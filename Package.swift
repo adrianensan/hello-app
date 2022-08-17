@@ -1,9 +1,10 @@
 // swift-tools-version: 5.7
-import Foundation
 import PackageDescription
 
+let useLocal = false // ProcessInfo.process.environment["USE_LOCAL_HELLO"] != nil
+
 let helloCorePackage: Package.Dependency
-if !#file.contains("/DerivedData/") {
+if useLocal {
   helloCorePackage = .package(name: "hello-core", path: "../hello-core")
 } else {
   helloCorePackage = .package(url: "https://github.com/adrianensan/hello-core", branch: "main")
