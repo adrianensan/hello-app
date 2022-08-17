@@ -4,7 +4,7 @@ import AVFoundation
 public class NativeCameraPreviewView: NativeView {
   
   #if os(iOS)
-  override static var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+  public override static var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
   #elseif os(macOS)
   public override func makeBackingLayer() -> CALayer {
     AVCaptureVideoPreviewLayer()
@@ -33,6 +33,7 @@ public protocol CaptureModel: Actor, ObservableObject {
 
 public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
   
+  public typealias UIViewType = NativeCameraPreviewView
   public typealias NSViewType = NativeCameraPreviewView
   
   var model: Model

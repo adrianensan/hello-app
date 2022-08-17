@@ -1,8 +1,24 @@
 import SwiftUI
 
 #if os(iOS)
-struct NativeViewRepresentable: UIViewRepresentable {
+protocol NativeViewRepresentable: UIViewRepresentable {
+  func makeView(context: Context) -> UIViewType
+  static func dismantleView(_ uiView: UIViewType, coordinator: Coordinator)
+  func updateView(_ uiView: UIViewType, context: Context)
+}
+
+extension NativeViewRepresentable {
+  public func makeUIView(context: Context) -> UIViewType {
+    makeView(context: context)
+  }
   
+  public static func dismantleUIView(_ uiView: UIViewType, coordinator: Coordinator) {
+    dismantleView(uiView, coordinator: coordinator)
+  }
+  
+  public func updateUIView(_ uiView: UIViewType, context: Context) {
+    updateView(uiView, context: context)
+  }
 }
 #elseif os(macOS)
 protocol NativeViewRepresentable: NSViewRepresentable {
