@@ -9,6 +9,7 @@ dependencies.append(.package(url: "https://github.com/adrianensan/openssl", bran
 let opensslTargetDependency: Target.Dependency = .product(name: "OpenSSL", package: "openssl")
 #else
 additionalTargets.append(.systemLibrary(name: "OpenSSL",
+                                        path: "server/openssl",
                                         pkgConfig: "openssl",
                                         providers: [.apt(["openssl libssl-dev"])]))
 let opensslTargetDependency: Target.Dependency = .target(name: "OpenSSL")
