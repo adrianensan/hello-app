@@ -1,34 +1,38 @@
 // swift-tools-version: 5.7
 import PackageDescription
 
-let useLocal = false // ProcessInfo.process.environment["USE_LOCAL_HELLO"] != nil
-
-let helloCorePackage: Package.Dependency
-if useLocal {
-  helloCorePackage = .package(name: "hello-core", path: "../hello-core")
-} else {
-  helloCorePackage = .package(url: "https://github.com/adrianensan/hello-core", branch: "main")
-}
-
-//#if os(iOS)
-//let excludedUIPaths = ["macOS/"]
-//#elseif os(macOS)
-//let excludedUIPaths = ["iOS/"]
-//#elseif os(Linux)
-//let excludedUIPaths = ["iOS/", "macOS/"]
-//#endif
-
+var dependencies: [Package.Dependency] = []
+var additionalTargets: [Target] = []
+#if os(iOS) || os(macOS)
+let opensslPackage: Package.Dependency
+dependencies.append(.package(url: "https://github.com/adrianensan/openssl", branch: "main"))
+let opensslTargetDependency: Target.Dependency = .product(name: "OpenSSL", package: "openssl")
+#else
+additionalTargets.append(.systemLibrary(name: "OpenSSL",
+                                        pkgConfig: "openssl",
+                                        providers: [.apt(["openssl libssl-dev"])]))
+let opensslTargetDependency: Target.Dependency = .target(name: "OpenSSL")
+#endif
 
 let package = Package(
   name: "HelloApp",
   platforms: [.iOS(.v15), .macOS(.v12)],
   products: [
-    .library(name: "HelloApp", targets: ["HelloApp"])
+    .library(name: "HelloApp", targets: ["HelloApp"]),
+    .library(name: "HelloCore", targets: ["HelloCore"]),
+    .library(name: "HelloServer", targets: ["HelloServer"]),
   ],
-  dependencies: [helloCorePackage],
-  targets: [
+  dependencies: dependencies,
+  targets: additionalTargets + [
+    .target(name: "HelloCore",
+            dependencies: [],
+            path: "core"),
     .target(name: "HelloApp",
-            dependencies: [.product(name: "HelloCore", package: "hello-core")],
-            path: "code")
+            dependencies: ["HelloCore"],
+            path: "code"),
+    .target(name: "HelloServer",
+            dependencies: ["HelloCore", opensslTargetDependency],
+            path: "server/code"),
+    
   ]
 )
