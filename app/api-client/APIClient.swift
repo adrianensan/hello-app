@@ -75,7 +75,7 @@ open class APIClient {
     
     let request = URLRequest(url: url) +& {
       switch endpoint.type {
-      case .normal, .longPoll:
+      case .normal, .longPoll, .websocket:
         $0.httpBody = bodyData
       case .upload:
         $0.allowsExpensiveNetworkAccess = true
@@ -117,6 +117,16 @@ open class APIClient {
       }
       do {
         (data, urlResponse) = try await session.upload(for: request, from: bodyData, delegate: delegate)
+      } catch {
+        let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+        logStart += String(format: " (%.2fs)", requestDuration)
+        Log.error("\(logStart) failed with error: \(error.localizedDescription)", context: "API")
+        throw error
+      }
+    case .websocket:
+      do {
+        let wsSession = try await session.webSocketTask(with: url)
+        throw APIError.invalidRequest
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)

@@ -6,15 +6,6 @@ public struct EmptyResponse: Codable {
   public init() {}
 }
 
-public struct APIHeader {
-  public var key: String
-  public var value: String
-  
-  public static func custom(key: String, value: String) -> APIHeader {
-    APIHeader(key: key, value: value)
-  }
-}
-
 public enum AuthType {
   case user
   case rep
@@ -25,6 +16,7 @@ public enum RequestType {
   case normal
   case upload
   case longPoll
+  case websocket
 }
 
 public protocol APIEndpoint {
@@ -59,6 +51,7 @@ extension APIEndpoint {
     case .normal: return 20
     case .upload: return 100
     case .longPoll: return 120
+    case .websocket: return 30
     }
   }
   
