@@ -17,7 +17,7 @@ public actor HTTPSRedirectServer: HTTPSServer {
     self.sslFiles = sslFiles
   }
   
-  public func handle(request: RawHTTPRequest) async throws -> HTTPResponse<Data?> {
+  public func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?> {
     return .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
   }
 }
@@ -33,7 +33,7 @@ public actor HTTPRedirectServer: HTTPServer {
     self.host = host
   }
   
-  public func handle(request: RawHTTPRequest) async throws -> HTTPResponse<Data?> {
+  public func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?> {
     return .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
   }
 }

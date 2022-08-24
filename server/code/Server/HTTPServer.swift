@@ -5,6 +5,7 @@ import HelloCore
 public protocol HTTPServer: TCPServer {
   var staticFilesRoot: URL? { get }
   var endpoints: [HTTPEndpoint] { get }
+  func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?>
   func preCondition(_ request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?>?
 }
 

@@ -11,7 +11,7 @@ public actor HTTPToHTTPSRedirectServer: HTTPServer {
     self.host = host
   }
   
-  public func handle(request: RawHTTPRequest) async throws -> HTTPResponse<Data?> {
+  public func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?> {
     .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.host + request.url)"])
   }
 }
