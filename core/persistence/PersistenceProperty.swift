@@ -79,8 +79,8 @@ public class Persistent<Property: PersistenceProperty> {
   public var wrappedValue: Property.Value {
     get { value }
     set {
+      value = newValue
       Task {
-        value = newValue
         await persistence.save(newValue, for: property)
       }
     }
