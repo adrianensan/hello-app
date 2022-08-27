@@ -52,11 +52,13 @@ class SocketPoller {
   }
   
   func update(readObservedSockets: Set<Int32>) {
+    guard self.readObservedSockets != readObservedSockets else { return }
     self.readObservedSockets = readObservedSockets
     cancelSocket.cancel()
   }
   
   func update(writeObservedSockets: Set<Int32>) {
+    guard self.writeObservedSockets != writeObservedSockets else { return }
     self.writeObservedSockets = writeObservedSockets
     cancelSocket.cancel()
   }
@@ -123,30 +125,30 @@ actor SocketPool {
   }
   
   var pollTask: Task<[Int32: SocketState], any Error>?
-  var writeSocketListeners: [Int32: CheckedContinuation<Void, Error>] = [:]
-  var readSocketListeners: [Int32: CheckedContinuation<Void, Error>] = [:]
+  var writeSocketListeners: [Int32: [CheckedContinuation<Void, Error>]] = [:]
+  var readSocketListeners: [Int32: [CheckedContinuation<Void, Error>]] = [:]
   
   public func pollStateUpdate(_ socketStates: [Int32: SocketState]) async {
     for socketState in socketStates where socketState.value != .idle {
-      let readContinuation = readSocketListeners[socketState.key]
-      let writeContinuation = writeSocketListeners[socketState.key]
+      let readContinuations = readSocketListeners[socketState.key]
+      let writeContinuations = writeSocketListeners[socketState.key]
       switch socketState.value {
       case .closed:
         readSocketListeners[socketState.key] = nil
         writeSocketListeners[socketState.key] = nil
-        readContinuation?.resume(throwing: SocketError.closed)
-        writeContinuation?.resume(throwing: SocketError.closed)
+        readContinuations?.forEach { $0.resume(throwing: SocketError.closed) }
+        writeContinuations?.forEach { $0.resume(throwing: SocketError.closed) }
       case .readyToReadAndWrite:
         readSocketListeners[socketState.key] = nil
         writeSocketListeners[socketState.key] = nil
-        readContinuation?.resume()
-        writeContinuation?.resume()
+        readContinuations?.forEach { $0.resume() }
+        writeContinuations?.forEach { $0.resume() }
       case .readyToRead:
         readSocketListeners[socketState.key] = nil
-        readContinuation?.resume()
+        readContinuations?.forEach { $0.resume() }
       case .readyToWrite:
         writeSocketListeners[socketState.key] = nil
-        writeContinuation?.resume()
+        writeContinuations?.forEach { $0.resume() }
       case .idle: continue
       }
     }
@@ -167,18 +169,10 @@ actor SocketPool {
   }
   
   private func addReadListener(_ continuation: CheckedContinuation<Void, Error>, to fd: Int32) {
-    if let existingContinuation = readSocketListeners[fd] {
-      Log.error("Trying to wait for fd that's already been waited for", context: "Poller")
-      existingContinuation.resume(throwing: SocketError.closed)
-    }
-    readSocketListeners[fd] = continuation
+    readSocketListeners[fd] = (readSocketListeners[fd] ?? []) + [continuation]
   }
   
   private func addWriteListener(_ continuation: CheckedContinuation<Void, Error>, to fd: Int32) {
-    if let existingContinuation = writeSocketListeners[fd] {
-      Log.error("Trying to wait for fd that's already been waited for", context: "Poller")
-      existingContinuation.resume(throwing: SocketError.closed)
-    }
-    writeSocketListeners[fd] = continuation
+    writeSocketListeners[fd] = (writeSocketListeners[fd] ?? []) + [continuation]
   }
 }

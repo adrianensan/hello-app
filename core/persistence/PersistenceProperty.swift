@@ -52,57 +52,37 @@ extension PersistenceProperty {
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 
-@MainActor
-fileprivate class PersistentThingInternal<Property: PersistenceProperty>: PersistenceSubscriber {
-  
-  private let persistence: OFPersistence<Property.Key>
-  private let property: Property
-  
-  var value: Property.Value
-  
-  init(persistence: OFPersistence<Property.Key>, property: Property) {
-    self.persistence = persistence
-    self.property = property
-    value = Persistence.value(property)
-    persistence.subscribe(self, to: property.key)
-  }
-  
-  public func update(to newValue: Property.Value) {
-    persistence.save(newValue, for: property)
-  }
-  
-  public func valueUpdated<Key: PersistenceKey>(for key: Key) {
-    value = Persistence.value(property)
-  }
-}
-
 @propertyWrapper
-public class PersistentThing<Property: PersistenceProperty>: PersistenceSubscriber {
+public class Persistent<Property: PersistenceProperty> {
   
   private let persistence: OFPersistence<Property.Key>
   private let property: Property
-  var value: Property.Value
+  private var value: Property.Value
   
   public init(_ property: Property, in persistence: OFPersistence<Property.Key> = Property.Key.persistence) {
     self.persistence = persistence
     self.property = property
-    value = Persistence.value(property)
-    persistence.subscribe(self, to: property.key)
+    value = property.defaultValue
+    Task {
+      await setup()
+    }
+  }
+  
+  private func setup() {
+    Task {
+      for await update in await Persistence.updates(for: property) {
+        value = update
+      }
+    }
   }
   
   public var wrappedValue: Property.Value {
     get { value }
     set {
-      value = newValue
-      update(to: newValue)
+      Task {
+        value = newValue
+        await persistence.save(newValue, for: property)
+      }
     }
-  }
-  
-  public func update(to newValue: Property.Value) {
-    persistence.save(newValue, for: property)
-  }
-  
-  public func valueUpdated<Key: PersistenceKey>(for key: Key) {
-    value = Persistence.value(property)
   }
 }

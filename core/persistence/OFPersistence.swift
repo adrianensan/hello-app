@@ -1,10 +1,5 @@
 import Foundation
 
-public protocol PersistenceSubscriber: AnyObject {
-  
-  @MainActor func valueUpdated<Key: PersistenceKey>(for key: Key)
-}
-
 public class Weak<T: AnyObject> {
   public weak var value : T?
   public init (value: T) {
@@ -12,7 +7,7 @@ public class Weak<T: AnyObject> {
   }
 }
 
-open class OFPersistence<Key: PersistenceKey> {
+public actor OFPersistence<Key: PersistenceKey> {
   
   public let defaults: UserDefaults
   public let keychain: KeychainHelper
@@ -24,11 +19,13 @@ open class OFPersistence<Key: PersistenceKey> {
     baseURL.appendingPathComponent(subPath)
   }
   
-  private var subscribers: [Key: [Weak<AnyObject>]] = [:]
+  private var updateTaskContinuations: [Key: Any] = [:]
+  private var updateTasks: [Key: Any] = [:]
+  private var updates: [Key: Any] = [:]
   private var cache: [Key: Any] = [:]
   
-  public init(defaults: UserDefaults, pathRoot: URL, keychain: KeychainHelper) {
-    self.defaults = defaults
+  public init(defaultsSuiteName: String?, pathRoot: URL, keychain: KeychainHelper) {
+    self.defaults = UserDefaults(suiteName: defaultsSuiteName)!
     self.baseURL = pathRoot
     self.keychain = keychain
     if !FileManager.default.fileExists(atPath: baseURL.path) {
@@ -36,19 +33,39 @@ open class OFPersistence<Key: PersistenceKey> {
     }
   }
   
-  private func valueChanged(forKey key: Key) {
-    DispatchQueue.main.async {
-      self.subscribers[key] = self.subscribers[key]?.filter { $0.value != nil }
-      self.subscribers[key]?.forEach { ($0.value as? PersistenceSubscriber)?.valueUpdated(for: key) }
+  private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) where Property.Key == Key {
+    if let continuation = updateTaskContinuations[property.key] as? CheckedContinuation<Property.Value, Never> {
+      continuation.resume(returning: value)
+      updateTasks[property.key] = nil
+      updateTaskContinuations[property.key] = nil
     }
   }
   
-  public func subscribe<Subscriber: PersistenceSubscriber>(_ subscriber: Subscriber, to key: Key) {
-    subscribers[key] = (subscribers[key] ?? []) + [Weak(value: subscriber as AnyObject)]
+  private func updateStream<Property: PersistenceProperty>(for property: Property) async -> Property.Value where Property.Key == Key {
+    let task: Task<Property.Value, Never>
+    if let stream = updateTasks[property.key] as? Task<Property.Value, Never> {
+      task = stream
+    } else {
+      task = Task<Property.Value, Never> {
+        return await withCheckedContinuation {
+          updateTaskContinuations.updateValue($0, forKey: property.key)
+        }
+      }
+      updateTasks[property.key] = task
+    }
+    let updatedValue = await task.value
+    return updatedValue
   }
   
-  public func unsubscribe<Subscriber: PersistenceSubscriber>(_ subscriber: Subscriber, from key: Key) {
-    subscribers[key] = subscribers[key]?.filter { $0.value !== subscriber }
+  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncStream<Property.Value> where Property.Key == Key {
+    AsyncStream<Property.Value> { continuation in
+      Task {
+        Task { continuation.yield(await value(for: property)) }
+        while true {
+          continuation.yield(await updateStream(for: property))
+        }
+      }
+    }
   }
   
   public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) where Property.Key == Key {
@@ -116,7 +133,7 @@ open class OFPersistence<Key: PersistenceKey> {
       }
     case .memory: break
     }
-    valueChanged(forKey: property.key)
+    updated(value: value, for: property)
   }
   
   public func value<Property: PersistenceProperty>(for property: Property) -> Property.Value where Property.Key == Key {
@@ -205,7 +222,7 @@ open class OFPersistence<Key: PersistenceKey> {
     case .keychain(let key): keychain.remove(for: key)
     case .memory: break
     }
-    valueChanged(forKey: property.key)
+    updated(value: property.defaultValue, for: property)
   }
   
   public func nuke(stopSaving: Bool = true) {
@@ -228,23 +245,23 @@ open class OFPersistence<Key: PersistenceKey> {
 }
 
 public enum Persistence {
-  public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
-    Property.Key.persistence.save(value, for: property)
+  public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
+    await Property.Key.persistence.save(value, for: property)
   }
   
-  public static func value<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    Property.Key.persistence.value(for: property)
+  public static func value<Property: PersistenceProperty>(_ property: Property) async -> Property.Value {
+    await Property.Key.persistence.value(for: property)
   }
   
-  public static func delete<Property: PersistenceProperty>(_ property: Property) {
-    Property.Key.persistence.delete(property: property)
+//  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+//    await Property.Key.persistence.value(for: property)
+//  }
+  
+  public static func delete<Property: PersistenceProperty>(_ property: Property) async {
+    await Property.Key.persistence.delete(property: property)
   }
   
-  public static func subscribe<Subscriber: PersistenceSubscriber, Key: PersistenceKey>(_ subscriber: Subscriber, to key: Key) {
-    Key.persistence.subscribe(subscriber, to: key)
-  }
-  
-  public static func unsubscribe<Subscriber: PersistenceSubscriber, Key: PersistenceKey>(_ subscriber: Subscriber, from key: Key) {
-    Key.persistence.unsubscribe(subscriber, from: key)
+  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncStream<Property.Value> {
+    await Property.Key.persistence.updates(for: property)
   }
 }

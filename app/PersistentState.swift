@@ -3,7 +3,7 @@ import SwiftUI
 import HelloCore
 
 @MainActor
-fileprivate class PersistentInternal<Property: PersistenceProperty>: ObservableObject, PersistenceSubscriber {
+fileprivate class PersistentStateInternal<Property: PersistenceProperty>: ObservableObject {
   
   private let persistence: OFPersistence<Property.Key>
   private let property: Property
@@ -13,27 +13,30 @@ fileprivate class PersistentInternal<Property: PersistenceProperty>: ObservableO
   init(persistence: OFPersistence<Property.Key>, property: Property) {
     self.persistence = persistence
     self.property = property
-    value = Persistence.value(property)
-    persistence.subscribe(self, to: property.key)
+    self.value = property.defaultValue
+    Task {
+      for await update in await persistence.updates(for: property) {
+        value = update
+      }
+    }
   }
   
   public func update(to newValue: Property.Value) {
-    persistence.save(newValue, for: property)
-  }
-  
-  public func valueUpdated<Key: PersistenceKey>(for key: Key) {
-    value = Persistence.value(property)
+    value = newValue
+    Task {
+      await persistence.save(newValue, for: property)
+    }
   }
 }
 
 @MainActor
 @propertyWrapper
-public struct Persistent<Property: PersistenceProperty>: DynamicProperty {
+public struct PersistentState<Property: PersistenceProperty>: DynamicProperty {
   
-  @StateObject private var persistentInternal: PersistentInternal<Property>
+  @StateObject private var persistentInternal: PersistentStateInternal<Property>
   
   public init(_ property: Property, in persistence: OFPersistence<Property.Key> = Property.Key.persistence) {
-    _persistentInternal = StateObject(wrappedValue: PersistentInternal(persistence: persistence, property: property))
+    _persistentInternal = StateObject(wrappedValue: PersistentStateInternal(persistence: persistence, property: property))
   }
   
   public var wrappedValue: Property.Value {
