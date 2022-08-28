@@ -59,12 +59,14 @@ public class Persistent<Property: PersistenceProperty> {
   private let property: Property
   private var value: Property.Value
   
+  public var onUpdate: (() -> Void)?
+  
   public init(_ property: Property, in persistence: OFPersistence<Property.Key> = Property.Key.persistence) {
     self.persistence = persistence
     self.property = property
     value = property.defaultValue
     Task {
-      await setup()
+      setup()
     }
   }
   
@@ -72,6 +74,7 @@ public class Persistent<Property: PersistenceProperty> {
     Task {
       for await update in await Persistence.updates(for: property) {
         value = update
+        onUpdate?()
       }
     }
   }
