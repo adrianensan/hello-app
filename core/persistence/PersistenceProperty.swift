@@ -81,7 +81,7 @@ public class Persistent<Property: PersistenceProperty> {
     set {
       value = newValue
       Task {
-        await persistence.save(newValue, for: property)
+        await persistence.save(value, for: property)
       }
     }
   }

@@ -24,7 +24,7 @@ fileprivate class PersistentStateInternal<Property: PersistenceProperty>: Observ
   public func update(to newValue: Property.Value) {
     value = newValue
     Task {
-      await persistence.save(newValue, for: property)
+      await persistence.save(value, for: property)
     }
   }
 }
