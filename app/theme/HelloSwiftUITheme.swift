@@ -7,7 +7,9 @@ public struct HelloSwiftUITheme {
   public var theme: HelloThemeContext
   
   public var backgroundColor: Color
-//  public var backgroundView: AnyView
+  public var backgroundView: some View {
+    theme.background.view(for: RoundedRectangle(cornerRadius: 8, style: .continuous))
+  }
   
   public var textPrimaryColor: Color
   public var textSecondaryColor: Color
@@ -24,17 +26,16 @@ public struct HelloSwiftUITheme {
     self.theme = theme
     
     backgroundColor = theme.background.mainColor.swiftuiColor
-    //backgroundView = theme.background.
     
     textPrimaryColor = theme.textPrimary.mainColor.swiftuiColor
     textSecondaryColor = theme.textSecondary.mainColor.swiftuiColor
     textTertiaryColor = theme.textTertiary.mainColor.swiftuiColor
     
     accentColor = theme.accent.mainColor.swiftuiColor
-    accentStyle = AnyShapeStyle(theme.accent.mainColor.swiftuiColor)
+    accentStyle = AnyShapeStyle(theme.accent.view)
     
-    textPrimaryStyle = AnyShapeStyle(theme.textPrimary.mainColor.swiftuiColor)
-    textSecondaryStyle = AnyShapeStyle(theme.textSecondary.mainColor.swiftuiColor)
-    textTertiaryStyle = AnyShapeStyle(theme.textTertiary.mainColor.swiftuiColor)
+    textPrimaryStyle = AnyShapeStyle(theme.textPrimary.view)
+    textSecondaryStyle = AnyShapeStyle(theme.textSecondary.view)
+    textTertiaryStyle = AnyShapeStyle(theme.textTertiary.view)
   }
 }

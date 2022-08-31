@@ -7,6 +7,6 @@ public struct HelloImageBackground: Codable {
     case tile
   }
   
-  var name: String
-  var mode: Mode
+  public var name: String
+  public var mode: Mode
 }

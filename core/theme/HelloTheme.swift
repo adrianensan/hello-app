@@ -1,8 +1,8 @@
 import Foundation
 
 public struct HelloBorder: Codable {
-  var color: HelloColor
-  var width: CGFloat
+  public var color: HelloColor
+  public var width: CGFloat
   
   public init(color: HelloColor, width: CGFloat = 1) {
     self.color = color

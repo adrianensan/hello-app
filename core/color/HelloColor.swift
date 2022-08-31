@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HelloColor: Codable, Equatable, Hashable {
+public struct HelloColor: Codable, Equatable, Hashable, Identifiable {
   public var r: Double
   public var g: Double
   public var b: Double
@@ -73,6 +73,10 @@ public struct HelloColor: Codable, Equatable, Hashable {
     self.init(r: Double((hexNumber & 0xFF0000) >> 16) / 255.0,
               g: Double((hexNumber & 0x00FF00) >> 8) / 255.0,
               b: Double((hexNumber & 0x0000FF)) / 255.0)
+  }
+  
+  public var id: Double {
+    r * 1000_000_000 + g * 1000_000 + b * 1000 + a
   }
   
   public var light: HelloColor { self }
