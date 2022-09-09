@@ -21,8 +21,8 @@ public enum RequestType {
 
 public protocol APIEndpoint {
   
-  associatedtype ResponseType: Codable = EmptyResponse
   associatedtype RequestBodyType: Codable = Data?
+  associatedtype ResponseType: Codable = EmptyResponse
   
   static var method: HTTPMethod { get }
   var contentType: ContentType? { get }
@@ -34,6 +34,8 @@ public protocol APIEndpoint {
   static var path: String { get }
   
   var parameters: [String: String] { get }
+  
+  var subpath: String? { get }
   
   var body: RequestBodyType { get }
 }
@@ -56,6 +58,8 @@ extension APIEndpoint {
   }
   
   public var body: Data? { nil }
+  
+  public var subpath: String? { nil }
   
   public var parameters: [String: String] { [:] }
 }

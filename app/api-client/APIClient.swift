@@ -15,6 +15,52 @@ public struct OFAPIResponse<Content: Decodable> {
   public var content: Content
 }
 
+//public class WebSocketsSession: NSObject {
+//
+//  private var session: URLSessionWebSocketTask
+//
+//  public init(session: URLSessionWebSocketTask) {
+//    self.session = session
+//  }
+//
+//  public func send(data: Data) async throws {
+//    do {
+//      try await session.send(.data(data))
+//    } catch {
+//      if let httpURLResponse = (session.response as? HTTPURLResponse),
+//         !HTTPResponseStatus.from(code: httpURLResponse.statusCode).isSuccess {
+//        throw APIError.httpError(statusCode: httpURLResponse.statusCode)
+//      } else {
+//        throw error
+//      }
+//    }
+//  }
+//
+//  public var data: AsyncThrowingStream<Data, Error> {
+//    AsyncThrowingStream { continuation in
+//      Task {
+//        do {
+//          while true {
+//            let rawMessage = try await session.receive()
+//            switch rawMessage {
+//            case .data(let data):
+//              continuation.yield(data)
+//            case .string(let string): ()
+//            }
+//          }
+//        } catch {
+//          if let httpResponse = (session.response as? HTTPURLResponse) {
+//            continuation.finish(throwing: APIError.httpError(statusCode: httpResponse.statusCode))
+//          } else {
+//            print(session.closeCode)
+//            continuation.finish(throwing: error)
+//          }
+//        }
+//      }
+//    }
+//  }
+//}
+
 open class APIClient {
   
   public var apiRoot: String
@@ -50,30 +96,47 @@ open class APIClient {
     
   }
   
-  open var errorHandlers: [Int: (HTTPResponse<Data?>) -> Void] { [:] }
-  
-  @discardableResult
-  public func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
-                                             isRetry: Bool = false,
-                                             retryHandler: ((APIError) async throws -> Bool)? = nil,
-                                             uploadProgressUpdate: ((Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
-    let requestStartTime = Date().timeIntervalSince1970
-    var logStart = Endpoint.path
+  open func handle(errorResponse response: HTTPResponse<Data?>) throws {
     
-    guard let url = URL(string: apiRoot + Endpoint.path) else {
+  }
+  
+  func request<Endpoint: APIEndpoint>(for endpoint: Endpoint) throws -> URLRequest {
+    var subpath: String = ""
+    if let actualSubpath = endpoint.subpath {
+      subpath += "/" + actualSubpath
+    }
+    
+    var parameters: String = ""
+    if !endpoint.parameters.isEmpty {
+      parameters += "?"
+      for (key, value) in endpoint.parameters {
+        parameters += "\(key)=\(value)"
+      }
+    }
+    
+    var apiRoot = apiRoot
+    if endpoint.type == .websocket {
+      apiRoot = apiRoot.replacingOccurrences(of: "https", with: "wss")
+    }
+    
+    guard let url = URL(string: apiRoot + Endpoint.path + subpath + parameters) else {
       throw APIError.invalidRequest
     }
     
     let bodyData: Data?
+    let inferredContentType: ContentType?
     if let data = endpoint.body as? Data? {
       bodyData = data
+      inferredContentType = nil
     } else if let string = endpoint.body as? String? {
       bodyData = string?.data(using: .utf8)
+      inferredContentType = .plain
     } else {
       bodyData = try? JSONEncoder().encode(endpoint.body)
+      inferredContentType = .json
     }
     
-    let request = URLRequest(url: url) +& {
+    return URLRequest(url: url) +& {
       switch endpoint.type {
       case .normal, .longPoll, .websocket:
         $0.httpBody = bodyData
@@ -83,7 +146,7 @@ open class APIClient {
       }
       $0.timeoutInterval = endpoint.timeout
       $0.httpMethod = Endpoint.method.description
-      if let contentType = endpoint.contentType {
+      if let contentType = endpoint.contentType ?? inferredContentType {
         $0.setValue(contentType.typeString, forHTTPHeaderField: "Content-Type")
       }
       $0.setValue(userAgentString, forHTTPHeaderField: "User-Agent")
@@ -94,6 +157,42 @@ open class APIClient {
         $0.setValue(value, forHTTPHeaderField: key)
       }
     }
+  }
+  
+//  public func websocketsSession<Endpoint: APIEndpoint>(endpoint: Endpoint) throws -> WebSocketsSession {
+//    let urlRequest = try request(for: endpoint)
+//    let requestStartTime = Date().timeIntervalSince1970
+//    var logStart = Endpoint.path
+//    
+//    let session = session.webSocketTask(with: urlRequest)
+//    session.resume()
+//    
+//    let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+//    logStart += String(format: " (%.2fs)", requestDuration)
+//    Log.info("\(logStart)", context: "API")
+//    
+//    return WebSocketsSession(session: session)
+//  }
+  
+  @discardableResult
+  public func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
+                                             isRetry: Bool = false,
+                                             retryHandler: ((APIError) async throws -> Bool)? = nil,
+                                             uploadProgressUpdate: ((Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
+    let requestStartTime = Date().timeIntervalSince1970
+    var logStart = Endpoint.path
+    if let actualSubpath = endpoint.subpath {
+      logStart += "/" + actualSubpath
+    }
+    
+    if !endpoint.parameters.isEmpty {
+      logStart += "?"
+      for (key, value) in endpoint.parameters {
+        logStart += "\(key)=\(value)"
+      }
+    }
+
+    let request = try request(for: endpoint)
     
     let (data, urlResponse): (Data, URLResponse)
     switch endpoint.type {
@@ -107,7 +206,7 @@ open class APIClient {
         throw error
       }
     case .upload:
-      guard let bodyData = bodyData else {
+      guard let bodyData = request.httpBody else {
         Log.error("\(logStart) Request body empty for expected upload", context: "API")
         throw APIError.invalidRequest
       }
@@ -125,7 +224,7 @@ open class APIClient {
       }
     case .websocket:
       do {
-        let wsSession = try await session.webSocketTask(with: url)
+        let wsSession = try await session.webSocketTask(with: request)
         throw APIError.invalidRequest
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime
@@ -144,12 +243,12 @@ open class APIClient {
     
     logStart += " \(httpResponse.statusCode)"
     
-    guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
-      if let handler = errorHandlers[httpResponse.statusCode] {
-        handler(HTTPResponse(status: .from(code: httpResponse.statusCode), body: data))
-      }
-      let error = APIError.httpError(statusCode: httpResponse.statusCode)
+    let response: HTTPResponse<Data?> = HTTPResponse(status: .from(code: httpResponse.statusCode), body: data)
+    
+    guard response.status.isSuccess else {
       Log.error("\(logStart)", context: "API")
+      try handle(errorResponse: response)
+      let error = APIError.httpError(statusCode: httpResponse.statusCode)
       if !isRetry, try await retryHandler?(error) == true {
         Log.info("\(Endpoint.path) retrying", context: "API")
         return try await self.request(endpoint: endpoint, isRetry: true, retryHandler: retryHandler)
@@ -161,7 +260,7 @@ open class APIClient {
     let headers: [String: String] = [:]
     
     handle(headers: httpResponse.allHeaderFields, for: endpoint)
-    
+
     switch Endpoint.ResponseType.self {
     case is EmptyResponse.Type:
       guard let decodedResponse = EmptyResponse() as? Endpoint.ResponseType else {

@@ -33,6 +33,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
   case unsupportedMediaType
   case requestedRangeNotSatisfiable
   case expectationFailed
+  case imATeapot
   case outdatedClientVersion
   case internalServerError
   case notImplemented
@@ -78,6 +79,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case         .unsupportedMediaType: return 415
     case .requestedRangeNotSatisfiable: return 416
     case            .expectationFailed: return 417
+    case                    .imATeapot: return 418
     case        .outdatedClientVersion: return 420
     case          .internalServerError: return 500
     case               .notImplemented: return 501
@@ -125,6 +127,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case         .unsupportedMediaType: return "Unsupported Media Type"
     case .requestedRangeNotSatisfiable: return "Requested Range Not Satisfiable"
     case            .expectationFailed: return "Expectation Failed"
+    case                    .imATeapot: return "I'm a teapot"
     case        .outdatedClientVersion: return "Outdated Client Version"
     case          .internalServerError: return "Internal Server Error"
     case               .notImplemented: return "Not Implemented"
@@ -177,6 +180,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case 415: return .unsupportedMediaType
     case 416: return .requestedRangeNotSatisfiable
     case 417: return .expectationFailed
+    case 418: return .imATeapot
     case 420: return .outdatedClientVersion
     case 500: return .internalServerError
     case 501: return .notImplemented
@@ -186,6 +190,10 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case 505: return .httpVersionNotSupported
      default: return .custom(code: code, message: "Unkown")
     }
+  }
+  
+  public var isSuccess: Bool {
+    statusCode < 300
   }
   
   public var description: String { "\(statusCode) \(statusDescription)" }
