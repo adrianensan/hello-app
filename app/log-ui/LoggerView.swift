@@ -18,7 +18,7 @@ public struct LoggerView: View {
   
   let overscrollInsets: EdgeInsets
   
-  public init(logger: Logger, overscroll: EdgeInsets) {
+  public init(logger: Logger = Log.logger, overscroll: EdgeInsets = EdgeInsets()) {
     _loggerObservable = .init(wrappedValue: LoggerObservable(logger: logger))
     overscrollInsets = overscroll
   }

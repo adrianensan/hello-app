@@ -16,7 +16,8 @@ public class LoggerObservable: NSObject, ObservableObject, LoggerSubscriber {
     
     Task {
       await logger.subscribe(self)
-      lineCount = await logger.logStatements.count
+      logStatements = await logger.logStatements
+      lineCount = logStatements.count
     }
   }
   

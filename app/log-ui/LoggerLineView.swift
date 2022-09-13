@@ -6,29 +6,70 @@ struct LoggerLineView: View {
   
   let logStatement: LogStatement
   
-  var color: Color {
+  var backgroundColor: Color {
+    switch logStatement.level {
+    case .wtf: return .red
+    default: return .clear
+    }
+  }
+  
+  var symbolColor: Color {
     switch logStatement.level {
     case .warning: return .yellow
-    case .error: return .red
+    case .error, .wtf: return .red
     case .debug: return .secondary.opacity(0.6)
     default: return .secondary
     }
   }
   
+  var timeColor: Color {
+    switch logStatement.level {
+    case .wtf: return .white
+    default: return symbolColor
+    }
+  }
+  
+  var iconSize: CGFloat {
+    #if os(macOS)
+    11
+    #else
+    13
+    #endif
+  }
+  
+  var timeStampFontSize: CGFloat {
+    #if os(macOS)
+    9
+    #else
+    10
+    #endif
+  }
+  
+  var logFontSize: CGFloat {
+    #if os(macOS)
+    10
+    #else
+    12
+    #endif
+  }
+  
   var body: some View {
-    HStack(alignment: .top, spacing: 4) {
+    HStack(alignment: .top, spacing: 2) {
       Image(systemName: logStatement.level.icon)
-        .font(.system(size: 13, weight: .black, design: .rounded))
-        .foregroundColor(color)
-        .frame(width: 13, height: 15)
+        .font(.system(size: iconSize, weight: .black, design: .rounded))
+        .foregroundColor(symbolColor)
+        .frame(width: iconSize, height: iconSize + 2)
       
       Text(logStatement.timeStampString)
-        .font(.system(size: 10, weight: .semibold, design: .monospaced))
-        .foregroundColor(color)
-        .frame(height: 15)
+        .font(.system(size: timeStampFontSize, weight: .semibold, design: .monospaced))
+        .foregroundColor(timeColor)
+        .frame(height: iconSize + 2)
+        .padding(.horizontal, 2)
+        .background(RoundedRectangle(cornerRadius: 4, style: .continuous)
+          .fill(backgroundColor))
       
       (Text("\(logStatement.context)").bold() + Text(" \(logStatement.message)"))
-        .font(.system(size: 12, weight: .regular, design: .monospaced))
+        .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
         .foregroundColor(.primary)
         .textSelection(.enabled)
         .fixedSize(horizontal: false, vertical: true)

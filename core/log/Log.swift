@@ -12,7 +12,7 @@ public enum Log {
   
   private static var logsFolder: URL { FileManager.default.temporaryDirectory.appendingPathComponent("logs") }
   
-  public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("prod.txt"), ephemeral: true)
+  public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("prod.txt"), ephemeral: ephemeral)
   
   private static func log(level: LogLevel, message: String, context: String) {
     let logStatement = LogStatement(level: level, message: message, context: context)
@@ -43,6 +43,10 @@ public enum Log {
   
   public static func error(_ message: String, context: String) {
     log(level: .error, message: message, context: context)
+  }
+  
+  public static func wtf(_ message: String, context: String) {
+    log(level: .wtf, message: message, context: context)
   }
 }
 

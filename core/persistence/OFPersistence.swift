@@ -125,9 +125,13 @@ public actor OFPersistence<Key: PersistenceKey> {
     case .keychain(let key):
       if let string = value as? String? {
         if let string = string {
-          keychain.set(string, for: key)
+          do {
+            try keychain.set(string, for: key)
+          } catch {
+            Log.wtf("Failed to save item to keychain (Error \(error)", context: "Persistence")
+          }
         } else {
-          keychain.remove(for: key)
+          try? keychain.remove(for: key)
         }
       }
     case .memory: break
@@ -179,9 +183,9 @@ public actor OFPersistence<Key: PersistenceKey> {
     case .keychain(let key):
       switch Property.Value.self {
       case is String.Type, is String?.Type:
-        returnValue = keychain.string(for: key) as? Property.Value ?? property.defaultValue
+        returnValue = (try? keychain.string(for: key) as? Property.Value) ?? property.defaultValue
       default:
-        guard let data = keychain.data(for: key) else {
+        guard let data = try? keychain.data(for: key) else {
           returnValue = property.defaultValue
           break
         }
@@ -252,9 +256,9 @@ public actor OFPersistence<Key: PersistenceKey> {
     case .keychain(let key):
       switch Property.Value.self {
       case is String.Type, is String?.Type:
-        returnValue = keychain.string(for: key) as? Property.Value ?? property.defaultValue
+        returnValue = (try? keychain.string(for: key) as? Property.Value) ?? property.defaultValue
       default:
-        guard let data = keychain.data(for: key) else {
+        guard let data = try? keychain.data(for: key) else {
           returnValue = property.defaultValue
           break
         }
@@ -286,7 +290,7 @@ public actor OFPersistence<Key: PersistenceKey> {
     switch property.location {
     case .defaults(let key): defaults.removeObject(forKey: key)
     case .file(let path): try? FileManager.default.removeItem(atPath: fileURL(for: path).path)
-    case .keychain(let key): keychain.remove(for: key)
+    case .keychain(let key): try? keychain.remove(for: key)
     case .memory: break
     }
     updated(value: property.defaultValue, for: property)
