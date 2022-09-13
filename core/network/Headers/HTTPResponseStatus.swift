@@ -35,6 +35,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
   case expectationFailed
   case imATeapot
   case outdatedClientVersion
+  case unprocessableEntity
   case internalServerError
   case notImplemented
   case badGateway
@@ -81,6 +82,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case            .expectationFailed: return 417
     case                    .imATeapot: return 418
     case        .outdatedClientVersion: return 420
+    case          .unprocessableEntity: return 422
     case          .internalServerError: return 500
     case               .notImplemented: return 501
     case                   .badGateway: return 502
@@ -129,6 +131,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case            .expectationFailed: return "Expectation Failed"
     case                    .imATeapot: return "I'm a teapot"
     case        .outdatedClientVersion: return "Outdated Client Version"
+    case          .unprocessableEntity: return "Unprocessable Entity"
     case          .internalServerError: return "Internal Server Error"
     case               .notImplemented: return "Not Implemented"
     case                   .badGateway: return "Bad Gateway"
@@ -182,6 +185,7 @@ public enum HTTPResponseStatus: CustomStringConvertible {
     case 417: return .expectationFailed
     case 418: return .imATeapot
     case 420: return .outdatedClientVersion
+    case 422: return .unprocessableEntity
     case 500: return .internalServerError
     case 501: return .notImplemented
     case 502: return .badGateway

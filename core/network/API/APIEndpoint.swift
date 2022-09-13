@@ -6,12 +6,6 @@ public struct EmptyResponse: Codable {
   public init() {}
 }
 
-public enum AuthType {
-  case user
-  case rep
-  case none
-}
-
 public enum RequestType {
   case normal
   case upload
@@ -27,7 +21,6 @@ public protocol APIEndpoint {
   static var method: HTTPMethod { get }
   var contentType: ContentType? { get }
   var headers: [APIHeader] { get }
-  var authType: AuthType { get }
   var type: RequestType { get }
   var timeout: TimeInterval { get }
   
@@ -46,7 +39,6 @@ extension APIEndpoint {
   
   public var headers: [APIHeader] { [] }
   
-  public var authType: AuthType { .none }
   public var type: RequestType { .normal }
   public var timeout: TimeInterval {
     switch type {

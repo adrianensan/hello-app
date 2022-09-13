@@ -141,6 +141,7 @@ open class APIClient {
       case .normal, .longPoll, .websocket:
         $0.httpBody = bodyData
       case .upload:
+        $0.httpBody = bodyData
         $0.allowsExpensiveNetworkAccess = true
         $0.allowsConstrainedNetworkAccess = true
       }

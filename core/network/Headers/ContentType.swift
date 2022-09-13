@@ -64,6 +64,7 @@ public enum ContentType: CustomStringConvertible, Equatable {
   case ogg
   case bin
   case other
+  case multipart(boundary: String)
   case custom(type: String)
   
   public var typeString: String {
@@ -122,6 +123,7 @@ public enum ContentType: CustomStringConvertible, Equatable {
     case         .x7zip: return "application/x-7z-compressed"
     case           .jar: return "application/java-archive"
     case           .ogg: return "application/ogg"
+    case .multipart(let boundary): return "multipart/form-data; boundary=\(boundary)"
     case   .bin, .other: return "application/octet-stream"
     case .custom(let s): return s
     }
