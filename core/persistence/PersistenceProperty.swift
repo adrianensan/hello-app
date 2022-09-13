@@ -64,15 +64,13 @@ public class Persistent<Property: PersistenceProperty> {
   public init(_ property: Property, in persistence: OFPersistence<Property.Key> = Property.Key.persistence) {
     self.persistence = persistence
     self.property = property
-    value = property.defaultValue
-    Task {
-      setup()
-    }
+    value = persistence.initialValue(for: property)
+    setup()
   }
   
   private func setup() {
     Task {
-      for await update in await Persistence.updates(for: property) {
+      for await update in await persistence.updates(for: property) {
         value = update
         onUpdate?()
       }

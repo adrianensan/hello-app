@@ -13,7 +13,7 @@ fileprivate class PersistentStateInternal<Property: PersistenceProperty>: Observ
   init(persistence: OFPersistence<Property.Key>, property: Property) {
     self.persistence = persistence
     self.property = property
-    self.value = property.defaultValue
+    self.value = persistence.initialValue(for: property)
     Task {
       for await update in await persistence.updates(for: property) {
         value = update

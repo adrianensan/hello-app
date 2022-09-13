@@ -12,10 +12,10 @@ public actor OFPersistence<Key: PersistenceKey> {
   public let defaults: UserDefaults
   public let keychain: KeychainHelper
   
-  public private(set) var baseURL: URL
+  public let baseURL: URL
   private var allowSaving: Bool = true
   
-  public func fileURL(for subPath: String) -> URL {
+  nonisolated public func fileURL(for subPath: String) -> URL {
     baseURL.appendingPathComponent(subPath)
   }
   
@@ -60,7 +60,6 @@ public actor OFPersistence<Key: PersistenceKey> {
   public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncStream<Property.Value> where Property.Key == Key {
     AsyncStream<Property.Value> { continuation in
       Task {
-        Task { continuation.yield(await value(for: property)) }
         while true {
           continuation.yield(await updateStream(for: property))
         }
@@ -134,6 +133,74 @@ public actor OFPersistence<Key: PersistenceKey> {
     case .memory: break
     }
     updated(value: value, for: property)
+  }
+  
+  public nonisolated func initialValue<Property: PersistenceProperty>(for property: Property) -> Property.Value where Property.Key == Key {
+    let returnValue: Property.Value
+    
+    switch property.location {
+    case .defaults(let key):
+      switch Property.Value.self {
+      case is Bool.Type, is Bool?.Type,
+        is String.Type, is String?.Type,
+        is Int.Type, is Int?.Type,
+        is Double.Type, is Double?.Type,
+        is Data.Type, is Data?.Type:
+        returnValue = defaults.object(forKey: key) as? Property.Value ?? property.defaultValue
+      default:
+        guard let data = defaults.object(forKey: key) as? Data,
+              let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+          returnValue = property.defaultValue
+          break
+        }
+        returnValue = value
+      }
+    case .file(let path):
+      let url = fileURL(for: path)
+      switch Property.Value.self {
+      case is String.Type, is String?.Type:
+        returnValue = (try? String(contentsOf: url) as? Property.Value) ?? property.defaultValue
+      default:
+        guard let data = try? Data(contentsOf: url) else {
+          returnValue = property.defaultValue
+          break
+        }
+        switch Property.Value.self {
+        case is Data.Type, is Data?.Type:
+          returnValue = (data as? Property.Value) ?? property.defaultValue
+        default:
+          guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+            returnValue = property.defaultValue
+            break
+          }
+          returnValue = value
+        }
+      }
+    case .keychain(let key):
+      switch Property.Value.self {
+      case is String.Type, is String?.Type:
+        returnValue = keychain.string(for: key) as? Property.Value ?? property.defaultValue
+      default:
+        guard let data = keychain.data(for: key) else {
+          returnValue = property.defaultValue
+          break
+        }
+        switch Property.Value.self {
+        case is Data.Type, is Data?.Type:
+          returnValue = (data as? Property.Value) ?? property.defaultValue
+        default:
+          guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+            returnValue = property.defaultValue
+            break
+          }
+          returnValue = value
+        }
+      }
+    case .memory: returnValue = property.defaultValue
+    }
+    
+    let value = property.cleanup(value: returnValue)
+    return value
   }
   
   public func value<Property: PersistenceProperty>(for property: Property) -> Property.Value where Property.Key == Key {
