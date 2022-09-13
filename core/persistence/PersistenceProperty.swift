@@ -58,6 +58,7 @@ public class Persistent<Property: PersistenceProperty> {
   private let persistence: OFPersistence<Property.Key>
   private let property: Property
   private var value: Property.Value
+  private var updateTask: Task<Void, Error>?
   
   public var onUpdate: (() -> Void)?
   
@@ -65,16 +66,17 @@ public class Persistent<Property: PersistenceProperty> {
     self.persistence = persistence
     self.property = property
     value = persistence.initialValue(for: property)
-    setup()
-  }
-  
-  private func setup() {
-    Task {
+    updateTask = Task {
       for await update in await persistence.updates(for: property) {
         value = update
         onUpdate?()
       }
     }
+  }
+  
+  deinit {
+    updateTask?.cancel()
+    updateTask = nil
   }
   
   public var wrappedValue: Property.Value {

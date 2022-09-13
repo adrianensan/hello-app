@@ -9,10 +9,10 @@ public class Weak<T: AnyObject> {
 
 public actor OFPersistence<Key: PersistenceKey> {
   
-  public let defaults: UserDefaults
-  public let keychain: KeychainHelper
+  nonisolated public let defaults: UserDefaults
+  nonisolated public let keychain: KeychainHelper
   
-  public let baseURL: URL
+  nonisolated public let baseURL: URL
   private var allowSaving: Bool = true
   
   nonisolated public func fileURL(for subPath: String) -> URL {
@@ -318,6 +318,10 @@ public enum Persistence {
   
   public static func value<Property: PersistenceProperty>(_ property: Property) async -> Property.Value {
     await Property.Key.persistence.value(for: property)
+  }
+  
+  public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+    Property.Key.persistence.initialValue(for: property)
   }
   
 //  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
