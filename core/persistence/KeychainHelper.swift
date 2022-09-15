@@ -56,13 +56,15 @@ public class KeychainHelper {
     query[kSecAttrAccount] = key
     query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlock
     query[kSecValueData] = data
+    query[kSecUseDataProtectionKeychain] = true
     
     let status = SecItemAdd(query as CFDictionary, nil)
     guard status == errSecSuccess else {
       switch status {
       case errSecDuplicateItem:
         let updateStatus = SecItemUpdate(queryAttributes(for: key) as CFDictionary,
-                                         [kSecValueData: data] as CFDictionary)
+                                         [kSecValueData: data,
+                                          kSecUseDataProtectionKeychain: true] as CFDictionary)
         guard status == errSecSuccess else {
           switch status {
           default: throw KeychainError.other(error: status)
