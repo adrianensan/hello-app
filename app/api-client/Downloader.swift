@@ -31,11 +31,11 @@ public class Downloader {
     var logStart = url.absoluteString
     
     let (data, urlResponse): (Data, URLResponse)
-    var delegate: OFAPIDownloadTaskDelegate?
-    if let progressUpdater = downloadProgressUpdate {
-      delegate = OFAPIDownloadTaskDelegate(progressUpdater: progressUpdater)
-    }
     do {
+      var delegate: OFAPIDownloadTaskDelegate?
+      if let progressUpdater = downloadProgressUpdate {
+        delegate = OFAPIDownloadTaskDelegate(progressUpdater: progressUpdater)
+      }
       (data, urlResponse) = try await session.data(from: url, delegate: delegate)
     } catch {
       let requestDuration = Date().timeIntervalSince1970 - requestStartTime
