@@ -50,6 +50,8 @@ public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
     
     Task {
       layer.session = await model.captureSession
+      layer.connection?.automaticallyAdjustsVideoMirroring = false
+      layer.connection?.isVideoMirrored = true
     }
     return view
   }

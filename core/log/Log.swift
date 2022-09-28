@@ -10,9 +10,14 @@ public enum Log {
   
   public static var ephemeral: Bool = false
   
-  private static var logsFolder: URL { FileManager.default.temporaryDirectory.appendingPathComponent("logs") }
+  private static var logsFolder: URL {
+    ((try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
+     ?? FileManager.default.temporaryDirectory)
+      .appendingPathComponent("Ambient")
+      .appendingPathComponent("logs")
+  }
   
-  public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("prod.txt"), ephemeral: ephemeral)
+  public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("logs.json"), ephemeral: ephemeral)
   
   private static func log(level: LogLevel, message: String, context: String) {
     let logStatement = LogStatement(level: level, message: message, context: context)
