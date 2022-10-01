@@ -27,8 +27,8 @@ public class NativeCameraPreviewView: NativeView {
   }
 }
 
-public protocol CaptureModel: Actor, ObservableObject {
-  var captureSession: AVCaptureSession { get }
+public protocol CaptureModel: ObservableObject {
+  var captureSession: AVCaptureSession { get async }
 }
 
 public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
@@ -36,7 +36,7 @@ public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
   public typealias UIViewType = NativeCameraPreviewView
   public typealias NSViewType = NativeCameraPreviewView
   
-  var model: Model
+  @ObservedObject var model: Model
   
   public init(model: Model) {
     self.model = model
@@ -62,5 +62,8 @@ public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
   }
   
   public func updateView(_ view: NativeCameraPreviewView, context: Context) {
+    view.previewLayer.videoGravity = .resizeAspectFill
+    view.previewLayer.connection?.automaticallyAdjustsVideoMirroring = false
+    view.previewLayer.connection?.isVideoMirrored = true
   }
 }
