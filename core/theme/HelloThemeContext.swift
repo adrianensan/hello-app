@@ -46,7 +46,9 @@ public struct HelloThemeContext {
     self.textSecondary = textSecondary
     self.textTertiary = textTertiary
 
-    self.accent = baseTheme.accent ?? .color(color: HelloColor(r: 0.43, g: 0.725, b: 0.98))
+//    self.accent = baseTheme.accent ?? .color(color: HelloColor(r: 0.43, g: 0.725, b: 0.98))
+    self.accent = baseTheme.accent ?? .gradient(.init(colors: [.init(r: 0.96, g: 0.48, b: 0.33), .init(r: 1, g: 0.19, b: 0.5)],
+                                                      direction: .leftToRight))
     self.disabled = baseTheme.disabled ?? .color(color: textPrimary.mainColor.opacity(0.3))
     self.error = baseTheme.error ?? .color(color: HelloColor(r: 0.9, g: 0, b: 0))
   }
