@@ -7,6 +7,7 @@ fileprivate class PersistentStateInternal<Property: PersistenceProperty>: Observ
   
   private let persistence: OFPersistence<Property.Key>
   private let property: Property
+  private var updateTask: Task<Void, Error>?
   
   @Published var value: Property.Value
   
@@ -14,11 +15,18 @@ fileprivate class PersistentStateInternal<Property: PersistenceProperty>: Observ
     self.persistence = persistence
     self.property = property
     self.value = persistence.initialValue(for: property)
-    Task {
-      for await update in await persistence.updates(for: property) {
-        value = update
+    updateTask = Task { [weak self] in
+      for try await update in await persistence.updates(for: property) {
+        try Task.checkCancellation()
+        guard let self else { return }
+        self.value = update
       }
     }
+  }
+  
+  deinit {
+    updateTask?.cancel()
+    updateTask = nil
   }
   
   public func update(to newValue: Property.Value) {

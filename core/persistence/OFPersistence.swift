@@ -7,6 +7,10 @@ public class Weak<T: AnyObject> {
   }
 }
 
+public enum OFPersistenceError: Error {
+  case updatesCancelled
+}
+
 public actor OFPersistence<Key: PersistenceKey> {
   
   nonisolated public let defaults: UserDefaults
@@ -19,8 +23,7 @@ public actor OFPersistence<Key: PersistenceKey> {
     baseURL.appendingPathComponent(subPath)
   }
   
-  private var updateTaskContinuations: [Key: Any] = [:]
-  private var updateTasks: [Key: Any] = [:]
+  private var updateTaskContinuations: [Key: [String: Any]] = [:]
   private var updates: [Key: Any] = [:]
   private var cache: [Key: Any] = [:]
   
@@ -34,35 +37,60 @@ public actor OFPersistence<Key: PersistenceKey> {
   }
   
   private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) where Property.Key == Key {
-    if let continuation = updateTaskContinuations[property.key] as? CheckedContinuation<Property.Value, Never> {
-      continuation.resume(returning: value)
-      updateTasks[property.key] = nil
-      updateTaskContinuations[property.key] = nil
+    for (_, continuation) in updateTaskContinuations[property.key] ?? [:] {
+      if let continuation = continuation as? CheckedContinuation<Property.Value, Error> {
+        continuation.resume(returning: value)
+      } else {
+        Log.wtf("Unexpected continuation type for \(property.key)", context: "Persistence")
+      }
+    }
+    updateTaskContinuations[property.key] = nil
+  }
+  
+//  private func updateStream<Property: PersistenceProperty>(for property: Property) async throws -> Property.Value where Property.Key == Key {
+//    let task = Task<Property.Value, Error> {
+//      return try await withCheckedThrowingContinuation { continuation in
+//        var existingContinuations = updateTaskContinuations[property.key] ?? []
+//        existingContinuations.append(continuation)
+//        updateTaskContinuations.updateValue(existingContinuations, forKey: property.key)
+//      }
+//    }
+//    var existingTasks = updateTasks[property.key] ?? []
+//    existingTasks.append(task)
+//    updateTasks[property.key] = existingTasks
+//    let updatedValue = try await task.value
+//    try Task.checkCancellation()
+//    return updatedValue
+//  }
+  
+  private func updateContinuation<Property: PersistenceProperty>(for property: Property, id: String, to newContinuation: Any?) where Property.Key == Key {
+    var existingContinuations = updateTaskContinuations[property.key] ?? [:]
+    (existingContinuations[id] as? CheckedContinuation<Property.Value, Error>)?.resume(throwing: OFPersistenceError.updatesCancelled)
+    existingContinuations[id] = newContinuation
+    updateTaskContinuations.updateValue(existingContinuations, forKey: property.key)
+  }
+  
+  private func nextUpdate<Property: PersistenceProperty>(for property: Property, id: String) async throws -> Property.Value where Property.Key == Key {
+    try await withCheckedThrowingContinuation { continuation in
+      updateContinuation(for: property, id: id, to: continuation)
     }
   }
   
-  private func updateStream<Property: PersistenceProperty>(for property: Property) async -> Property.Value where Property.Key == Key {
-    let task: Task<Property.Value, Never>
-    if let stream = updateTasks[property.key] as? Task<Property.Value, Never> {
-      task = stream
-    } else {
-      task = Task<Property.Value, Never> {
-        return await withCheckedContinuation {
-          updateTaskContinuations.updateValue($0, forKey: property.key)
+  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncThrowingStream<Property.Value, Error> where Property.Key == Key {
+    AsyncThrowingStream<Property.Value, Error> { streamContinuation in
+      let id = UUID().uuidString
+      let updates = Task {
+        while true {
+          try Task.checkCancellation()
+          let updatedValue: Property.Value = try await nextUpdate(for: property, id: id)
+          try Task.checkCancellation()
+          streamContinuation.yield(updatedValue)
         }
       }
-      updateTasks[property.key] = task
-    }
-    let updatedValue = await task.value
-    return updatedValue
-  }
-  
-  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncStream<Property.Value> where Property.Key == Key {
-    AsyncStream<Property.Value> { continuation in
-      Task {
-        while true {
-          continuation.yield(await updateStream(for: property))
-        }
+      
+      streamContinuation.onTermination = { _ in
+        updates.cancel()
+        Task { await self.updateContinuation(for: property, id: id, to: nil) }
       }
     }
   }
@@ -336,7 +364,7 @@ public enum Persistence {
     await Property.Key.persistence.delete(property: property)
   }
   
-  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncStream<Property.Value> {
+  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, Error> {
     await Property.Key.persistence.updates(for: property)
   }
 }
