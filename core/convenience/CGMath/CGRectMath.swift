@@ -9,6 +9,16 @@ public extension CGRect {
             y: origin.y + 0.5 * size.height)
   }
   
+  var leading: CGPoint {
+    CGPoint(x: origin.x,
+            y: origin.y + 0.5 * size.height)
+  }
+  
+  var trailing: CGPoint {
+    CGPoint(x: origin.x + size.width,
+            y: origin.y + 0.5 * size.height)
+  }
+  
   static func +(left: CGRect, right: CGRect) -> CGRect {
     CGRect(origin: left.origin + right.origin, size: left.size + right.size)
   }

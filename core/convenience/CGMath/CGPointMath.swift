@@ -1,12 +1,26 @@
 import Foundation
 
+public func abs(_ point: CGPoint) -> CGPoint {
+  CGPoint(x: abs(point.x), y: abs(point.y))
+}
+
 public extension CGPoint {
   
   var magnitude: CGFloat { sqrt(x * x + y * y) }
   
   var maxCoordinateMagnitude: CGFloat { max(abs(x), abs(y)) }
   
-  var normalized: CGPoint { self / magnitude }
+  var normalized: CGPoint {
+    if magnitude > 0 {
+      return self / magnitude
+    } else {
+      return CGPoint(x: 0, y: 0)
+    }
+  }
+  
+  var perpendicular: CGPoint {
+    CGPoint(x: y, y: x)
+  }
   
   static prefix func -(point: CGPoint) -> CGPoint {
     point * -1
