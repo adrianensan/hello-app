@@ -79,7 +79,7 @@ public class KeychainHelper {
     #endif
   }
   
-  @discardableResult public func remove(for key: String) throws {
+  public func remove(for key: String) throws {
     #if os(iOS) || os(macOS)
     let status = SecItemDelete(queryAttributes(for: key) as CFDictionary)
     guard status == errSecSuccess else {

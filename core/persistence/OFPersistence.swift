@@ -11,6 +11,10 @@ public enum OFPersistenceError: Error {
   case updatesCancelled
 }
 
+extension UserDefaults: Sendable {
+  
+}
+
 public actor OFPersistence<Key: PersistenceKey> {
   
   nonisolated public let defaults: UserDefaults
