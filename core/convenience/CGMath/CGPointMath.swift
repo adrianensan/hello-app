@@ -87,4 +87,9 @@ public extension CGPoint {
   func dot(with vector: CGPoint) -> CGFloat {
     x * vector.x + y * vector.y
   }
+  
+  func rotate(by radians: CGFloat) -> CGPoint {
+    CGPoint(x: x * cos(radians) - y * sin(radians),
+            y: x * sin(radians) + y * cos(radians))
+  }
 }

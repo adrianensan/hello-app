@@ -11,9 +11,7 @@ public enum OFPersistenceError: Error {
   case updatesCancelled
 }
 
-extension UserDefaults: Sendable {
-  
-}
+extension UserDefaults: @unchecked Sendable {}
 
 public actor OFPersistence<Key: PersistenceKey> {
   
