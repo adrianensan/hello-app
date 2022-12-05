@@ -2,12 +2,22 @@ import Foundation
 
 import HelloCore
 
-public enum APIError: Error {
+public enum APIError: LocalizedError {
   case invalidRequest
   case fail
   case duplicate
   case invalidResponse
   case httpError(statusCode: Int)
+  
+  public var errorDescription: String? {
+    switch self {
+    case .invalidRequest: return "Invalid HTTP Request"
+    case .fail: return "Fail"
+    case .duplicate: return "Duplicate request"
+    case .invalidResponse: return "Invalid Response"
+    case .httpError(let statusCode): return "HTTP Error \(statusCode)"
+    }
+  }
 }
 
 public struct OFAPIResponse<Content: Decodable> {
@@ -200,6 +210,9 @@ open class APIClient {
     case .normal, .longPoll:
       do {
         (data, urlResponse) = try await session.data(for: request)
+        if let string = String(data: data, encoding: .utf8) {
+          print(string)
+        }
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)
