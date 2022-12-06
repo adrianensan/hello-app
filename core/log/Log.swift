@@ -9,6 +9,7 @@ public enum Log {
   #endif
   
   public static var ephemeral: Bool = false
+  public static var logLevel: LogLevel = .info
   
   private static var logsFolder: URL {
     ((try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
@@ -25,7 +26,7 @@ public enum Log {
       print(logStatement.formattedLine)
     }
 
-    if level != .debug && level != .verbose {
+    if level >= logLevel {
       Task { try await logger.log(logStatement) }
     }
   }
