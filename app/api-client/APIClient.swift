@@ -210,9 +210,6 @@ open class APIClient {
     case .normal, .longPoll:
       do {
         (data, urlResponse) = try await session.data(for: request)
-        if let string = String(data: data, encoding: .utf8) {
-          print(string)
-        }
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)
