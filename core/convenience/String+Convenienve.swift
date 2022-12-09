@@ -1,7 +1,7 @@
 import Foundation
 
 public extension String {
-  public var fileSafeString: String {
+  var fileSafeString: String {
     var filtered = String(filter { !"/\\:".contains($0) })
     filtered = filtered.components(separatedBy: "?")[0]
     if filtered.count > 254 {

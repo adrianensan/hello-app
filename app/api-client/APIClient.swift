@@ -235,7 +235,7 @@ open class APIClient {
       }
     case .websocket:
       do {
-        let wsSession = try await session.webSocketTask(with: request)
+        let wsSession = session.webSocketTask(with: request)
         throw APIError.invalidRequest
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime

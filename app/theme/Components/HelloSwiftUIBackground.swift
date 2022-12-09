@@ -5,7 +5,7 @@ import HelloCore
 public extension HelloBackground {
   
   @ViewBuilder
-  public func view(for shape: some Shape) -> some View {
+  func view(for shape: some Shape) -> some View {
     switch self {
     case .color(let color, let border):
       if let border {
@@ -16,7 +16,7 @@ public extension HelloBackground {
       }
     case .gradient(let gradient):
       shape.fill(gradient.gradient)
-    case .blur(let dark, let overlay, let border):
+    case .blur(_, let overlay, let border):
       if let border {
         (overlay ?? .transparent).swiftuiColor
           .background(.ultraThinMaterial)

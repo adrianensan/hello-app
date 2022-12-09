@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HelloColor: Codable, Equatable, Hashable, Identifiable {
+public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   public var r: Double
   public var g: Double
   public var b: Double

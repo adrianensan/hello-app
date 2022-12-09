@@ -1,6 +1,6 @@
 import Foundation
 
-public struct AppVersion: LosslessStringConvertible, Codable, Equatable, Comparable, Hashable {
+public struct AppVersion: LosslessStringConvertible, Codable, Equatable, Comparable, Hashable, Sendable {
   
   public static var current: AppVersion? {
     guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"],

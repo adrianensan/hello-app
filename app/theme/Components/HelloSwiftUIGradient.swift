@@ -3,7 +3,7 @@ import SwiftUI
 import HelloCore
 
 public extension HelloGradient.GradientType {
-  public var startPoint: UnitPoint {
+  var startPoint: UnitPoint {
     switch self {
     case .topToBottom:
       return .top
@@ -12,7 +12,7 @@ public extension HelloGradient.GradientType {
     }
   }
   
-  public var endPoint: UnitPoint {
+  var endPoint: UnitPoint {
     switch self {
     case .topToBottom:
       return .bottom
@@ -24,7 +24,7 @@ public extension HelloGradient.GradientType {
 
 public extension HelloGradient {
   
-  public var gradient: LinearGradient {
+  var gradient: LinearGradient {
     LinearGradient(colors: colors.map { $0.swiftuiColor }, startPoint: direction.startPoint, endPoint: direction.endPoint)
   }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public enum PersistenceType {
+public enum PersistenceType: Sendable {
   case defaults(key: String)
   case file(path: String)
   case keychain(key: String)
@@ -23,7 +23,7 @@ public struct NoOld<Key: PersistenceKey>: PersistenceProperty {
   
 }
 
-public protocol PersistenceProperty {
+public protocol PersistenceProperty: Sendable {
   
   associatedtype Value: Codable
   associatedtype Key: PersistenceKey

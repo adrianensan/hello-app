@@ -1,6 +1,6 @@
 import Foundation
 
-public enum LogLevel: Codable, Comparable, Equatable {
+public enum LogLevel: Codable, Comparable, Equatable, Sendable {
   case debug
   case verbose
   case info
