@@ -1,26 +1,37 @@
 #if os(macOS)
 import SwiftUI
 
-struct BehindWindowBlur: NSViewRepresentable {
-  let material: NSVisualEffectView.Material
-  let blendingMode: NSVisualEffectView.BlendingMode
-  let isDark: Bool = true
+public struct BehindWindowBlur: NSViewRepresentable {
   
-  func makeNSView(context: Context) -> NSVisualEffectView
+  @Environment(\.colorScheme) var colorScheme
+  
+  let material: NSVisualEffectView.Material
+  var nsAppearance: NSAppearance.Name {
+    switch colorScheme {
+    case .dark: return .vibrantDark
+    case .light: fallthrough
+    @unknown default: return .vibrantLight
+    }
+  }
+  
+  public init(material: NSVisualEffectView.Material = .fullScreenUI) {
+    self.material = material
+  }
+  
+  public func makeNSView(context: Context) -> NSVisualEffectView
   {
     let visualEffectView = NSVisualEffectView()
     visualEffectView.material = material
-    visualEffectView.blendingMode = blendingMode
+    visualEffectView.blendingMode = .behindWindow
     visualEffectView.state = .active
-    visualEffectView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+    visualEffectView.appearance = NSAppearance(named: nsAppearance)
     return visualEffectView
   }
   
-  func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context)
+  public func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context)
   {
     visualEffectView.material = material
-    visualEffectView.blendingMode = blendingMode
-    visualEffectView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+    visualEffectView.appearance = NSAppearance(named: nsAppearance)
   }
 }
 #endif

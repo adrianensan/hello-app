@@ -5,10 +5,10 @@ import HelloCore
 public extension HelloBackground {
   
   @ViewBuilder
-  func view(for shape: some Shape) -> some View {
+  func view(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
     switch self {
     case .color(let color, let border):
-      if let border {
+      if !isBaseLayer, let border {
         shape.fill(color.swiftuiColor)
           .border(border.color.swiftuiColor, width: border.width)
       } else {
@@ -17,14 +17,27 @@ public extension HelloBackground {
     case .gradient(let gradient):
       shape.fill(gradient.gradient)
     case .blur(_, let overlay, let border):
-      if let border {
-        (overlay ?? .transparent).swiftuiColor
+      #if os(macOS)
+      if !isBaseLayer, let border {
+        shape.fill((overlay ?? .transparent).swiftuiColor)
+          .background(BehindWindowBlur(material: .fullScreenUI))
+          .clipShape(shape)
+          .border(border.color.swiftuiColor, width: border.width)
+      } else {
+        shape.fill((overlay ?? .transparent).swiftuiColor)
+          .background(BehindWindowBlur(material: .fullScreenUI))
+          .clipShape(shape)
+      }
+      #else
+      if !isBaseLayer, let border {
+        shape.fill((overlay ?? .transparent).swiftuiColor)
           .background(.ultraThinMaterial)
           .border(border.color.swiftuiColor, width: border.width)
       } else {
-        (overlay ?? .transparent).swiftuiColor
+        shape.fill((overlay ?? .transparent).swiftuiColor)
           .background(.ultraThinMaterial)
       }
+      #endif
     case .image(let image):
       switch image.mode {
       case .fill:
@@ -36,12 +49,6 @@ public extension HelloBackground {
           .resizable(capInsets: .init(), resizingMode: .tile)
           .aspectRatio(contentMode: .fill)
       }
-    case .windowBlur:
-      #if os(macOS)
-      BehindWindowBlur(material: .sidebar, blendingMode: .behindWindow)
-      #else
-      Color.clear
-      #endif
     }
   }
 }

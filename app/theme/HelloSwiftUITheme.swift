@@ -11,8 +11,8 @@ public struct HelloSwiftUITheme {
     theme.background.view(for: RoundedRectangle(cornerRadius: 8, style: .continuous))
   }
   
-  public func backgroundView(for shape: some Shape) -> some View {
-    theme.background.view(for: shape)
+  public func backgroundView(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
+    theme.background.view(for: shape, isBaseLayer: isBaseLayer)
   }
   
   public var textPrimaryColor: Color
