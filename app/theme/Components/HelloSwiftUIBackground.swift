@@ -20,12 +20,12 @@ public extension HelloBackground {
       #if os(macOS)
       if !isBaseLayer, let border {
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(BehindWindowBlur(material: .fullScreenUI))
+          .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
           .clipShape(shape)
           .border(border.color.swiftuiColor, width: border.width)
       } else {
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(BehindWindowBlur(material: .fullScreenUI))
+          .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
           .clipShape(shape)
       }
       #else
@@ -44,6 +44,22 @@ public extension HelloBackground {
         Image(image.name)
           .resizable()
           .aspectRatio(contentMode: .fill)
+      case .fillLengthwise:
+        GeometryReader { geometry in
+          if geometry.size.width > geometry.size.height {
+            Image(image.name)
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+              .frame(width: geometry.size.width, height: geometry.size.height)
+          } else {
+            Image(image.name)
+              .resizable()
+              .aspectRatio(contentMode: .fill)
+              .frame(width: geometry.size.height, height: geometry.size.width)
+              .rotationEffect(.radians(0.5 * .pi))
+              .frame(width: geometry.size.width, height: geometry.size.height)
+          }
+        }
       case .tile:
         Image(image.name)
           .resizable(capInsets: .init(), resizingMode: .tile)

@@ -1,17 +1,17 @@
 import Foundation
 
+public enum LayerChange {
+  case base
+  case raised
+  case lowered
+  case header
+  case floating
+}
+
 public struct HelloThemeContext {
   
   public enum Layer: Hashable {
     case layer(Int)
-    case header
-    case floating
-  }
-  
-  public enum LayerChange {
-    case base
-    case raised
-    case lowered
     case header
     case floating
   }
@@ -35,7 +35,15 @@ public struct HelloThemeContext {
     
     let baseTheme = theme.baseLayer
     
-    let background = baseTheme.background ?? .color(color: HelloColor(r: 0.1, g: 0.1, b: 0.1))
+    let background: HelloBackground
+    switch layer {
+    case .layer(let int):
+      background = baseTheme.background ?? .color(color: HelloColor(r: 0.1, g: 0.1, b: 0.1))
+    case .header:
+      background = theme.headerLayer?.background ?? baseTheme.background ?? .color(color: HelloColor(r: 0.1, g: 0.1, b: 0.1))
+    case .floating:
+      background = theme.floatingLayer?.background ?? baseTheme.background ?? .color(color: HelloColor(r: 0.1, g: 0.1, b: 0.1))
+    }
     let textPrimary = baseTheme.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.9))
     let textSecondary = baseTheme.textPrimary ?? .color(color: textPrimary.mainColor.opacity(0.72))
     let textTertiary = baseTheme.textTertiary ?? .color(color: textSecondary.mainColor.opacity(0.6))
@@ -62,7 +70,7 @@ public struct HelloThemeContext {
 //    }
 //  }
   
-  func context(for layerChange: LayerChange) -> HelloThemeContext {
+  public func context(for layerChange: LayerChange) -> HelloThemeContext {
     switch layerChange {
     case .base:
       return HelloThemeContext(theme: theme, layer: .layer(0))
@@ -82,6 +90,4 @@ public struct HelloThemeContext {
       return HelloThemeContext(theme: theme, layer: .floating)
     }
   }
-  
-  
 }

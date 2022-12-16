@@ -8,11 +8,15 @@ public struct HelloSwiftUITheme {
   
   public var backgroundColor: Color
   public var backgroundView: some View {
-    theme.background.view(for: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    theme.background.view(for: Rectangle())
   }
   
   public func backgroundView(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
     theme.background.view(for: shape, isBaseLayer: isBaseLayer)
+  }
+  
+  public func backgroundView(isBaseLayer: Bool = true) -> some View {
+    theme.background.view(for: Rectangle(), isBaseLayer: isBaseLayer)
   }
   
   public var textPrimaryColor: Color
@@ -52,5 +56,9 @@ public struct HelloSwiftUITheme {
     textPrimaryStyle = AnyShapeStyle(theme.textPrimary.view)
     textSecondaryStyle = AnyShapeStyle(theme.textSecondary.view)
     textTertiaryStyle = AnyShapeStyle(theme.textTertiary.view)
+  }
+  
+  func context(for layerChange: LayerChange) -> HelloSwiftUITheme {
+    HelloSwiftUITheme(theme: theme.context(for: layerChange))
   }
 }
