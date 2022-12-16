@@ -92,4 +92,8 @@ public struct HelloTheme: Codable {
     self.floatingLayer = floatingLayer
     self.additionalLayers = additionalLayers
   }
+  
+  public var isDark: Bool {
+    baseLayer.background?.mainColor.isDark ?? false
+  }
 }
