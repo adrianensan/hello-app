@@ -68,11 +68,18 @@ struct LoggerLineView: View {
         .background(RoundedRectangle(cornerRadius: 4, style: .continuous)
           .fill(backgroundColor))
       
+      #if os(iOS) || os(macOS)
       (Text("\(logStatement.context)").bold() + Text(" \(logStatement.message)"))
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
         .foregroundColor(.primary)
         .textSelection(.enabled)
         .fixedSize(horizontal: false, vertical: true)
+      #else
+      (Text("\(logStatement.context)").bold() + Text(" \(logStatement.message)"))
+        .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
+        .foregroundColor(.primary)
+        .fixedSize(horizontal: false, vertical: true)
+      #endif
     }
   }
 }

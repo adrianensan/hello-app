@@ -39,7 +39,7 @@ public extension CGRect {
     CGRect(origin: left.origin - right, size: left.size)
   }
   
-  static func /(left: CGRect, right: CGFloat) -> CGRect {
+  static func /(left: CGRect, right: CGFloat.NativeType) -> CGRect {
     CGRect(origin: left.origin / right, size: left.size / right)
   }
   
@@ -125,7 +125,7 @@ public extension CGRect {
     return newRect
   }
   
-  func with(padding: CGFloat, within sizeLimit: CGSize) -> CGRect {
+  func with(padding: CGFloat.NativeType, within sizeLimit: CGSize) -> CGRect {
     var newRect = self
     let maxXPadding = max(0, min(padding,
                           newRect.origin.x,
@@ -145,7 +145,7 @@ public extension CGRect {
     return newRect
   }
   
-  func mapped(to targetRect: CGRect, with maxPadding: CGFloat) -> CGRect {
+  func mapped(to targetRect: CGRect, with maxPadding: CGFloat.NativeType) -> CGRect {
     var newRect = CGRect()
     newRect.origin.x = max(0, round(origin.x * targetRect.origin.x))
     newRect.origin.y = max(0, round(origin.y * targetRect.origin.y))

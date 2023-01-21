@@ -87,23 +87,23 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
     HelloColor(r: r, g: g, b: b, a: a * alpha)
   }
   
-  var brightness: Double {
+  public var brightness: Double {
     r * 0.225 + g * 0.7 + b * 0.075
   }
   
-  var isDark: Bool {
+  public var isDark: Bool {
     brightness < 0.7
   }
   
-  var isDim: Bool {
+  public var isDim: Bool {
     brightness < 0.4
   }
   
-  var isGreyscale: Bool {
+  public var isGreyscale: Bool {
     r == b && b == g
   }
   
-  var isEssentiallyGreyscale: Bool {
+  public var isEssentiallyGreyscale: Bool {
     abs(r - b) < 0.1 && abs(b - g) < 0.1
   }
   
@@ -154,6 +154,11 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
                g: g * alpha + background.g * (1 - alpha),
                b: b * alpha + background.b * (1 - alpha),
                a: a)
+  }
+  
+  public func isEssentiallySame(as otherColor: HelloColor) -> Bool {
+    abs(r - otherColor.r) < 0.001 && abs(g - otherColor.g) < 0.001
+    && abs(b - otherColor.b) < 0.001 && abs(a - otherColor.a) < 0.001
   }
 }
 

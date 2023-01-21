@@ -6,15 +6,21 @@ public func abs(_ point: CGPoint) -> CGPoint {
 
 public extension CGPoint {
   
-  var magnitude: CGFloat { sqrt(x * x + y * y) }
+  #if os(watchOS)
+  public init(x: CGFloat, y: CGFloat) {
+    self.init(x: x, y: y)
+  }
+  #endif
   
-  var maxCoordinateMagnitude: CGFloat { max(abs(x), abs(y)) }
+  var magnitude: CGFloat.NativeType { sqrt(x * x + y * y) }
+  
+  var maxCoordinateMagnitude: CGFloat.NativeType { max(abs(x), abs(y)) }
   
   var normalized: CGPoint {
     if magnitude > 0 {
       return self / magnitude
     } else {
-      return CGPoint(x: 0, y: 0)
+      return CGPoint(x: CGFloat(0), y: CGFloat(0))
     }
   }
   
@@ -64,31 +70,31 @@ public extension CGPoint {
   
   // Constants Math
   
-  static func +(left: CGPoint, right: CGFloat) -> CGPoint {
+  static func +(left: CGPoint, right: CGFloat.NativeType) -> CGPoint {
     CGPoint(x: left.x + right, y: left.y + right)
   }
   
-  static func -(left: CGPoint, right: CGFloat) -> CGPoint {
+  static func -(left: CGPoint, right: CGFloat.NativeType) -> CGPoint {
     CGPoint(x: left.x - right, y: left.y - right)
   }
   
-  static func *(left: CGPoint, right: CGFloat) -> CGPoint {
+  static func *(left: CGPoint, right: CGFloat.NativeType) -> CGPoint {
     CGPoint(x: left.x * right, y: left.y * right)
   }
   
-  static func *(left: CGFloat, right: CGPoint) -> CGPoint {
+  static func *(left: CGFloat.NativeType, right: CGPoint) -> CGPoint {
     CGPoint(x: left * right.x, y: left * right.y)
   }
   
-  static func /(left: CGPoint, right: CGFloat) -> CGPoint {
+  static func /(left: CGPoint, right: CGFloat.NativeType) -> CGPoint {
     CGPoint(x: left.x / right, y: left.y / right)
   }
   
-  func dot(with vector: CGPoint) -> CGFloat {
+  func dot(with vector: CGPoint) -> CGFloat.NativeType {
     x * vector.x + y * vector.y
   }
   
-  func rotate(by radians: CGFloat) -> CGPoint {
+  func rotate(by radians: CGFloat.NativeType) -> CGPoint {
     CGPoint(x: x * cos(radians) - y * sin(radians),
             y: x * sin(radians) + y * cos(radians))
   }

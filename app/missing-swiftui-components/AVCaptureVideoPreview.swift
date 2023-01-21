@@ -1,3 +1,4 @@
+#if os(iOS) || os(macOS)
 import SwiftUI
 import AVFoundation
 
@@ -67,3 +68,4 @@ public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
     view.previewLayer.connection?.isVideoMirrored = true
   }
 }
+#endif

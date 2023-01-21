@@ -31,6 +31,7 @@ struct HoverableViewModifier: ViewModifier {
   }
   
   func body(content: Content) -> some View {
+    #if os(iOS) || os(macOS)
     content
       .onHover {
         if $0 {
@@ -39,6 +40,9 @@ struct HoverableViewModifier: ViewModifier {
           hoverModel.currentHover = nil
         }
       }
+    #else
+    content
+    #endif
   }
 }
 

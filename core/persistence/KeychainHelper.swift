@@ -13,7 +13,7 @@ public class KeychainHelper {
   
   private let accessGroup: String?
   
-  #if os(iOS) || os(macOS)
+  #if os(iOS) || os(macOS) || os(watchOS)
   private var baseAttributes: [CFString: Any] {
     var attributes: [CFString: Any] = [
       kSecAttrService: service,
@@ -49,7 +49,7 @@ public class KeychainHelper {
   }
   
   public func set(_ data: Data, for key: String) throws {
-    #if os(iOS) || os(macOS)
+    #if os(iOS) || os(macOS) || os(watchOS)
     try? remove(for: key)
     
     var query = baseAttributes
@@ -80,7 +80,7 @@ public class KeychainHelper {
   }
   
   public func remove(for key: String) throws {
-    #if os(iOS) || os(macOS)
+    #if os(iOS) || os(macOS) || os(watchOS)
     let status = SecItemDelete(queryAttributes(for: key) as CFDictionary)
     guard status == errSecSuccess else {
       switch status {
@@ -101,7 +101,7 @@ public class KeychainHelper {
   }
   
   public func data(for key: String) throws -> Data {
-    #if os(iOS) || os(macOS)
+    #if os(iOS) || os(macOS) || os(watchOS)
     var query = baseAttributes
     query[kSecAttrAccount] = key
     query[kSecMatchLimit] = kSecMatchLimitOne
@@ -124,7 +124,7 @@ public class KeychainHelper {
   }
   
   public func nuke() {
-    #if os(iOS) || os(macOS)
+    #if os(iOS) || os(macOS) || os(watchOS)
     SecItemDelete(baseAttributes as CFDictionary)
     #else
     fatalError("Keychain Not Available")

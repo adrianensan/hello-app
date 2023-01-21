@@ -343,6 +343,42 @@ public actor OFPersistence<Key: PersistenceKey> {
       }
     }
   }
+  
+  public func size<Property: PersistenceProperty>(of property: Property) -> Int where Property.Key == Key {
+    switch property.location {
+    case .defaults(let key): return 0
+    case .file(let path):
+      guard let resourceValues = try? fileURL(for: path).resourceValues(forKeys: [
+        .isRegularFileKey,
+        .totalFileSizeKey,
+        .fileAllocatedSizeKey,
+        .totalFileAllocatedSizeKey,
+      ]), resourceValues.isRegularFile == true else { return 0 }
+      
+      return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
+    case .keychain(let key): return 0
+    case .memory:  return 0
+    }
+  }
+  
+  public func isSet<Property: PersistenceProperty>(property: Property) -> Bool where Property.Key == Key {
+    switch property.location {
+    case .defaults(let key): return defaults.object(forKey: key) != nil
+    case .file(let path):
+      return FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
+    case .keychain(let key): return (try? keychain.data(for: key)) != nil
+    case .memory: return cache[property.key] != nil
+    }
+  }
+  
+  public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
+    switch property.location {
+    case .defaults: return nil
+    case .file(let path): return fileURL(for: path)
+    case .keychain: return nil
+    case .memory: return nil
+    }
+  }
 }
 
 public enum Persistence {
@@ -368,5 +404,17 @@ public enum Persistence {
   
   public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, Error> {
     await Property.Key.persistence.updates(for: property)
+  }
+  
+  public static func size<Property: PersistenceProperty>(of property: Property) async -> Int {
+    await Property.Key.persistence.size(of: property)
+  }
+  
+  public static func isSet<Property: PersistenceProperty>(property: Property) async -> Bool {
+    await Property.Key.persistence.isSet(property: property)
+  }
+  
+  public static func fileURL<Property: PersistenceProperty>(for property: Property) async -> URL? {
+    await Property.Key.persistence.fileURL(for: property)
   }
 }

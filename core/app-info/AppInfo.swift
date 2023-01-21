@@ -1,5 +1,6 @@
 import Foundation
 
+public typealias AppInfo = App
 public enum App {
   public static let bundleID: String = Bundle.main.bundleIdentifier ?? "?"
   public static let version: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"

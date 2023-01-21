@@ -18,24 +18,30 @@ public extension HelloBackground {
       shape.fill(gradient.gradient)
     case .blur(_, let overlay, let border):
       #if os(macOS)
-      if !isBaseLayer, let border {
+      ZStack {
         shape.fill((overlay ?? .transparent).swiftuiColor)
           .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
           .clipShape(shape)
+      
+        if !isBaseLayer, let border {
+          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+        }
+      }
+      #elseif os(iOS)
+      if !isBaseLayer, let border {
+        shape.fill((overlay ?? .transparent).swiftuiColor)
+          .background(.ultraThinMaterial)
           .border(border.color.swiftuiColor, width: border.width)
       } else {
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
-          .clipShape(shape)
+          .background(.ultraThinMaterial)
       }
       #else
       if !isBaseLayer, let border {
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(.ultraThinMaterial)
           .border(border.color.swiftuiColor, width: border.width)
       } else {
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(.ultraThinMaterial)
       }
       #endif
     case .image(let image):

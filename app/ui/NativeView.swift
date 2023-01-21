@@ -1,6 +1,8 @@
 import SwiftUI
 
-#if canImport(UIKit)
+#if os(watchOS)
+public typealias NativeView = View
+#elseif canImport(UIKit)
 public typealias NativeView = UIView
 #elseif canImport(AppKit)
 public typealias NativeView = NSView
