@@ -296,6 +296,9 @@ open class APIClient {
       return OFAPIResponse(headers: headers, content: decodedResponse)
     default:
       guard let decodedResponse = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: data) else {
+        if let stringResponse = String(data: data, encoding: .utf8) {
+          Log.debug(stringResponse, context: "API error")
+        }
         Log.error("\(logStart) failed to decode response", context: "API")
         throw APIError.invalidResponse
       }
