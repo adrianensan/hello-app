@@ -167,3 +167,19 @@ public extension HelloColor {
   static var black: HelloColor { HelloColor(r: 0, g: 0, b: 0) }
   static var white: HelloColor { HelloColor(r: 1, g: 1, b: 1) }
 }
+
+public struct HelloDynamicColor {
+  
+  public var light: HelloColor
+  public var dark: HelloColor
+  
+  public init(light: HelloColor, dark: HelloColor) {
+    self.light = light
+    self.dark = dark
+  }
+  
+  public init(r: Double, g: Double, b: Double, a: Double = 1) {
+    self.light = HelloColor(r: r, g: g, b: b, a: a)
+    self.dark = HelloColor(r: r, g: g, b: b, a: a)
+  }
+}

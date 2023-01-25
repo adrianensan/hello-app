@@ -17,3 +17,20 @@ public extension HelloColor {
     Color(.displayP3, red: r, green: g, blue: b, opacity: a)
   }
 }
+
+public extension HelloDynamicColor {
+  var nativeColor: NativeColor {
+    NativeColor(name: nil) { appearance in
+      switch appearance.name {
+      case .darkAqua, .vibrantDark, .accessibilityHighContrastDarkAqua, .accessibilityHighContrastVibrantDark:
+        return dark.nativeColor
+      default:
+        return light.nativeColor
+      }
+    }
+  }
+  
+  var swiftuiColor: Color {
+    Color(nativeColor)
+  }
+}
