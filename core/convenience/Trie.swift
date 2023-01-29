@@ -32,7 +32,7 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
           currentNode = newNode
         }
       }
-      currentNode.value.append(value)
+      currentNode.value.insert(value)
     }
     
     return root
@@ -52,7 +52,7 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
           currentNode = newNode
         }
       }
-      currentNode.value.append(value)
+      currentNode.value.insert(value)
     }
   }
   
@@ -75,7 +75,7 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
 
 public class TrieNode<T: Codable & Hashable>: Codable {
   
-  public internal(set) var value: [T]
+  public internal(set) var value: Set<T>
   public internal(set) var map: [UInt8: TrieNode]
   
   public init(value: T? = nil) {
@@ -95,7 +95,7 @@ public class TrieNode<T: Codable & Hashable>: Codable {
   required public init(from decoder: Decoder) throws {
     let values = try decoder.container(keyedBy: TrieCodingKeys.self)
     map = try values.decode([UInt8: TrieNode].self, forKey: .map)
-    value = try values.decode([T].self, forKey: .value)
+    value = try values.decode(Set<T>.self, forKey: .value)
   }
   
   public func encode(to encoder: Encoder) throws {
