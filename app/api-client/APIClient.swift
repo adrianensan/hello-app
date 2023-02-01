@@ -120,6 +120,9 @@ open class APIClient {
     if !endpoint.parameters.isEmpty {
       parameters += "?"
       for (key, value) in endpoint.parameters {
+        if parameters.count > 2 {
+          parameters += "&"
+        }
         parameters += "\(key)=\(value)"
       }
     }
@@ -198,7 +201,12 @@ open class APIClient {
     
     if !endpoint.parameters.isEmpty {
       logStart += "?"
+      var isFirst = true
       for (key, value) in endpoint.parameters {
+        if !isFirst {
+          logStart += "&"
+        }
+        isFirst = false
         logStart += "\(key)=\(value)"
       }
     }
