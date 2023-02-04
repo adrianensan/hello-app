@@ -20,6 +20,14 @@ public extension HelloColor {
 
 public extension HelloDynamicColor {
   var nativeColor: NativeColor {
+    #if os(iOS)
+    NativeColor { traitCollection in
+      switch traitCollection.userInterfaceStyle {
+      case .dark: return dark.nativeColor
+      default: return light.nativeColor
+      }
+    }
+    #elseif os(macOS)
     NativeColor(name: nil) { appearance in
       switch appearance.name {
       case .darkAqua, .vibrantDark, .accessibilityHighContrastDarkAqua, .accessibilityHighContrastVibrantDark:
@@ -28,6 +36,7 @@ public extension HelloDynamicColor {
         return light.nativeColor
       }
     }
+    #endif
   }
   
   var swiftuiColor: Color {

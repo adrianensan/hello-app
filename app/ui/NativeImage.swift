@@ -1,8 +1,8 @@
 import SwiftUI
 
-#if canImport(UIKit)
+#if os(iOS)
 public typealias NativeImage = UIImage
-#elseif canImport(AppKit)
+#elseif os(macOS)
 public typealias NativeImage = NSImage
 extension NativeImage {
   convenience init(cgImage: CGImage) {
