@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if os(iOS)
-protocol NativeViewRepresentable: UIViewRepresentable {
+public protocol NativeViewRepresentable: UIViewRepresentable {
   func makeView(context: Context) -> UIViewType
   static func dismantleView(_ uiView: UIViewType, coordinator: Coordinator)
   func updateView(_ uiView: UIViewType, context: Context)
@@ -21,10 +21,11 @@ extension NativeViewRepresentable {
   }
 }
 #elseif os(macOS)
-protocol NativeViewRepresentable: NSViewRepresentable {
+public protocol NativeViewRepresentable: NSViewRepresentable {
+  
   func makeView(context: Context) -> NSViewType
-  static func dismantleView(_ nsView: NSViewType, coordinator: Coordinator)
-  func updateView(_ nsView: NSViewType, context: Context)
+  static func dismantleView(_ view: NSViewType, coordinator: Coordinator)
+  func updateView(_ view: NSViewType, context: Context)
 }
 
 extension NativeViewRepresentable {
@@ -39,6 +40,10 @@ extension NativeViewRepresentable {
   public func updateNSView(_ nsView: NSViewType, context: Context) {
     updateView(nsView, context: context)
   }
+  
+  public static func dismantleView(_ nsView: NSViewType, coordinator: Coordinator) {}
+  
+  public func updateView(_ view: NSViewType, context: Context) {}
 }
 
 #endif
