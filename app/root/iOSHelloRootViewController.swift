@@ -49,40 +49,46 @@ public extension View {
 @available(iOSApplicationExtension, unavailable)
 public class HelloRootViewController: UIHostingController<AnyView> {
   
+  private static var instances: [String: HelloRootViewController] = [:]
+  
   var statusBarStyle: UIStatusBarStyle = .default
   var lockRotation: Bool = false
   var hideHomeIndicator: Bool = false
   public var onBrightnessChange: (() -> Void)?
   
+  var uiProperties: UIProperties
+  
   public init<T: View>(wrappedView: T) {
-    UIConstantsObservable.main.safeAreaInsets = (UIApplication.shared.windows.first?.safeAreaInsets ?? .zero) =& {
-      EdgeInsets(top: $0.top, leading: $0.left, bottom: $0.bottom, trailing: $0.right)
-    }
+    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: UIApplication.shared.windows.first?.safeAreaInsets)
+    self.uiProperties = uiProperties
+    let id = UUID().uuidString
     let observedView = AnyView(wrappedView
-      .environmentObject(UIConstantsObservable.main)
+      .environmentObject(uiProperties)
       .onPreferenceChange(StatusBarStyleKey.self) { style in
-        guard let viewController = Self.main,
+        guard let viewController = Self.instances[id],
               viewController.statusBarStyle != style else { return }
         viewController.statusBarStyle = style
         viewController.setNeedsStatusBarAppearanceUpdate()
       }.onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
-        guard let viewController = Self.main,
+        guard let viewController = Self.instances[id],
               viewController.hideHomeIndicator != hideHomeIndicator else { return }
         viewController.hideHomeIndicator = hideHomeIndicator
         viewController.setNeedsUpdateOfHomeIndicatorAutoHidden()
         viewController.setNeedsUpdateOfScreenEdgesDeferringSystemGestures()
       }.onPreferenceChange(LockOrientationKey.self) { lockRotation in
-        guard let viewController = Self.main,
+        guard let viewController = Self.instances[id],
               viewController.lockRotation != lockRotation else { return }
         viewController.lockRotation = lockRotation
-        if lockRotation && Hello.window.windowScene?.interfaceOrientation != .portrait {
+        
+        //window.windowScene?.interfaceOrientation != .portrait
+        if lockRotation {
           UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
         }
         UIViewController.attemptRotationToDeviceOrientation()
       }.ignoresSafeArea())
     
     super.init(rootView: observedView)
-    Self.main = self
+    Self.instances[id] = self
     view.backgroundColor = .black
     disableKeyboardOffset()
     
@@ -123,6 +129,15 @@ public class HelloRootViewController: UIHostingController<AnyView> {
       
       objc_registerClassPair(viewSubclass)
       object_setClass(view, viewSubclass)
+    }
+  }
+  
+  func updateSize() {
+    let size = view.bounds.size
+    guard size.minSide > 0 else { return }
+    uiProperties.updateSize(to: size)
+    if let safeArea = view.window?.safeAreaInsets {
+      uiProperties.updateSafeAreaInsets(to: safeArea)
     }
   }
   
