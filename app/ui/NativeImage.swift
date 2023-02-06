@@ -11,16 +11,18 @@ extension NativeImage {
 }
 #else
 public struct FakeImage {
-  init()
+  init() {}
+  
+  init?(named: String) {}
 }
 public typealias NativeImage = FakeImage
 #endif
 
 public extension Image {
   init(_ image: NativeImage) {
-#if canImport(UIKit)
+#if os(iOS)
     self.init(uiImage: image)
-#elseif canImport(AppKit)
+#elseif os(macOS)
     self.init(nsImage: image)
 #else
     self.init("")
@@ -30,12 +32,12 @@ public extension Image {
 
 public extension NativeImage {
   static func create(from cgImage: CGImage) -> NativeImage {
-#if canImport(UIKit)
+#if os(iOS)
     NativeImage(cgImage: cgImage)
-#elseif canImport(AppKit)
+#elseif os(macOS)
     NativeImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
 #else
-    NativeImage.init("")
+    NativeImage()
 #endif
   }
 }

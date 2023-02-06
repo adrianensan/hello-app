@@ -41,7 +41,9 @@ public protocol PersistenceProperty: Sendable {
   
   func cleanup(value: Value) -> Value
   
-//  func migrate(from oldValue: OldProperty.Value) -> Value?
+  var oldProperty: OldProperty? { get }
+  
+  func migrate(from oldValue: OldProperty.Value) -> Value?
 }
 
 extension PersistenceProperty {
@@ -49,6 +51,9 @@ extension PersistenceProperty {
   
   public var allowCache: Bool { true }
   public var isDeprecated: Bool { false }
+  
+  public var oldProperty: OldProperty? { nil }
+  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 

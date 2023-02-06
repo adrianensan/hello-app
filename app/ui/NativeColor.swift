@@ -2,10 +2,12 @@ import SwiftUI
 
 import HelloCore
 
-#if canImport(UIKit)
+#if os(iOS)
 public typealias NativeColor = UIColor
-#elseif canImport(AppKit)
+#elseif os(macOS)
 public typealias NativeColor = NSColor
+#elseif os(watchOS)
+public typealias NativeColor = UIColor
 #endif
 
 public extension HelloColor {
@@ -36,6 +38,8 @@ public extension HelloDynamicColor {
         return light.nativeColor
       }
     }
+    #elseif os(watchOS)
+    return light.nativeColor
     #endif
   }
   

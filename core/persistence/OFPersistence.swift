@@ -371,10 +371,24 @@ public actor OFPersistence<Key: PersistenceKey> {
     }
   }
   
-  public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
+  nonisolated public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
     switch property.location {
     case .defaults: return nil
     case .file(let path): return fileURL(for: path)
+    case .keychain: return nil
+    case .memory: return nil
+    }
+  }
+  
+  nonisolated public func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
+    switch property.location {
+    case .defaults: return nil
+    case .file(let path):
+      if let lastSlashIndex = path.lastIndex(of: "/") {
+        return fileURL(for: String(path[..<lastSlashIndex]))
+      } else {
+        return fileURL(for: path)
+      }
     case .keychain: return nil
     case .memory: return nil
     }
@@ -414,7 +428,11 @@ public enum Persistence {
     await Property.Key.persistence.isSet(property: property)
   }
   
-  public static func fileURL<Property: PersistenceProperty>(for property: Property) async -> URL? {
-    await Property.Key.persistence.fileURL(for: property)
+  public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
+    Property.Key.persistence.fileURL(for: property)
+  }
+  
+  public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
+    Property.Key.persistence.fileURL(for: property)
   }
 }
