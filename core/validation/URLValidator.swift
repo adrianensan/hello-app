@@ -10,7 +10,7 @@ public enum URLValidator {
     
     let components = url.components(separatedBy: ".")
     guard components.count > 1,
-          let tld = components.last?.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: false).first else { return false }
+          let tld = components.last else { return false }
     
     for domainComponent in components {
       guard !domainComponent.isEmpty

@@ -1,8 +1,8 @@
 #if os(iOS)
-import Foundation
 import SwiftUI
 import UIKit
-import SwiftConvenience
+
+import HelloCore
 
 struct StatusBarStyleKey: PreferenceKey {
   static var defaultValue: UIStatusBarStyle = .default
