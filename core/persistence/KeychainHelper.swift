@@ -62,9 +62,10 @@ public class KeychainHelper {
     guard status == errSecSuccess else {
       switch status {
       case errSecDuplicateItem:
-        let updateStatus = SecItemUpdate(queryAttributes(for: key) as CFDictionary,
-                                         [kSecValueData: data,
-                                          kSecUseDataProtectionKeychain: true] as CFDictionary)
+        let updateStatus = SecItemUpdate(queryAttributes(for: key) as CFDictionary, [
+          kSecValueData: data,
+          kSecUseDataProtectionKeychain: true
+        ] as [CFString : Any] as CFDictionary)
         guard status == errSecSuccess else {
           switch status {
           default: throw KeychainError.other(error: status)

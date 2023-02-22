@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Orientation: String, Equatable, Hashable, Codable, Identifiable {
+public enum Orientation: String, Equatable, Hashable, Codable, Identifiable, Sendable {
   case vertical
   case horizontal
   

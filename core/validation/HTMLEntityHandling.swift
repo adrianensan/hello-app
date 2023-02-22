@@ -1,7 +1,5 @@
 import Foundation
 
-import HelloCore
-
 private let htmlEntitiesTrie = Trie.constructFrom(valuesMap:[
   "&amp;": "&",
   "%20": " ",

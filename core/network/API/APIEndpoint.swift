@@ -13,10 +13,10 @@ public enum RequestType {
   case websocket
 }
 
-public protocol APIEndpoint {
+public protocol APIEndpoint: Sendable {
   
   associatedtype RequestBodyType: Codable = Data?
-  associatedtype ResponseType: Codable = EmptyResponse
+  associatedtype ResponseType: Codable & Sendable = EmptyResponse
   
   static var method: HTTPMethod { get }
   var contentType: ContentType? { get }

@@ -62,7 +62,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: UIApplication.shared.windows.first?.safeAreaInsets)
     self.uiProperties = uiProperties
     let id = UUID().uuidString
-    let observedView = AnyView(wrappedView
+    let observedView = AnyView(HelloAppRootView(wrappedView)
       .environmentObject(uiProperties)
       .onPreferenceChange(StatusBarStyleKey.self) { style in
         guard let viewController = Self.instances[id],
@@ -134,7 +134,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   
   func updateSize() {
     let size = view.bounds.size
-    guard size.minSide > 0 else { return }
+    guard size.miniSide > 0 else { return }
     uiProperties.updateSize(to: size)
     if let safeArea = view.window?.safeAreaInsets {
       uiProperties.updateSafeAreaInsets(to: safeArea)

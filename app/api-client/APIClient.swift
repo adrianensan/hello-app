@@ -2,7 +2,7 @@ import Foundation
 
 import HelloCore
 
-public enum APIError: LocalizedError {
+public enum APIError: LocalizedError, Sendable {
   case invalidRequest
   case fail
   case duplicate
@@ -20,7 +20,7 @@ public enum APIError: LocalizedError {
   }
 }
 
-public struct OFAPIResponse<Content: Decodable> {
+public struct OFAPIResponse<Content: Decodable & Sendable>: Sendable {
   public var headers: [String: String]
   public var content: Content
 }
@@ -191,8 +191,8 @@ open class APIClient {
   @discardableResult
   public func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
                                              isRetry: Bool = false,
-                                             retryHandler: ((APIError) async throws -> Bool)? = nil,
-                                             uploadProgressUpdate: ((Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
+                                             retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
+                                             uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
     let requestStartTime = Date().timeIntervalSince1970
     var logStart = Endpoint.path
     if let actualSubpath = endpoint.subpath {

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Changelog {
+public struct Changelog: Codable, Sendable {
   
   public var version: AppVersion
   public var notes: [ChangelogNote]

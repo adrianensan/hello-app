@@ -5,7 +5,7 @@ public protocol LoggerSubscriber: AnyObject {
   func statementLogged()
 }
 
-public actor Logger {
+public actor Logger: Sendable {
   
   public let logFile: URL
   public private(set) var logStatements: [LogStatement]

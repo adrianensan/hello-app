@@ -26,7 +26,7 @@ public class Downloader {
   
   public init() {}
   
-  public func download(from url: URL, downloadProgressUpdate: ((Double) -> Void)? = nil) async throws -> Data {
+  public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
     let requestStartTime = Date().timeIntervalSince1970
     var logStart = url.absoluteString
     

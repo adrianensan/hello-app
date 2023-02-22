@@ -168,7 +168,7 @@ public extension HelloColor {
   static var white: HelloColor { HelloColor(r: 1, g: 1, b: 1) }
 }
 
-public struct HelloDynamicColor {
+public struct HelloDynamicColor: Sendable {
   
   public var light: HelloColor
   public var dark: HelloColor

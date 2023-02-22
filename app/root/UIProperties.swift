@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 #if os(iOS) || os(watchOS)
 public typealias NativeEdgeInsets = UIEdgeInsets

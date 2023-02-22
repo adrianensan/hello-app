@@ -1,5 +1,6 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
+import Combine
 import AVFoundation
 
 public class NativeCameraPreviewView: NativeView {

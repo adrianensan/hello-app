@@ -1,5 +1,7 @@
 import SwiftUI
 
+import HelloCore
+
 public struct MacAppIconWrapperView<Content: View>: View {
   
   var view: Content

@@ -22,7 +22,7 @@ public struct ChangelogNote: Codable, Equatable, Sendable {
   }
 }
 
-public struct AppRelease: Codable, Equatable, Identifiable {
+public struct AppRelease: Codable, Equatable, Identifiable, Sendable {
   public var version: AppVersion
   public var date: Date
   public var notes: [ChangelogNote]

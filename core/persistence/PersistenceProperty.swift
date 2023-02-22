@@ -25,7 +25,7 @@ public struct NoOld<Key: PersistenceKey>: PersistenceProperty {
 
 public protocol PersistenceProperty: Sendable {
   
-  associatedtype Value: Codable
+  associatedtype Value: Codable & Sendable
   associatedtype Key: PersistenceKey
   associatedtype OldProperty: PersistenceProperty = NoOld<Key>
   
