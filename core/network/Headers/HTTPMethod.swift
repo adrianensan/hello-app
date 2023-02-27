@@ -1,4 +1,4 @@
-public enum HTTPMethod: CustomStringConvertible {
+public enum HTTPMethod: CustomStringConvertible, Codable, Sendable {
   case get
   case head
   case post

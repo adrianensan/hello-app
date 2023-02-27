@@ -1,12 +1,12 @@
 import Foundation
 
-public struct EmptyResponse: Codable {
+public struct EmptyResponse: Codable, Sendable {
   public init(from decoder: Decoder) throws {}
   
   public init() {}
 }
 
-public enum RequestType {
+public enum RequestType: Codable, Sendable {
   case normal
   case upload
   case longPoll
@@ -15,7 +15,7 @@ public enum RequestType {
 
 public protocol APIEndpoint: Sendable {
   
-  associatedtype RequestBodyType: Codable = Data?
+  associatedtype RequestBodyType: Codable & Sendable = Data?
   associatedtype ResponseType: Codable & Sendable = EmptyResponse
   
   static var method: HTTPMethod { get }

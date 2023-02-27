@@ -1,4 +1,4 @@
-public enum ContentType: CustomStringConvertible, Equatable {
+public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
   
   public static var allCases: [ContentType] {
     [.plain, .html, .css, .csv, .javascript, .ics, .otf, .ttf, .woff, .woff2, .png, .jpeg, .tiff,

@@ -6,12 +6,15 @@ public struct LoadingSpinner: View {
   
   @State private var animateIn: Bool = false
   
-  public init() {}
+  private var lineWidth: CGFloat
+  public init(lineWidth: CGFloat = 4) {
+    self.lineWidth = lineWidth
+  }
   
   public var body: some View {
     GeometryReader { geometry in
       Circle()
-        .strokeBorder(style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+        .strokeBorder(style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
         .frame(width: geometry.size.minSide, height: geometry.size.minSide)
         .mask(
           AngularGradient(gradient: Gradient(colors: [.white.opacity(0), .white]), center: .center)

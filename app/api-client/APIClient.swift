@@ -194,7 +194,7 @@ open class APIClient {
                                              retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
                                              uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
     let requestStartTime = Date().timeIntervalSince1970
-    var logStart = Endpoint.path
+    var logStart = Endpoint.method.description + " " + Endpoint.path
     if let actualSubpath = endpoint.subpath {
       logStart += "/" + actualSubpath
     }

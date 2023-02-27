@@ -1,6 +1,6 @@
 import Foundation
 
-public struct APIHeader {
+public struct APIHeader: Codable, Sendable {
   public var key: String
   public var value: String
   

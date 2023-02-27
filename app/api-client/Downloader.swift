@@ -2,7 +2,7 @@ import Foundation
 
 import HelloCore
 
-public class Downloader {
+public actor Downloader {
   
   public static var main: Downloader = Downloader()
   
@@ -24,9 +24,14 @@ public class Downloader {
     ) +& { _session = $0 }
   }
   
+  private var downloadingURLs: Set<URL> = []
+  
   public init() {}
   
   public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
+    guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
+    downloadingURLs.insert(url)
+    defer { downloadingURLs.remove(url) }
     let requestStartTime = Date().timeIntervalSince1970
     var logStart = url.absoluteString
     
