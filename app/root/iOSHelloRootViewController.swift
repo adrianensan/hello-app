@@ -134,7 +134,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   
   func updateSize() {
     let size = view.bounds.size
-    guard size.miniSide > 0 else { return }
+    guard size.minSide > 0 else { return }
     uiProperties.updateSize(to: size)
     if let safeArea = view.window?.safeAreaInsets {
       uiProperties.updateSafeAreaInsets(to: safeArea)
