@@ -19,6 +19,12 @@ public class UIProperties: ObservableObject {
   
   @Published public var size: CGSize
   @Published public var safeAreaInsets: EdgeInsets
+  #if os(iOS)
+  @Published public var keyboardFrame: CGRect = .zero
+  var keyboardAnimationDuration: CGFloat = 0
+  
+  public var isKeyboardShowing: Bool { keyboardFrame.height > 0 }
+  #endif
   
   public var extraSafeArea: CGFloat = 0
   
@@ -38,4 +44,13 @@ public class UIProperties: ObservableObject {
     guard safeAreaInsets != edgeInsets else { return }
     safeAreaInsets = edgeInsets
   }
+  
+  #if os(iOS)
+  public func updateKeyboardFrame(to keyboardFrame: CGRect) {
+    guard self.keyboardFrame != keyboardFrame else { return }
+    withAnimation(.easeOut(duration: keyboardAnimationDuration)) {
+      self.keyboardFrame = keyboardFrame
+    }
+  }
+  #endif
 }

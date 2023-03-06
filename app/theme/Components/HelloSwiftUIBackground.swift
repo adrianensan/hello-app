@@ -8,42 +8,36 @@ public extension HelloBackground {
   func view(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
     switch self {
     case .color(let color, let border):
-      if !isBaseLayer, let border {
-        shape.fill(color.swiftuiColor)
-          .border(border.color.swiftuiColor, width: border.width)
-      } else {
-        shape.fill(color.swiftuiColor)
-      }
-    case .gradient(let gradient):
-      shape.fill(gradient.gradient)
-    case .blur(_, let overlay, let border):
-      #if os(macOS)
       ZStack {
-        shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
-          .clipShape(shape)
-      
+        shape.fill(color.swiftuiColor)
         if !isBaseLayer, let border {
           shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
         }
       }
-      #elseif os(iOS)
-      if !isBaseLayer, let border {
+    case .gradient(let gradient):
+      shape.fill(gradient.gradient)
+    case .blur(_, let overlay, let border):
+      ZStack {
+        #if os(macOS)
+        shape.fill((overlay ?? .transparent).swiftuiColor)
+          .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
+          .clipShape(shape)
+        if !isBaseLayer, let border {
+          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+        }
+        #elseif os(iOS)
         shape.fill((overlay ?? .transparent).swiftuiColor)
           .background(.ultraThinMaterial)
-          .border(border.color.swiftuiColor, width: border.width)
-      } else {
+        if !isBaseLayer, let border {
+          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+        }
+        #else
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(.ultraThinMaterial)
+        if !isBaseLayer, let border {
+          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+        }
+        #endif
       }
-      #else
-      if !isBaseLayer, let border {
-        shape.fill((overlay ?? .transparent).swiftuiColor)
-          .border(border.color.swiftuiColor, width: border.width)
-      } else {
-        shape.fill((overlay ?? .transparent).swiftuiColor)
-      }
-      #endif
     case .image(let image):
       switch image.mode {
       case .fill:

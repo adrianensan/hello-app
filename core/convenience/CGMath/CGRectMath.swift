@@ -19,6 +19,16 @@ public extension CGRect {
             y: origin.y + 0.5 * size.height)
   }
   
+  var bottom: CGPoint {
+    CGPoint(x: origin.x + 0.5 * size.width,
+            y: origin.y + size.height)
+  }
+  
+  var top: CGPoint {
+    CGPoint(x: origin.x + 0.5 * size.width,
+            y: origin.y)
+  }
+  
   static func +(left: CGRect, right: CGRect) -> CGRect {
     CGRect(origin: left.origin + right.origin, size: left.size + right.size)
   }

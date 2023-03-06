@@ -182,4 +182,9 @@ public struct HelloDynamicColor: Sendable {
     self.light = HelloColor(r: r, g: g, b: b, a: a)
     self.dark = HelloColor(r: r, g: g, b: b, a: a)
   }
+  
+  public var readableOverlayColor: HelloDynamicColor {
+    HelloDynamicColor(light: light.readableOverlayColor,
+                      dark: dark.readableOverlayColor)
+  }
 }

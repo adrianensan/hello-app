@@ -6,6 +6,7 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable {
   case info
   case warning
   case error
+  case fatal
   case wtf
   
   public var icon: String {
@@ -15,6 +16,7 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable {
     case .info: return "info.circle.fill"
     case .warning: return "exclamationmark.triangle.fill"
     case .error: return "exclamationmark.octagon.fill"
+    case .fatal: return "exclamationmark.octagon.fill"
     case .wtf: return "exclamationmark.octagon.fill"
     }
   }

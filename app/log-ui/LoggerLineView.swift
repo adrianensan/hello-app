@@ -8,7 +8,7 @@ struct LoggerLineView: View {
   
   var backgroundColor: Color {
     switch logStatement.level {
-    case .wtf: return .red
+    case .fatal, .wtf: return .red
     default: return .clear
     }
   }
@@ -16,7 +16,7 @@ struct LoggerLineView: View {
   var symbolColor: Color {
     switch logStatement.level {
     case .warning: return .yellow
-    case .error, .wtf: return .red
+    case .error, .fatal, .wtf: return .red
     case .debug: return .secondary.opacity(0.6)
     default: return .secondary
     }
@@ -24,7 +24,7 @@ struct LoggerLineView: View {
   
   var timeColor: Color {
     switch logStatement.level {
-    case .wtf: return .white
+    case .fatal, .wtf: return .white
     default: return symbolColor
     }
   }

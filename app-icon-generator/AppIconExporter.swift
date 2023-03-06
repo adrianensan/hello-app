@@ -14,8 +14,8 @@ public struct AppIconExporter {
   
   var baseExportPath: URL? { FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.appendingPathComponent(appName) }
   
-  func baseImage<IconView: View>(for iconView: IconView, scale: IconScale) -> AnyView {
-    AnyView(iconView)
+  func baseImage<IconView: View>(for iconView: IconView, scale: IconScale) -> some View {
+    iconView
 //    guard let imageData = ImageRenderer.renderData(view: iconView,
 //                                                   size: CGSize(width: 1024 * scale.widthScale,
 //                                                                height: 1024 * scale.heightScale),
@@ -35,7 +35,8 @@ public struct AppIconExporter {
     
     for scale in IconScale.watchOSIconScales {
       try await save(view: baseImage(for: icon.watchView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
-           to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)))
+                     to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
+                     allowOpacity: false)
       try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: IconScale.watchOSIconScales)
         .write(to: iconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
     }
@@ -48,7 +49,8 @@ public struct AppIconExporter {
     
     for scale in IconScale.iMessageIconScales {
       try await save(view: baseImage(for: icon.iMessageView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
-           to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)))
+                     to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
+                     allowOpacity: false)
       try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: IconScale.iMessageIconScales)
         .write(to: iconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
     }
@@ -64,7 +66,8 @@ public struct AppIconExporter {
       let scales = icon.imageName == AppIcon.defaultIcon.imageName ? IconScale.iOSMainIconScales : IconScale.iOSAlternateIconScales
       for scale in scales {
         try await save(view: baseImage(for: icon.iOSView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
-             to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)))
+                       to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
+                       allowOpacity: false)
       }
       try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: scales)
         .write(to: iconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
@@ -81,7 +84,8 @@ public struct AppIconExporter {
     // Main App Icon
     for scale in IconScale.macOSMainIconScales {
       try await save(view: baseImage(for: AppIcon.defaultIcon.macView.view, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
-           to: mainIconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: AppIcon.defaultIcon.imageName, scale: scale)))
+                     to: mainIconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: AppIcon.defaultIcon.imageName, scale: scale)),
+                     allowOpacity: true)
     }
     try? AppiconsetContentsGenerator.contentsFile(for: AppIcon.defaultIcon.imageName, with: IconScale.macOSMainIconScales)
       .write(to: mainIconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
@@ -90,8 +94,9 @@ public struct AppIconExporter {
       try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
       
       try await save(view: baseImage(for: icon.macView.view, scale: .init(size: CGSize(width: 256, height: 256), scaleFactor: 1, purpose: .mac)),
-           size: CGSize(width: 256, height: 256),
-           to: exportPath.appendingPathComponent("\(icon.imageName).png"))
+                     size: CGSize(width: 256, height: 256),
+                     to: exportPath.appendingPathComponent("\(icon.imageName).png"),
+                     allowOpacity: true)
     }
   }
   
@@ -100,11 +105,13 @@ public struct AppIconExporter {
     case failedGetData
   }
   
-  func save<Content: View>(view: Content, size: CGSize, to path: URL) async throws {
+  @MainActor
+  func save<Content: View>(view: Content, size: CGSize, to path: URL, allowOpacity: Bool) async throws {
     if #available(iOS 16, macOS 13, *) {
-      let imageRender = await ImageRenderer(content: view.frame(size))
+      let imageRender = ImageRenderer(content: view.frame(size))
+      imageRender.isOpaque = !allowOpacity
       //    imageRender.proposedSize = size
-      guard let cgImage = await imageRender.cgImage else { throw AppIconCreateError.failedToRender }
+      guard let cgImage = imageRender.cgImage else { throw AppIconCreateError.failedToRender }
       let data = NSMutableData()
       let downsampleOptions = [
         kCGImageSourceCreateThumbnailFromImageAlways: true,

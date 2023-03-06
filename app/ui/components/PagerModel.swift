@@ -15,7 +15,7 @@ public class PagerViewModel: ObservableObject {
     viewDepth = initialViewStack.count
   }
   
-  public func push<Page: View>(view: Page, animated: Bool = true) {
+  public func push(view: some View, animated: Bool = true) {
     if let view = view as? AnyView {
       realViewStack.append(view)
     } else {
@@ -30,6 +30,16 @@ public class PagerViewModel: ObservableObject {
     } else {
       self.viewDepth = self.realViewStack.count
     }
+  }
+  
+  public func replaceView(with newView: some View) {
+    realViewStack.popLast()
+    if let view = newView as? AnyView {
+      realViewStack.append(view)
+    } else {
+      realViewStack.append(AnyView(newView.id(UUID().uuidString)))
+    }
+    commitViewStackUpdate()
   }
   
   public func popView(animated: Bool = true) {

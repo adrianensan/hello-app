@@ -51,6 +51,10 @@ public enum Log {
     log(level: .error, message: message, context: context)
   }
   
+  public static func fatal(_ message: String, context: String) {
+    log(level: .fatal, message: message, context: context)
+  }
+  
   public static func wtf(_ message: String, context: String) {
     log(level: .wtf, message: message, context: context)
   }
