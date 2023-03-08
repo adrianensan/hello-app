@@ -332,7 +332,6 @@ public actor OFPersistence<Key: PersistenceKey> {
     for key in defaults.dictionaryRepresentation().keys {
       defaults.removeObject(forKey: key)
     }
-    print(defaults.dictionaryRepresentation())
     
     keychain.nuke()
     

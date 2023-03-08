@@ -60,6 +60,10 @@ public extension CGPoint {
     CGPoint(x: left.x * right.width, y: left.y * right.height)
   }
   
+  static func /(left: CGPoint, right: CGSize) -> CGPoint {
+    CGPoint(x: left.x / right.width, y: left.y / right.height)
+  }
+  
   static func +(left: CGPoint, right: CGSize) -> CGPoint {
     CGPoint(x: left.x + right.width, y: left.y + right.height)
   }

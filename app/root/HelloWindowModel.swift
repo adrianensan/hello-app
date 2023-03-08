@@ -24,4 +24,9 @@ public class HelloWindowModel: ObservableObject {
     guard popupView != nil else { return }
     popupView = nil
   }
+  
+  public func dismissAlert() {
+    guard alertView != nil else { return }
+    alertView = nil
+  }
 }

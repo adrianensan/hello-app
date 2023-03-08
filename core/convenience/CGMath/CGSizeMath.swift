@@ -20,6 +20,17 @@ public extension CGSize {
   
   var rounded: CGSize { CGSize(width: round(width), height: round(height)) }
   
+  func sizeThatFits(with aspectRatio: CGFloat) -> CGSize {
+    let currentAspectRatio = height / width
+    if currentAspectRatio > aspectRatio {
+      return CGSize(width: width, height: width * aspectRatio)
+    } else if currentAspectRatio < aspectRatio {
+      return CGSize(width: height / aspectRatio, height: height)
+    } else {
+      return self
+    }
+  }
+  
   static prefix func -(point: CGSize) -> CGSize {
     point * -1
   }

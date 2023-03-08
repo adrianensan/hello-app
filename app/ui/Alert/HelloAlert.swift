@@ -47,7 +47,9 @@ public struct HelloAlertConfig {
 public struct HelloAlert: View {
   
   @Environment(\.theme) var theme
+  
   @EnvironmentObject var uiConstants: UIProperties
+  @EnvironmentObject var windowModel: HelloWindowModel
   
   @State var animateIn: Bool = false
   @State var isDismissed: Bool = false
@@ -61,6 +63,10 @@ public struct HelloAlert: View {
   func dismiss() {
     isDismissed = true
     animateIn = false
+    Task {
+      try await Task.sleep(seconds: 0.02)
+      windowModel.dismissAlert()
+    }
   }
   
   public var body: some View {
@@ -116,6 +122,8 @@ public struct HelloAlert: View {
       }
     }.frame(width: 280)
       .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+      .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous),
+                                       isBaseLayer: false))
 //      .background(theme.background)
 //      .componentBackground(color: theme.rowBackground, RoundedRectangle(cornerRadius: 12, style: .continuous))
       .compositingGroup()
