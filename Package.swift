@@ -38,6 +38,9 @@ let package = Package(
     .target(name: "HelloAppIconGenerator",
             dependencies: ["HelloApp"],
             path: "app-icon-generator"),
+    .testTarget(name: "HelloAppTests",
+                dependencies: ["HelloApp"],
+                path: "Tests")
     
   ]
 )

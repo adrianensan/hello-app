@@ -73,7 +73,7 @@ public struct OFAPIResponse<Content: Decodable & Sendable>: Sendable {
 
 open class APIClient {
   
-  public var apiRoot: String
+  public let apiRoot: String
   
   private let userAgentString = "\(App.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)"
   

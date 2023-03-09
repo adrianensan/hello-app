@@ -3,9 +3,17 @@ import SwiftUI
 @MainActor
 public struct FrameAnimation: View {
   
+  public enum RepeatBehaviour {
+    case playOnce
+    case loopForever
+    case loop(numberOfLoops: Int)
+  }
+  
   private class NonObserved {
+    var isAnimating: Bool = false
     var frame: Int = 0
     var frames: [Int: NativeImage] = [:]
+    var loopIteration: Int = 0
   }
   
   @State private var currentImageFrame: NativeImage?
@@ -18,20 +26,57 @@ public struct FrameAnimation: View {
   private var delay: TimeInterval
   private var fps: CGFloat
   private var lingerOnLastFrame: Bool
+  private var repeatBehaviour: RepeatBehaviour
+  private var resetSignal: Bool
   
   public init(name: String,
               initialFrame: Int,
               lastFrame: Int,
               delay: TimeInterval = 0,
               fps: CGFloat = 60,
-              lingerOnLastFrame: Bool = false) {
+              lingerOnLastFrame: Bool = false,
+              repeatBehaviour: RepeatBehaviour = .playOnce,
+              resetSignal: Bool = false) {
     self.name = name
     self.initialFrame = initialFrame
     self.lastFrame = lastFrame
     self.delay = delay
     self.fps = fps
     self.lingerOnLastFrame = lingerOnLastFrame
+    self.repeatBehaviour = repeatBehaviour
+    self.resetSignal = resetSignal
     nonObserved.frame = initialFrame
+  }
+  
+  public func animate() {
+    guard !nonObserved.isAnimating else { return }
+    nonObserved.isAnimating = true
+    defer { nonObserved.isAnimating = false }
+    Task {
+      try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+      isHidden = false
+      for i in initialFrame...lastFrame {
+        nonObserved.frame = i
+        if let nextImage = nonObserved.frames[nonObserved.frame] {
+          currentImageFrame = nextImage
+        }
+        try await Task.sleep(nanoseconds: UInt64(1 / fps * 1_000_000_000))
+      }
+      switch self.repeatBehaviour {
+      case .playOnce: ()
+      case .loopForever:
+        nonObserved.loopIteration += 1
+        animate()
+      case .loop(let numberOfLoops):
+        if nonObserved.loopIteration < numberOfLoops {
+          nonObserved.loopIteration += 1
+          animate()
+        }
+      }
+      if !lingerOnLastFrame {
+        isHidden = true
+      }
+    }
   }
   
   public var body: some View {
@@ -50,20 +95,10 @@ public struct FrameAnimation: View {
             }
           }
         }
-        Task {
-          try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-          isHidden = false
-          for i in initialFrame...lastFrame {
-            nonObserved.frame = i
-            if let nextImage = nonObserved.frames[nonObserved.frame] {
-              currentImageFrame = nextImage
-            }
-            try await Task.sleep(nanoseconds: UInt64(1 / fps * 1_000_000_000))
-          }
-          if !lingerOnLastFrame {
-            isHidden = true
-          }
-        }
+        animate()
+      }.onChange(of: resetSignal) { _ in
+        nonObserved.loopIteration = 0
+        animate()
       }
   }
 }

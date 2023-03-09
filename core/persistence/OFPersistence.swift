@@ -314,6 +314,10 @@ public actor OFPersistence<Key: PersistenceKey> {
     return value
   }
   
+  public func atomicUpdate<Property: PersistenceProperty>(_ property: Property, update: (Property.Value) -> Property.Value) where Property.Key == Key {
+    save(update(value(for: property)), for: property)
+  }
+  
   public func delete<Property: PersistenceProperty>(property: Property) where Property.Key == Key {
     cache[property.key] = nil
     
@@ -417,6 +421,10 @@ public enum Persistence {
   
   public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, Error> {
     await Property.Key.persistence.updates(for: property)
+  }
+  
+  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: (Property.Value) -> Property.Value) async {
+    await Property.Key.persistence.atomicUpdate(property, update: update)
   }
   
   public static func size<Property: PersistenceProperty>(of property: Property) async -> Int {

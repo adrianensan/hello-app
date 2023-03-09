@@ -57,4 +57,7 @@ public extension Rect {
   
   var width: Double { size.width }
   var height: Double { size.height }
+  
+  var center: CGPoint { CGPoint(x: x + 0.5 * width,
+                                y: y + 0.5 * height) }
 }
