@@ -3,7 +3,7 @@ import SwiftUI
 @MainActor
 public struct FrameAnimation: View {
   
-  public enum RepeatBehaviour {
+  public enum RepeatBehaviour: Equatable, Sendable {
     case playOnce
     case loopForever
     case loop(numberOfLoops: Int)
@@ -19,6 +19,7 @@ public struct FrameAnimation: View {
   @State private var currentImageFrame: NativeImage?
   @State private var isHidden: Bool = true
   @State private var nonObserved = NonObserved()
+  @State private var loopMode: RepeatBehaviour = .playOnce
   
   private var name: String
   private var initialFrame: Int
@@ -44,38 +45,43 @@ public struct FrameAnimation: View {
     self.fps = fps
     self.lingerOnLastFrame = lingerOnLastFrame
     self.repeatBehaviour = repeatBehaviour
+    self._loopMode = State(initialValue: repeatBehaviour)
     self.resetSignal = resetSignal
     nonObserved.frame = initialFrame
   }
   
-  public func animate() {
+  public func animate() async throws {
     guard !nonObserved.isAnimating else { return }
     nonObserved.isAnimating = true
     defer { nonObserved.isAnimating = false }
-    Task {
-      try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-      isHidden = false
-      for i in initialFrame...lastFrame {
-        nonObserved.frame = i
-        if let nextImage = nonObserved.frames[nonObserved.frame] {
-          currentImageFrame = nextImage
-        }
-        try await Task.sleep(nanoseconds: UInt64(1 / fps * 1_000_000_000))
+    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+    isHidden = false
+    for i in initialFrame...lastFrame {
+      nonObserved.frame = i
+      if let nextImage = nonObserved.frames[nonObserved.frame] {
+        currentImageFrame = nextImage
       }
-      switch self.repeatBehaviour {
-      case .playOnce: ()
-      case .loopForever:
+      try await Task.sleep(nanoseconds: UInt64(1 / fps * 1_000_000_000))
+    }
+    switch loopMode {
+    case .playOnce: ()
+    case .loopForever:
+      nonObserved.loopIteration += 1
+      Task {
+        try await animate()
+      }
+      return
+    case .loop(let numberOfLoops):
+      if nonObserved.loopIteration < numberOfLoops {
         nonObserved.loopIteration += 1
-        animate()
-      case .loop(let numberOfLoops):
-        if nonObserved.loopIteration < numberOfLoops {
-          nonObserved.loopIteration += 1
-          animate()
+        Task {
+          try await animate()
         }
+        return
       }
-      if !lingerOnLastFrame {
-        isHidden = true
-      }
+    }
+    if !lingerOnLastFrame {
+      isHidden = true
     }
   }
   
@@ -95,10 +101,14 @@ public struct FrameAnimation: View {
             }
           }
         }
-        animate()
+        Task { try await animate() }
       }.onChange(of: resetSignal) { _ in
         nonObserved.loopIteration = 0
-        animate()
+        Task { try await animate() }
+      }.onChange(of: repeatBehaviour) { newii in
+        loopMode = newii
+        nonObserved.loopIteration = 0
+        Task { try await animate() }
       }
   }
 }
