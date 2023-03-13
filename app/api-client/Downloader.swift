@@ -4,7 +4,7 @@ import HelloCore
 
 public actor Downloader {
   
-  public static var main: Downloader = Downloader()
+  public static let main: Downloader = Downloader()
   
   private var _session: URLSession?
   private var session: URLSession {
