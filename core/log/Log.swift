@@ -21,6 +21,7 @@ public enum Log {
   public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("logs.json"), ephemeral: ephemeral)
   
   private static func log(level: LogLevel, message: String, context: String) {
+    guard shouldPrintStatements || level >= logLevel else { return }
     let logStatement = LogStatement(level: level, message: message, context: context)
     if shouldPrintStatements {
       print(logStatement.formattedLine)
