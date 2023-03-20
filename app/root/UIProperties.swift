@@ -43,6 +43,7 @@ public class UIProperties: ObservableObject {
     edgeInsets.top += extraSafeArea
     guard safeAreaInsets != edgeInsets else { return }
     safeAreaInsets = edgeInsets
+    print(extraSafeArea, safeAreaInsets)
   }
   
   #if os(iOS)

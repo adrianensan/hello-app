@@ -42,7 +42,7 @@ extension APIEndpoint {
   public var type: RequestType { .normal }
   public var timeout: TimeInterval {
     switch type {
-    case .normal: return 20
+    case .normal: return 30
     case .upload: return 100
     case .longPoll: return 120
     case .websocket: return 30

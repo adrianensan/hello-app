@@ -12,7 +12,7 @@ public struct TypewriterText: View {
   var appear: Bool
   var forceInstant: Bool = false
   
-  public init(text: String, appear: Bool, forceInstant: Bool = false) {
+  public init(_ text: String, appear: Bool = true, forceInstant: Bool = false) {
     self.text = text
     self.appear = appear
     self.forceInstant = forceInstant
@@ -24,7 +24,12 @@ public struct TypewriterText: View {
     (Text(appearedText)
      + Text(hiddenText).foregroundColor(Color.clear))
     .opacity(appear || appearedText.isEmpty ? 1 : 0)
-    .onChange(of: appear) {
+    .onChange(of: text) {
+      appearedText = ""
+      hiddenText = $0
+      timer.upstream.connect().cancel()
+      timer = Timer.publish(every: 0.016, tolerance: 0.01, on: .main, in: .common).autoconnect()
+    }.onChange(of: appear) {
       if $0 {
         appearedText = ""
         hiddenText = text
