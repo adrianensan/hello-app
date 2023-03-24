@@ -11,6 +11,7 @@ public struct FrameAnimation: View {
   
   private class NonObserved {
     var isAnimating: Bool = false
+    var isActive: Bool = false
     var frame: Int = 0
     var frames: [Int: NativeImage] = [:]
     var loopIteration: Int = 0
@@ -20,6 +21,7 @@ public struct FrameAnimation: View {
   @State private var isHidden: Bool = true
   @State private var nonObserved = NonObserved()
   @State private var loopMode: RepeatBehaviour = .playOnce
+  @State private var isActive: Bool = false
   
   private var name: String
   private var initialFrame: Int
@@ -51,7 +53,7 @@ public struct FrameAnimation: View {
   }
   
   public func animate() async throws {
-    guard !nonObserved.isAnimating else { return }
+    guard nonObserved.isActive && !nonObserved.isAnimating else { return }
     nonObserved.isAnimating = true
     defer { nonObserved.isAnimating = false }
     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
@@ -91,6 +93,7 @@ public struct FrameAnimation: View {
       .aspectRatio(contentMode: .fit)
       .opacity(isHidden ? 0 : 1)
       .onAppear {
+        nonObserved.isActive = true
         for i in initialFrame...lastFrame {
           let imageName = String(format: "\(name)%0\(String(lastFrame).count)d", i)
           Task.detached {
@@ -109,6 +112,8 @@ public struct FrameAnimation: View {
         loopMode = newii
         nonObserved.loopIteration = 0
         Task { try await animate() }
+      }.onDisappear {
+        nonObserved.isActive = false
       }
   }
 }
