@@ -3,6 +3,7 @@ import Foundation
 private let htmlEntitiesTrie = Trie.constructFrom(valuesMap:[
   "&amp;": "&",
   "%20": " ",
+  "&#x20;": " ",
   "&AMP;": "&",
   "&#38;": "&",
   "&#038;": "&",

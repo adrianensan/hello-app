@@ -30,6 +30,7 @@ public struct FrameAnimation: View {
   private var fps: CGFloat
   private var lingerOnLastFrame: Bool
   private var repeatBehaviour: RepeatBehaviour
+  private var contentMode: ContentMode
   private var resetSignal: Bool
   
   public init(name: String,
@@ -39,6 +40,7 @@ public struct FrameAnimation: View {
               fps: CGFloat = 60,
               lingerOnLastFrame: Bool = false,
               repeatBehaviour: RepeatBehaviour = .playOnce,
+              contentMode: ContentMode = .fit,
               resetSignal: Bool = false) {
     self.name = name
     self.initialFrame = initialFrame
@@ -48,6 +50,7 @@ public struct FrameAnimation: View {
     self.lingerOnLastFrame = lingerOnLastFrame
     self.repeatBehaviour = repeatBehaviour
     self._loopMode = State(initialValue: repeatBehaviour)
+    self.contentMode = contentMode
     self.resetSignal = resetSignal
     nonObserved.frame = initialFrame
   }
@@ -90,7 +93,7 @@ public struct FrameAnimation: View {
   public var body: some View {
     Image(currentImageFrame ?? NativeImage())
       .resizable()
-      .aspectRatio(contentMode: .fit)
+      .aspectRatio(contentMode: contentMode)
       .opacity(isHidden ? 0 : 1)
       .onAppear {
         nonObserved.isActive = true
