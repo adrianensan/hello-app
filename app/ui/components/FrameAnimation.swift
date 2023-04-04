@@ -34,6 +34,7 @@ public struct FrameAnimation: View {
   private var resetSignal: Bool
   
   public init(name: String,
+              startFrameOverride: Int? = nil,
               initialFrame: Int,
               lastFrame: Int,
               delay: TimeInterval = 0,
@@ -52,7 +53,7 @@ public struct FrameAnimation: View {
     self._loopMode = State(initialValue: repeatBehaviour)
     self.contentMode = contentMode
     self.resetSignal = resetSignal
-    nonObserved.frame = initialFrame
+    nonObserved.frame = (startFrameOverride ?? initialFrame)
   }
   
   public func animate() async throws {
@@ -61,8 +62,8 @@ public struct FrameAnimation: View {
     defer { nonObserved.isAnimating = false }
     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
     isHidden = false
-    for i in initialFrame...lastFrame {
-      nonObserved.frame = i
+    while nonObserved.frame < lastFrame {
+      nonObserved.frame += 1
       if let nextImage = nonObserved.frames[nonObserved.frame] {
         currentImageFrame = nextImage
       }
@@ -72,6 +73,7 @@ public struct FrameAnimation: View {
     case .playOnce: ()
     case .loopForever:
       nonObserved.loopIteration += 1
+      nonObserved.frame = initialFrame - 1
       Task {
         try await animate()
       }
@@ -79,6 +81,7 @@ public struct FrameAnimation: View {
     case .loop(let numberOfLoops):
       if nonObserved.loopIteration < numberOfLoops {
         nonObserved.loopIteration += 1
+        nonObserved.frame = initialFrame - 1
         Task {
           try await animate()
         }
@@ -103,6 +106,9 @@ public struct FrameAnimation: View {
             if let nextImage = NativeImage(named: imageName) {
               Task { @MainActor in
                 nonObserved.frames[i] = nextImage
+                if i == nonObserved.frame {
+                  currentImageFrame = nextImage
+                }
               }
             }
           }
