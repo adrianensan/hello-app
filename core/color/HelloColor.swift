@@ -92,7 +92,7 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   }
   
   public var isDark: Bool {
-    brightness < 0.74
+    brightness < 0.7
   }
   
   public var isDim: Bool {
