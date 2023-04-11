@@ -32,6 +32,10 @@ public enum Log {
     }
   }
   
+  public static func terminate() {
+    Task { try await logger.terminate() }
+  }
+  
   public static func verbose(_ message: String, context: String) {
     log(level: .verbose, message: message, context: context)
   }

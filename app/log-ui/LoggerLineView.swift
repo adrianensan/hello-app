@@ -15,6 +15,7 @@ struct LoggerLineView: View {
   
   var symbolColor: Color {
     switch logStatement.level {
+    case .meta: return .blue
     case .warning: return .yellow
     case .error, .fatal, .wtf: return .red
     case .debug: return .secondary.opacity(0.6)

@@ -50,8 +50,8 @@ public struct LoggerView: View {
                 return Color.clear
               })
             LazyVStack(alignment: .leading, spacing: 4) {
-              ForEach(loggerObservable.logStatements) {
-                LoggerLineView(logStatement: $0)
+              ForEach(loggerObservable.logStatements) { logLine in
+                LoggerLineView(logStatement: logLine)
               }
             }
             Color.clear

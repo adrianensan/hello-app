@@ -29,6 +29,8 @@ public actor Logger: Sendable {
     if !FileManager.default.fileExists(atPath: logFile.deletingLastPathComponent().path) {
       try? FileManager.default.createDirectory(at: logFile.deletingLastPathComponent(), withIntermediateDirectories: true)
     }
+    
+    logStatements.append(LogStatement(level: .meta, message: "", context: "-----Launch-----"))
   }
   
   private func generateRawString() -> String {
@@ -44,6 +46,12 @@ public actor Logger: Sendable {
       self.isFlushPending = true
       try await flush()
     }
+  }
+  
+  public func terminate() async throws {
+    try await log(LogStatement(level: .meta, message: "", context: "-----Terminate-----"))
+    try await flush(force: true)
+    isEphemeral = true
   }
   
   public func clear() async throws {
@@ -68,7 +76,7 @@ public actor Logger: Sendable {
     guard isFlushPending else { return }
     var diff = Date().timeIntervalSince1970 - lastLoggedTime
     while diff < 5 {
-      try await Task.sleep(nanoseconds: UInt64(5 - diff) * 1_000_000_000)
+      try await Task.sleep(seconds: 5 - diff)
       diff = Date().timeIntervalSince1970 - lastLoggedTime
     }
     isFlushPending = false
