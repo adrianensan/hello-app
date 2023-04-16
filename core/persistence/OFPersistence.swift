@@ -423,7 +423,7 @@ public enum Persistence {
     await Property.Key.persistence.updates(for: property)
   }
   
-  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: (Property.Value) -> Property.Value) async {
+  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (Property.Value) -> Property.Value) async {
     await Property.Key.persistence.atomicUpdate(property, update: update)
   }
   

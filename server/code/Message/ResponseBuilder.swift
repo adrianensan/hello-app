@@ -9,7 +9,6 @@ public class ResponseBuilder: Message {
   public var location: String?
   public var cache: Cache?
   public var lastModifiedDate: Date?
-  public var omitBody: Bool = false
   var cookies: [Cookie] = []
   var customeHeaders: [String] = []
   

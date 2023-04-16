@@ -61,8 +61,7 @@ extension HTTPResponse {
                           contentType: responseBuilder.contentType,
                           location: responseBuilder.location,
                           lastModifiedDate: responseBuilder.lastModifiedDate,
-                          body: responseBuilder.body,
-                          omitBody: false)
+                          body: responseBuilder.body)
     } else {
       return nil
     }

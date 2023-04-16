@@ -20,6 +20,7 @@ public protocol APIEndpoint: Sendable {
   
   static var method: HTTPMethod { get }
   var contentType: ContentType? { get }
+  var contentTypeBoundary: String? { get }
   var headers: [APIHeader] { get }
   var type: RequestType { get }
   var timeout: TimeInterval { get }
@@ -36,6 +37,7 @@ public protocol APIEndpoint: Sendable {
 extension APIEndpoint {
   
   public var contentType: ContentType? { nil }
+  public var contentTypeBoundary: String? { nil }
   
   public var headers: [APIHeader] { [] }
   

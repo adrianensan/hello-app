@@ -58,7 +58,7 @@ public extension HTTPServer {
         contentType = .from(fileExtension: fileExtension)
       }
       let lastModificationDate = (try? FileManager.default.attributesOfItem(atPath: url.path))?[FileAttributeKey.modificationDate] as? Date
-      return .init(status: .ok, contentType: contentType, lastModifiedDate: lastModificationDate, body: fileString, omitBody: request.method == .head)
+      return .init(status: .ok, contentType: contentType, lastModifiedDate: lastModificationDate, body: request.method != .head ? fileString : nil)!
       //Page.replaceIncludes(in: fileString,
       //         from: url.replacingOccurrences(of: "index.html", with: ""),
       //       staticRoot: staticFilesRoot)

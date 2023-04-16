@@ -148,7 +148,11 @@ public extension TestAPIClient {
       $0.timeoutInterval = endpoint.timeout
       $0.httpMethod = Endpoint.method.description
       if let contentType = endpoint.contentType ?? inferredContentType {
-        $0.setValue(contentType.typeString, forHTTPHeaderField: "Content-Type")
+        var contentTypeString = contentType.typeString
+        if let boundary = endpoint.contentTypeBoundary {
+          contentTypeString += "; boundary=\(boundary)"
+        }
+        $0.setValue(contentTypeString, forHTTPHeaderField: "Content-Type")
       }
       $0.setValue(userAgentString, forHTTPHeaderField: "User-Agent")
       for header in endpoint.headers {
@@ -219,7 +223,7 @@ public extension TestAPIClient {
     
     logStart += " \(httpResponse.statusCode)"
     
-    let response: HTTPResponse<Data?> = HTTPResponse(status: .from(code: httpResponse.statusCode), body: data)
+    let response: HTTPResponse<Data?> = HTTPResponse<Data?>(httpURLResponse: httpResponse, data: data)
     
     guard response.status.isSuccess else {
       Log.error("\(logStart)", context: "API")

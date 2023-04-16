@@ -78,7 +78,7 @@ extension HTTPResponse<Data?> {
   
   public var data: Data {
     var data = headerString.data
-    if !omitBody, let body = body, let bodyData = body { data += bodyData }
+    if let body = body, let bodyData = body { data += bodyData }
     return data
   }
 }
@@ -91,7 +91,7 @@ public struct HTTPResponse<Body: Codable> {
   public static var badRequest: HTTPResponse<Body> { HTTPResponse(status: .badRequest) }
   public static var serverError: HTTPResponse<Body> { HTTPResponse(status: .internalServerError) }
   
-  public static func ok(body: Body, contentType: ContentType? = nil, omitBody: Bool = false) -> HTTPResponse<Body> {
+  public static func ok(body: Body, contentType: ContentType? = nil) -> HTTPResponse<Body> {
     HTTPResponse(status: .ok, contentType: contentType, body: body)
   }
   
@@ -104,7 +104,6 @@ public struct HTTPResponse<Body: Codable> {
   public let location: String?
   public let lastModifiedDate: Date?
   public let body: Body?
-  public let omitBody: Bool
   
   public init(status: HTTPResponseStatus,
               cache: Cache? = nil,
@@ -113,8 +112,7 @@ public struct HTTPResponse<Body: Codable> {
               contentType: ContentType? = nil,
               location: String? = nil,
               lastModifiedDate: Date? = nil,
-              body: Body? = nil,
-              omitBody: Bool = false) {
+              body: Body? = nil) {
     self.status = status
     self.cache = cache
     self.cookies = cookies
@@ -134,7 +132,6 @@ public struct HTTPResponse<Body: Codable> {
     self.location = location
     self.lastModifiedDate = lastModifiedDate
     self.body = body
-    self.omitBody = omitBody
   }
   
   public init(copying otherResponse: HTTPResponse<some Codable>, body: Body) {

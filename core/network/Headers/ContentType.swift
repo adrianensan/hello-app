@@ -1,19 +1,37 @@
-public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
-  
-  public static var allCases: [ContentType] {
-    [.plain, .html, .css, .csv, .javascript, .ics, .otf, .ttf, .woff, .woff2, .png, .jpeg, .tiff,
-     .gif, .webpImage, .svg, .icon, .aac, .oggAudio, .webmAudio, .wav, .midi, .x3GPP, .x3GPP2,
-     .avi, .mpeg, .oggVideo, .webmVideo, .json, .xhtml, .xml, .xul, .pdf, .rtf, .oldWord,
-     .oldPowerpoint, .oldExcel, .word, .powerpoint, .excel, .epub, .sh, .typescript, .es,
-     .eot, .zip, .tar, .rar, .bz, .bz2, .x7zip, .jar, .ogg, .bin, .other]
-  }
+import Foundation
+
+public enum ContentTypeCategory: String, Equatable, Codable, Sendable {
+  case image
+  case audio
+  case video
+  case text
+  case font
+  case terminalScript
+  case model3D
+  case code
+  case other
+}
+
+public enum ContentType: String, CaseIterable, Equatable, Codable, Sendable {
   
   case none
+  
   case plain
-  case html
-  case css
+  
+  case html, css, javascript
+  
+  case mp3, m4a
+  
+  case mp4, mov
+  
+  case heic, heif
+  
+  case fbx
+  
+  case directory
+  case macosApp
+  
   case csv
-  case javascript
   case ics
   case otf
   case ttf
@@ -63,13 +81,37 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
   case jar
   case ogg
   case bin
+  case swift
   case other
-  case multipart(boundary: String)
-  case custom(type: String)
+  case formData
+  case custom
+  
+  public var category: ContentTypeCategory {
+    switch self {
+    case .zip, .rar, .tar, .bz, .bz2, .x7zip: return .text
+    case .png, .jpeg, .heic, .heif, .tiff, .gif, .svg: return .image
+    case .mp3, .m4a, .wav, .aac, .oggAudio, .webmAudio, .oggAudio: return .audio
+    case .ttf, .otf, .eot: return .font
+    case .mp4, .mov, .avi, .oggVideo, .webmVideo: return .video
+    case .plain: return .text
+    case .pdf, .word, .oldWord: return .text
+    case .excel, .oldExcel, .csv: return .text
+    case .json: return .code
+    case .xml, .html: return .code
+    case .bin: return .other
+    case .midi: return .other
+    case .swift: return .code
+    case .epub: return .other
+    case .ics: return .other
+    default: return .other
+    }
+  }
   
   public var typeString: String {
     switch self {
     case          .none: return ""
+    case     .directory: return "application/x-directory"
+    case      .macosApp: return "application/macos-app"
     case         .plain: return "text/plain"
     case          .html: return "text/html"
     case           .css: return "text/css"
@@ -84,10 +126,16 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
     case          .jpeg: return "image/jpeg"
     case          .tiff: return "image/tiff"
     case           .gif: return "image/gif"
+    case          .heic: return "image/heic"
+    case          .heif: return "image/heif"
     case     .webpImage: return "image/webp"
     case           .svg: return "image/svg+xml"
     case          .icon: return "image/x-icon"
     case           .aac: return "audio/aac"
+    case           .mp3: return "audio/mpeg"
+    case           .m4a: return "audio/m4a"
+    case           .mp4: return "video/mp4"
+    case           .mov: return "video/quicktime"
     case      .oggAudio: return "audio/ogg"
     case     .webmAudio: return "audio/webm"
     case           .wav: return "audio/wav"
@@ -112,6 +160,7 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
     case         .excel: return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     case          .epub: return "application/epub+zip"
     case            .sh: return "application/x-sh"
+    case         .swift: return "application/swift"
     case    .typescript: return "application/typescript"
     case            .es: return "application/ecmascript"
     case           .eot: return "application/vnd.ms-fontobject"
@@ -123,39 +172,48 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
     case         .x7zip: return "application/x-7z-compressed"
     case           .jar: return "application/java-archive"
     case           .ogg: return "application/ogg"
-    case .multipart(let boundary): return "multipart/form-data; boundary=\(boundary)"
+    case      .formData: return "multipart/form-data"
     case   .bin, .other: return "application/octet-stream"
-    case .custom(let s): return s
+      
+      
+    case .fbx: return "application/fbx"
+    case .custom: return "application/octet-stream"
     }
   }
   
-  public static func fromHeader(string: String) -> ContentType {
+  public static func inferFrom(mimeType: String) -> ContentType {
+    let mimeType = mimeType.lowercased()
     for type in ContentType.allCases {
-      if type.typeString == string { return type }
+      if type.typeString == mimeType { return type }
     }
-    return custom(type: string)
+    return .custom
   }
   
-  public static func from(fileExtension: String) -> ContentType {
+  public static func inferFrom(fileExtension: String) -> ContentType {
     switch fileExtension {
     case            "": return .none
     case         "txt": return .plain
     case "html", "htm": return .html
     case         "css": return .css
-    case         "cvs": return .csv
+    case         "csv": return .csv
     case          "js": return .javascript
     case         "ics": return .ics
     case         "otf": return .otf
     case         "ttf": return .ttf
+    case         "fbx": return .fbx
     case        "woff": return .woff
     case       "woff2": return .woff2
     case         "png": return .png
     case "jpeg", "jpg": return .jpeg
     case "tiff", "tif": return .tiff
     case         "gif": return .gif
+    case        "heic": return .heic
+    case        "heif": return .heif
     case        "webp": return .webpImage
     case         "svg": return .svg
     case         "ico": return .icon
+    case         "mp3": return .mp3
+    case         "m4a": return .m4a
     case         "aac": return .aac
     case         "oga": return .oggAudio
     case        "weba": return .webmAudio
@@ -163,6 +221,8 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
     case         "3gp": return .x3GPP
     case         "3g2": return .x3GPP2
     case         "avi": return .avi
+    case         "mp4": return .mp4
+    case         "mov": return .mov
     case        "mpeg": return .mpeg
     case         "ogv": return .oggVideo
     case        "webm": return .webmVideo
@@ -193,7 +253,32 @@ public enum ContentType: CustomStringConvertible, Equatable, Codable, Sendable {
     case          "7z": return .x7zip
     case         "ogg": return .ogg
     case         "bin": return .bin
+    case       "swift": return .swift
                default: return .other
+    }
+  }
+  
+  public var iconName: String {
+    switch self {
+    case .zip, .rar, .tar, .bz, .bz2, .x7zip: return "doc.zipper"
+    case .png, .jpeg, .heic, .heif, .tiff, .gif, .svg: return "photo"
+    case .mp3, .m4a, .wav, .aac, .oggAudio, .webmAudio, .oggAudio: return "music.note"
+    case .ttf, .otf, .eot: return "textformat"
+    case .mp4, .mov, .avi, .oggVideo, .webmVideo: return "play.rectangle"
+    case .plain: return "doc.text"
+    case .pdf, .word, .oldWord: return "doc.richtext"
+    case .excel, .oldExcel, .csv: return "tablecells"
+    case .json: return "curlybraces"
+    case .xml, .html: return "chevron.left.forwardslash.chevron.right"
+    case .bin: return "terminal"
+    case .midi: return "pianokeys"
+    case .fbx: return "move.3d"
+    case .swift: return "swift"
+    case .epub: return "book"
+    case .ics: return "calendar"
+    case .directory: return "folder"
+    case .macosApp: return "app"
+    default: return "doc"
     }
   }
   
