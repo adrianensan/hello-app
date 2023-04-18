@@ -28,12 +28,19 @@ public actor Downloader {
   
   public init() {}
   
+  public func download(from urlString: String, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
+    guard let url = URLComponents(string: urlString)?.url else {
+      throw APIError.invalidURL
+    }
+    return try await download(from: url, downloadProgressUpdate: downloadProgressUpdate)
+  }
+  
   public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
     guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
     let requestStartTime = Date().timeIntervalSince1970
-    var logStart = url.absoluteString
+    var logStart = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
     let (data, urlResponse): (Data, URLResponse)
     do {

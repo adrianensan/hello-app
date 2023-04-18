@@ -3,6 +3,7 @@ import Foundation
 import HelloCore
 
 public enum APIError: LocalizedError, Sendable {
+  case invalidURL
   case invalidRequest
   case fail
   case duplicate
@@ -11,6 +12,7 @@ public enum APIError: LocalizedError, Sendable {
   
   public var errorDescription: String? {
     switch self {
+    case .invalidURL: return "Invalid URL"
     case .invalidRequest: return "Invalid HTTP Request"
     case .fail: return "Fail"
     case .duplicate: return "Duplicate request"
