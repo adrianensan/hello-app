@@ -1,5 +1,9 @@
 import Foundation
 
+public func round(_ cgSize: CGSize) -> CGSize {
+  CGSize(width: round(cgSize.width), height: round(cgSize.height))
+}
+
 public extension CGSize {
   
   static var unit: CGSize { CGSize(width: 1, height: 1) }

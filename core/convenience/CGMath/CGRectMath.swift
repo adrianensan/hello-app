@@ -1,5 +1,9 @@
 import Foundation
 
+public func round(_ cgRect: CGRect) -> CGRect {
+  CGRect(origin: round(cgRect.origin), size: round(cgRect.size))
+}
+
 public extension CGRect {
   
   static var unit: CGRect { CGRect(origin: .init(), size: .unit) }

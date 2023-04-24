@@ -4,6 +4,10 @@ public func abs(_ point: CGPoint) -> CGPoint {
   CGPoint(x: abs(point.x), y: abs(point.y))
 }
 
+public func round(_ cgPoint: CGPoint) -> CGPoint {
+  CGPoint(x: round(cgPoint.x), y: round(cgPoint.y))
+}
+
 public extension CGPoint {
   
   #if os(watchOS)
