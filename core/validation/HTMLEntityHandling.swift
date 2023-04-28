@@ -18,6 +18,7 @@ private let htmlEntitiesTrie = Trie.constructFrom(valuesMap:[
   "&num;": "#",
   "&#35;": "#",
   "&#035;": "#",
+  "&#47;": "/",
   "&sol;": "/",
   "&bsol;": "\\",
   "&percnt;": "%",
