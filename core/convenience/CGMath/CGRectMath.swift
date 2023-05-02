@@ -18,6 +18,16 @@ public extension CGRect {
             y: origin.y + 0.5 * size.height)
   }
   
+  var topLeading: CGPoint {
+    CGPoint(x: origin.x,
+            y: origin.y + size.height)
+  }
+  
+  var topTrailing: CGPoint {
+    CGPoint(x: origin.x + size.width,
+            y: origin.y + size.height)
+  }
+  
   var trailing: CGPoint {
     CGPoint(x: origin.x + size.width,
             y: origin.y + 0.5 * size.height)
@@ -26,6 +36,15 @@ public extension CGRect {
   var bottom: CGPoint {
     CGPoint(x: origin.x + 0.5 * size.width,
             y: origin.y + size.height)
+  }
+  
+  var bottomLeading: CGPoint {
+    CGPoint(x: origin.x, y: origin.y)
+  }
+  
+  var bottomTrailing: CGPoint {
+    CGPoint(x: origin.x + size.width,
+            y: origin.y)
   }
   
   var top: CGPoint {
