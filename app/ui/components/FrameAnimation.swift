@@ -15,6 +15,7 @@ public struct FrameAnimation: View {
     var frame: Int = 0
     var frames: [Int: NativeImage] = [:]
     var loopIteration: Int = 0
+    var freezeFrame: Int?
   }
   
   @State private var currentImageFrame: NativeImage?
@@ -37,6 +38,7 @@ public struct FrameAnimation: View {
               startFrameOverride: Int? = nil,
               initialFrame: Int,
               lastFrame: Int,
+              freezeFrame: Int? = nil,
               delay: TimeInterval = 0,
               fps: CGFloat = 60,
               lingerOnLastFrame: Bool = false,
@@ -54,6 +56,7 @@ public struct FrameAnimation: View {
     self.contentMode = contentMode
     self.resetSignal = resetSignal
     nonObserved.frame = (startFrameOverride ?? initialFrame)
+    nonObserved.freezeFrame = freezeFrame
   }
   
   public func animate() async throws {
@@ -62,7 +65,7 @@ public struct FrameAnimation: View {
     defer { nonObserved.isAnimating = false }
     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
     isHidden = false
-    while nonObserved.frame < lastFrame {
+    while nonObserved.frame < nonObserved.freezeFrame ?? lastFrame {
       nonObserved.frame += 1
       if let nextImage = nonObserved.frames[nonObserved.frame] {
         currentImageFrame = nextImage
@@ -116,6 +119,7 @@ public struct FrameAnimation: View {
         Task { try await animate() }
       }.onChange(of: resetSignal) { _ in
         nonObserved.loopIteration = 0
+        nonObserved.freezeFrame = nil
         Task { try await animate() }
       }.onChange(of: repeatBehaviour) { newii in
         loopMode = newii
