@@ -27,10 +27,12 @@ public struct Stack<Content: View>: View {
     case .horizontal:
       HStack(alignment: alignment.vertical, spacing: spacing) {
         content
+          .environment(\.layoutDirection, .leftToRight)
       }.environment(\.layoutDirection, isReversed ? .rightToLeft : .leftToRight)
     case .vertical:
       VStack(alignment: alignment.horizontal, spacing: spacing) {
         content
+          .environment(\.layoutDirection, .leftToRight)
       }.environment(\.layoutDirection, isReversed ? .rightToLeft : .leftToRight)
     }
   }
