@@ -9,7 +9,15 @@ public struct AppVersion: LosslessStringConvertible, Codable, Equatable, Compara
   }
   
   public static func <(lhs: AppVersion, rhs: AppVersion) -> Bool {
-    lhs.intValue < rhs.intValue
+    if lhs.major != rhs.major {
+      return lhs.major < rhs.major
+    } else if lhs.minor != rhs.minor {
+      return lhs.minor < rhs.minor
+    } else if lhs.patch != rhs.patch {
+      return lhs.patch < rhs.patch
+    } else {
+      return lhs.build < rhs.build
+    }
   }
   
   public var major: Int
@@ -62,6 +70,6 @@ public struct AppVersion: LosslessStringConvertible, Codable, Equatable, Compara
   public var display: String { "\(major).\(minor).\(patch) (\(build))" }
   
   var intValue: Int {
-    major * 1000000 + minor * 10000 + patch * 100 + build
+    major * 10000000 + minor * 100000 + patch * 1000 + build
   }
 }
