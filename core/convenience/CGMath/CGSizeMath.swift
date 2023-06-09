@@ -1,4 +1,4 @@
-import Foundation
+import CoreGraphics
 
 public func round(_ cgSize: CGSize) -> CGSize {
   CGSize(width: round(cgSize.width), height: round(cgSize.height))

@@ -14,4 +14,9 @@ public class ActiveThemeManager: ObservableObject {
     lightTHeme = theme.lightTheme
     darkTHeme = theme.darkTheme
   }
+  
+  public func set(lightTheme: HelloTheme, darkTheme: HelloTheme) {
+    lightTHeme = lightTheme
+    darkTHeme = darkTheme
+  }
 }

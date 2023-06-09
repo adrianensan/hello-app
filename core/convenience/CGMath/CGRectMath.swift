@@ -1,4 +1,4 @@
-import Foundation
+import CoreGraphics
 
 public func round(_ cgRect: CGRect) -> CGRect {
   CGRect(origin: round(cgRect.origin), size: round(cgRect.size))

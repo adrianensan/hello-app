@@ -30,7 +30,6 @@ public struct HelloAppRootView<Content: View>: View {
       #if os(iOS)
       ZStack {
         content
-          .compositingGroup()
           .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       }.onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { notification in
         if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {

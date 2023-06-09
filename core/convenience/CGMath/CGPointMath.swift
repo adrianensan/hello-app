@@ -1,4 +1,4 @@
-import Foundation
+import CoreGraphics
 
 public func abs(_ point: CGPoint) -> CGPoint {
   CGPoint(x: abs(point.x), y: abs(point.y))

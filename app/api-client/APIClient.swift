@@ -167,7 +167,7 @@ public extension TestAPIClient {
   }
   
   @discardableResult
-  public func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
+  func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
                                              isRetry: Bool = false,
                                              retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
                                              uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
@@ -278,7 +278,7 @@ public extension TestAPIClient {
     }
   }
   
-  public func websocketsSession<Endpoint: APIEndpoint>(endpoint: Endpoint) throws -> URLSessionWebSocketTask {
+  func websocketsSession<Endpoint: APIEndpoint>(endpoint: Endpoint) throws -> URLSessionWebSocketTask {
     let urlRequest = try request(for: endpoint)
     let requestStartTime = Date().timeIntervalSince1970
     var logStart = Endpoint.path

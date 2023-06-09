@@ -1,5 +1,7 @@
 import Foundation
 
+public typealias HelloColour = HelloColor
+
 public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   public var r: Double
   public var g: Double
@@ -160,12 +162,58 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
     abs(r - otherColor.r) < 0.001 && abs(g - otherColor.g) < 0.001
     && abs(b - otherColor.b) < 0.001 && abs(a - otherColor.a) < 0.001
   }
+  
+  public func isSimilar(to otherColor: HelloColor) -> Bool {
+    let diff = abs(r - otherColor.r) + abs(g - otherColor.g) + abs(b - otherColor.b)
+    return diff / 3 < 0.1
+  }
+  
+  public func lighten() -> HelloColor {
+    modify(saturation: 0, brightness: 0.4)
+  }
+  
+  public func darken() -> HelloColor {
+    modify(saturation: 0, brightness: -0.3)
+  }
 }
 
 public extension HelloColor {
   static var transparent: HelloColor { HelloColor(r: 0, g: 0, b: 0, a: 0) }
   static var black: HelloColor { HelloColor(r: 0, g: 0, b: 0) }
   static var white: HelloColor { HelloColor(r: 1, g: 1, b: 1) }
+  
+  static var monkeyOrange: HelloColor { HelloColor(r: 0.8, g: 0.4, b: 0.2) }
+  
+  static var pink: HelloColor { HelloColor(r: 0.6, g: 0.4, b: 0.4) }
+  static var fullBlue: HelloColor { HelloColor(r: 0, g: 0, b: 1) }
+  static var fullGreen: HelloColor { HelloColor(r: 0, g: 1, b: 0) }
+  static var darkGreen: HelloColor { HelloColor(r: 0.2, g: 0.5, b: 0.15) }
+  static var darkBlue: HelloColor { HelloColor(r: 0, g: 0, b: 0.5) }
+  static var fullOrange: HelloColor { HelloColor(r: 1, g: 0.5, b: 0) }
+  static var skyBlue: HelloColor { HelloColor(r: 0.41, g: 0.57, b: 0.96) }
+  static var twitter: HelloColor { HelloColor(r: 0.12, g: 0.63, b: 0.96) }
+  
+  static var solitaireAccent: HelloColor { HelloColor(r: 0.25, g: 0.7, b: 0.25) }
+  static var snapchat: HelloColor { HelloColor(r: 1, g: 0.99, b: 0.02) }
+  
+  static var dark: HelloColor { HelloColor(r: 0.14, g: 0.14, b: 0.14) }
+  static var darker: HelloColor { HelloColor(r: 0.1, g: 0.1, b: 0.1) }
+  static var light: HelloColor { HelloColor(r: 0.9, g: 0.9, b: 0.9) }
+  static var oldWhite: HelloColor { HelloColor(r: 0.95, g: 0.95, b: 0.91) }
+  static var offWhite: HelloColor { HelloColor(r: 0.95, g: 0.95, b: 0.95) }
+  
+  static var dimWhite: HelloColor { HelloColor(r: 0.5, g: 0.5, b: 0.5) }
+  static var veryDimWhite: HelloColor { HelloColor(r: 0.35, g: 0.35, b: 0.35) }
+  static var veryDimRed: HelloColor { HelloColor(r: 0.5, g: 0.1, b: 0.1) }
+  static var dimRed: HelloColor { HelloColor(r: 0.6, g: 0.1, b: 0.1) }
+  
+  static var fadedRed: HelloColor { HelloColor(r: 0.9, g: 0, b: 0) }
+  static var fullRed: HelloColor { HelloColor(r: 1.0, g: 0, b: 0) }
+  
+  static var darkGrey: HelloColor { HelloColor(r: 0.32, g: 0.32, b: 0.32) }
+  static var darkerGrey: HelloColor { HelloColor(r: 0.26, g: 0.26, b: 0.26) }
+  
+  static var neonGreen: HelloColor { HelloColor(r: 0.1, g: 0.8, b: 0.1) }
 }
 
 public struct HelloDynamicColor: Sendable {

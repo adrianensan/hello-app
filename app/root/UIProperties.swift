@@ -19,6 +19,7 @@ public class UIProperties: ObservableObject {
   
   @Published public var size: CGSize
   @Published public var safeAreaInsets: EdgeInsets
+  @Published public var scaleFactor: CGFloat = 1
   #if os(iOS)
   @Published public var keyboardFrame: CGRect = .zero
   var keyboardAnimationDuration: CGFloat = 0

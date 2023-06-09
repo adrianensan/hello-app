@@ -1,5 +1,7 @@
 import SwiftUI
 
+import HelloCore
+
 public struct HelloAlertConfig {
   
   public struct HelloAlertViewItem {
