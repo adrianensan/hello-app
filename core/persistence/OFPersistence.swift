@@ -13,7 +13,7 @@ public enum OFPersistenceError: Error {
 
 extension UserDefaults: @unchecked Sendable {}
 
-public actor OFPersistence<Key: PersistenceKey> {
+public actor OFPersistence {
   
   nonisolated public let defaults: UserDefaults
   nonisolated public let keychain: KeychainHelper
@@ -25,9 +25,9 @@ public actor OFPersistence<Key: PersistenceKey> {
     baseURL.appendingPathComponent(subPath)
   }
   
-  private var updateTaskContinuations: [Key: [String: Any]] = [:]
-  private var updates: [Key: Any] = [:]
-  private var cache: [Key: Any] = [:]
+  private var updateTaskContinuations: [String: [String: Any]] = [:]
+  private var updates: [String: Any] = [:]
+  private var cache: [String: Any] = [:]
   
   public init(defaultsSuiteName: String?, pathRoot: URL, keychain: KeychainHelper) {
     self.defaults = UserDefaults(suiteName: defaultsSuiteName)!
@@ -38,15 +38,15 @@ public actor OFPersistence<Key: PersistenceKey> {
     }
   }
   
-  private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) where Property.Key == Key {
-    for (_, continuation) in updateTaskContinuations[property.key] ?? [:] {
-      if let continuation = continuation as? CheckedContinuation<Property.Value, Error> {
+  private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) {
+    for (_, continuation) in updateTaskContinuations[property.location.id] ?? [:] {
+      if let continuation = continuation as? CheckedContinuation<Property.Value, any Error> {
         continuation.resume(returning: value)
       } else {
-        Log.wtf("Unexpected continuation type for \(property.key)", context: "Persistence")
+        Log.wtf("Unexpected continuation type for \(property.self)", context: "Persistence")
       }
     }
-    updateTaskContinuations[property.key] = nil
+    updateTaskContinuations[property.location.id] = nil
   }
   
 //  private func updateStream<Property: PersistenceProperty>(for property: Property) async throws -> Property.Value where Property.Key == Key {
@@ -65,21 +65,21 @@ public actor OFPersistence<Key: PersistenceKey> {
 //    return updatedValue
 //  }
   
-  private func updateContinuation<Property: PersistenceProperty>(for property: Property, id: String, to newContinuation: Any?) where Property.Key == Key {
-    var existingContinuations = updateTaskContinuations[property.key] ?? [:]
-    (existingContinuations[id] as? CheckedContinuation<Property.Value, Error>)?.resume(throwing: OFPersistenceError.updatesCancelled)
+  private func updateContinuation<Property: PersistenceProperty>(for property: Property, id: String, to newContinuation: Any?) {
+    var existingContinuations = updateTaskContinuations[property.location.id] ?? [:]
+    (existingContinuations[id] as? CheckedContinuation<Property.Value, any Error>)?.resume(throwing: OFPersistenceError.updatesCancelled)
     existingContinuations[id] = newContinuation
-    updateTaskContinuations.updateValue(existingContinuations, forKey: property.key)
+    updateTaskContinuations.updateValue(existingContinuations, forKey: property.location.id)
   }
   
-  private func nextUpdate<Property: PersistenceProperty>(for property: Property, id: String) async throws -> Property.Value where Property.Key == Key {
+  private func nextUpdate<Property: PersistenceProperty>(for property: Property, id: String) async throws -> Property.Value {
     try await withCheckedThrowingContinuation { continuation in
       updateContinuation(for: property, id: id, to: continuation)
     }
   }
   
-  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncThrowingStream<Property.Value, Error> where Property.Key == Key {
-    AsyncThrowingStream<Property.Value, Error> { streamContinuation in
+  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncThrowingStream<Property.Value, any Error> {
+    AsyncThrowingStream<Property.Value, any Error> { streamContinuation in
       let id = UUID().uuidString
       let updates = Task {
         while true {
@@ -97,14 +97,14 @@ public actor OFPersistence<Key: PersistenceKey> {
     }
   }
   
-  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) where Property.Key == Key {
+  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
     guard allowSaving else { return }
     if property.isDeprecated {
-      Log.warning("Using depreacted property \(property.key)", context: "Persistence")
+      Log.warning("Using depreacted property \(property.self)", context: "Persistence")
     }
     let value = property.cleanup(value: value)
     if property.allowCache {
-      cache[property.key] = value
+      cache[property.location.id] = value
     }
     
     switch property.location {
@@ -169,7 +169,7 @@ public actor OFPersistence<Key: PersistenceKey> {
     updated(value: value, for: property)
   }
   
-  public nonisolated func initialValue<Property: PersistenceProperty>(for property: Property) -> Property.Value where Property.Key == Key {
+  public nonisolated func initialValue<Property: PersistenceProperty>(for property: Property) -> Property.Value {
     let returnValue: Property.Value
     
     switch property.location {
@@ -237,8 +237,8 @@ public actor OFPersistence<Key: PersistenceKey> {
     return value
   }
   
-  public func value<Property: PersistenceProperty>(for property: Property) -> Property.Value where Property.Key == Key {
-    if let rawValue = cache[property.key],
+  public func value<Property: PersistenceProperty>(for property: Property) -> Property.Value {
+    if let rawValue = cache[property.location.id],
        let value = rawValue as? Property.Value {
       return value
     }
@@ -308,18 +308,18 @@ public actor OFPersistence<Key: PersistenceKey> {
     
     let value = property.cleanup(value: returnValue)
     if property.allowCache {
-      cache[property.key] = value
+      cache[property.location.id] = value
     }
     
     return value
   }
   
-  public func atomicUpdate<Property: PersistenceProperty>(_ property: Property, update: (Property.Value) -> Property.Value) where Property.Key == Key {
+  public func atomicUpdate<Property: PersistenceProperty>(_ property: Property, update: (Property.Value) -> Property.Value) {
     save(update(value(for: property)), for: property)
   }
   
-  public func delete<Property: PersistenceProperty>(property: Property) where Property.Key == Key {
-    cache[property.key] = nil
+  public func delete<Property: PersistenceProperty>(property: Property) {
+    cache[property.location.id] = nil
     
     switch property.location {
     case .defaults(let key): defaults.removeObject(forKey: key)
@@ -347,9 +347,9 @@ public actor OFPersistence<Key: PersistenceKey> {
     }
   }
   
-  public func size<Property: PersistenceProperty>(of property: Property) -> Int where Property.Key == Key {
+  public func size<Property: PersistenceProperty>(of property: Property) -> Int {
     switch property.location {
-    case .defaults(let key): return 0
+    case .defaults: return 0
     case .file(let path):
       guard let resourceValues = try? fileURL(for: path).resourceValues(forKeys: [
         .isRegularFileKey,
@@ -359,56 +359,77 @@ public actor OFPersistence<Key: PersistenceKey> {
       ]), resourceValues.isRegularFile == true else { return 0 }
       
       return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
-    case .keychain(let key): return 0
-    case .memory:  return 0
+    case .keychain: return 0
+    case .memory: return 0
     }
   }
   
-  public func isSet<Property: PersistenceProperty>(property: Property) -> Bool where Property.Key == Key {
+  public func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults(let key): return defaults.object(forKey: key) != nil
-    case .file(let path):
-      return FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
-    case .keychain(let key): return (try? keychain.data(for: key)) != nil
-    case .memory: return cache[property.key] != nil
+    case .defaults(let key): defaults.object(forKey: key) != nil
+    case .file(let path): FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
+    case .keychain(let key): (try? keychain.data(for: key)) != nil
+    case .memory: cache[property.location.id] != nil
     }
   }
   
-  nonisolated public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
+  nonisolated public func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults: return nil
-    case .file(let path): return fileURL(for: path)
-    case .keychain: return nil
-    case .memory: return nil
+    case .defaults(let key): defaults.object(forKey: key) != nil
+    case .file(let path): FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
+    case .keychain(let key): (try? keychain.data(for: key)) != nil
+    case .memory: false
     }
   }
   
-  nonisolated public func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? where Property.Key == Key {
+  nonisolated public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
     switch property.location {
-    case .defaults: return nil
+    case .defaults: nil
+    case .file(let path): fileURL(for: path)
+    case .keychain: nil
+    case .memory: nil
+    }
+  }
+  
+  nonisolated public func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
+    switch property.location {
+    case .defaults: nil
     case .file(let path):
       if let lastSlashIndex = path.lastIndex(of: "/") {
-        return fileURL(for: String(path[..<lastSlashIndex]))
+        fileURL(for: String(path[..<lastSlashIndex]))
       } else {
-        return fileURL(for: path)
+        fileURL(for: path)
       }
-    case .keychain: return nil
-    case .memory: return nil
+    case .keychain: nil
+    case .memory: nil
     }
   }
 }
 
 public enum Persistence {
+  
+  public static var defaultPathRoot: URL {
+    do {
+      return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    } catch {
+      return FileManager.default.temporaryDirectory
+    }
+  }
+  
+  public static let defaultPersistence = OFPersistence(defaultsSuiteName: nil,
+                                                       pathRoot: defaultPathRoot,
+                                                       keychain: KeychainHelper(service: AppInfo.bundleID))
+  
   public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
-    await Property.Key.persistence.save(value, for: property)
+    await Property.persistence.save(value, for: property)
   }
   
   public static func value<Property: PersistenceProperty>(_ property: Property) async -> Property.Value {
-    await Property.Key.persistence.value(for: property)
+    await Property.persistence.value(for: property)
   }
   
   public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    Property.Key.persistence.initialValue(for: property)
+    Property.persistence.initialValue(for: property)
   }
   
 //  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
@@ -416,30 +437,34 @@ public enum Persistence {
 //  }
   
   public static func delete<Property: PersistenceProperty>(_ property: Property) async {
-    await Property.Key.persistence.delete(property: property)
+    await Property.persistence.delete(property: property)
   }
   
-  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, Error> {
-    await Property.Key.persistence.updates(for: property)
+  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, any Error> {
+    await Property.persistence.updates(for: property)
   }
   
   public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (Property.Value) -> Property.Value) async {
-    await Property.Key.persistence.atomicUpdate(property, update: update)
+    await Property.persistence.atomicUpdate(property, update: update)
   }
   
   public static func size<Property: PersistenceProperty>(of property: Property) async -> Int {
-    await Property.Key.persistence.size(of: property)
+    await Property.persistence.size(of: property)
   }
   
   public static func isSet<Property: PersistenceProperty>(property: Property) async -> Bool {
-    await Property.Key.persistence.isSet(property: property)
+    await Property.persistence.isSet(property: property)
+  }
+  
+  public static func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
+    Property.persistence.initialIsSet(property: property)
   }
   
   public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    Property.Key.persistence.fileURL(for: property)
+    Property.persistence.fileURL(for: property)
   }
   
   public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    Property.Key.persistence.fileURL(for: property)
+    Property.persistence.fileURL(for: property)
   }
 }

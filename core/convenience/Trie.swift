@@ -1,7 +1,7 @@
 import Foundation
 
 extension Character: Codable {
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     guard let character = try container.decode(String.self).first else {
       throw DecodingError.dataCorruptedError(in: container, debugDescription: "Decoder expected a Character but found an empty string.")
@@ -9,7 +9,7 @@ extension Character: Codable {
     self = character
   }
   
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     try container.encode(String(self))
   }
@@ -17,11 +17,35 @@ extension Character: Codable {
 
 public class Trie<T: Codable & Hashable>: TrieNode<T> {
   
-  public static func constructFrom(valuesMap: [String: T]) -> Trie<T> {
-    let root = Trie<T>()
-    
+//  public static func constructFrom<T: Codable & Hashable>(valuesMap: [String: T]) -> Trie<T> {
+//    let root = Trie<T>()
+//    
+//    for (key, value) in valuesMap {
+//      var currentNode: TrieNode<T> = root
+//      for character in key.utf8 {
+//        if let node = currentNode.map[character] {
+//          currentNode = node
+//          continue
+//        } else {
+//          let newNode = TrieNode<T>()
+//          currentNode.map[character] = newNode
+//          currentNode = newNode
+//        }
+//      }
+//      currentNode.value.insert(value)
+//    }
+//    
+//    return root
+//  }
+  
+  public init() {
+    super.init()
+  }
+  
+  public init(valuesMap: [String: T]) {
+    super.init()
     for (key, value) in valuesMap {
-      var currentNode: TrieNode<T> = root
+      var currentNode: TrieNode<T> = self
       for character in key.utf8 {
         if let node = currentNode.map[character] {
           currentNode = node
@@ -34,8 +58,14 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
       }
       currentNode.value.insert(value)
     }
-    
-    return root
+  }
+  
+  required public init(from decoder: any Decoder) throws {
+    fatalError("init(from:) has not been implemented")
+  }
+  
+  public func add(value: T, for key: String) {
+    add(value: value, for: [key])
   }
   
   public func add(value: T, for keys: [String]) {
@@ -92,13 +122,13 @@ public class TrieNode<T: Codable & Hashable>: Codable {
     case value
   }
   
-  required public init(from decoder: Decoder) throws {
+  required public init(from decoder: any Decoder) throws {
     let values = try decoder.container(keyedBy: TrieCodingKeys.self)
     map = try values.decode([UInt8: TrieNode].self, forKey: .map)
     value = try values.decode(Set<T>.self, forKey: .value)
   }
   
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: TrieCodingKeys.self)
     try container.encode(map, forKey: .map)
     try container.encode(value, forKey: .value)

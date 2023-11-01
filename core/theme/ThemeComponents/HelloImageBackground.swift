@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HelloImageBackground: Codable {
+public struct HelloImageBackground: Codable, Sendable {
   
   public enum Mode: Codable {
     case fill

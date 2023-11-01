@@ -46,6 +46,7 @@ public struct HelloAlertConfig {
   }
 }
 
+@MainActor
 public struct HelloAlert: View {
   
   @Environment(\.theme) var theme
@@ -76,19 +77,19 @@ public struct HelloAlert: View {
       VStack(spacing: 6) {
         Text(config.title)
           .font(.system(size: 17, weight: .medium, design: .rounded))
-          .foregroundColor(theme.text.primaryColor)
+          .foregroundColor(theme.foreground.primary.color)
           .fixedSize(horizontal: false, vertical: true)
         
         if let message = config.message {
           Text(message)
             .font(.system(size: 13, weight: .regular, design: .rounded))
-            .foregroundColor(theme.text.primaryColor)
+            .foregroundColor(theme.foreground.primary.color)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
         }
       }.padding(16)
       
-      theme.text.primaryColor.opacity(0.1)
+      theme.foreground.primary.color.opacity(0.1)
         .frame(height: 1)
       
       HStack(spacing: 0) {
@@ -106,7 +107,7 @@ public struct HelloAlert: View {
         }.buttonStyle(.highlight)
         
         if let secondButton = config.secondButton {
-          theme.text.primaryColor.opacity(0.1)
+          theme.foreground.primary.color.opacity(0.1)
             .frame(width: 1, height: 44)
           Button(action: {
             secondButton.action?()

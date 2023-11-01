@@ -46,7 +46,7 @@ public extension View {
   }
 }
 
-@available(iOSApplicationExtension, unavailable)
+@MainActor
 public class HelloRootViewController: UIHostingController<AnyView> {
   
   private static var instances: [String: HelloRootViewController] = [:]
@@ -57,13 +57,17 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   public var onBrightnessChange: (() -> Void)?
   
   var uiProperties: UIProperties
+  var windowModel: HelloWindowModel
   
-  public init<T: View>(wrappedView: T) {
-    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: UIApplication.shared.windows.first?.safeAreaInsets)
-    self.uiProperties = uiProperties
+  public init<T: View>(window: UIWindow? = nil, wrappedView: T) {
+//    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
+    uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
+    windowModel = HelloWindowModel()
+    windowModel.window = window
     let id = UUID().uuidString
     let observedView = AnyView(HelloAppRootView(wrappedView)
       .environmentObject(uiProperties)
+      .environmentObject(windowModel)
       .onPreferenceChange(StatusBarStyleKey.self) { style in
         guard let viewController = Self.instances[id],
               viewController.statusBarStyle != style else { return }
@@ -106,30 +110,28 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   func disableKeyboardOffset() {
     guard let viewClass = object_getClass(view) else { return }
     
-    let viewSubclassName = String(cString: class_getName(viewClass)).appending("_IgnoresKeyboard")
-    if let viewSubclass = NSClassFromString(viewSubclassName) {
-      object_setClass(view, viewSubclass)
+    let viewSubclassName = String("HelloRootUIHostingView")
+    guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
+    guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
+    
+    if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
+      let safeAreaInsets: @convention(block) () -> UIEdgeInsets = { .zero }
+      class_addMethod(viewSubclass,
+                      #selector(getter: UIView.safeAreaInsets),
+                      imp_implementationWithBlock(safeAreaInsets),
+                      method_getTypeEncoding(method))
     }
-    else {
-      guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
-      guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
-      
-      if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
-        let safeAreaInsets: @convention(block) (AnyObject) -> UIEdgeInsets = { _ in
-          return .zero
-        }
-        class_addMethod(viewSubclass, #selector(getter: UIView.safeAreaInsets), imp_implementationWithBlock(safeAreaInsets), method_getTypeEncoding(method))
-      }
-      
-      if let method = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
-        let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
-        class_addMethod(viewSubclass, NSSelectorFromString("keyboardWillShowWithNotification:"),
-                        imp_implementationWithBlock(keyboardWillShow), method_getTypeEncoding(method))
-      }
-      
-      objc_registerClassPair(viewSubclass)
-      object_setClass(view, viewSubclass)
+    
+    if let method = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
+      let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
+      class_addMethod(viewSubclass,
+                      NSSelectorFromString("keyboardWillShowWithNotification:"),
+                      imp_implementationWithBlock(keyboardWillShow),
+                      method_getTypeEncoding(method))
     }
+    
+    objc_registerClassPair(viewSubclass)
+    object_setClass(view, viewSubclass)
   }
   
   func updateSize() {
@@ -175,7 +177,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   }
   
   override public func viewWillTransition(to size: CGSize,
-                                          with coordinator: UIViewControllerTransitionCoordinator) {
+                                          with coordinator: any UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
     updateSize()
   }

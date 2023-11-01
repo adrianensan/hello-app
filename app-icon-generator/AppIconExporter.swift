@@ -10,6 +10,9 @@ public struct AppIconExporter {
   
   public init(appName: String) {
     self.appName = appName
+    if let baseExportPath {
+      try? FileManager.default.removeItem(at: baseExportPath)
+    }
   }
   
   var baseExportPath: URL? { FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.appendingPathComponent(appName) }

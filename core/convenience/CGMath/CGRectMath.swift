@@ -1,131 +1,131 @@
 import CoreGraphics
 
-public func round(_ cgRect: CGRect) -> CGRect {
-  CGRect(origin: round(cgRect.origin), size: round(cgRect.size))
-}
+//public func round(_ cgRect: CGRect) -> CGRect {
+//  CGRect(origin: round(cgRect.origin), size: round(cgRect.size))
+//}
 
 public extension CGRect {
   
-  static var unit: CGRect { CGRect(origin: .init(), size: .unit) }
-  
-  var center: CGPoint {
-    CGPoint(x: origin.x + 0.5 * size.width,
-            y: origin.y + 0.5 * size.height)
-  }
-  
-  var leading: CGPoint {
-    CGPoint(x: origin.x,
-            y: origin.y + 0.5 * size.height)
-  }
-  
-  var topLeading: CGPoint {
-    CGPoint(x: origin.x,
-            y: origin.y + size.height)
-  }
-  
-  var topTrailing: CGPoint {
-    CGPoint(x: origin.x + size.width,
-            y: origin.y + size.height)
-  }
-  
-  var trailing: CGPoint {
-    CGPoint(x: origin.x + size.width,
-            y: origin.y + 0.5 * size.height)
-  }
-  
-  var bottom: CGPoint {
-    CGPoint(x: origin.x + 0.5 * size.width,
-            y: origin.y + size.height)
-  }
-  
-  var bottomLeading: CGPoint {
-    CGPoint(x: origin.x, y: origin.y)
-  }
-  
-  var bottomTrailing: CGPoint {
-    CGPoint(x: origin.x + size.width,
-            y: origin.y)
-  }
-  
-  var top: CGPoint {
-    CGPoint(x: origin.x + 0.5 * size.width,
-            y: origin.y)
-  }
-  
-  static func +(left: CGRect, right: CGRect) -> CGRect {
-    CGRect(origin: left.origin + right.origin, size: left.size + right.size)
-  }
-  
-  static func -(left: CGRect, right: CGRect) -> CGRect {
-    CGRect(origin: left.origin - right.origin, size: left.size - right.size)
-  }
-  
-  static func *(left: CGRect, right: CGSize) -> CGRect {
-    CGRect(origin: left.origin * right, size: left.size * right)
-  }
-  
-  static func +(left: CGRect, right: CGPoint) -> CGRect {
-    CGRect(origin: left.origin + right, size: left.size)
-  }
-  
-  static func -(left: CGRect, right: CGPoint) -> CGRect {
-    CGRect(origin: left.origin - right, size: left.size)
-  }
-  
-  static func /(left: CGRect, right: CGFloat.NativeType) -> CGRect {
-    CGRect(origin: left.origin / right, size: left.size / right)
-  }
-  
-//  func contains(_ innerRect: CGRect) -> Bool {
-//    innerRect.origin.x >= origin.x &&
-//    innerRect.origin.y >= origin.y &&
-//    (innerRect.origin.x + innerRect.size.width) <= (origin.x + size.width) &&
-//    (innerRect.origin.y + innerRect.size.height) <= (origin.y + size.height)
+//  static var unit: CGRect { CGRect(origin: .init(), size: .unit) }
+//  
+//  var center: CGPoint {
+//    CGPoint(x: origin.x + 0.5 * size.width,
+//            y: origin.y + 0.5 * size.height)
 //  }
-  
-  func clipped(in outerSize: CGSize) -> CGRect {
-    var clippedRect = self
-    
-    if clippedRect.origin.x < 0 {
-      clippedRect.origin.x = 0
-    }
-    if clippedRect.origin.x + clippedRect.size.width > outerSize.width {
-      clippedRect.size.width = outerSize.width - clippedRect.origin.x
-    }
-    
-    if clippedRect.origin.y < 0 {
-      clippedRect.origin.y = 0
-    }
-    if clippedRect.origin.y + clippedRect.size.height > outerSize.height {
-      clippedRect.size.height = outerSize.height - clippedRect.origin.y
-    }
-    
-    return clippedRect
-  }
-  
-  func fit(in outerSize: CGSize) -> CGRect {
-    var clippedRect = self
-    
-    if clippedRect.origin.x < 0 {
-      clippedRect.size.width = min(outerSize.width, clippedRect.size.width + clippedRect.origin.x)
-      clippedRect.origin.x = 0
-    }
-    if clippedRect.origin.x + clippedRect.size.width > outerSize.width {
-      clippedRect.origin.x = max(0, clippedRect.origin.x - (clippedRect.origin.x + clippedRect.size.width - outerSize.width))
-      clippedRect.size.width = outerSize.width - clippedRect.origin.x
-    }
-    
-    if clippedRect.origin.y < 0 {
-      clippedRect.size.height = min(outerSize.height, clippedRect.size.height + clippedRect.origin.y)
-      clippedRect.origin.y = 0
-    }
-    if clippedRect.origin.y + clippedRect.size.height > outerSize.height {
-      clippedRect.origin.y = max(0, clippedRect.origin.y - (clippedRect.origin.y + clippedRect.size.height - outerSize.height))
-      clippedRect.size.height = outerSize.height - clippedRect.origin.y
-    }
-    
-    return clippedRect
-  }
+//  
+//  var leading: CGPoint {
+//    CGPoint(x: origin.x,
+//            y: origin.y + 0.5 * size.height)
+//  }
+//  
+//  var topLeading: CGPoint {
+//    CGPoint(x: origin.x,
+//            y: origin.y + size.height)
+//  }
+//  
+//  var topTrailing: CGPoint {
+//    CGPoint(x: origin.x + size.width,
+//            y: origin.y + size.height)
+//  }
+//  
+//  var trailing: CGPoint {
+//    CGPoint(x: origin.x + size.width,
+//            y: origin.y + 0.5 * size.height)
+//  }
+//  
+//  var bottom: CGPoint {
+//    CGPoint(x: origin.x + 0.5 * size.width,
+//            y: origin.y + size.height)
+//  }
+//  
+//  var bottomLeading: CGPoint {
+//    CGPoint(x: origin.x, y: origin.y)
+//  }
+//  
+//  var bottomTrailing: CGPoint {
+//    CGPoint(x: origin.x + size.width,
+//            y: origin.y)
+//  }
+//  
+//  var top: CGPoint {
+//    CGPoint(x: origin.x + 0.5 * size.width,
+//            y: origin.y)
+//  }
+//  
+//  static func +(left: CGRect, right: CGRect) -> CGRect {
+//    CGRect(origin: left.origin + right.origin, size: left.size + right.size)
+//  }
+//  
+//  static func -(left: CGRect, right: CGRect) -> CGRect {
+//    CGRect(origin: left.origin - right.origin, size: left.size - right.size)
+//  }
+//  
+//  static func *(left: CGRect, right: CGSize) -> CGRect {
+//    CGRect(origin: left.origin * right, size: left.size * right)
+//  }
+//  
+//  static func +(left: CGRect, right: CGPoint) -> CGRect {
+//    CGRect(origin: left.origin + right, size: left.size)
+//  }
+//  
+//  static func -(left: CGRect, right: CGPoint) -> CGRect {
+//    CGRect(origin: left.origin - right, size: left.size)
+//  }
+//  
+//  static func /(left: CGRect, right: CGFloat.NativeType) -> CGRect {
+//    CGRect(origin: left.origin / right, size: left.size / right)
+//  }
+//  
+////  func contains(_ innerRect: CGRect) -> Bool {
+////    innerRect.origin.x >= origin.x &&
+////    innerRect.origin.y >= origin.y &&
+////    (innerRect.origin.x + innerRect.size.width) <= (origin.x + size.width) &&
+////    (innerRect.origin.y + innerRect.size.height) <= (origin.y + size.height)
+////  }
+//  
+//  func clipped(in outerSize: CGSize) -> CGRect {
+//    var clippedRect = self
+//    
+//    if clippedRect.origin.x < 0 {
+//      clippedRect.origin.x = 0
+//    }
+//    if clippedRect.origin.x + clippedRect.size.width > outerSize.width {
+//      clippedRect.size.width = outerSize.width - clippedRect.origin.x
+//    }
+//    
+//    if clippedRect.origin.y < 0 {
+//      clippedRect.origin.y = 0
+//    }
+//    if clippedRect.origin.y + clippedRect.size.height > outerSize.height {
+//      clippedRect.size.height = outerSize.height - clippedRect.origin.y
+//    }
+//    
+//    return clippedRect
+//  }
+//  
+//  func fit(in outerSize: CGSize) -> CGRect {
+//    var clippedRect = self
+//    
+//    if clippedRect.origin.x < 0 {
+//      clippedRect.size.width = min(outerSize.width, clippedRect.size.width + clippedRect.origin.x)
+//      clippedRect.origin.x = 0
+//    }
+//    if clippedRect.origin.x + clippedRect.size.width > outerSize.width {
+//      clippedRect.origin.x = max(0, clippedRect.origin.x - (clippedRect.origin.x + clippedRect.size.width - outerSize.width))
+//      clippedRect.size.width = outerSize.width - clippedRect.origin.x
+//    }
+//    
+//    if clippedRect.origin.y < 0 {
+//      clippedRect.size.height = min(outerSize.height, clippedRect.size.height + clippedRect.origin.y)
+//      clippedRect.origin.y = 0
+//    }
+//    if clippedRect.origin.y + clippedRect.size.height > outerSize.height {
+//      clippedRect.origin.y = max(0, clippedRect.origin.y - (clippedRect.origin.y + clippedRect.size.height - outerSize.height))
+//      clippedRect.size.height = outerSize.height - clippedRect.origin.y
+//    }
+//    
+//    return clippedRect
+//  }
   
   func squaredOff(in outerSize: CGSize) -> CGRect {
     var newRect = self
@@ -158,25 +158,25 @@ public extension CGRect {
     return newRect
   }
   
-  func with(padding: CGFloat.NativeType, within sizeLimit: CGSize) -> CGRect {
-    var newRect = self
-    let maxXPadding = max(0, min(padding,
-                          newRect.origin.x,
-                          sizeLimit.width - newRect.size.width - newRect.origin.x))
-    if maxXPadding > 0 {
-      newRect.origin.x -= maxXPadding
-      newRect.size.width += 2 * maxXPadding
-    }
-    
-    let maxYPadding = max(0, min(padding,
-                          newRect.origin.y,
-                          sizeLimit.height - newRect.size.height - newRect.origin.y))
-    if maxYPadding > 0 {
-      newRect.origin.y -= maxYPadding
-      newRect.size.height += 2 * maxYPadding
-    }
-    return newRect
-  }
+//  func with(padding: CGFloat.NativeType, within sizeLimit: CGSize) -> CGRect {
+//    var newRect = self
+//    let maxXPadding = max(0, min(padding,
+//                          newRect.origin.x,
+//                          sizeLimit.width - newRect.size.width - newRect.origin.x))
+//    if maxXPadding > 0 {
+//      newRect.origin.x -= maxXPadding
+//      newRect.size.width += 2 * maxXPadding
+//    }
+//    
+//    let maxYPadding = max(0, min(padding,
+//                          newRect.origin.y,
+//                          sizeLimit.height - newRect.size.height - newRect.origin.y))
+//    if maxYPadding > 0 {
+//      newRect.origin.y -= maxYPadding
+//      newRect.size.height += 2 * maxYPadding
+//    }
+//    return newRect
+//  }
   
   func mapped(to targetRect: CGRect, with maxPadding: CGFloat.NativeType) -> CGRect {
     var newRect = CGRect()
@@ -206,5 +206,85 @@ public extension CGRect {
       newRect.size.height -= 1
     }
     return newRect
+  }
+  
+  func clippedHorizontally(in outerRect: CGRect) -> CGRect {
+    var clippedRect = self
+    
+    let minXDiff = outerRect.minX - clippedRect.minX
+    if minXDiff > 0 {
+      clippedRect.origin.x = outerRect.minX
+      clippedRect.size.width = max(0, clippedRect.width - minXDiff)
+    }
+    
+    let maxXDiff = clippedRect.maxX - outerRect.maxX
+    if maxXDiff > 0 {
+      clippedRect.size.width = max(0, clippedRect.width - maxXDiff)
+    }
+    
+    return clippedRect
+  }
+  
+  func clippedVertically(in outerRect: CGRect) -> CGRect {
+    var clippedRect = self
+    
+    let minYDiff = outerRect.minY - clippedRect.minY
+    if minYDiff > 0 {
+      clippedRect.origin.y = outerRect.minY
+      clippedRect.size.height = max(0, clippedRect.height - minYDiff)
+    }
+    
+    let maxYDiff = clippedRect.maxY - outerRect.maxY
+    if maxYDiff > 0 {
+      clippedRect.size.height = max(0, clippedRect.height - maxYDiff)
+    }
+    
+    return clippedRect
+  }
+  
+  func fitVertically(in outerRect: CGRect) -> CGRect {
+    var clippedRect = self
+    
+    let minYDiff = outerRect.minY - clippedRect.minY
+    if minYDiff > 0 {
+      clippedRect.origin.y = outerRect.minY
+      clippedRect.size.height = max(outerRect.height, clippedRect.height)
+    }
+    
+    let maxYDiff = clippedRect.maxY - outerRect.maxY
+    if maxYDiff > 0 {
+      clippedRect.origin.y = max(outerRect.minY, clippedRect.minY - maxYDiff)
+      clippedRect.size.height = max(outerRect.height, clippedRect.height)
+    }
+    
+    return clippedRect
+  }
+  
+  func clipped(in outerRect: CGRect) -> CGRect {
+    var clippedRect = self
+    
+    let minXDiff = outerRect.minX - clippedRect.minX
+    if minXDiff > 0 {
+      clippedRect.origin.x = outerRect.minX
+      clippedRect.size.width = max(0, clippedRect.width - minXDiff)
+    }
+    
+    let maxXDiff = clippedRect.maxX - outerRect.maxX
+    if maxXDiff > 0 {
+      clippedRect.size.width = max(0, clippedRect.width - maxXDiff)
+    }
+    
+    let minYDiff = outerRect.minY - clippedRect.minY
+    if minYDiff > 0 {
+      clippedRect.origin.y = outerRect.minY
+      clippedRect.size.height = max(0, clippedRect.height - minYDiff)
+    }
+    
+    let maxYDiff = clippedRect.maxY - outerRect.maxY
+    if maxYDiff > 0 {
+      clippedRect.size.height = max(0, clippedRect.height - maxYDiff)
+    }
+    
+    return clippedRect
   }
 }

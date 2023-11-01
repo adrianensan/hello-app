@@ -14,6 +14,30 @@ public extension EdgeInsets {
   }
 }
 
+//@available(iOS 17.0, *)
+//@available(macOS 14.0, *)
+//@MainActor
+//@Observable
+//public class HelloSafeArea: ObservableObject {
+//  public var safeAreaInsets: EdgeInsets = .init()
+//  
+//  #if os(iOS)
+//  public var keyboardFrame: CGRect = .zero
+//  #endif
+//  
+//  public func updateSafeAreaInsets(to edgeInsets: EdgeInsets) {
+//    guard safeAreaInsets != edgeInsets else { return }
+//    safeAreaInsets = edgeInsets
+//  }
+//  
+//  #if os(iOS)
+//  public func updateKeyboardFrame(to keyboardFrame: CGRect) {
+//    guard self.keyboardFrame != keyboardFrame else { return }
+//    self.keyboardFrame = keyboardFrame
+//  }
+//  #endif
+//}
+
 @MainActor
 public class UIProperties: ObservableObject {
   
@@ -45,6 +69,10 @@ public class UIProperties: ObservableObject {
     guard safeAreaInsets != edgeInsets else { return }
     safeAreaInsets = edgeInsets
   }
+  
+  public var horizontalMargin: CGFloat { 6 + max(0, min(36, (size.width - 320) / 5)) }
+  
+  public var innerHorizontalMargin: CGFloat { 8 + max(0, min(8, (size.width - 320) / 5)) }
   
   #if os(iOS)
   public func updateKeyboardFrame(to keyboardFrame: CGRect) {

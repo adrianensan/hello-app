@@ -14,6 +14,7 @@ public extension Animation {
 
 public struct HighlightButtonStyle: ButtonStyle {
   
+  #if os(macOS)
   @State var isHovered: Bool = false
   
   public func makeBody(configuration: Configuration) -> some View {
@@ -23,6 +24,17 @@ public struct HighlightButtonStyle: ButtonStyle {
       .clickable()
       .onHover { isHovered = $0 }
   }
+  #else
+  public func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .brightness(configuration.isPressed ? 0.05 : 0)
+      .clickable()
+  }
+  #endif
+}
+
+public extension ButtonStyle where Self == HighlightButtonStyle {
+  static var highlight: HighlightButtonStyle { HighlightButtonStyle() }
 }
 
 public struct NoButtonStyle: ButtonStyle {
@@ -103,8 +115,4 @@ public extension ButtonStyle where Self == HelloButtonStyle {
     HelloButtonStyle(allowHaptics: allowHaptics)
     
   }
-}
-
-public extension ButtonStyle where Self == HighlightButtonStyle {
-  static var highlight: HighlightButtonStyle { HighlightButtonStyle() }
 }

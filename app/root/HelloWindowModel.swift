@@ -3,6 +3,10 @@ import SwiftUI
 @MainActor
 public class HelloWindowModel: ObservableObject {
   
+  #if os(iOS)
+  public weak var window: UIWindow?
+  #endif
+  
   @Published public var popupView: AnyView?
   @Published public var alertView: AnyView?
   

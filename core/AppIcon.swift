@@ -26,8 +26,8 @@ public extension BaseAppIcon {
   
   var systemName: String? {
     switch self {
-    case Self.defaultIcon: return nil
-    default: return imageName
+    case Self.defaultIcon: nil
+    default: imageName
     }
   }
   
@@ -35,9 +35,9 @@ public extension BaseAppIcon {
   
   static func infer(from systemName: String?) -> Self {
     if let systemName = systemName {
-      return Self(rawValue: systemName.deletingPrefix("app-icon-")) ?? defaultIcon
+      Self(rawValue: systemName.deletingPrefix("app-icon-")) ?? defaultIcon
     } else {
-      return defaultIcon
+      defaultIcon
     }
   }
 }

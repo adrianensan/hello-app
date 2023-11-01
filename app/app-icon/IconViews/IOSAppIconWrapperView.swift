@@ -17,6 +17,6 @@ public struct IOSAppIconWrapperView<Content: View>: View {
     view
       .clipShape(AppIconShape())
       .frame(width: isSmall ? 32 : 60, height: isSmall ? 32 : 60)
-      .overlay(AppIconShape().stroke(theme.text.primaryColor.opacity(0.1), lineWidth: 1))
+      .overlay(AppIconShape().stroke(theme.text.primary.color.opacity(0.1), lineWidth: 1))
   }
 }

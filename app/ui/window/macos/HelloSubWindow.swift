@@ -20,6 +20,7 @@ open class HelloSubWindow: OFWindow {
     case .bottom: target.y += nsWindow.frame.size.height
     default: ()
     }
+    
     if let screenFrame = screen?.visibleFrame {
       let topClip = (target.y + nsWindow.frame.height) - screenFrame.maxY
       if topClip > 0 {
@@ -49,11 +50,12 @@ open class HelloSubWindow: OFWindow {
   override public var autoCloseBehaviour: OFWindow.AutoCloseBehaviour { autoCloseBehaviourOption }
   
   public init(id: String = UUID().uuidString,
-       anchor: WindowAnchor,
-       autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onFocusLost,
-       parentWindow: OFWindow,
-       windowLevel: NSWindow.Level = .tornOffMenu,
-       content: @autoclosure () -> some View) {
+              anchor: WindowAnchor,
+              autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onFocusLost,
+              parentWindow: OFWindow? = nil,
+              windowLevel: NSWindow.Level = .tornOffMenu,
+              content: @autoclosure () -> some View,
+              canBecomeMain: Bool = false) {
     self.anchor = anchor
     autoCloseBehaviourOption = autoCloseBehaviour
     super.init(view: content().closableByEscape(),
@@ -62,7 +64,7 @@ open class HelloSubWindow: OFWindow {
                size: .fixedAuto,
                windowFlags: [.fullSizeContentView, .titled, .closable],
                forceKey: autoCloseBehaviour == .onHoverLost || autoCloseBehaviour == .onHoverLostRespectingMouseInWindow ? false : nil,
-               canBecomeMainOverride: false)
+               canBecomeMainOverride: canBecomeMain)
     draggableArea = .none
     nsWindow.collectionBehavior = [.transient, .ignoresCycle, .stationary]
     nsWindow.level = windowLevel

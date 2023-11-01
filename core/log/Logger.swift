@@ -9,7 +9,7 @@ public actor Logger: Sendable {
   
   public let logFile: URL
   public private(set) var logStatements: [LogStatement]
-  public weak var subscriber: LoggerSubscriber?
+  public weak var subscriber: (any LoggerSubscriber)?
   
   private var lastLoggedTime: TimeInterval = 0
   private var isFlushPending: Bool = false
@@ -63,7 +63,7 @@ public actor Logger: Sendable {
     }
   }
   
-  public func subscribe(_ subscriber: LoggerSubscriber) {
+  public func subscribe(_ subscriber: any LoggerSubscriber) {
     self.subscriber = subscriber
   }
   

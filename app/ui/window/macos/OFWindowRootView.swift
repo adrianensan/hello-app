@@ -3,7 +3,32 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
 public struct OFWindowRootView<Content: View>: View {
+  
+  private var becomeActiveNotification: Notification.Name {
+#if os(macOS)
+    NSApplication.didBecomeActiveNotification
+#else
+    UIApplication.didBecomeActiveNotification
+#endif
+  }
+  
+  private var resignActiveNotification: Notification.Name {
+#if os(macOS)
+    NSApplication.didResignActiveNotification
+#else
+    UIApplication.didEnterBackgroundNotification
+#endif
+  }
+  
+  private var isActiveSystem: Bool {
+#if os(macOS)
+    NSApplication.shared.isActive
+#else
+    UIApplication.shared.applicationState == .active
+#endif
+  }
   
   @Environment(\.colorScheme) private var colorScheme
   
@@ -14,10 +39,11 @@ public struct OFWindowRootView<Content: View>: View {
   @ObservedObject private var themeManager: ActiveThemeManager = .main
   
   private var content: Content
-  @State private var uiProperties: UIProperties
+  @ObservedObject private var uiProperties: UIProperties
+  @State var isActive: Bool = false
   
   public init(uiProperties: UIProperties, @ViewBuilder content: () -> Content) {
-    self._uiProperties = State(initialValue: uiProperties)
+    self.uiProperties = uiProperties
     self.content = content()
   }
   
@@ -58,9 +84,18 @@ public struct OFWindowRootView<Content: View>: View {
     }.ignoresSafeArea()
       .environment(\.colorScheme, theme.isDark ? .dark : .light)
       .environment(\.currentHover, hoverManager.currentHover)
-      .environment(\.theme, HelloSwiftUITheme(theme: .init(theme: theme)))
+      .environment(\.theme, HelloSwiftUITheme(theme: theme))
+      .environment(\.isActive, isActive)
+      .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
+      .environment(\.safeArea, uiProperties.safeAreaInsets)
       .environmentObject(uiProperties)
       .environmentObject(windowManager)
+      .onAppear { isActive = isActiveSystem }
+      .onReceive(NotificationCenter.default.publisher(for: becomeActiveNotification)) { _ in
+        isActive = true
+      }.onReceive(NotificationCenter.default.publisher(for: resignActiveNotification)) { _ in
+        isActive = false
+      }
   }
 }
 #endif

@@ -2,16 +2,47 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
 public struct HelloAppRootView<Content: View>: View {
+  
+  private var becomeActiveNotification: Notification.Name {
+    #if os(macOS)
+    NSApplication.didBecomeActiveNotification
+    #elseif os(iOS)
+    UIApplication.didBecomeActiveNotification
+    #elseif os(watchOS)
+    WKApplication.didBecomeActiveNotification
+    #endif
+  }
+  
+  private var resignActiveNotification: Notification.Name {
+    #if os(macOS)
+    NSApplication.didResignActiveNotification
+    #elseif os(iOS)
+    UIApplication.didEnterBackgroundNotification
+    #elseif os(watchOS)
+    WKApplication.didEnterBackgroundNotification
+    #endif
+  }
+  
+  private var isActiveSystem: Bool {
+    #if os(macOS)
+    NSApplication.shared.isActive
+    #elseif os(iOS)
+    UIApplication.shared.applicationState == .active
+    #else
+    true
+    #endif
+  }
   
   @Environment(\.colorScheme) var colorScheme: ColorScheme
   @EnvironmentObject var uiProperties: UIProperties
+  @EnvironmentObject var windowModel: HelloWindowModel
   
   @ObservedObject var themeManager: ActiveThemeManager = .main
   
-  @StateObject var windowModel = HelloWindowModel()
-  
   @State var showHelloModal: Bool = false//Hello.isFirstLaunch
+  @State var isActive: Bool = false
   
   var content: Content
   
@@ -25,13 +56,16 @@ public struct HelloAppRootView<Content: View>: View {
     : themeManager.lightTHeme
   }
   
+  @State var keyboardFrame: CGRect?
+  
   public var body: some View {
     ZStack {
       #if os(iOS)
       ZStack {
         content
           .frame(width: uiProperties.size.width, height: uiProperties.size.height)
-      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { notification in
+      }.environment(\.keyboardFrame, uiProperties.keyboardFrame)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { notification in
         if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
           uiProperties.keyboardAnimationDuration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0
           uiProperties.updateKeyboardFrame(to: keyboardFrame.cgRectValue)
@@ -41,6 +75,10 @@ public struct HelloAppRootView<Content: View>: View {
       }.onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { notification in
         uiProperties.keyboardAnimationDuration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0
         uiProperties.updateKeyboardFrame(to: .zero)
+      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
+        isActive = false
+      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
+        isActive = true
       }
       
       if let popupView = windowModel.popupView {
@@ -65,7 +103,9 @@ public struct HelloAppRootView<Content: View>: View {
       }
       #endif
     }.frame(width: uiProperties.size.width, height: uiProperties.size.height)
-      .environment(\.theme, HelloSwiftUITheme(theme: .init(theme: currentTheme)))
+      .environment(\.theme, HelloSwiftUITheme(theme: currentTheme))
+      .environment(\.isActive, isActive)
+      .environment(\.safeArea, uiProperties.safeAreaInsets)
       .animation(.easeInOut(duration: 0.2), value: currentTheme.id)
       .environmentObject(windowModel)
   }

@@ -1,6 +1,6 @@
 import Foundation
 
-private let htmlEntitiesTrie = Trie.constructFrom(valuesMap:[
+private let htmlEntitiesTrie = Trie(valuesMap: [
   "&amp;": "&",
   "%20": " ",
   "&#x20;": " ",
@@ -32,6 +32,8 @@ private let htmlEntitiesTrie = Trie.constructFrom(valuesMap:[
   "&QUOT;": "\"",
   "&#34;": "\"",
   "&#034;": "\"",
+  // Pipe
+  "%7C": "|",
   // LT <
   "&lt;": "<",
   "&LT;": "<",
@@ -76,7 +78,7 @@ public extension StringProtocol {
   
   var removingHTMLEntities: String {
     var updatedString: [UInt8] = []
-    var trieNode: TrieNode = htmlEntitiesTrie
+    var trieNode: TrieNode<String> = htmlEntitiesTrie
     var tempCharacters: [UInt8] = []
     let andVal = "&".utf8.first!
     for character in self.utf8 {

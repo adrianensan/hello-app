@@ -29,6 +29,10 @@ public enum IPhoneModel: CustomStringConvertible, Equatable {
   case _14Plus
   case _14Pro
   case _14ProMax
+  case _15
+  case _15Plus
+  case _15Pro
+  case _15ProMax
   case se1
   case se2
   case se3
@@ -61,6 +65,10 @@ public enum IPhoneModel: CustomStringConvertible, Equatable {
     case ._14Plus: return "14 Plus"
     case ._14Pro: return "14 Pro"
     case ._14ProMax: return "14 Pro Max"
+    case ._15: return "15"
+    case ._15Plus: return "15 Plus"
+    case ._15Pro: return "15 Pro"
+    case ._15ProMax: return "15 Pro Max"
     case .se1: return "SE (2016)"
     case .se2: return "SE (2020)"
     case .se3: return "SE (2022)"
@@ -98,6 +106,10 @@ public enum IPhoneModel: CustomStringConvertible, Equatable {
     case "14,8": return ._14Plus
     case "15,2": return ._14Pro
     case "15,3": return ._14ProMax
+    case "15,4": return ._15
+    case "15,5": return ._15Plus
+    case "16,1": return ._15Pro
+    case "16,2": return ._15ProMax
     default: return .unknown(modelNumber: modelNumber)
     }
   }

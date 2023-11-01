@@ -30,7 +30,6 @@ fileprivate struct DelaysTouches: ViewModifier {
   }
 }
 
-@MainActor
 fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
   @Binding var disabled: Bool
   var duration: TimeInterval?
@@ -41,7 +40,8 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
     configuration.label
       .onChange(of: configuration.isPressed, perform: handleIsPressed)
   }
-  
+
+  @MainActor
   private func handleIsPressed(isPressed: Bool) {
     isPressedAction(isPressed)
     if isPressed {

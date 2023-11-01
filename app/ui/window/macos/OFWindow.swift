@@ -81,7 +81,7 @@ class OFNSWindow: NSWindow {
 @MainActor
 public class OFWindowModel: ObservableObject {
   public weak var window: OFWindow?
-  public var subWindowID: String?
+  @Published public var subWindowID: String?
   
   public func subWindowClosed() {
     if let oldSubWindowID = subWindowID {
@@ -103,12 +103,31 @@ fileprivate class OFWindowDelegate: NSObject, NSWindowDelegate {
     self.ofWindow = ofWindow
   }
   
+  func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+    ofWindow?.willResize(to: frameSize) ?? frameSize
+  }
+  
   func windowDidResize(_ notification: Notification) {
     ofWindow?.onResizeInternal()
     ofWindow?.onResize()
     ofWindow?.onFrameChanged()
   }
   
+  func windowDidChangeOcclusionState(_ notification: Notification) {
+    ofWindow?.onOcclusionStateChanged()
+  }
+  
+  func windowDidMiniaturize(_ notification: Notification) {
+    ofWindow?.onMinimize()
+  }
+  
+  func windowWillMiniaturize(_ notification: Notification) {
+    ofWindow?.willMinimize()
+  }
+  
+  func windowDidDeminiaturize(_ notification: Notification) {
+    ofWindow?.onDeMinimize()
+  }
   func windowWillClose(_ notification: Notification) {
     ofWindow?.onCloseInternal()
     ofWindow?.onClose()
@@ -131,10 +150,6 @@ fileprivate class OFWindowDelegate: NSObject, NSWindowDelegate {
   func windowDidResignMain(_ notification: Notification) {
     ofWindow?.onMainFocusLostInternal()
     ofWindow?.onMainFocusLost()
-  }
-  
-  func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
-    ofWindow?.willResize(to: frameSize) ?? frameSize
   }
 
   func windowDidChangeScreen(_ notification: Notification) {
@@ -198,7 +213,12 @@ open class OFWindow: OFDefaultWindow {
   open var autoCloseBehaviour: AutoCloseBehaviour { .never }
   
   open var extraTopSafeArea: CGFloat { 0 }
+  open var closeButtonPosition: CGPoint? { nil }
+  open var minimizeButtonPosition: CGPoint? { nil }
+  open var maximizeButtonPosition: CGPoint? { nil }
   open var hideWindowButtons: Bool { false }
+  
+  public var temporaryWindowID: String? { temporaryWindow?.id }
   
   private var temporaryWindow: OFWindow?
   public var subWindow: OFWindow?
@@ -354,6 +374,10 @@ open class OFWindow: OFDefaultWindow {
   open func onScreenChange() {}
   open func onLiveResizeStart() {}
   open func onLiveResizeEnd() {}
+  open func onMinimize() {}
+  open func willMinimize() {}
+  open func onDeMinimize() {}
+  open func onOcclusionStateChanged() {}
   
   fileprivate func onMouseEnteredInternal() {
     isMouseInWindow = true
@@ -399,6 +423,8 @@ open class OFWindow: OFDefaultWindow {
   fileprivate func onResizeInternal() {
     updateControlButtons()
   }
+  
+  public var buttonSize: CGFloat { nsWindow.standardWindowButton(.closeButton)?.frame.size.width ?? 8 }
   
   public var frame: CGRect { nsWindow.frame }
   
@@ -484,13 +510,14 @@ open class OFWindow: OFDefaultWindow {
                                    content: subView))
   }
   
-  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onFocusLost) {
+  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onHoverLost) {
     show(temporaryWindow: HelloSubWindow(id: id,
-                                   anchor: .init(point: point, alignment: alignment),
-                                   autoCloseBehaviour: autoCloseBehaviour,
-                                   parentWindow: self,
-                                   windowLevel: nsWindow.level,
-                                   content: temporarySubView))
+                                         anchor: .init(point: point, alignment: alignment),
+                                         autoCloseBehaviour: autoCloseBehaviour,
+                                         parentWindow: nil,
+                                         windowLevel: nsWindow.level,
+                                         content: temporarySubView,
+                                         canBecomeMain: false))
   }
   
   public func closeSubWindow() {
@@ -527,7 +554,16 @@ open class OFWindow: OFDefaultWindow {
                                                 right: (diff.size.width - diff.origin.x)))
   }
   
-  func updateControlButtons() {
+  public func updateControlButtons() {
+    if let closeButtonPosition {
+      nsWindow.standardWindowButton(.closeButton)?.frame.origin = closeButtonPosition
+    }
+    if let minimizeButtonPosition {
+      nsWindow.standardWindowButton(.miniaturizeButton)?.frame.origin = minimizeButtonPosition
+    }
+    if let maximizeButtonPosition {
+      nsWindow.standardWindowButton(.zoomButton)?.frame.origin = maximizeButtonPosition
+    }
     guard extraTopSafeArea > 0 else { return }
     let current = (nsWindow.standardWindowButton(.closeButton)?.frame.origin.y ?? 0)
     if let expectedCloseButtonY {
@@ -540,6 +576,26 @@ open class OFWindow: OFDefaultWindow {
                                                                                y: -0.5 * extraTopSafeArea)
     nsWindow.standardWindowButton(.zoomButton)?.frame.origin += CGPoint(x: 0.5 * extraTopSafeArea,
                                                                         y: -0.5 * extraTopSafeArea)
+  }
+}
+
+#elseif os(iOS)
+
+import SwiftUI
+
+@MainActor
+public class OFWindowModel: ObservableObject {
+  public weak var window: UIWindow?
+  public var subWindowID: String?
+  
+  public func subWindowClosed() {
+    if let oldSubWindowID = subWindowID {
+      Task {
+        try await Task.sleep(seconds: 0.2)
+        guard subWindowID == oldSubWindowID else { return }
+        subWindowID = nil
+      }
+    }
   }
 }
 #endif

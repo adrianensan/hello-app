@@ -88,7 +88,7 @@ public protocol TestAPIClient: Actor {
 }
 
 public extension TestAPIClient {
-  var userAgentString: String { "\(App.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
+  var userAgentString: String { "\(AppInfo.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
   
   func additionalHeaders(endpoint: some APIEndpoint) -> [String: String] { [:] }
   
@@ -174,7 +174,7 @@ public extension TestAPIClient {
     let requestStartTime = Date().timeIntervalSince1970
     var logStart = Endpoint.method.description + " " + urlPath(for: endpoint)
     
-    let request = try request(for: endpoint)
+    var request = try request(for: endpoint)
     
     let (data, urlResponse): (Data, URLResponse)
     switch endpoint.type {
@@ -197,6 +197,7 @@ public extension TestAPIClient {
         delegate = OFAPIUploadTaskDelegate(progressUpdater: progressUpdater)
       }
       do {
+        request.httpBody = nil
         (data, urlResponse) = try await session.upload(for: request, from: bodyData, delegate: delegate)
       } catch {
         let requestDuration = Date().timeIntervalSince1970 - requestStartTime
@@ -267,10 +268,10 @@ public extension TestAPIClient {
       return OFAPIResponse(headers: headers, content: decodedResponse)
     default:
       guard let decodedResponse = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: data) else {
-        if let stringResponse = String(data: data, encoding: .utf8) {
-          Log.debug(stringResponse, context: "API error")
-        }
         Log.error("\(logStart) failed to decode response", context: "API")
+        if let stringResponse = String(data: data, encoding: .utf8) {
+          Log.debug(stringResponse)
+        }
         throw APIError.invalidResponse
       }
       Log.info("\(logStart)", context: "API")
@@ -284,6 +285,7 @@ public extension TestAPIClient {
     var logStart = Endpoint.path
     
     let session = session.webSocketTask(with: urlRequest)
+    session.maximumMessageSize = 3145728
     
     let requestDuration = Date().timeIntervalSince1970 - requestStartTime
     logStart += String(format: " (%.2fs)", requestDuration)

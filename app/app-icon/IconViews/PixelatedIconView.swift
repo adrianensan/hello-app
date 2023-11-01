@@ -45,7 +45,7 @@ public struct PixelatedIconView: View {
   }
   
   public var body: some View {
-    Image(image)
+    Image(nativeImage: image)
       .resizable()
       .aspectRatio(contentMode: .fill)
       .background(HelloColor.black.swiftuiColor)

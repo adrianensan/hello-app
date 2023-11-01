@@ -23,7 +23,7 @@ public struct ViewableImageView: View {
   }
 
   public var body: some View {
-    Image(image)
+    Image(nativeImage: image)
       .resizable()
       .interpolation(.high)
       .antialiased(true)

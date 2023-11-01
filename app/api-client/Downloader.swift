@@ -17,7 +17,7 @@ public actor Downloader {
         $0.tlsMaximumSupportedProtocolVersion = .TLSv13
         $0.allowsExpensiveNetworkAccess = true
         $0.allowsConstrainedNetworkAccess = true
-        $0.httpAdditionalHeaders = ["User-Agent": "\(App.displayName) iOS v\(AppVersion.current?.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
+        $0.httpAdditionalHeaders = ["User-Agent": "\(AppInfo.displayName) iOS v\(AppVersion.current?.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
       },
       delegate: nil,
       delegateQueue: nil

@@ -1,3 +1,4 @@
+#if os(iOS) || os(macOS)
 import Foundation
 import AVKit
 
@@ -33,3 +34,4 @@ public enum VideoThumbnailGenerator {
     return image
   }
 }
+#endif

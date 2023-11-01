@@ -44,7 +44,7 @@ public struct StaticIconView: View {
   }
   
   public var body: some View {
-    Image(image)
+    Image(nativeImage: image)
       .resizable()
       .aspectRatio(contentMode: .fill)
   }

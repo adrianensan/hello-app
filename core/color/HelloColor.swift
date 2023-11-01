@@ -59,11 +59,7 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   }
   
   public init?(hexCode: String) {
-    var hexCode: String = hexCode.trimmingCharacters(in: .whitespacesAndNewlines)
-    
-    if (hexCode.hasPrefix("#")) {
-      hexCode.removeFirst()
-    }
+    let hexCode: String = hexCode.trimmingCharacters(in: .whitespacesAndNewlines).deletingPrefix("#")
     
     let scanner = Scanner(string: hexCode)
     var hexNumber: UInt64 = 0
@@ -164,7 +160,10 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   }
   
   public func isSimilar(to otherColor: HelloColor) -> Bool {
-    let diff = abs(r - otherColor.r) + abs(g - otherColor.g) + abs(b - otherColor.b)
+    let rDiff: Double = abs(r - otherColor.r)
+    let gDiff: Double = abs(g - otherColor.g)
+    let bDiff: Double = abs(b - otherColor.b)
+    let diff: Double = rDiff + gDiff + bDiff
     return diff / 3 < 0.1
   }
   

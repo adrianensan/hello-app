@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 import PackageDescription
 
 var dependencies: [Package.Dependency] = []
@@ -17,7 +17,7 @@ let opensslTargetDependency: Target.Dependency = .target(name: "OpenSSL")
 
 let package = Package(
   name: "HelloApp",
-  platforms: [.iOS(.v15), .macOS(.v12), .watchOS(.v8)],
+  platforms: [.iOS(.v16), .macOS(.v12), .watchOS(.v10)],
   products: [
     .library(name: "HelloApp", targets: ["HelloApp"]),
     .library(name: "HelloCore", targets: ["HelloCore"]),
@@ -28,10 +28,26 @@ let package = Package(
   targets: additionalTargets + [
     .target(name: "HelloCore",
             dependencies: [],
-            path: "core"),
+            path: "core",
+            swiftSettings: [
+              .enableUpcomingFeature("DisableOutwardActorInference"),
+              .enableUpcomingFeature("ImportObjcForwardDeclarations"),
+              .enableUpcomingFeature("BareSlashRegexLiterals"),
+              .enableUpcomingFeature("ExistentialAny"),
+              .enableUpcomingFeature("ForwardTrailingClosures"),
+              .enableUpcomingFeature("ConciseMagicFile")
+            ]),
     .target(name: "HelloApp",
             dependencies: ["HelloCore"],
-            path: "app"),
+            path: "app",
+            swiftSettings: [
+              .enableUpcomingFeature("DisableOutwardActorInference"),
+              .enableUpcomingFeature("ImportObjcForwardDeclarations"),
+              .enableUpcomingFeature("BareSlashRegexLiterals"),
+              .enableUpcomingFeature("ExistentialAny"),
+              .enableUpcomingFeature("ForwardTrailingClosures"),
+              .enableUpcomingFeature("ConciseMagicFile")
+            ]),
     .target(name: "HelloServer",
             dependencies: ["HelloCore", opensslTargetDependency],
             path: "server/code"),

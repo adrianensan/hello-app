@@ -8,8 +8,8 @@ public enum Orientation: String, Equatable, Hashable, Codable, Identifiable, Sen
   
   public var name: String {
     switch self {
-    case .vertical: return "Vertical"
-    case .horizontal: return "Horizontal"
+    case .vertical: "Vertical"
+    case .horizontal: "Horizontal"
     }
   }
 }

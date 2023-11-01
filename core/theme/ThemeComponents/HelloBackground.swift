@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HelloBackground: Codable {
+public enum HelloBackground: Codable, Sendable {
   case color(color: HelloColor, border: HelloBorder? = nil)
   case gradient(HelloGradient)
   case blur(dark: Bool, overlay: HelloColor? = nil, border: HelloBorder? = nil)

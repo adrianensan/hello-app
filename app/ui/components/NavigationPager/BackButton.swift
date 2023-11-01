@@ -13,6 +13,7 @@ public class BackProgressModel: ObservableObject {
 }
 
 #if os(iOS)
+@MainActor
 public struct BackButton: View {
   
   @Environment(\.theme) var theme

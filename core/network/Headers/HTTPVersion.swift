@@ -7,9 +7,9 @@ public enum HTTPVersion: CustomStringConvertible {
   
   public var description: String {
     switch self {
-    case .http1_0: return HTTPVersion.baseString + "1.0"
-    case .http1_1: return HTTPVersion.baseString + "1.1"
-    case .http2_0: return HTTPVersion.baseString + "2.0"
+    case .http1_0: HTTPVersion.baseString + "1.0"
+    case .http1_1: HTTPVersion.baseString + "1.1"
+    case .http2_0: HTTPVersion.baseString + "2.0"
     }
   }
 }

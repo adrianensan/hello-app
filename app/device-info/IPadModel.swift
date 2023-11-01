@@ -23,12 +23,14 @@ public enum IPadModel: CustomStringConvertible, Equatable {
   case pro11Inch1
   case pro11Inch2
   case pro11Inch3
+  case pro11Inch4
   
   case pro12Inch1
   case pro12Inch2
   case pro12Inch3
   case pro12Inch4
   case pro12Inch5
+  case pro12Inch6
   
   case unknown(modelNumber: String)
 
@@ -50,11 +52,13 @@ public enum IPadModel: CustomStringConvertible, Equatable {
     case .pro11Inch1: return "Pro (11 inch) (1st generation)"
     case .pro11Inch2: return "Pro (11 inch) (2nd generation)"
     case .pro11Inch3: return "Pro (11 inch) (3rd generation)"
+    case .pro11Inch4: return "Pro (11 inch) (4th generation)"
     case .pro12Inch1: return "Pro (12.9 inch) (1st generation)"
     case .pro12Inch2: return "Pro (12.9 inch) (2nd generation)"
     case .pro12Inch3: return "Pro (12.9 inch) (3rd generation)"
     case .pro12Inch4: return "Pro (12.9 inch) (4th generation)"
     case .pro12Inch5: return "Pro (12.9 inch) (5th generation)"
+    case .pro12Inch6: return "Pro (12.9 inch) (6th generation)"
     case .unknown(let modelNumber): return "? (\(modelNumber))"
     }
   }
@@ -82,6 +86,8 @@ public enum IPadModel: CustomStringConvertible, Equatable {
     case "13,4", "13,5", "13,6", "13,7": return .pro11Inch3
     case "13,8", "13,9", "13,10", "13,11": return .pro12Inch5
     case "14,1": return .mini6
+    case "14,3", "14,4": return .pro11Inch4
+    case "14,5", "14,6": return .pro12Inch6
     default: return .unknown(modelNumber: modelNumber)
     }
   }

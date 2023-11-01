@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if os(iOS)
+#if os(iOS) || os(watchOS) || os(visionOS)
 public typealias NativeImage = UIImage
 #elseif os(macOS)
 public typealias NativeImage = NSImage
@@ -19,11 +19,11 @@ public typealias NativeImage = FakeImage
 #endif
 
 public extension Image {
-  init(_ image: NativeImage) {
+  init(nativeImage: NativeImage) {
 #if os(iOS)
-    self.init(uiImage: image)
+    self.init(uiImage: nativeImage)
 #elseif os(macOS)
-    self.init(nsImage: image)
+    self.init(nsImage: nativeImage)
 #else
     self.init("")
 #endif

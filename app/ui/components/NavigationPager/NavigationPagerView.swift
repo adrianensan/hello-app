@@ -6,11 +6,11 @@ public extension Animation {
   }
 }
 
+@MainActor
 public struct NavigationPagerView: View {
   
   @Environment(\.theme) var theme
-  
-  @EnvironmentObject private var uiProperties: UIProperties
+  @Environment(\.safeArea) var safeAreaInsets
   
   @ObservedObject var model: PagerModel
   var allowsBack: Bool
@@ -25,21 +25,21 @@ public struct NavigationPagerView: View {
   }
   
   var previousPageOptions: PagerPageOptions {
-    model.viewStackOptions[max(0, model.viewDepth - 2)] ?? PagerPageOptions()
+    model.viewStack[max(0, model.viewDepth - 2)].options
   }
   
   var currentPageOptions: PagerPageOptions {
-    model.viewStackOptions[model.viewDepth - 1] ?? PagerPageOptions()
+    model.activePage?.options ?? PagerPageOptions()
   }
   
   public var body: some View {
     GeometryReader { geometry in
       ZStack(alignment: .leading) {
         HStack(spacing: 0) {
-          ForEach(0..<model.viewStack.count, id: \.self) { i in
-            model.viewStack[i]
+          ForEach(model.viewStack) { page in
+            page.view
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-              .allowsHitTesting(model.allowInteraction && (model.viewDepth - 1) == i)
+              .allowsHitTesting(model.allowInteraction && model.activePageID == page.id)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
           }
@@ -55,12 +55,13 @@ public struct NavigationPagerView: View {
             BackButton()
               .foregroundColor(
                 backDragGestureState.width > 32
-                ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primaryColor
-                : currentPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primaryColor
+                ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
+                : currentPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
               )
           }.zIndex(4)
-            .padding(8)
-            .padding(.top, uiProperties.safeAreaInsets.top)
+            .padding(.horizontal, 8)
+            .frame(height: model.config.defaultNavBarHeight)
+            .padding(.top, safeAreaInsets.top)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .opacity(model.viewDepth > 1 && currentPageOptions.allowBackOverride != false ? 1 : 0)
             .animation(.easeInOut(duration: 0.2), value: model.viewDepth)
@@ -71,6 +72,7 @@ public struct NavigationPagerView: View {
 //        .clipShape(Rectangle())
     }.environmentObject(model)
       .environmentObject(model.backProgressModel)
+      .environment(\.helloPagerConfig, model.config)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(ClearClickableView())
       .gesture(DragGesture(minimumDistance: allowsBack && model.viewDepth > 1 && currentPageOptions.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
@@ -92,5 +94,16 @@ public struct NavigationPagerView: View {
           model.backProgressModel.backProgress = progress
         }
       }
+  }
+}
+
+private struct HelloPagerConfigEnvironmentKey: EnvironmentKey {
+  static let defaultValue = HelloPagerConfig()
+}
+
+public extension EnvironmentValues {
+  var helloPagerConfig: HelloPagerConfig {
+    get { self[HelloPagerConfigEnvironmentKey.self] }
+    set { self[HelloPagerConfigEnvironmentKey.self] = newValue }
   }
 }

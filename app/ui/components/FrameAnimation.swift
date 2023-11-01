@@ -1,5 +1,7 @@
 import SwiftUI
 
+import HelloCore
+
 @MainActor
 public struct FrameAnimation: View {
   
@@ -15,11 +17,13 @@ public struct FrameAnimation: View {
     var frame: Int = 0
     var frames: [Int: NativeImage] = [:]
     var loopIteration: Int = 0
+    var delay: TimeInterval = 0
+    var fps: CGFloat = 30
     var freezeFrame: Int?
   }
   
   @State private var currentImageFrame: NativeImage?
-  @State private var isHidden: Bool = true
+  @State private var isHidden: Bool
   @State private var nonObserved = NonObserved()
   @State private var loopMode: RepeatBehaviour = .playOnce
   @State private var isActive: Bool = false
@@ -27,12 +31,12 @@ public struct FrameAnimation: View {
   private var name: String
   private var initialFrame: Int
   private var lastFrame: Int
-  private var delay: TimeInterval
-  private var fps: CGFloat
   private var lingerOnLastFrame: Bool
   private var repeatBehaviour: RepeatBehaviour
   private var contentMode: ContentMode
   private var resetSignal: Bool
+  private var delay: TimeInterval
+  private var fps: CGFloat
   
   public init(name: String,
               startFrameOverride: Int? = nil,
@@ -41,6 +45,7 @@ public struct FrameAnimation: View {
               freezeFrame: Int? = nil,
               delay: TimeInterval = 0,
               fps: CGFloat = 60,
+              showImmediately: Bool = false,
               lingerOnLastFrame: Bool = false,
               repeatBehaviour: RepeatBehaviour = .playOnce,
               contentMode: ContentMode = .fit,
@@ -48,29 +53,32 @@ public struct FrameAnimation: View {
     self.name = name
     self.initialFrame = initialFrame
     self.lastFrame = lastFrame
-    self.delay = delay
-    self.fps = fps
+    _isHidden = State(initialValue: !showImmediately)
     self.lingerOnLastFrame = lingerOnLastFrame
     self.repeatBehaviour = repeatBehaviour
     self._loopMode = State(initialValue: repeatBehaviour)
     self.contentMode = contentMode
     self.resetSignal = resetSignal
+    self.delay = delay
+    self.fps = fps
     nonObserved.frame = (startFrameOverride ?? initialFrame)
     nonObserved.freezeFrame = freezeFrame
+    nonObserved.delay = delay
+    nonObserved.fps = fps
   }
   
   public func animate() async throws {
     guard nonObserved.isActive && !nonObserved.isAnimating else { return }
     nonObserved.isAnimating = true
     defer { nonObserved.isAnimating = false }
-    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+    try await Task.sleep(nanoseconds: UInt64(nonObserved.delay * 1_000_000_000))
     isHidden = false
     while nonObserved.frame < nonObserved.freezeFrame ?? lastFrame {
       nonObserved.frame += 1
       if let nextImage = nonObserved.frames[nonObserved.frame] {
         currentImageFrame = nextImage
       }
-      try await Task.sleep(nanoseconds: UInt64(1 / fps * 1_000_000_000))
+      try await Task.sleep(nanoseconds: UInt64(1 / nonObserved.fps * 1_000_000_000))
     }
     switch loopMode {
     case .playOnce: ()
@@ -97,7 +105,7 @@ public struct FrameAnimation: View {
   }
   
   public var body: some View {
-    Image(currentImageFrame ?? NativeImage())
+    Image(nativeImage: currentImageFrame ?? NativeImage())
       .resizable()
       .aspectRatio(contentMode: contentMode)
       .opacity(isHidden ? 0 : 1)
@@ -113,6 +121,8 @@ public struct FrameAnimation: View {
                   currentImageFrame = nextImage
                 }
               }
+            } else {
+//              Log.warning("Missing asset named '\(imageName)'", context: "Frame Animation")
             }
           }
         }
@@ -125,6 +135,10 @@ public struct FrameAnimation: View {
         loopMode = newii
         nonObserved.loopIteration = 0
         Task { try await animate() }
+      }.onChange(of: delay) { delay in
+        nonObserved.delay = delay
+      }.onChange(of: fps) { fps in
+        nonObserved.fps = fps
       }.onDisappear {
         nonObserved.isActive = false
       }

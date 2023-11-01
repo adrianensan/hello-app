@@ -1,7 +1,7 @@
 import Foundation
 
 public struct EmptyResponse: Codable, Sendable {
-  public init(from decoder: Decoder) throws {}
+  public init(from decoder: any Decoder) throws {}
   
   public init() {}
 }

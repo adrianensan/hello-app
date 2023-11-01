@@ -116,7 +116,7 @@ public struct GlitchIconView: View {
         ForEach(segments) { segment in
           Group {
             if let image = image {
-              Image(image)
+              Image(nativeImage: image)
             } else {
               BaseGlitchIconView(characterView: characterView)
                 .frame(width: geometry.size.width,

@@ -44,7 +44,7 @@ public struct ImageViewer: View {
           }
         }
       }) {
-        Image(image)
+        Image(nativeImage: image)
           .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(width: originalFrame?.width, height: originalFrame?.height)

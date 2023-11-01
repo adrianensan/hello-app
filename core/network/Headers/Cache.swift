@@ -6,8 +6,8 @@ public enum Cache: CustomStringConvertible {
   
   public var description: String {
     switch self {
-    case .noCache: return "\(Header.cacheControl)no-cache"
-    case .noStore: return "\(Header.cacheControl)no-store"
+    case .noCache: "\(Header.cacheControl)no-cache"
+    case .noStore: "\(Header.cacheControl)no-store"
     }
   }
 }

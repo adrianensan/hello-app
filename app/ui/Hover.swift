@@ -21,6 +21,7 @@ public extension EnvironmentValues {
   }
 }
 
+@MainActor
 struct HoverableViewModifier: ViewModifier {
   
   @ObservedObject var hoverModel: HoverManager = .main
@@ -47,6 +48,7 @@ struct HoverableViewModifier: ViewModifier {
   }
 }
 
+@MainActor
 public extension View {
   func hover(id: String) -> some View {
     modifier(HoverableViewModifier(id: id))

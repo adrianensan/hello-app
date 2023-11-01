@@ -1,7 +1,6 @@
 import Foundation
 
-public typealias AppInfo = App
-public enum App {
+public enum AppInfo {
   public static let bundleID: String = Bundle.main.bundleIdentifier ?? "?"
   public static let version: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
   public static let build: String = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
@@ -16,15 +15,11 @@ public enum App {
   #endif
   
   public static var rootBundleID: String {
-    if bundleID.hasSuffix(".widget") {
-      return String(bundleID.dropLast(7))
-    } else if bundleID.hasSuffix(".watchkitapp") {
-      return String(bundleID.dropLast(12))
-    } else if bundleID.hasSuffix(".watchkitapp.watchkitextension") {
-      return String(bundleID.dropLast(30))
-    } else {
-      return bundleID
-    }
+    bundleID
+      .deletingSuffix(".widget")
+      .deletingSuffix(".watchkitapp")
+      .deletingSuffix(".watchkitapp.watchkitextension")
+      .deletingSuffix(".messages-extension")
   }
   public static var appGroup: String { "group.\(rootBundleID)" }
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }

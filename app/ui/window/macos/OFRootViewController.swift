@@ -23,6 +23,7 @@ class OFRootViewController<Content: View>: NSViewController {
   // When using SwiftUI as the rootview alongside full window content, it becomes impossible to
   // properly ignore safe area (same is true on iOS).
   // Force safe area to be zero and save the actual safe area in an object
+  @MainActor
   class NoSafeAreaNSView: NSHostingView<OFWindowRootView<Content>> {
     
     var realSafeAreaInsets: NSEdgeInsets { super.safeAreaInsets }
@@ -32,6 +33,9 @@ class OFRootViewController<Content: View>: NSViewController {
     var onMouseExited: (() -> Void)?
     var onCursorUpdate: (() -> Void)?
     
+    override func contentCompressionResistancePriority(for orientation: NSLayoutConstraint.Orientation) -> NSLayoutConstraint.Priority {
+      NSLayoutConstraint.Priority(14)
+    }
     override var safeAreaInsets: NSEdgeInsets { NSEdgeInsets() }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     

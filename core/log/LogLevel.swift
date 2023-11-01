@@ -12,14 +12,14 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable {
   
   public var icon: String {
     switch self {
-    case .debug: return "curlybraces"
-    case .verbose: return "curlybraces"
-    case .info: return "info.circle.fill"
-    case .meta: return "power"
-    case .warning: return "exclamationmark.triangle.fill"
-    case .error: return "exclamationmark.octagon.fill"
-    case .fatal: return "exclamationmark.octagon.fill"
-    case .wtf: return "exclamationmark.octagon.fill"
+    case .debug: "curlybraces"
+    case .verbose: "curlybraces"
+    case .info: "info.circle.fill"
+    case .meta: "power"
+    case .warning: "exclamationmark.triangle.fill"
+    case .error: "exclamationmark.octagon.fill"
+    case .fatal: "exclamationmark.octagon.fill"
+    case .wtf: "exclamationmark.octagon.fill"
     }
   }
 }

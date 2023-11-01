@@ -63,5 +63,9 @@ public enum Log {
   public static func wtf(_ message: String, context: String = "") {
     log(level: .wtf, message: message, context: context)
   }
+  
+  public static func meta(_ message: String, context: String = "") {
+    log(level: .meta, message: message, context: context)
+  }
 }
 

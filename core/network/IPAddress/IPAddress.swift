@@ -42,22 +42,22 @@ public enum IPAddress: IPAddressConformable {
   
   public var type: IPVersion {
     switch self {
-    case .ipv4(let address): return address.type
-    case .ipv6(let address): return address.type
+    case .ipv4(let address): address.type
+    case .ipv6(let address): address.type
     }
   }
   
   public var bytes: [UInt8] {
     switch self {
-    case .ipv4(let address): return address.bytes
-    case .ipv6(let address): return address.bytes
+    case .ipv4(let address): address.bytes
+    case .ipv6(let address): address.bytes
     }
   }
   
   public var string: String {
     switch self {
-    case .ipv4(let address): return address.string
-    case .ipv6(let address): return address.string
+    case .ipv4(let address): address.string
+    case .ipv6(let address): address.string
     }
   }
   

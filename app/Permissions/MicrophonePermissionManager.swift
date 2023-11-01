@@ -1,5 +1,6 @@
 import AVFoundation
 
+#if os(ios) || os(macOS)
 @MainActor
 public class MicrophonePermissionsManager {
   
@@ -29,3 +30,4 @@ public class CameraPermissionsManager {
     return await AVCaptureDevice.requestAccess(for: .video)
   }
 }
+#endif

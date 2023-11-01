@@ -11,27 +11,27 @@ public enum HTTPMethod: CustomStringConvertible, Codable, Sendable {
   
   public static func infer(from string: String) -> HTTPMethod {
     switch string.lowercased() {
-    case "get": return .get
-    case "head": return .head
-    case "post": return .post
-    case "put": return .put
-    case "delete": return .delete
-    case "patch": return .patch
-    case "options": return .options
-    default: return .unknown
+    case "get": .get
+    case "head": .head
+    case "post": .post
+    case "put": .put
+    case "delete": .delete
+    case "patch": .patch
+    case "options": .options
+    default: .unknown
     }
   }
   
   public var description: String {
     switch self {
-    case .get: return "GET"
-    case .head: return "HEAD"
-    case .post: return "POST"
-    case .put: return "PUT"
-    case .delete: return "DELETE"
-    case .patch: return "PATCH"
-    case .options: return "OPTIONS"
-    default: return "UNKNOWN"
+    case .get: "GET"
+    case .head: "HEAD"
+    case .post: "POST"
+    case .put: "PUT"
+    case .delete: "DELETE"
+    case .patch: "PATCH"
+    case .options: "OPTIONS"
+    default: "UNKNOWN"
     }
   }
 }
