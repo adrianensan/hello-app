@@ -17,7 +17,7 @@ let opensslTargetDependency: Target.Dependency = .target(name: "OpenSSL")
 
 let package = Package(
   name: "HelloApp",
-  platforms: [.iOS(.v16), .macOS(.v12), .watchOS(.v10)],
+  platforms: [.iOS(.v17), .macOS(.v14), .watchOS(.v10)],
   products: [
     .library(name: "HelloApp", targets: ["HelloApp"]),
     .library(name: "HelloCore", targets: ["HelloCore"]),
