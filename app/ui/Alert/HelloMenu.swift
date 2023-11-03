@@ -23,8 +23,6 @@ public struct HelloMenu: View {
   
   @Environment(\.theme) private var theme
   
-  @EnvironmentObject private var windowModel: HelloWindowModel
-  
   var position: CGPoint
   var anchor: Alignment = .topTrailing
   var items: [HelloMenuItem]

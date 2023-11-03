@@ -1,4 +1,5 @@
 import SwiftUI
+import Observation
 
 extension Animation {
   public static var interactive: Animation {
@@ -7,18 +8,18 @@ extension Animation {
 }
 
 @MainActor
-public class BackProgressModel: ObservableObject {
+@Observable
+public class BackProgressModel {
   
-  @Published public var backProgress: CGFloat = 0
+  public var backProgress: CGFloat = 0
 }
 
 #if os(iOS)
 @MainActor
 public struct BackButton: View {
   
-  @Environment(\.theme) var theme
-  
-  @EnvironmentObject var backProgressModel: BackProgressModel
+  @Environment(\.theme) private var theme
+  @Environment(BackProgressModel.self) private var backProgressModel
   
   var rotationInterval: CGFloat = 0.6
   

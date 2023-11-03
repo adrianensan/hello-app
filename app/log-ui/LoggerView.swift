@@ -12,14 +12,14 @@ public struct LoggerView: View {
     var lastBottomY: CGFloat = 0
   }
   
-  @StateObject var loggerObservable: LoggerObservable
+  @State var loggerObservable: LoggerObservable
   
   @State var nonObserved = NonObservedStorage()
   
   let overscrollInsets: EdgeInsets
   
   public init(logger: Logger = Log.logger, overscroll: EdgeInsets = EdgeInsets()) {
-    _loggerObservable = .init(wrappedValue: LoggerObservable(logger: logger))
+    _loggerObservable = State(initialValue: LoggerObservable(logger: logger))
     overscrollInsets = overscroll
   }
   

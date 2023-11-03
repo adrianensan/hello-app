@@ -1,17 +1,19 @@
 import SwiftUI
+import Observation
 
 @MainActor
-public class HelloWindowModel: ObservableObject {
+@Observable
+public class HelloWindowModel {
   
   #if os(iOS)
   public weak var window: UIWindow?
   #endif
   
-  @Published public var popupView: AnyView?
-  @Published public var alertView: AnyView?
+  public private(set) var popupView: AnyView?
+  public private(set) var alertView: AnyView?
   
-  public var popupViewID: String = UUID().uuidString
-  public var alertViewID: String = UUID().uuidString
+  public private(set) var popupViewID: String = UUID().uuidString
+  public private(set) var alertViewID: String = UUID().uuidString
   
   
   public func showPopup<Content: View>(_ view: Content) {

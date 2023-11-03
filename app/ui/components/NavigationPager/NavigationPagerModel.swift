@@ -61,11 +61,12 @@ public struct PagerPageOptions: Sendable {
 }
 
 @MainActor
-public class PagerModel: ObservableObject {
-  public var backProgressModel = BackProgressModel()
-  @Published public var viewStack: [PagerPage] = []
-  @Published public var viewDepth: Int = 0
-  @Published public var allowInteraction: Bool = true
+@Observable
+public class PagerModel {
+  public private(set) var backProgressModel = BackProgressModel()
+  public private(set) var viewStack: [PagerPage] = []
+  public private(set) var viewDepth: Int = 0
+  public var allowInteraction: Bool = true
   var config: HelloPagerConfig
   private var lastPage: String?
   

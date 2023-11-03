@@ -1,6 +1,5 @@
 import Foundation
 
-@available(iOS 17.0, macOS 14.0, *)
 @Observable
 public class HelloClock {
   public enum HelloClockState {

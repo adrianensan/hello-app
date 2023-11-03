@@ -76,6 +76,7 @@ extension PersistenceProperty {
 }
 
 @propertyWrapper
+@Observable
 public class Persistent<Property: PersistenceProperty> {
   
   private let persistence: OFPersistence

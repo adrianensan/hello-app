@@ -10,8 +10,7 @@ public struct ViewableImageView: View {
   }
 
   @Environment(\.theme) private var theme
-  
-  @EnvironmentObject private var windowModel: HelloWindowModel
+  @Environment(HelloWindowModel.self) private var windowModel
 
   @State private var nonObserved = NonObserved()
   @State private var isOpened = false

@@ -5,8 +5,9 @@ import HelloCore
 
 public struct ImageViewer: View {
   
-  @EnvironmentObject private var uiProperties: UIProperties
-  @EnvironmentObject private var windowModel: HelloWindowModel
+  @Environment(\.windowFrame) private var windowFrame
+  @Environment(\.safeArea) private var safeAreaInsets
+  @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var dismissVelocity: CGPoint?
   
@@ -26,7 +27,7 @@ public struct ImageViewer: View {
   
   public var body: some View {
     ZStack {
-      ZoomScrollView(size: uiProperties.size,
+      ZoomScrollView(size: windowFrame.size,
                      onDismiss: { velocity in
         guard !isDissmising else { return }
         Task {
@@ -49,7 +50,7 @@ public struct ImageViewer: View {
           .aspectRatio(contentMode: .fit)
           .frame(width: originalFrame?.width, height: originalFrame?.height)
           .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
-          .frame(width: uiProperties.size.width, height: uiProperties.size.height,
+          .frame(width: windowFrame.size.width, height: windowFrame.size.height,
                  alignment: originalFrame == nil ? .center : .topLeading)
           .offset(x: -1000 * (dismissVelocity?.x ?? 0),
                   y: -1000 * (dismissVelocity?.y ?? 0))
@@ -71,7 +72,7 @@ public struct ImageViewer: View {
           .frame(width: 44, height: 44)
           .clickable()
       }.padding(8)
-        .padding(.top, uiProperties.safeAreaInsets.top)
+        .padding(.top, safeAreaInsets.top)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
         .opacity(!isDissmising ? 1 : 0)
         .animation(.easeInOut(duration: 0.36), value: isDissmising)

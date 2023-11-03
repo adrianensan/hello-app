@@ -18,9 +18,24 @@ public enum HelloScrollTarget: Sendable, Identifiable, Hashable {
 
 @MainActor
 @Observable
-public class HelloScrollViewModel: ObservableObject {
+public class HelloScrollModel {
   
   fileprivate var scrollTarget: HelloScrollTarget?
+  public fileprivate(set) var scrollOffset: CGFloat = 0
+  public fileprivate(set) var dismissProgress: CGFloat = 0
+  
+  @ObservationIgnored fileprivate var coordinateSpaceName: String = UUID().uuidString
+  @ObservationIgnored fileprivate var readyForDismiss: Bool = true
+  @ObservationIgnored fileprivate var isDismissing: Bool = true
+  @ObservationIgnored fileprivate var timeReachedtop: TimeInterval = 0
+  
+  public init() {
+    
+  }
+  
+  public var overscroll: CGFloat { max(0, scrollOffset) }
+  
+  public var hasScrolled: Bool { scrollOffset < 0 }
   
   public func scroll(to scrollTarget: HelloScrollTarget) {
     self.scrollTarget = scrollTarget
@@ -30,76 +45,56 @@ public class HelloScrollViewModel: ObservableObject {
 @MainActor
 public struct HelloScrollView<Content: View>: View {
   
-  private class NonObservedStorage {
-    var coordinateSpaceName: String = UUID().uuidString
-    var readyForDismiss: Bool = true
-    var scrollOffset: CGFloat = 0
-    var dismissProgress: CGFloat = 0
-    var isDismissing: Bool = true
-    var timeReachedtop: TimeInterval = 0
-  }
-  
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.keyboardFrame) private var keyboardFrame
   
-  @State private var model = HelloScrollViewModel()
-  @State private var nonObservedStorage = NonObservedStorage()
+  @State private var model: HelloScrollModel
   
   private let allowScroll: Bool
   private let showsIndicators: Bool
-  private var onScrollUpdate: ((CGFloat) -> Void)?
-  private var onDismissUpdate: ((CGFloat) -> Void)?
   private var content: Content
   
   public init(allowScroll: Bool = true,
               showsIndicators: Bool = true,
-              scrollToTopTrigger: Binding<Bool> = .constant(false),
-              onScrollUpdate: ((CGFloat) -> Void)? = nil,
-              onDismissUpdate: ((CGFloat) -> Void)? = nil,
+              model: HelloScrollModel? = nil,
               @ViewBuilder content: () -> Content) {
     self.allowScroll = allowScroll
     self.showsIndicators = showsIndicators
-    self.onScrollUpdate = onScrollUpdate
-    self.onDismissUpdate = onDismissUpdate
     self.content = content()
+    _model = State(initialValue: model ?? HelloScrollModel())
   }
   
-  func update(offset: CGFloat) {
+  private func update(offset: CGFloat) {
     Task {
       if offset < 0 {
-        nonObservedStorage.timeReachedtop = Date().timeIntervalSince1970
+        model.timeReachedtop = Date().timeIntervalSince1970
       }
       
-      if nonObservedStorage.readyForDismiss
-          && !nonObservedStorage.isDismissing
-          && offset > nonObservedStorage.scrollOffset {
-        nonObservedStorage.isDismissing = true
+      if model.readyForDismiss
+          && !model.isDismissing
+          && offset > model.scrollOffset {
+        model.isDismissing = true
       }
       
-      if !nonObservedStorage.readyForDismiss
-          && offset >= 0 && offset < nonObservedStorage.scrollOffset
-          && Date().timeIntervalSince1970 - nonObservedStorage.timeReachedtop > 0.1 {
-        nonObservedStorage.readyForDismiss = true
-      } else if nonObservedStorage.readyForDismiss && offset < 0 {
-        nonObservedStorage.readyForDismiss = false
-        nonObservedStorage.isDismissing = false
+      if !model.readyForDismiss
+          && offset >= 0 && offset < model.scrollOffset
+          && Date().timeIntervalSince1970 - model.timeReachedtop > 0.1 {
+        model.readyForDismiss = true
+      } else if model.readyForDismiss && offset < 0 {
+        model.readyForDismiss = false
+        model.isDismissing = false
       }
       
-      guard nonObservedStorage.scrollOffset != offset else { return }
-      onScrollUpdate?(offset)
-      nonObservedStorage.scrollOffset = offset
+      guard model.scrollOffset != offset else { return }
+      model.scrollOffset = offset
       
-      if let onDismissUpdate = onDismissUpdate {
-        if nonObservedStorage.isDismissing {
-          let newDismissProgress = min(1, max(0, offset / 100))
-          guard nonObservedStorage.dismissProgress != newDismissProgress else { return }
-          nonObservedStorage.dismissProgress = newDismissProgress
-          onDismissUpdate(newDismissProgress)
-        } else if nonObservedStorage.dismissProgress != 0 {
-          nonObservedStorage.dismissProgress = 0
-          onDismissUpdate(0)
-        }
+      if model.isDismissing {
+        let newDismissProgress = min(1, max(0, offset / 100))
+        guard model.dismissProgress != newDismissProgress else { return }
+        model.dismissProgress = newDismissProgress
+      } else if model.dismissProgress != 0 {
+        model.dismissProgress = 0
       }
     }
   }
@@ -109,11 +104,11 @@ public struct HelloScrollView<Content: View>: View {
       ScrollView(allowScroll ? .vertical : [], showsIndicators: showsIndicators) {
         VStack(spacing: 0) {
           PositionReaderView(onPositionChange: { update(offset: $0.y) },
-                             coordinateSpace: .named(nonObservedStorage.coordinateSpaceName))
+                             coordinateSpace: .named(model.coordinateSpaceName))
           .frame(height: 0)
           content
         }.id(HelloScrollTarget.top.id)
-      }.coordinateSpace(name: nonObservedStorage.coordinateSpaceName)
+      }.coordinateSpace(name: model.coordinateSpaceName)
         .safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: safeAreaInsets.top)
         }.safeAreaInset(edge: .bottom, spacing: 0) {
@@ -122,6 +117,7 @@ public struct HelloScrollView<Content: View>: View {
           if let scrollTarget = model.scrollTarget {
             //            withAnimation(.easeOut(duration: 0.5)) {
             scrollView.scrollTo(scrollTarget.id, anchor: .top)
+            model.scrollTarget = nil
             //            }
           }
         }.compositingGroup()

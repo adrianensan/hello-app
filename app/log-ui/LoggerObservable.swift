@@ -4,11 +4,12 @@ import Combine
 import HelloCore
 
 @MainActor
-public class LoggerObservable: NSObject, ObservableObject, LoggerSubscriber {
+@Observable
+public class LoggerObservable: NSObject, LoggerSubscriber {
   
-  @Published public var lineCount: Int
-  var logger: Logger
-  public var logStatements: [LogStatement] = []
+  public var lineCount: Int
+  let logger: Logger
+  @ObservationIgnored public var logStatements: [LogStatement] = []
   
   public init(logger: Logger) {
     self.logger = logger

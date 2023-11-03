@@ -23,8 +23,7 @@ extension Alignment {
 
 public struct PopupViewWrapper<Content: View>: View {
   
-  @EnvironmentObject private var windowModel: HelloWindowModel
-  @EnvironmentObject private var uiProperties: UIProperties
+  @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var isVisible: Bool
   
@@ -66,9 +65,6 @@ public struct PopupViewWrapper<Content: View>: View {
         if !$0 {
           windowModel.dismissPopup()
         }
-      }.onChange(of: uiProperties.size) { _ in
-        guard isVisible else { return }
-        isVisible = false
       }
   }
 }

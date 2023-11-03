@@ -50,9 +50,7 @@ public struct HelloAlertConfig {
 public struct HelloAlert: View {
   
   @Environment(\.theme) var theme
-  
-  @EnvironmentObject var uiConstants: UIProperties
-  @EnvironmentObject var windowModel: HelloWindowModel
+  @Environment(HelloWindowModel.self) var windowModel
   
   @State var animateIn: Bool = false
   @State var isDismissed: Bool = false

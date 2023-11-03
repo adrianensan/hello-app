@@ -12,7 +12,7 @@ public struct NavigationPagerView: View {
   @Environment(\.theme) var theme
   @Environment(\.safeArea) var safeAreaInsets
   
-  @ObservedObject var model: PagerModel
+  var model: PagerModel
   var allowsBack: Bool
   
   @State var viewDepth: CGFloat = 0
@@ -70,8 +70,8 @@ public struct NavigationPagerView: View {
         #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
 //        .clipShape(Rectangle())
-    }.environmentObject(model)
-      .environmentObject(model.backProgressModel)
+    }.environment(model)
+      .environment(model.backProgressModel)
       .environment(\.helloPagerConfig, model.config)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(ClearClickableView())

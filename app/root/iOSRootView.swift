@@ -36,8 +36,8 @@ public struct HelloAppRootView<Content: View>: View {
   }
   
   @Environment(\.colorScheme) var colorScheme: ColorScheme
+  @Environment(HelloWindowModel.self) private var windowModel
   @EnvironmentObject var uiProperties: UIProperties
-  @EnvironmentObject var windowModel: HelloWindowModel
   
   @ObservedObject var themeManager: ActiveThemeManager = .main
   
@@ -107,6 +107,6 @@ public struct HelloAppRootView<Content: View>: View {
       .environment(\.isActive, isActive)
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .animation(.easeInOut(duration: 0.2), value: currentTheme.id)
-      .environmentObject(windowModel)
+      .environment(windowModel)
   }
 }
