@@ -5,13 +5,13 @@ import HelloCore
 @MainActor
 fileprivate class PersistentStateInternal<Property: PersistenceProperty>: ObservableObject {
   
-  private let persistence: OFPersistence
+  private let persistence: HelloPersistence
   private let property: Property
   private var updateTask: Task<Void, any Error>?
   
   @Published var value: Property.Value
   
-  init(persistence: OFPersistence, property: Property) {
+  init(persistence: HelloPersistence, property: Property) {
     self.persistence = persistence
     self.property = property
     self.value = persistence.initialValue(for: property)
@@ -38,7 +38,7 @@ public struct PersistentState<Property: PersistenceProperty>: DynamicProperty {
   
   @StateObject private var persistentInternal: PersistentStateInternal<Property>
   
-  public init(_ property: Property, in persistence: OFPersistence = Property.persistence) {
+  public init(_ property: Property, in persistence: HelloPersistence = Property.persistence) {
     _persistentInternal = StateObject(wrappedValue: PersistentStateInternal(persistence: persistence, property: property))
   }
   

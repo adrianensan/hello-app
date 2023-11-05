@@ -44,9 +44,9 @@ public actor Downloader {
     
     let (data, urlResponse): (Data, URLResponse)
     do {
-      var delegate: OFAPIDownloadTaskDelegate?
+      var delegate: HelloAPIDownloadTaskDelegate?
       if let progressUpdater = downloadProgressUpdate {
-        delegate = OFAPIDownloadTaskDelegate(progressUpdater: progressUpdater)
+        delegate = HelloAPIDownloadTaskDelegate(progressUpdater: progressUpdater)
       }
       (data, urlResponse) = try await session.data(from: url, delegate: delegate)
     } catch {
@@ -75,7 +75,7 @@ public actor Downloader {
   }
 }
 
-class OFAPIDownloadTaskDelegate: NSObject, URLSessionDataDelegate {
+class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDataDelegate {
   
   let progressUpdater: (Double) -> Void
   

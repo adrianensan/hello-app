@@ -2,7 +2,7 @@ import Foundation
 
 public struct IsTesterPersistenceProperty: PersistenceProperty {
   
-  public static var persistence: OFPersistence { Persistence.defaultPersistence }
+  public static var persistence: HelloPersistence { Persistence.defaultPersistence }
   
   public var defaultValue: Bool { false }
   

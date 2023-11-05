@@ -9,11 +9,11 @@ import HelloCore
 @propertyWrapper
 public class Persistent2<Property: PersistenceProperty> {
   
-  private let persistence: OFPersistence
+  private let persistence: HelloPersistence
   private let property: Property
   private var value: Property.Value
   
-  public init(_ property: Property, in persistence: OFPersistence = Property.persistence) {
+  public init(_ property: Property, in persistence: HelloPersistence = Property.persistence) {
     self.persistence = persistence
     self.property = property
     value = persistence.initialValue(for: property)
@@ -44,7 +44,7 @@ public struct PersistentObservable<Property: PersistenceProperty>: DynamicProper
   
   @State private var persistentInternal: Persistent2<Property>
   
-  public init(_ property: Property, in persistence: OFPersistence = Property.persistence) {
+  public init(_ property: Property, in persistence: HelloPersistence = Property.persistence) {
     _persistentInternal = .init(initialValue: Persistent2(property, in: persistence))
   }
   

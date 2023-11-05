@@ -12,17 +12,17 @@ public enum APIError: LocalizedError, Sendable {
   
   public var errorDescription: String? {
     switch self {
-    case .invalidURL: return "Invalid URL"
-    case .invalidRequest: return "Invalid HTTP Request"
-    case .fail: return "Fail"
-    case .duplicate: return "Duplicate request"
-    case .invalidResponse: return "Invalid Response"
-    case .httpError(let statusCode): return "HTTP Error \(statusCode)"
+    case .invalidURL: "Invalid URL"
+    case .invalidRequest: "Invalid HTTP Request"
+    case .fail: "Fail"
+    case .duplicate: "Duplicate request"
+    case .invalidResponse: "Invalid Response"
+    case .httpError(let statusCode): "HTTP Error \(statusCode)"
     }
   }
 }
 
-public struct OFAPIResponse<Content: Decodable & Sendable>: Sendable {
+public struct HelloAPIResponse<Content: Decodable & Sendable>: Sendable {
   public var headers: [String: String]
   public var content: Content
 }
@@ -73,8 +73,10 @@ public struct OFAPIResponse<Content: Decodable & Sendable>: Sendable {
 //  }
 //}
 
-public protocol TestAPIClient: Actor {
-  var apiRoot: String { get }
+public protocol HelloAPIClient: Actor {
+  var scheme: String { get }
+  
+  var host: String { get }
   
   var session: URLSession { get }
   
@@ -87,7 +89,12 @@ public protocol TestAPIClient: Actor {
   func handle(errorResponse response: HTTPResponse<Data?>) async throws
 }
 
-public extension TestAPIClient {
+public extension HelloAPIClient {
+  
+  var scheme: String { "https" }
+  
+  var apiRoot: String { "\(scheme)://\(host)" }
+  
   var userAgentString: String { "\(AppInfo.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
   
   func additionalHeaders(endpoint: some APIEndpoint) -> [String: String] { [:] }
@@ -96,47 +103,41 @@ public extension TestAPIClient {
   
   func handle(errorResponse response: HTTPResponse<Data?>) async throws {}
   
-  private func urlPath<Endpoint: APIEndpoint>(for endpoint: Endpoint) -> String {
-    var urlString: String = Endpoint.path
-    if let actualSubpath = endpoint.subpath {
-      urlString += "/" + actualSubpath
-    }
+  private func request(for endpoint: some APIEndpoint) throws -> URLRequest {
+    var urlComponents = URLComponents()
+    urlComponents.scheme = scheme
+    urlComponents.host = host
+    urlComponents.path = endpoint.path
+    urlComponents.queryItems = endpoint.parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
     
-    if !endpoint.parameters.isEmpty {
-      urlString += "?"
-      for (i, (key, value)) in endpoint.parameters.enumerated() {
-        if i > 0 {
-          urlString += "&"
-        }
-        urlString += "\(key)=\(value)"
-      }
-    }
-    return urlString
-  }
-  
-  private func request<Endpoint: APIEndpoint>(for endpoint: Endpoint) throws -> URLRequest {
-    var subpath: String = urlPath(for: endpoint)
-    
-    var apiRoot = apiRoot
     if endpoint.type == .websocket {
-      apiRoot = apiRoot.replacingOccurrences(of: "https", with: "wss")
+      urlComponents.scheme = "wss"
     }
     
-    guard let url = URL(string: apiRoot + subpath) else {
-      throw APIError.invalidRequest
+    guard let url = urlComponents.url else {
+      throw HelloError("Invalid url \(scheme)\(host)\(endpoint.urlString)")
     }
     
     let bodyData: Data?
     let inferredContentType: ContentType?
-    if let data = endpoint.body as? Data? {
-      bodyData = data
-      inferredContentType = nil
-    } else if let string = endpoint.body as? String? {
-      bodyData = string?.data(using: .utf8)
-      inferredContentType = .plain
+    if let body = endpoint.body {
+      if let data = body as? Data? {
+        bodyData = data
+        inferredContentType = nil
+      } else if let string = body as? String? {
+        bodyData = string?.data(using: .utf8)
+        inferredContentType = .plain
+      } else {
+        do {
+          bodyData = try JSONEncoder().encode(body)
+        } catch {
+          throw HelloError("Failed to encode body for \(scheme)\(host)\(endpoint.urlString)")
+        }
+        inferredContentType = .json
+      }
     } else {
-      bodyData = try? JSONEncoder().encode(endpoint.body)
-      inferredContentType = .json
+      bodyData = nil
+      inferredContentType = nil
     }
     
     return URLRequest(url: url) +& {
@@ -148,7 +149,7 @@ public extension TestAPIClient {
         $0.allowsConstrainedNetworkAccess = true
       }
       $0.timeoutInterval = endpoint.timeout
-      $0.httpMethod = Endpoint.method.description
+      $0.httpMethod = endpoint.method.description
       if let contentType = endpoint.contentType ?? inferredContentType {
         var contentTypeString = contentType.typeString
         if let boundary = endpoint.contentTypeBoundary {
@@ -168,13 +169,19 @@ public extension TestAPIClient {
   
   @discardableResult
   func request<Endpoint: APIEndpoint>(endpoint: Endpoint,
-                                             isRetry: Bool = false,
-                                             retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
-                                             uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> OFAPIResponse<Endpoint.ResponseType> {
+                                      isRetry: Bool = false,
+                                      retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
+                                      uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> HelloAPIResponse<Endpoint.ResponseType> {
     let requestStartTime = Date().timeIntervalSince1970
-    var logStart = Endpoint.method.description + " " + urlPath(for: endpoint)
+    var logStart = endpoint.method.description + " " + endpoint.urlString
     
-    var request = try request(for: endpoint)
+    var request: URLRequest
+    do {
+      request = try self.request(for: endpoint)
+    } catch {
+      Log.error(error.localizedDescription, context: "API")
+      throw error
+    }
     
     let (data, urlResponse): (Data, URLResponse)
     switch endpoint.type {
@@ -192,9 +199,9 @@ public extension TestAPIClient {
         Log.error("\(logStart) Request body empty for expected upload", context: "API")
         throw APIError.invalidRequest
       }
-      var delegate: OFAPIUploadTaskDelegate?
+      var delegate: HelloAPIUploadTaskDelegate?
       if let progressUpdater = uploadProgressUpdate {
-        delegate = OFAPIUploadTaskDelegate(progressUpdater: progressUpdater)
+        delegate = HelloAPIUploadTaskDelegate(progressUpdater: progressUpdater)
       }
       do {
         request.httpBody = nil
@@ -233,7 +240,7 @@ public extension TestAPIClient {
       try await handle(errorResponse: response)
       let error = APIError.httpError(statusCode: httpResponse.statusCode)
       if !isRetry, try await retryHandler?(error) == true {
-        Log.info("\(Endpoint.path) retrying", context: "API")
+        Log.info("\(endpoint.path) retrying", context: "API")
         return try await self.request(endpoint: endpoint, isRetry: true, retryHandler: retryHandler)
       } else {
         throw error
@@ -251,21 +258,21 @@ public extension TestAPIClient {
         throw APIError.invalidResponse
       }
       Log.info("\(logStart)", context: "API")
-      return OFAPIResponse(headers: headers, content: decodedResponse)
+      return HelloAPIResponse(headers: headers, content: decodedResponse)
     case is Data.Type:
       guard let decodedResponse = data as? Endpoint.ResponseType else {
         Log.error("\(logStart) failed to decode response", context: "API")
         throw APIError.invalidResponse
       }
       Log.info("\(logStart)", context: "API")
-      return OFAPIResponse(headers: headers, content: decodedResponse)
+      return HelloAPIResponse(headers: headers, content: decodedResponse)
     case is String.Type:
       guard let decodedResponse = String(data: data, encoding: .utf8) as? Endpoint.ResponseType else {
         Log.error("\(logStart) failed to decode response", context: "API")
         throw APIError.invalidResponse
       }
       Log.info("\(logStart)", context: "API")
-      return OFAPIResponse(headers: headers, content: decodedResponse)
+      return HelloAPIResponse(headers: headers, content: decodedResponse)
     default:
       guard let decodedResponse = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: data) else {
         Log.error("\(logStart) failed to decode response", context: "API")
@@ -275,14 +282,14 @@ public extension TestAPIClient {
         throw APIError.invalidResponse
       }
       Log.info("\(logStart)", context: "API")
-      return OFAPIResponse(headers: headers, content: decodedResponse)
+      return HelloAPIResponse(headers: headers, content: decodedResponse)
     }
   }
   
   func websocketsSession<Endpoint: APIEndpoint>(endpoint: Endpoint) throws -> URLSessionWebSocketTask {
     let urlRequest = try request(for: endpoint)
     let requestStartTime = Date().timeIntervalSince1970
-    var logStart = Endpoint.path
+    var logStart = endpoint.path
     
     let session = session.webSocketTask(with: urlRequest)
     session.maximumMessageSize = 3145728
@@ -295,7 +302,7 @@ public extension TestAPIClient {
   }
 }
 
-class OFAPIUploadTaskDelegate: NSObject, URLSessionTaskDelegate {
+class HelloAPIUploadTaskDelegate: NSObject, URLSessionTaskDelegate {
   
   let progressUpdater: (Double) -> Bool
   
