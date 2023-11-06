@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HelloFont: Codable {
+public enum HelloFont: Codable, Sendable, Hashable {
   
   case rounded
   case normal

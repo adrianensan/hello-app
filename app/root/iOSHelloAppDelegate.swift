@@ -32,7 +32,7 @@ open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, He
 //  }
   
   open var rootView: RootView { fatalError("No root view provided") }
-  open var persistence: OFPersistence { fatalError() }
+  open var persistence: HelloPersistence { fatalError() }
   
   public final func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     applicationDidLaunch()

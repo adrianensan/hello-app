@@ -31,3 +31,9 @@ public extension ArraySlice {
     return [Element](repeating: [Element](self), count: count)
   }
 }
+
+public extension Collection where Element: Numeric {
+  func sum() -> Element {
+    reduce(0) { $0 + $1 }
+  }
+}

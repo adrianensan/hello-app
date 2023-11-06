@@ -5,9 +5,8 @@ import HelloApp
 
 public struct HelloCloseButton: View {
   
-  @Environment(\.theme) var helloTheme
-  
-  @EnvironmentObject var dismissModel: HelloDismissModel
+  @Environment(\.theme) private var helloTheme
+  @Environment(HelloDismissModel.self) private var dismissModel
   
   public init() { }
   

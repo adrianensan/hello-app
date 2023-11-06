@@ -18,8 +18,8 @@ public enum PersistenceType: Sendable {
 
 public struct NoOld: PersistenceProperty {
   
-  public static var persistence: OFPersistence {
-    OFPersistence(defaultsSuiteName: nil, pathRoot: URL(string: "")!, keychain: .init(service: ""))
+  public static var persistence: HelloPersistence {
+    HelloPersistence(defaultsSuiteName: nil, pathRoot: URL(string: "")!, keychain: .init(service: ""))
   }
   
 //  public var key: Key
@@ -42,7 +42,7 @@ public protocol PersistenceProperty: Sendable {
 //  associatedtype Key: PersistenceKey
   associatedtype OldProperty: PersistenceProperty = NoOld
   
-  static var persistence: OFPersistence { get }
+  static var persistence: HelloPersistence { get }
   
   var defaultValue: Value { get }
   
@@ -63,7 +63,7 @@ public protocol PersistenceProperty: Sendable {
 
 extension PersistenceProperty {
   
-  public static var persistence: OFPersistence { Persistence.defaultPersistence }
+  public static var persistence: HelloPersistence { Persistence.defaultPersistence }
   
   public func cleanup(value: Value) -> Value { value }
   
@@ -79,13 +79,13 @@ extension PersistenceProperty {
 @Observable
 public class Persistent<Property: PersistenceProperty> {
   
-  private let persistence: OFPersistence
+  private let persistence: HelloPersistence
   private let property: Property
   private var value: Property.Value
   
   public var onUpdate: (() -> Void)?
   
-  public init(_ property: Property, in persistence: OFPersistence = Property.persistence) {
+  public init(_ property: Property, in persistence: HelloPersistence = Property.persistence) {
     self.persistence = persistence
     self.property = property
     value = persistence.initialValue(for: property)

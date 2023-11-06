@@ -1,11 +1,11 @@
 import Foundation
 
-public enum HelloSemanticColor: Codable, Sendable {
+public enum HelloSemanticColor: Codable, Sendable, Hashable {
   case accent
   case error
 }
 
-public enum HelloFill: Codable, Sendable {
+public enum HelloFill: Codable, Sendable, Hashable {
   case color(color: HelloColor)
   case gradient(HelloGradient)
   case semanticColor(HelloSemanticColor)

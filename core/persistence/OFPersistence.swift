@@ -7,13 +7,13 @@ public class Weak<T: AnyObject> {
   }
 }
 
-public enum OFPersistenceError: Error {
+public enum HelloPersistenceError: Error {
   case updatesCancelled
 }
 
 extension UserDefaults: @unchecked Sendable {}
 
-public actor OFPersistence {
+public actor HelloPersistence {
   
   nonisolated public let defaults: UserDefaults
   nonisolated public let keychain: KeychainHelper
@@ -67,7 +67,7 @@ public actor OFPersistence {
   
   private func updateContinuation<Property: PersistenceProperty>(for property: Property, id: String, to newContinuation: Any?) {
     var existingContinuations = updateTaskContinuations[property.location.id] ?? [:]
-    (existingContinuations[id] as? CheckedContinuation<Property.Value, any Error>)?.resume(throwing: OFPersistenceError.updatesCancelled)
+    (existingContinuations[id] as? CheckedContinuation<Property.Value, any Error>)?.resume(throwing: HelloPersistenceError.updatesCancelled)
     existingContinuations[id] = newContinuation
     updateTaskContinuations.updateValue(existingContinuations, forKey: property.location.id)
   }
@@ -416,7 +416,7 @@ public enum Persistence {
     }
   }
   
-  public static let defaultPersistence = OFPersistence(defaultsSuiteName: nil,
+  public static let defaultPersistence = HelloPersistence(defaultsSuiteName: nil,
                                                        pathRoot: defaultPathRoot,
                                                        keychain: KeychainHelper(service: AppInfo.bundleID))
   

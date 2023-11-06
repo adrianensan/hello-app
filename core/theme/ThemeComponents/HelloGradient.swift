@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HelloGradient: Codable, Sendable {
+public struct HelloGradient: Codable, Sendable, Hashable {
   
   public enum GradientType: Codable, Sendable {
     case topToBottom

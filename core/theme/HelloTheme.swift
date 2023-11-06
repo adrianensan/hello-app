@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HelloBorder: Codable, Sendable {
+public struct HelloBorder: Codable, Sendable, Hashable {
   public var color: HelloColor
   public var width: CGFloat
   
@@ -10,7 +10,7 @@ public struct HelloBorder: Codable, Sendable {
   }
 }
 
-public struct HelloThemeLayer: Codable, Sendable {
+public struct HelloThemeLayer: Codable, Sendable, Hashable {
   
   public var background: HelloBackground
   
@@ -109,7 +109,7 @@ public enum HelloThemeScheme: Codable, Sendable, Equatable {
   case dark
 }
 
-public struct HelloTheme: Codable {
+public struct HelloTheme: Codable, Hashable {
   public var id: String
   public var name: String
   
