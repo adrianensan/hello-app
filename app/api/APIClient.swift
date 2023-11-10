@@ -105,39 +105,30 @@ public extension HelloAPIClient {
   
   private func request(for endpoint: some APIEndpoint) throws -> URLRequest {
     var urlComponents = URLComponents()
-    urlComponents.scheme = scheme
-    urlComponents.host = host
+    urlComponents.scheme = endpoint.scheme.rawValue
+    urlComponents.host = endpoint.host
     urlComponents.path = endpoint.path
     urlComponents.queryItems = endpoint.parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
     
-    if endpoint.type == .websocket {
-      urlComponents.scheme = "wss"
-    }
-    
     guard let url = urlComponents.url else {
-      throw HelloError("Invalid url \(scheme)\(host)\(endpoint.urlString)")
+      throw HelloError("Invalid url \(endpoint.urlString)")
     }
     
     let bodyData: Data?
     let inferredContentType: ContentType?
-    if let body = endpoint.body {
-      if let data = body as? Data? {
-        bodyData = data
-        inferredContentType = nil
-      } else if let string = body as? String? {
-        bodyData = string?.data(using: .utf8)
-        inferredContentType = .plain
-      } else {
-        do {
-          bodyData = try JSONEncoder().encode(body)
-        } catch {
-          throw HelloError("Failed to encode body for \(scheme)\(host)\(endpoint.urlString)")
-        }
-        inferredContentType = .json
-      }
-    } else {
-      bodyData = nil
+    if let data = endpoint.body as? Data? {
+      bodyData = data
       inferredContentType = nil
+    } else if let string = endpoint.body as? String? {
+      bodyData = string?.data(using: .utf8)
+      inferredContentType = .plain
+    } else {
+      do {
+        bodyData = try JSONEncoder().encode(endpoint.body)
+      } catch {
+        throw HelloError("Failed to encode body for \(endpoint.urlString)")
+      }
+      inferredContentType = .json
     }
     
     return URLRequest(url: url) +& {
