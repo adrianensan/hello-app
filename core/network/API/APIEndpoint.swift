@@ -61,7 +61,7 @@ extension APIEndpoint {
   public var parameters: [String: String] { [:] }
   
   public var urlString: String {
-    var urlString: String = path
+    var urlString: String = "\(scheme)://\(host)\(path)"
     
     if !parameters.isEmpty {
       urlString += "?"

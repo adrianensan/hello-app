@@ -17,10 +17,12 @@ public struct HighlightButtonStyle: ButtonStyle {
   #if os(macOS)
   @State var isHovered: Bool = false
   
+  var highlightAmount: CGFloat = 0.05
+  
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .opacity(isHovered ? 0.95 : 1)
-      .brightness(configuration.isPressed ? 0.05 : 0)
+      .opacity(isHovered ? 1 - highlightAmount : 1)
+      .brightness(configuration.isPressed ? highlightAmount : 0)
       .clickable()
       .onHover { isHovered = $0 }
   }
@@ -35,6 +37,10 @@ public struct HighlightButtonStyle: ButtonStyle {
 
 public extension ButtonStyle where Self == HighlightButtonStyle {
   static var highlight: HighlightButtonStyle { HighlightButtonStyle() }
+}
+
+public extension ButtonStyle where Self == HighlightButtonStyle {
+  static var deepHighlight: HighlightButtonStyle { HighlightButtonStyle(highlightAmount: 0.16) }
 }
 
 public struct NoButtonStyle: ButtonStyle {
