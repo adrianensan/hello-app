@@ -63,23 +63,23 @@ public struct HelloAppRootView<Content: View>: View {
       #if os(iOS)
       ZStack {
         content
-          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
+//          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       }.environment(\.keyboardFrame, uiProperties.keyboardFrame)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { notification in
-        if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+          if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            uiProperties.keyboardAnimationDuration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0
+            uiProperties.updateKeyboardFrame(to: keyboardFrame.cgRectValue)
+          } else {
+            uiProperties.updateKeyboardFrame(to: .zero)
+          }
+        }.onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { notification in
           uiProperties.keyboardAnimationDuration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0
-          uiProperties.updateKeyboardFrame(to: keyboardFrame.cgRectValue)
-        } else {
           uiProperties.updateKeyboardFrame(to: .zero)
+        }.onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
+          isActive = false
+        }.onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
+          isActive = true
         }
-      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { notification in
-        uiProperties.keyboardAnimationDuration = (notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0
-        uiProperties.updateKeyboardFrame(to: .zero)
-      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
-        isActive = false
-      }.onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
-        isActive = true
-      }
       
       if let popupView = windowModel.popupView {
         popupView
@@ -102,9 +102,11 @@ public struct HelloAppRootView<Content: View>: View {
         content
       }
       #endif
-    }.frame(width: uiProperties.size.width, height: uiProperties.size.height)
+    }
+//    .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       .environment(\.theme, HelloSwiftUITheme(theme: currentTheme))
       .environment(\.isActive, isActive)
+      .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .animation(.easeInOut(duration: 0.2), value: currentTheme.id)
       .environment(windowModel)

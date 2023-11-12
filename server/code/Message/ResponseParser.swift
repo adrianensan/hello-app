@@ -18,7 +18,7 @@ extension HTTPResponse {
             guard messageEnd < data.count else { return nil }
           }
           if headerLine.lowercased().starts(with: Header.contentTypePrefix.lowercased()) {
-            responseBuilder.contentType = ContentType.fromHeader(string: headerLine.split(separator: ":", maxSplits: 1)[1].trimmingCharacters(in: .whitespaces))
+            responseBuilder.contentType = ContentType.inferFrom(mimeType: headerLine.split(separator: ":", maxSplits: 1)[1].trimmingCharacters(in: .whitespaces))
             guard headerEnd < blockEnd else { return nil }
             if messageEnd == headerEnd { messageEnd = blockEnd }
           }

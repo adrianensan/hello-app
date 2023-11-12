@@ -2,6 +2,14 @@ import SwiftUI
 
 public struct AppIconShape: InsettableShape {
   
+  public static var systemSize: CGFloat {
+    switch Device.currentEffective {
+    case .iPhone: 60
+    case .iPad: 76
+    default: 60
+    }
+  }
+  
   var insetAmount: CGFloat = 0
   
   public init() {}

@@ -67,45 +67,79 @@ extension PersistenceProperty {
   
   public func cleanup(value: Value) -> Value { value }
   
-  public var allowCache: Bool { true }
+  public var allowCache: Bool {
+    switch location {
+    case .defaults: true
+    case .file: false
+    case .keychain: true
+    case .memory: true
+    }
+  }
   public var isDeprecated: Bool { false }
+  var id: String { location.id }
   
   public var oldProperty: OldProperty? { nil }
   public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 
+@MainActor
+@Observable
+class PersistentObservable<Property: PersistenceProperty> {
+
+  private let property: Property
+  private var pendingChanges: Int = 0
+  var internalValue: Property.Value
+  
+  var value: Property.Value {
+    get { internalValue }
+    set {
+      internalValue = newValue
+      Task { await Property.persistence.save(internalValue, for: property) }
+    }
+  }
+  
+  init(_ property: Property) {
+    self.property = property
+    internalValue = Property.persistence.storedValue(for: property)
+  }
+}
+
+@MainActor
 @propertyWrapper
 @Observable
 public class Persistent<Property: PersistenceProperty> {
   
-  private let persistence: HelloPersistence
-  private let property: Property
-  private var value: Property.Value
+  private let persistenObservable: PersistentObservable<Property>
   
-  public var onUpdate: (() -> Void)?
-  
-  public init(_ property: Property, in persistence: HelloPersistence = Property.persistence) {
-    self.persistence = persistence
-    self.property = property
-    value = persistence.initialValue(for: property)
-    Task { [weak self] in
-      for try await update in await persistence.updates(for: property) {
-        try Task.checkCancellation()
-        guard let self else { return }
-        self.value = update
-        self.onUpdate?()
+  public var onUpdate: (() -> Void)? {
+    didSet {
+      if let onUpdate {
+        trackNextChange()
       }
     }
   }
   
-  public var wrappedValue: Property.Value {
-    get { value }
-    set {
-      value = newValue
-      Task {
-        await persistence.save(value, for: property)
-      }
+  private func trackNextChange() {
+    withObservationTracking {
+      let _ = persistenObservable.value
+    } onChange: {
+      Task { await self.valueChanged() }
     }
+  }
+  
+  private func valueChanged() {
+    guard let onUpdate else { return }
+    onUpdate()
+    trackNextChange()
+  }
+  
+  public init(_ property: Property) {
+    persistenObservable = Persistence.model(for: property)
+  }
+  
+  public var wrappedValue: Property.Value {
+    get { persistenObservable.value }
+    set { persistenObservable.value = newValue }
   }
 }

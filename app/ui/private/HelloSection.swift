@@ -16,9 +16,9 @@ public struct HelloSection<Content: View>: View {
     VStack(alignment: .leading, spacing: 8) {
       VStack(spacing: 4) {
         content
-      }.padding(.horizontal, 8)
+      }.padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(theme.backgroundView(for: .rect(cornerRadius: 16)))
+        .background(theme.surface.backgroundView(for: .rect(cornerRadius: 16)))
     }.frame(maxWidth: 520)
   }
 }

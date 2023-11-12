@@ -5,6 +5,14 @@ import XCTest
 final class HelloAppTests: XCTestCase {
   
   @Persistent(.test) private var test
+  @Persistent(.testInt) private var testInt
+  @Persistent(.testInt) private var testInt2
+  
+  
+  override func setUp() async throws {
+    await Persistence.delete(.test)
+    await Persistence.delete(.testInt)
+  }
   
   func testPersistenceThreadSafe() async throws {
     await withTaskGroup(of: Void.self) { taskGroup in
@@ -47,5 +55,22 @@ final class HelloAppTests: XCTestCase {
     }
 //    let result = await Persistence.value(.test)
 //    XCTAssertEqual(test, "test")
+  }
+  
+  func testPersistentWrapper2() async throws {
+    await withTaskGroup(of: Void.self) { taskGroup in
+      for _ in 0..<100 {
+        testInt += 1
+//        taskGroup.addTask {
+//          await Persistence.atomicUpdate(for: .testInt) {
+////            print($0)
+//            return $0 + 1
+//          }
+//        }
+      }
+    }
+    let result = await Persistence.value(.testInt)
+    XCTAssertEqual(result, 100)
+    XCTAssertEqual(self.testInt2, 100)
   }
 }

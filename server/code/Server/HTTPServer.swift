@@ -55,10 +55,10 @@ public extension HTTPServer {
     if let fileString = try? Data(contentsOf: url) {
       var contentType: ContentType?
       if let fileExtension = url.fileExtension {
-        contentType = .from(fileExtension: fileExtension)
+        contentType = .inferFrom(fileExtension: fileExtension)
       }
       let lastModificationDate = (try? FileManager.default.attributesOfItem(atPath: url.path))?[FileAttributeKey.modificationDate] as? Date
-      return .init(status: .ok, contentType: contentType, lastModifiedDate: lastModificationDate, body: request.method != .head ? fileString : nil)!
+      return .init(status: .ok, contentType: contentType, lastModifiedDate: lastModificationDate, body: request.method != .head ? fileString : nil)
       //Page.replaceIncludes(in: fileString,
       //         from: url.replacingOccurrences(of: "index.html", with: ""),
       //       staticRoot: staticFilesRoot)

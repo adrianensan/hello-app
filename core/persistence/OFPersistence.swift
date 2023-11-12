@@ -25,12 +25,16 @@ public actor HelloPersistence {
     baseURL.appendingPathComponent(subPath)
   }
   
-  private var updateTaskContinuations: [String: [String: Any]] = [:]
-  private var updates: [String: Any] = [:]
   private var cache: [String: Any] = [:]
   
   public init(defaultsSuiteName: String?, pathRoot: URL, keychain: KeychainHelper) {
-    self.defaults = UserDefaults(suiteName: defaultsSuiteName)!
+    if let defaults = UserDefaults(suiteName: defaultsSuiteName) {
+      self.defaults = defaults
+    } else {
+      Log.fatal("Failed to create UserDefaults for \(defaultsSuiteName), using standard instead", context: "Persistence")
+      self.defaults = .standard
+    }
+    
     self.baseURL = pathRoot
     self.keychain = keychain
     if !FileManager.default.fileExists(atPath: baseURL.path) {
@@ -39,65 +43,18 @@ public actor HelloPersistence {
   }
   
   private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) {
-    for (_, continuation) in updateTaskContinuations[property.location.id] ?? [:] {
-      if let continuation = continuation as? CheckedContinuation<Property.Value, any Error> {
-        continuation.resume(returning: value)
-      } else {
-        Log.wtf("Unexpected continuation type for \(property.self)", context: "Persistence")
-      }
-    }
-    updateTaskContinuations[property.location.id] = nil
-  }
-  
-//  private func updateStream<Property: PersistenceProperty>(for property: Property) async throws -> Property.Value where Property.Key == Key {
-//    let task = Task<Property.Value, Error> {
-//      return try await withCheckedThrowingContinuation { continuation in
-//        var existingContinuations = updateTaskContinuations[property.key] ?? []
-//        existingContinuations.append(continuation)
-//        updateTaskContinuations.updateValue(existingContinuations, forKey: property.key)
-//      }
-//    }
-//    var existingTasks = updateTasks[property.key] ?? []
-//    existingTasks.append(task)
-//    updateTasks[property.key] = existingTasks
-//    let updatedValue = try await task.value
-//    try Task.checkCancellation()
-//    return updatedValue
-//  }
-  
-  private func updateContinuation<Property: PersistenceProperty>(for property: Property, id: String, to newContinuation: Any?) {
-    var existingContinuations = updateTaskContinuations[property.location.id] ?? [:]
-    (existingContinuations[id] as? CheckedContinuation<Property.Value, any Error>)?.resume(throwing: HelloPersistenceError.updatesCancelled)
-    existingContinuations[id] = newContinuation
-    updateTaskContinuations.updateValue(existingContinuations, forKey: property.location.id)
-  }
-  
-  private func nextUpdate<Property: PersistenceProperty>(for property: Property, id: String) async throws -> Property.Value {
-    try await withCheckedThrowingContinuation { continuation in
-      updateContinuation(for: property, id: id, to: continuation)
-    }
-  }
-  
-  public func updates<Property: PersistenceProperty>(for property: Property) -> AsyncThrowingStream<Property.Value, any Error> {
-    AsyncThrowingStream<Property.Value, any Error> { streamContinuation in
-      let id = UUID().uuidString
-      let updates = Task {
-        while true {
-          try Task.checkCancellation()
-          let updatedValue: Property.Value = try await nextUpdate(for: property, id: id)
-          try Task.checkCancellation()
-          streamContinuation.yield(updatedValue)
+    Task { @MainActor in
+      if let object = Persistence.models[property.location.id]?.value {
+        guard let observable = object as? PersistentObservable<Property> else {
+          Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
+          return
         }
-      }
-      
-      streamContinuation.onTermination = { _ in
-        updates.cancel()
-        Task { await self.updateContinuation(for: property, id: id, to: nil) }
+        await observable.internalValue = value
       }
     }
   }
   
-  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+  func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property, initiatedFromProperty: Bool) {
     guard allowSaving else { return }
     if property.isDeprecated {
       Log.warning("Using depreacted property \(property.self)", context: "Persistence")
@@ -111,10 +68,10 @@ public actor HelloPersistence {
     case .defaults(let key):
       switch Property.Value.self {
       case is Bool.Type, is Bool?.Type,
-           is String.Type, is String?.Type,
-           is Int.Type, is Int?.Type,
-           is Double.Type, is Double?.Type,
-           is Data.Type, is Data?.Type:
+        is String.Type, is String?.Type,
+        is Int.Type, is Int?.Type,
+        is Double.Type, is Double?.Type,
+        is Data.Type, is Data?.Type:
         if let value =
             value as? Bool? ??
             value as? String? ??
@@ -140,7 +97,7 @@ public actor HelloPersistence {
           try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         }
       } catch {
-//        Log.error("Failed to create directory for \(path). Error: \(error.localizedDescription)", context: "Persistence")
+        //        Log.error("Failed to create directory for \(path). Error: \(error.localizedDescription)", context: "Persistence")
       }
       
       if let string = value as? String {
@@ -166,10 +123,16 @@ public actor HelloPersistence {
       }
     case .memory: break
     }
-    updated(value: value, for: property)
+    if !initiatedFromProperty {
+      updated(value: value, for: property)
+    }
   }
   
-  public nonisolated func initialValue<Property: PersistenceProperty>(for property: Property) -> Property.Value {
+  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+    saveInternal(value, for: property, initiatedFromProperty: false)
+  }
+  
+  public nonisolated func storedValue<Property: PersistenceProperty>(for property: Property) -> Property.Value {
     let returnValue: Property.Value
     
     switch property.location {
@@ -243,70 +206,7 @@ public actor HelloPersistence {
       return value
     }
     
-    let returnValue: Property.Value
-    
-    switch property.location {
-    case .defaults(let key):
-      switch Property.Value.self {
-      case is Bool.Type, is Bool?.Type,
-        is String.Type, is String?.Type,
-        is Int.Type, is Int?.Type,
-        is Double.Type, is Double?.Type,
-        is Data.Type, is Data?.Type:
-        returnValue = defaults.object(forKey: key) as? Property.Value ?? property.defaultValue
-      default:
-        guard let data = defaults.object(forKey: key) as? Data,
-              let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
-          returnValue = property.defaultValue
-          break
-        }
-        returnValue = value
-      }
-    case .file(let path):
-      let url = fileURL(for: path)
-      switch Property.Value.self {
-      case is String.Type, is String?.Type:
-        returnValue = (try? String(contentsOf: url) as? Property.Value) ?? property.defaultValue
-      default:
-        guard let data = try? Data(contentsOf: url) else {
-          returnValue = property.defaultValue
-          break
-        }
-        switch Property.Value.self {
-        case is Data.Type, is Data?.Type:
-          returnValue = (data as? Property.Value) ?? property.defaultValue
-        default:
-          guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
-            returnValue = property.defaultValue
-            break
-          }
-          returnValue = value
-        }
-      }
-    case .keychain(let key):
-      switch Property.Value.self {
-      case is String.Type, is String?.Type:
-        returnValue = (try? keychain.string(for: key) as? Property.Value) ?? property.defaultValue
-      default:
-        guard let data = try? keychain.data(for: key) else {
-          returnValue = property.defaultValue
-          break
-        }
-        switch Property.Value.self {
-        case is Data.Type, is Data?.Type:
-          returnValue = (data as? Property.Value) ?? property.defaultValue
-        default:
-          guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
-            returnValue = property.defaultValue
-            break
-          }
-          returnValue = value
-        }
-      }
-    case .memory: returnValue = property.defaultValue
-    }
-    
-    let value = property.cleanup(value: returnValue)
+    let value = storedValue(for: property)
     if property.allowCache {
       cache[property.location.id] = value
     }
@@ -408,6 +308,20 @@ public actor HelloPersistence {
 
 public enum Persistence {
   
+  fileprivate static var models: [String: Weak<AnyObject>] = [:]
+  
+  @MainActor
+  static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
+    if let weakModel = models[property.location.id],
+       let model = weakModel.value as? PersistentObservable<Property> {
+      return model
+    } else {
+      let model = PersistentObservable(property)
+      models[property.location.id] = Weak(value: model)
+      return model
+    }
+  }
+  
   public static var defaultPathRoot: URL {
     do {
       return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -429,7 +343,7 @@ public enum Persistence {
   }
   
   public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    Property.persistence.initialValue(for: property)
+    Property.persistence.storedValue(for: property)
   }
   
 //  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
@@ -438,10 +352,6 @@ public enum Persistence {
   
   public static func delete<Property: PersistenceProperty>(_ property: Property) async {
     await Property.persistence.delete(property: property)
-  }
-  
-  public static func updates<Property: PersistenceProperty>(for property: Property) async -> AsyncThrowingStream<Property.Value, any Error> {
-    await Property.persistence.updates(for: property)
   }
   
   public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (Property.Value) -> Property.Value) async {

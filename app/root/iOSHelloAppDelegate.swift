@@ -39,7 +39,7 @@ open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, He
 //    Hello.rootViewController = viewController
     
 //    viewController.onBrightnessChange = { ThemeObservable.shared.handleScreenBrightnessUpdate() }
-    let window = UIWindow(frame: UIScreen.main.bounds)
+    let window = UIWindow()
     let viewController = HelloRootViewController(window: window, wrappedView: rootView)
     window.rootViewController = viewController
     window.makeKeyAndVisible()
