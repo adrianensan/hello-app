@@ -2,14 +2,20 @@ import Foundation
 
 public enum PersistenceType: Sendable {
   case defaults(key: String)
-  case file(path: String)
+  case documentFile(path: String)
+  case appGroupFile(path: String)
+  case temporaryFile(path: String)
+  case supportFile(path: String)
   case keychain(key: String)
   case memory(key: String)
   
   public var id: String {
     switch self {
     case .defaults(let key): "defaults-\(key)"
-    case .file(let path): "file-\(path)"
+    case .documentFile(let path): "file-\(path)"
+    case .appGroupFile(let path): "app-group-file-\(path)"
+    case .temporaryFile(let path): "tmp-file-\(path)"
+    case .supportFile(let path): "support-file-\(path)"
     case .keychain(let key): "keychain-\(key)"
     case .memory(let key): "memory-\(key)"
     }
@@ -70,7 +76,10 @@ extension PersistenceProperty {
   public var allowCache: Bool {
     switch location {
     case .defaults: true
-    case .file: false
+    case .documentFile: false
+    case .appGroupFile: false
+    case .supportFile: false
+    case .temporaryFile: false
     case .keychain: true
     case .memory: true
     }
@@ -83,7 +92,6 @@ extension PersistenceProperty {
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 
-@MainActor
 @Observable
 class PersistentObservable<Property: PersistenceProperty> {
 
@@ -105,7 +113,6 @@ class PersistentObservable<Property: PersistenceProperty> {
   }
 }
 
-@MainActor
 @propertyWrapper
 @Observable
 public class Persistent<Property: PersistenceProperty> {

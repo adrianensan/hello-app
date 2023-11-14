@@ -26,6 +26,12 @@ public extension Array {
   }
 }
 
+public extension Collection where Element: Equatable {
+  func remove(_ element: Element) {
+    filter { $0 != element }
+  }
+}
+
 public extension ArraySlice {
   func repeated(count: Int) -> [Element] {
     return [Element](repeating: [Element](self), count: count)

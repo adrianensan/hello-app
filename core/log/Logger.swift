@@ -7,7 +7,8 @@ public protocol LoggerSubscriber: AnyObject {
 
 public actor Logger: Sendable {
   
-  public let logFile: URL
+  public static let shared = Logger()
+  
   public private(set) var logStatements: [LogStatement]
   public weak var subscriber: (any LoggerSubscriber)?
   
@@ -15,19 +16,12 @@ public actor Logger: Sendable {
   private var isFlushPending: Bool = false
   private var isEphemeral: Bool = false
   
-  public init(logFile: URL, ephemeral: Bool = false) {
-    self.logFile = logFile
+  public init(ephemeral: Bool = false) {
     self.isEphemeral = ephemeral
-    if !ephemeral,
-        let data = try? Data(contentsOf: logFile),
-       let logStatements = try? JSONDecoder().decode([LogStatement].self, from: data) {
-      self.logStatements = logStatements
+    if !ephemeral {
+      self.logStatements = Persistence.initialValue(.logs)
     } else {
       logStatements = []
-    }
-    
-    if !FileManager.default.fileExists(atPath: logFile.deletingLastPathComponent().path) {
-      try? FileManager.default.createDirectory(at: logFile.deletingLastPathComponent(), withIntermediateDirectories: true)
     }
     
     logStatements.append(LogStatement(level: .meta, message: "", context: "-----Launch-----"))
@@ -69,7 +63,7 @@ public actor Logger: Sendable {
   
   public func flush(force: Bool = false) async throws {
     guard !force else {
-      flushReal()
+      await flushReal()
       isFlushPending = false
       return
     }
@@ -82,11 +76,10 @@ public actor Logger: Sendable {
     isFlushPending = false
     let oldestAllowed = Date().timeIntervalSince1970 - 60 * 60 * 24 * 2
     logStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }))
-    flushReal()
+    await flushReal()
   }
   
-  private func flushReal() {
-    guard let logStatementsDate = try? JSONEncoder().encode(logStatements) else { return }
-    try? logStatementsDate.write(to: logFile)
+  private func flushReal() async {
+    await Persistence.save(logStatements, for: .logs)
   }
 }

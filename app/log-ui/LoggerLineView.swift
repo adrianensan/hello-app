@@ -70,7 +70,7 @@ struct LoggerLineView: View {
           .fill(backgroundColor))
       
       #if os(iOS) || os(macOS)
-      (Text("\(logStatement.context)").bold() + Text(" \(logStatement.message)"))
+      (Text("\(logStatement.context)").bold() + Text("\(logStatement.context.isEmpty ? "" : " ")\(logStatement.message)"))
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
         .foregroundColor(.primary)
         .textSelection(.enabled)

@@ -24,3 +24,26 @@ public enum AppInfo {
   public static var appGroup: String { "group.\(rootBundleID)" }
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
 }
+
+public class HelloApplication {
+  
+  public static let current = HelloApplication()
+  
+  private init() {
+    Task { await setup() }
+  }
+  
+  private func setup() async {
+    #if DEBUG
+    await Persistence.save(true, for: .isDeveloper)
+    #endif
+    if AppInfo.isTestBuild {
+      await Persistence.save(true, for: .isTester)
+    }
+    if let currentAppVersion = AppVersion.current {
+      let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
+      guard currentAppVersion != previousAppVersion else { return }
+      await Persistence.save(currentAppVersion, for: .lastestVersionLaunched)
+    }
+  }
+}

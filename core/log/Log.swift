@@ -18,7 +18,7 @@ public enum Log {
       .appendingPathComponent("logs")
   }
   
-  public static var logger: Logger = Logger(logFile: logsFolder.appendingPathComponent("logs.json"), ephemeral: ephemeral)
+  public static var logger: Logger = Logger(ephemeral: ephemeral)
   
   private static func log(level: LogLevel, message: String, context: String) {
     guard shouldPrintStatements || level >= logLevel else { return }

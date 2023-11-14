@@ -35,6 +35,7 @@ open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, He
   open var persistence: HelloPersistence { fatalError() }
   
   public final func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    _ = HelloApplication.current
     applicationDidLaunch()
 //    Hello.rootViewController = viewController
     
