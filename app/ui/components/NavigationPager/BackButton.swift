@@ -22,15 +22,18 @@ public struct BackButton: View {
   @Environment(BackProgressModel.self) private var backProgressModel
   
   var rotationInterval: CGFloat = 0.6
+  var backText: String?
   
   var rotationIntervalProgress: CGFloat {
     max(0, min(1, backProgressModel.backProgress / rotationInterval))
   }
   
-  public init() {}
+  public init(backText: String? = nil) {
+    self.backText = backText
+  }
   
   public var body: some View {
-    ZStack {
+    HStack(spacing: -8) {
       ZStack {
         Capsule(style: .continuous)
           .fill()
@@ -54,13 +57,25 @@ public struct BackButton: View {
       }.frame(width: 44, height: 44)
         .offset(x: -6)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-    }.frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
-      .background {
-        ClearClickableView()
+        .frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
+        .padding(-4)
+      
+      if let backText {
+        Text(backText)
+          .font(.system(size: 14, weight: .semibold, design: .rounded))
+          .foregroundStyle(theme.floating.foreground.primary.style)
+          .fixedSize()
+          .padding(.trailing, 10)
+      }
+    }.background {
+      Capsule(style: .continuous)
+        .fill(.thinMaterial)
+//        ClearClickableView()
         //        Capsule(style: .continuous)
         //          .fill(theme.textPrimary.swiftuiColor)
         //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
       }
+    .padding(4)
       .animation(.interactive, value: backProgressModel.backProgress)
       .hoverEffect(.lift)
   }

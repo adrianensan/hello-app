@@ -52,7 +52,7 @@ public struct NavigationPagerView: View {
         #if os(iOS)
         if allowsBack {
           BasicButton(haptics: .action, action: { model.popView() }) {
-            BackButton()
+            BackButton(backText: "Back")
               .foregroundColor(
                 backDragGestureState.width > 32
                 ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color

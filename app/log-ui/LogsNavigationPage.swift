@@ -14,6 +14,7 @@ public struct LogsNavigationPage: View {
   }
   
   @Environment(\.theme) var theme
+  @Environment(\.helloPagerConfig) var helloPagerConfig
   @Environment(HelloWindowModel.self) var windowModel
   
   @State var loggerObservable = LoggerObservable(logger: Log.logger)
@@ -97,7 +98,8 @@ public struct LogsNavigationPage: View {
             }
           }
       }
-    }.environment(\.helloPagerConfig, HelloPagerConfig(horizontalPagePadding: 8))
+    }.environment(\.helloPagerConfig, HelloPagerConfig(defaultNavBarHeight: helloPagerConfig.defaultNavBarHeight,
+                                                       horizontalPagePadding: 8))
   }
 }
 #endif
