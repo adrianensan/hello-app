@@ -1,21 +1,111 @@
 import Foundation
 
+public enum DefaultsPersistenceSuite: Hashable, Sendable {
+  case standard
+  case appGroup
+  case hello
+  case custom(String)
+  
+  public var id: String {
+    switch self {
+    case .standard: "standard"
+    case .appGroup: "appGroup"
+    case .hello: "hello"
+    case .custom(let suite): suite
+    }
+  }
+  
+  public static var allCases: [DefaultsPersistenceSuite] { [
+    .standard,
+    .appGroup,
+    .hello,
+  ]}
+  
+  public var userDefaults: UserDefaults? {
+    switch self {
+    case .standard:
+      return .standard
+    case .appGroup:
+      if let appGroupDefaults = UserDefaults(suiteName: AppInfo.appGroup) {
+        return  appGroupDefaults
+      } else {
+        Log.fatal("Failed to create UserDefaults for app group, please ensure \(AppInfo.appGroup) is added as an App Group", context: "Persistence")
+        return nil
+      }
+    case .hello:
+      if let helloDefaults = UserDefaults(suiteName: "com.adrianensan.hello") {
+        return  helloDefaults
+      } else {
+        Log.fatal("Failed to create UserDefaults for share Hello, please ensure com.adrianensan.hello is added as an App Group", context: "Persistence")
+        return nil
+      }
+    case .custom(let suiteName):
+      if let helloDefaults = UserDefaults(suiteName: suiteName) {
+        return  helloDefaults
+      } else {
+        Log.fatal("Failed to create UserDefaults for \(suiteName)", context: "Persistence")
+        return nil
+      }
+    }
+  }
+}
+
+public enum FilePersistenceLocation: Hashable, Sendable {
+  case decoument
+  case applicationSupport
+  case appGroup
+  case temporary
+  case cache
+  case custom(String)
+  
+  public static var allCases: [FilePersistenceLocation] { [
+    .decoument,
+    .applicationSupport,
+    .appGroup,
+    .temporary,
+    .cache
+  ]}
+  
+  public var id: String {
+    switch self {
+    case .decoument: "document"
+    case .applicationSupport: "support"
+    case .appGroup: "appgroup"
+    case .temporary: "temporary"
+    case .cache: "cache"
+    case .custom(let url): url
+    }
+  }
+  
+  public var url: URL? {
+    switch self {
+    case .decoument:
+      .documentsDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    case .applicationSupport:
+      .applicationSupportDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    case .appGroup:
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.appGroup)
+    case .temporary:
+      .temporaryDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    case .cache:
+      .cachesDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    case .custom(let url):
+      URL(string: url)?.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    }
+  }
+}
+
 public enum PersistenceType: Sendable {
-  case defaults(key: String)
-  case documentFile(path: String)
-  case appGroupFile(path: String)
-  case temporaryFile(path: String)
-  case supportFile(path: String)
+  
+  case defaults(suite: DefaultsPersistenceSuite = .standard, key: String)
+  case file(location: FilePersistenceLocation = .decoument, path: String)
   case keychain(key: String)
   case memory(key: String)
   
   public var id: String {
     switch self {
-    case .defaults(let key): "defaults-\(key)"
-    case .documentFile(let path): "file-\(path)"
-    case .appGroupFile(let path): "app-group-file-\(path)"
-    case .temporaryFile(let path): "tmp-file-\(path)"
-    case .supportFile(let path): "support-file-\(path)"
+    case .defaults(let suite, let key): "defaults-\(suite.id)-\(key)"
+    case .file(let location, let path): "file-\(location.id)-\(path)"
     case .keychain(let key): "keychain-\(key)"
     case .memory(let key): "memory-\(key)"
     }
@@ -24,22 +114,11 @@ public enum PersistenceType: Sendable {
 
 public struct NoOld: PersistenceProperty {
   
-  public static var persistence: HelloPersistence {
-    HelloPersistence(defaultsSuiteName: nil, pathRoot: URL(string: "")!, keychain: .init(service: ""))
-  }
-  
-//  public var key: Key
-  
   public var defaultValue: Bool? { nil }
   
   public var location: PersistenceType { .defaults(key: "nil") }
   
-  public typealias Value = Bool?
-  
-  public init() {
-//    self.key = key
-  }
-  
+  public init() {}
 }
 
 public protocol PersistenceProperty: Sendable {
@@ -76,10 +155,7 @@ extension PersistenceProperty {
   public var allowCache: Bool {
     switch location {
     case .defaults: true
-    case .documentFile: false
-    case .appGroupFile: false
-    case .supportFile: false
-    case .temporaryFile: false
+    case .file: false
     case .keychain: true
     case .memory: true
     }
@@ -89,6 +165,15 @@ extension PersistenceProperty {
   
   public var oldProperty: OldProperty? { nil }
   public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
+  
+  public var fileURL: URL? {
+    switch location {
+    case .defaults: nil
+    case .file(let location, let path): location.url?.appending(component: path)
+    case .keychain: nil
+    case .memory: nil
+    }
+  }
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 

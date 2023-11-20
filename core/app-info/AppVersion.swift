@@ -3,9 +3,7 @@ import Foundation
 public struct AppVersion: LosslessStringConvertible, Codable, Equatable, Comparable, Hashable, Sendable {
   
   public static var current: AppVersion? {
-    guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"],
-          let build = Bundle.main.infoDictionary?["CFBundleVersion"] else { return nil }
-    return AppVersion("\(version).\(build)")
+    AppVersion("\(AppInfo.version).\(AppInfo.build)")
   }
   
   public static func <(lhs: AppVersion, rhs: AppVersion) -> Bool {

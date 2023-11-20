@@ -43,7 +43,7 @@ public struct HelloAppRootView<Content: View>: View {
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .observeKeyboardFrame()
       .observeIsActive()
-      .observeIsActive()
+      .observeActiveTheme()
       .environment(windowModel)
   }
 }

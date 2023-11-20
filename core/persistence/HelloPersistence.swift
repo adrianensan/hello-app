@@ -15,66 +15,56 @@ extension UserDefaults: @unchecked Sendable {}
 
 public actor HelloPersistence {
   
-  nonisolated public let defaults: UserDefaults
   nonisolated public let keychain: KeychainHelper
-  
-  nonisolated public let baseURL: URL
-  nonisolated public let applicationSupportURL: URL
-  nonisolated public let temporaryURL: URL
   private var allowSaving: Bool = true
   
-  nonisolated public func fileURL(for subPath: String) -> URL {
-    baseURL.appending(component: subPath)
-  }
-  
-  nonisolated public func appGroupFileURL(for subPath: String) -> URL {
-    baseURL.appending(component: subPath)
-  }
-  
-  nonisolated public func supportFileURL(for subPath: String) -> URL {
-    applicationSupportURL.appending(component: subPath)
-  }
-  
-  nonisolated public func temporaryFileURL(for subPath: String) -> URL {
-    temporaryURL.appending(component: subPath)
+  nonisolated public func fileURL(for location: FilePersistenceLocation, subPath: String) -> URL {
+    baseURL(for: location).appending(component: subPath)
   }
   
   private var cache: [String: Any] = [:]
+  private var userDefaultsCache: [DefaultsPersistenceSuite: UserDefaults] = [:]
+  private var baseURLs: [FilePersistenceLocation: URL] = [:]
   
-  public init(defaultsSuiteName: String?, pathRoot: URL, keychain: KeychainHelper) {
-    if let defaults = UserDefaults(suiteName: defaultsSuiteName) {
-      self.defaults = defaults
-    } else {
-      Log.fatal("Failed to create UserDefaults for \(defaultsSuiteName), using standard instead", context: "Persistence")
-      self.defaults = .standard
-    }
-    
-    self.baseURL = pathRoot
-    self.applicationSupportURL = .applicationSupportDirectory.appending(component: AppInfo.displayName, directoryHint: .isDirectory)
-    self.temporaryURL = .temporaryDirectory.appending(component: AppInfo.displayName, directoryHint: .isDirectory)
+  fileprivate init(keychain: KeychainHelper) {
     self.keychain = keychain
-    if !FileManager.default.fileExists(atPath: baseURL.path) {
-      try? FileManager.default.createDirectory(at: baseURL, withIntermediateDirectories: true)
-    }
-    
-    if !FileManager.default.fileExists(atPath: applicationSupportURL.path) {
-      try? FileManager.default.createDirectory(at: applicationSupportURL, withIntermediateDirectories: true)
-    }
-    
-    if !FileManager.default.fileExists(atPath: temporaryURL.path) {
-      try? FileManager.default.createDirectory(at: temporaryURL, withIntermediateDirectories: true)
-    }
+  }
+  
+  nonisolated private func userDefaults(for suite: DefaultsPersistenceSuite) -> UserDefaults {
+    suite.userDefaults ?? .standard
+//    if let userDefaults = userDefaultsCache[suite] {
+//      return userDefaults
+//    } else {
+//      let userDefaults = suite.userDefaults ?? .standard
+//      userDefaultsCache[suite] = userDefaults
+//      return userDefaults
+//    }
+  }
+  
+  nonisolated private func baseURL(for location: FilePersistenceLocation) -> URL {
+    location.url ?? .temporaryDirectory
+//    if let url = baseURLs[location] {
+//      return url
+//    } else {
+//      guard let url = location.url else {
+//        return .temporaryDirectory
+//      }
+//      baseURLs[location] = url
+//      if !FileManager.default.fileExists(atPath: url.path) {
+//        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+//      }
+//      return url
+//    }
   }
   
   private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) {
     Task { @MainActor in
-      if let object = Persistence.models[property.location.id]?.value {
-        guard let observable = object as? PersistentObservable<Property> else {
-          Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
-          return
-        }
-        await observable.internalValue = value
+      guard let object = Persistence.models[property.location.id]?.value else { return }
+      guard let observable = object as? PersistentObservable<Property> else {
+        Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
+        return
       }
+      await observable.internalValue = value
     }
   }
   
@@ -89,7 +79,8 @@ public actor HelloPersistence {
     }
     
     switch property.location {
-    case .defaults(let key):
+    case .defaults(let suite, let key):
+      let userDefault = userDefaults(for: suite)
       switch Property.Value.self {
       case is Bool.Type, is Bool?.Type,
         is String.Type, is String?.Type,
@@ -103,22 +94,16 @@ public actor HelloPersistence {
             value as? Double? ??
             value as? Data?,
            value == nil {
-          defaults.removeObject(forKey: key)
+          userDefaults(for: suite).removeObject(forKey: key)
           return
         }
-        defaults.set(value, forKey: key)
+        userDefaults(for: suite).set(value, forKey: key)
       default:
         let data = try value.jsonData
-        defaults.set(data, forKey: key)
+        userDefaults(for: suite).set(data, forKey: key)
       }
-    case .documentFile(let path):
-      try save(value, to: fileURL(for: path))
-    case .appGroupFile(let path):
-      try save(value, to: appGroupFileURL(for: path))
-    case .supportFile(let path):
-      try save(value, to: supportFileURL(for: path))
-    case .temporaryFile(let path):
-      try save(value, to: temporaryFileURL(for: path))
+    case .file(let location, let path):
+      try save(value, to: fileURL(for: location, subPath: path))
     case .keychain(let key):
       if let string = value as? String? {
         if let string = string {
@@ -148,30 +133,24 @@ public actor HelloPersistence {
     let returnValue: Property.Value
     
     switch property.location {
-    case .defaults(let key):
+    case .defaults(let suite, let key):
       switch Property.Value.self {
       case is Bool.Type, is Bool?.Type,
         is String.Type, is String?.Type,
         is Int.Type, is Int?.Type,
         is Double.Type, is Double?.Type,
         is Data.Type, is Data?.Type:
-        returnValue = defaults.object(forKey: key) as? Property.Value ?? property.defaultValue
+        returnValue = userDefaults(for: suite).object(forKey: key) as? Property.Value ?? property.defaultValue
       default:
-        guard let data = defaults.object(forKey: key) as? Data,
+        guard let data = userDefaults(for: suite).object(forKey: key) as? Data,
               let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
           returnValue = property.defaultValue
           break
         }
         returnValue = value
       }
-    case .documentFile(let path):
-      returnValue = value(at: fileURL(for: path), for: property)
-    case .appGroupFile(let path):
-      returnValue = value(at: appGroupFileURL(for: path), for: property)
-    case .supportFile(let path):
-      returnValue = value(at: supportFileURL(for: path), for: property)
-    case .temporaryFile(let path):
-      returnValue = value(at: temporaryFileURL(for: path), for: property)
+    case .file(let location, let path):
+      returnValue = value(at: fileURL(for: location, subPath: path), for: property)
     case .keychain(let key):
       switch Property.Value.self {
       case is String.Type, is String?.Type:
@@ -220,11 +199,8 @@ public actor HelloPersistence {
     cache[property.location.id] = nil
     
     switch property.location {
-    case .defaults(let key): defaults.removeObject(forKey: key)
-    case .documentFile(let path): try? FileManager.default.removeItem(atPath: fileURL(for: path).path)
-    case .appGroupFile(let path): try? FileManager.default.removeItem(atPath: appGroupFileURL(for: path).path)
-    case .supportFile(let path): try? FileManager.default.removeItem(atPath: supportFileURL(for: path).path)
-    case .temporaryFile(let path): try? FileManager.default.removeItem(atPath: temporaryFileURL(for: path).path)
+    case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
+    case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
     case .keychain(let key): try? keychain.remove(for: key)
     case .memory: break
     }
@@ -234,27 +210,24 @@ public actor HelloPersistence {
   public func nuke(stopSaving: Bool = true) {
     allowSaving = !stopSaving
     cache = [:]
-    for key in defaults.dictionaryRepresentation().keys {
-      defaults.removeObject(forKey: key)
+    for suite in DefaultsPersistenceSuite.allCases {
+      let userDefaults = userDefaults(for: suite)
+      for key in userDefaults.dictionaryRepresentation().keys {
+        userDefaults.removeObject(forKey: key)
+      }
     }
     
     keychain.nuke()
     
-    guard let enumerator = FileManager.default.enumerator(at: baseURL, includingPropertiesForKeys: nil) else { return }
-    for file in enumerator {
-      if let fileURL = file as? URL {
-        try? FileManager.default.removeItem(at: fileURL)
-      }
+    for location in FilePersistenceLocation.allCases {
+      try? FileManager.default.removeItem(at: baseURL(for: location))
     }
   }
   
   public func size<Property: PersistenceProperty>(of property: Property) -> Int {
     switch property.location {
     case .defaults: 0
-    case .documentFile(let path): size(of: fileURL(for: path))
-    case .appGroupFile(let path): size(of: appGroupFileURL(for: path))
-    case .supportFile(let path): size(of: supportFileURL(for: path))
-    case .temporaryFile(let path): size(of: temporaryFileURL(for: path))
+    case .file(let location, let path): size(of: fileURL(for: location, subPath: path))
     case .keychain: 0
     case .memory: 0
     }
@@ -262,11 +235,8 @@ public actor HelloPersistence {
   
   public func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults(let key): defaults.object(forKey: key) != nil
-    case .documentFile(let path): FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
-    case .appGroupFile(let path): FileManager.default.fileExists(atPath: appGroupFileURL(for: path).relativePath)
-    case .supportFile(let path): FileManager.default.fileExists(atPath: supportFileURL(for: path).relativePath)
-    case .temporaryFile(let path): FileManager.default.fileExists(atPath: temporaryFileURL(for: path).relativePath)
+    case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
+    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
     case .keychain(let key): (try? keychain.data(for: key)) != nil
     case .memory: cache[property.location.id] != nil
     }
@@ -274,54 +244,25 @@ public actor HelloPersistence {
   
   nonisolated public func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults(let key): defaults.object(forKey: key) != nil
-    case .documentFile(let path): FileManager.default.fileExists(atPath: fileURL(for: path).relativePath)
-    case .appGroupFile(let path): FileManager.default.fileExists(atPath: appGroupFileURL(for: path).relativePath)
-    case .supportFile(let path): FileManager.default.fileExists(atPath: supportFileURL(for: path).relativePath)
-    case .temporaryFile(let path): FileManager.default.fileExists(atPath: temporaryFileURL(for: path).relativePath)
+    case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
+    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
     case .keychain(let key): (try? keychain.data(for: key)) != nil
     case .memory: false
     }
   }
   
   nonisolated public func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    switch property.location {
-    case .defaults: nil
-    case .documentFile(let path): fileURL(for: path)
-    case .appGroupFile(let path): appGroupFileURL(for: path)
-    case .supportFile(let path): supportFileURL(for: path)
-    case .temporaryFile(let path): temporaryFileURL(for: path)
-    case .keychain: nil
-    case .memory: nil
-    }
+    property.fileURL
   }
   
   nonisolated public func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
     switch property.location {
     case .defaults: nil
-    case .documentFile(let path):
+    case .file(let location, let path):
       if let lastSlashIndex = path.lastIndex(of: "/") {
-        fileURL(for: String(path[..<lastSlashIndex]))
+        fileURL(for: location, subPath: String(path[..<lastSlashIndex]))
       } else {
-        fileURL(for: path)
-      }
-    case .appGroupFile(let path):
-      if let lastSlashIndex = path.lastIndex(of: "/") {
-        appGroupFileURL(for: String(path[..<lastSlashIndex]))
-      } else {
-        appGroupFileURL(for: path)
-      }
-    case .supportFile(let path):
-      if let lastSlashIndex = path.lastIndex(of: "/") {
-        supportFileURL(for: String(path[..<lastSlashIndex]))
-      } else {
-        supportFileURL(for: path)
-      }
-    case .temporaryFile(let path):
-      if let lastSlashIndex = path.lastIndex(of: "/") {
-        temporaryFileURL(for: String(path[..<lastSlashIndex]))
-      } else {
-        temporaryFileURL(for: path)
+        fileURL(for: location, subPath: path)
       }
     case .keychain: nil
     case .memory: nil
@@ -404,10 +345,7 @@ public enum Persistence {
     }
   }
   
-  public static let defaultPersistence = HelloPersistence(
-    defaultsSuiteName: nil,
-    pathRoot: defaultPathRoot,
-    keychain: KeychainHelper(service: AppInfo.bundleID))
+  public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID))
   
   public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
     await Property.persistence.save(value, for: property)

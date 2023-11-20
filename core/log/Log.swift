@@ -9,7 +9,11 @@ public enum Log {
   #endif
   
   public static var ephemeral: Bool = false
+  #if DEBUG
+  public static var logLevel: LogLevel = .debug
+  #else
   public static var logLevel: LogLevel = .info
+  #endif
   
   private static var logsFolder: URL {
     ((try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))

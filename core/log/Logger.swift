@@ -12,8 +12,8 @@ public actor Logger: Sendable {
   public private(set) var logStatements: [LogStatement]
   public weak var subscriber: (any LoggerSubscriber)?
   
-  private var lastLoggedTime: TimeInterval = 0
-  private var isFlushPending: Bool = false
+  private var lastLoggedTime: TimeInterval = Date.now.timeIntervalSince1970
+  private var isFlushPending: Bool = true
   private var isEphemeral: Bool = false
   
   public init(ephemeral: Bool = false) {
@@ -25,6 +25,7 @@ public actor Logger: Sendable {
     }
     
     logStatements.append(LogStatement(level: .meta, message: "", context: "-----Launch-----"))
+    Task { try await flush() }
   }
   
   private func generateRawString() -> String {
