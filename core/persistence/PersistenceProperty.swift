@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 
 public enum DefaultsPersistenceSuite: Hashable, Sendable {
   case standard
@@ -192,6 +193,12 @@ class PersistentObservable<Property: PersistenceProperty> {
     }
   }
   
+  @MainActor
+  func updateValue(to newValue: Property.Value) async {
+    internalValue = newValue
+    await Property.persistence.save(internalValue, for: property)
+  }
+  
   init(_ property: Property) {
     self.property = property
     internalValue = Property.persistence.storedValue(for: property)
@@ -204,34 +211,36 @@ public class Persistent<Property: PersistenceProperty> {
   
   private let persistenObservable: PersistentObservable<Property>
   
-  public var onUpdate: (() -> Void)? {
-    didSet {
-      if let onUpdate {
-        trackNextChange()
-      }
-    }
-  }
+  private var value: Property.Value
+  
+  public var onUpdate: (() -> Void)?
   
   private func trackNextChange() {
     withObservationTracking {
       let _ = persistenObservable.value
-    } onChange: {
+    } onChange: { [weak self] in
+      guard let self else { return }
+      value = self.persistenObservable.value
       Task { await self.valueChanged() }
     }
   }
   
   private func valueChanged() {
-    guard let onUpdate else { return }
-    onUpdate()
+    onUpdate?()
     trackNextChange()
   }
   
   public init(_ property: Property) {
     persistenObservable = Persistence.model(for: property)
+    value = persistenObservable.value
+    trackNextChange()
   }
   
   public var wrappedValue: Property.Value {
-    get { persistenObservable.value }
-    set { persistenObservable.value = newValue }
+    get { value }
+    set {
+      value = newValue
+      Task { await persistenObservable.updateValue(to: value) }
+    }
   }
 }

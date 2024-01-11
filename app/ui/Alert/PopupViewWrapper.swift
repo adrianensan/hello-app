@@ -52,11 +52,16 @@ public struct PopupViewWrapper<Content: View>: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .background(Color.black
         .opacity(isVisible ? 0.2 : 0)
-        .onLongPressGesture(minimumDuration: 0, maximumDistance: 0) {
-          guard isVisible else { return }
-          isVisible = false
-        }
-        .animation(.easeInOut(duration: 0.2), value: isVisible))
+        .nest {
+          #if os(tvOS)
+          $0
+          #else
+          $0.onLongPressGesture(minimumDuration: 0, maximumDistance: 0) {
+            guard isVisible else { return }
+            isVisible = false
+          }
+          #endif
+        }.animation(.easeInOut(duration: 0.2), value: isVisible))
       .allowsHitTesting(isVisible)
       .onAppear {
         guard !isVisible else { return }

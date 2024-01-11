@@ -24,7 +24,7 @@ class OFRootViewController<Content: View>: NSViewController {
   // properly ignore safe area (same is true on iOS).
   // Force safe area to be zero and save the actual safe area in an object
   @MainActor
-  class NoSafeAreaNSView: NSHostingView<OFWindowRootView<Content>> {
+  class NoSafeAreaNSView: NSHostingView<HelloWindowRootView<Content>> {
     
     var realSafeAreaInsets: NSEdgeInsets { super.safeAreaInsets }
     
@@ -84,7 +84,7 @@ class OFRootViewController<Content: View>: NSViewController {
   
   public init(rootView: Content, uiProperties: UIProperties) {
     self.uiProperties = uiProperties
-    noSafeAreaNSView = NoSafeAreaNSView(rootView: OFWindowRootView(uiProperties: uiProperties) { rootView })
+    noSafeAreaNSView = NoSafeAreaNSView(rootView: HelloWindowRootView(uiProperties: uiProperties) { rootView })
     if uiProperties.size != .zero {
       noSafeAreaNSView.frame.size = uiProperties.size
     }

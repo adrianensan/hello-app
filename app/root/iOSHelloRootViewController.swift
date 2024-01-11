@@ -59,14 +59,14 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   var uiProperties: UIProperties
   var windowModel: HelloWindowModel
   
-  public init<T: View>(window: UIWindow? = nil, wrappedView: T) {
+  public init<T: View>(window: UIWindow? = nil, wrappedView: @escaping @autoclosure () -> T) {
 //    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
-    uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
+    uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
     windowModel.window = window
     let id = UUID().uuidString
     let observedView = AnyView(HelloAppRootView(wrappedView)
-      .environmentObject(uiProperties)
+      .environment(uiProperties)
       .environment(windowModel)
       .onPreferenceChange(StatusBarStyleKey.self) { style in
         guard let viewController = Self.instances[id],
@@ -193,6 +193,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   }
   
   override public var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+//    [.all]
     return hideHomeIndicator ? [.bottom] : []
   }
   

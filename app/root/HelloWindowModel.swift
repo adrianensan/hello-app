@@ -5,34 +5,37 @@ import Observation
 @Observable
 public class HelloWindowModel {
   
-  #if os(iOS)
+  #if os(iOS) || os(tvOS) || os(visionOS)
   public weak var window: UIWindow?
   #endif
   
-  public private(set) var popupView: AnyView?
-  public private(set) var alertView: AnyView?
+  struct PopupWindow: Identifiable, Sendable {
+    var id: String
+    var view: AnyView
+  }
   
-  public private(set) var popupViewID: String = UUID().uuidString
-  public private(set) var alertViewID: String = UUID().uuidString
+  var popupViews: [PopupWindow] = []
+  var alertView: HelloAlert?
   
+  var alertViewID: String = UUID().uuidString
   
   public func showPopup<Content: View>(_ view: Content) {
-    popupViewID = UUID().uuidString
-    popupView = AnyView(view.id(UUID().uuidString))
+    popupViews.append(PopupWindow(id: UUID().uuidString, view: AnyView(view.id(UUID().uuidString))))
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
     alertViewID = UUID().uuidString
-    alertView = AnyView(HelloAlert(config: alertConfig).id(UUID().uuidString))
+    alertView = HelloAlert(config: alertConfig)
   }
   
   public func dismissPopup() {
-    guard popupView != nil else { return }
-    popupView = nil
+    guard !popupViews.isEmpty else { return }
+    popupViews.popLast()
   }
   
   public func dismissAlert() {
-    guard alertView != nil else { return }
+    print("Dismissing alert")
+//    guard alertView != nil else { return }
     alertView = nil
   }
 }

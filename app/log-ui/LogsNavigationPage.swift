@@ -36,10 +36,10 @@ public struct LogsNavigationPage: View {
   }
   
   public var body: some View {
-    NavigationPage(model: scrollModel, navBarContent: {
+    NavigationPage(title: "Fluent Emoji Licence",
+                   model: scrollModel,
+                   navBarContent: {
       ZStack {
-        Text("Fluent Emoji Licence")
-        
         BasicButton(action: {
           windowModel.show(alert: .init(title: "Clear Logs",
                                           message: "Are you sure you want to clear all logs?",

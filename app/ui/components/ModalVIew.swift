@@ -28,7 +28,7 @@ public class HelloNoModalModel: HelloModalModel {
 @Observable
 public class HelloModalModel {
   
-  @ObservationIgnored public var dismissModel = HelloDismissModel()
+  @ObservationIgnored public var dismissModel: HelloDismissModel
   
   public var animateIn: Bool = false
   public var isDismissed: Bool = false
@@ -37,9 +37,10 @@ public class HelloModalModel {
   
   private var forceFullScreen: Bool
   
-  public init(forceFullScreen: Bool, dismiss: @escaping () -> Void) {
+  public init(forceFullScreen: Bool, dismiss: @escaping () -> Void, dismissModel: HelloDismissModel? = nil) {
     self.forceFullScreen = forceFullScreen
     self.onDismiss = dismiss
+    self.dismissModel = dismissModel ?? HelloDismissModel()
   }
   
   public func dismiss() {
@@ -59,14 +60,17 @@ public struct HelloModalView<Content: View>: View {
   @State var model: HelloModalModel
   
   var forceFullScreen: Bool
-  var content: Content
+  var content: () -> Content
   
   public init(forceFullScreen: Bool = false,
               onDismiss: @escaping () -> Void,
+              dismissModel: HelloDismissModel? = nil,
               @ViewBuilder content: @escaping () -> Content) {
     self.forceFullScreen = forceFullScreen
-    self.content = content()
-    self._model = State(wrappedValue: HelloModalModel(forceFullScreen: forceFullScreen, dismiss: { onDismiss() }))
+    self.content = content
+    self._model = State(wrappedValue: HelloModalModel(forceFullScreen: forceFullScreen,
+                                                      dismiss: { onDismiss() },
+                                                      dismissModel: dismissModel))
   }
   
   public var isFullScreen: Bool { forceFullScreen || windowFrame.size.width < 720 }
@@ -81,26 +85,26 @@ public struct HelloModalView<Content: View>: View {
   
   public var body: some View {
     ZStack {
-      ZStack {
-        helloTheme.backgroundView(for: RoundedRectangle(cornerRadius: isFullScreen ? Device.current.screenCornerRadius : 24,
-                                                          style: .continuous))
-        .frame(width: settingsSize.width, height: settingsSize.height)
-        //          .offset(multiplier: 100)
-        
-        content
-          .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
-        
-        BasicHelloButton(action: { model.dismiss() }) {
-          HelloCloseButton()
-        }.zIndex(4)
-          .padding(.top, isFullScreen ? safeAreaInsets.top + 8 : 8)
-          .padding(.trailing, isFullScreen ? safeAreaInsets.trailing + 8 : 8)
-          .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
-      }.compositingGroup()
-        .offset(y: model.animateIn && !model.isDismissed ? 0 : windowFrame.size.height)
-        .animation(.spring(), value: model.animateIn && !model.isDismissed)
+      helloTheme.backgroundView(for: RoundedRectangle(cornerRadius: isFullScreen ? Device.current.screenCornerRadius : 24,
+                                                        style: .continuous))
+      .frame(width: settingsSize.width, height: settingsSize.height)
+      //          .offset(multiplier: 100)
       
-    }.frame(width: settingsSize.width, height: settingsSize.height, alignment: .top)
+      content()
+        .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
+      
+      #if os(iOS)
+      BasicHelloButton(action: { model.dismiss() }) {
+        HelloCloseButton()
+      }.zIndex(4)
+        .padding(.top, isFullScreen ? safeAreaInsets.top + 8 : 8)
+        .padding(.trailing, isFullScreen ? safeAreaInsets.trailing + 8 : 8)
+        .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
+      #endif
+    }.compositingGroup()
+      .offset(y: model.animateIn && !model.isDismissed ? 0 : windowFrame.size.height)
+      .animation(.spring(), value: model.animateIn && !model.isDismissed)
+      .frame(width: settingsSize.width, height: settingsSize.height, alignment: .top)
       .compositingGroup()
       .clipShape(RoundedRectangle(cornerRadius: isFullScreen ? Device.current.screenCornerRadius : 24,
                                   style: .continuous))

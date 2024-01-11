@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if os(iOS) || os(watchOS) || os(visionOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias NativeImage = UIImage
 #elseif os(macOS)
 public typealias NativeImage = NSImage

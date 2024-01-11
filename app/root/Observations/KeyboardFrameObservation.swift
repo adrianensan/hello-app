@@ -1,6 +1,6 @@
-#if os(iOS)
 import SwiftUI
 
+#if os(iOS)
 private struct KeyboardFrameEnvironmentKey: EnvironmentKey {
   static let defaultValue = CGRect()
 }
@@ -44,6 +44,12 @@ struct KeyboardFrameObservationViewModifier: ViewModifier {
 public extension View {
   func observeKeyboardFrame() -> some View {
     modifier(KeyboardFrameObservationViewModifier())
+  }
+}
+#else
+public extension View {
+  func observeKeyboardFrame() -> some View {
+    self
   }
 }
 #endif

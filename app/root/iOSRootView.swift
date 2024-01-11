@@ -1,3 +1,4 @@
+#if os(iOS) || os(tvOS) || os(visionOS)
 import SwiftUI
 
 import HelloCore
@@ -6,44 +7,50 @@ import HelloCore
 public struct HelloAppRootView<Content: View>: View {
   
   @Environment(HelloWindowModel.self) private var windowModel
-  @EnvironmentObject var uiProperties: UIProperties  
+  @Environment(UIProperties.self) private var uiProperties
   
-  @State var showHelloModal: Bool = false//Hello.isFirstLaunch
+  @State private var showHelloModal: Bool = false//Hello.isFirstLaunch
   
-  var content: Content
+  private var content: () -> Content
   
-  public init(_ content: Content) {
+  public init(_ content: @escaping () -> Content) {
     self.content = content
   }
   
   public var body: some View {
     ZStack {
-      content
+      content()
+        .compositingGroup()
+        .blur(radius: windowModel.alertView != nil || !windowModel.popupViews.isEmpty ? 2 : 0)
+        .animation(.easeInOut(duration: 0.5), value: windowModel.alertView != nil || !windowModel.popupViews.isEmpty)
 //          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       
-      if let popupView = windowModel.popupView {
-        popupView
-          .id(windowModel.popupViewID)
-          .zIndex(3)
-          .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
-                                  removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
-          .allowsHitTesting(windowModel.popupView != nil)
+      if !windowModel.popupViews.isEmpty {
+        ForEach(windowModel.popupViews) { popupView in
+          popupView.view
+            .id(popupView.id)
+            .zIndex(3 + 0.1 * Double((windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0)))
+            .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
+                                    removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
+            .allowsHitTesting(windowModel.popupViews.contains(where: { $0.id == popupView.id }))
+        }
       }
       
       if let alertView = windowModel.alertView {
         alertView
-          .id(windowModel.popupViewID)
+          .id(windowModel.alertViewID)
           .zIndex(4)
           .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                   removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
+          .allowsHitTesting(windowModel.alertView != nil)
       }
     }
 //    .frame(width: uiProperties.size.width, height: uiProperties.size.height)
-      .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
+      .environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .observeKeyboardFrame()
       .observeIsActive()
       .observeActiveTheme()
-      .environment(windowModel)
   }
 }
+#endif

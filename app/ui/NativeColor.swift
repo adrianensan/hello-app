@@ -2,12 +2,10 @@ import SwiftUI
 
 import HelloCore
 
-#if os(iOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias NativeColor = UIColor
 #elseif os(macOS)
 public typealias NativeColor = NSColor
-#elseif os(watchOS)
-public typealias NativeColor = UIColor
 #endif
 
 public extension HelloColor {
@@ -22,7 +20,7 @@ public extension HelloColor {
 
 public extension HelloDynamicColor {
   var nativeColor: NativeColor {
-    #if os(iOS)
+    #if os(iOS) || os(tvOS)
     NativeColor { traitCollection in
       switch traitCollection.userInterfaceStyle {
       case .dark: return dark.nativeColor
@@ -38,7 +36,7 @@ public extension HelloDynamicColor {
         return light.nativeColor
       }
     }
-    #elseif os(watchOS)
+    #elseif os(watchOS) || os(visionOS)
     return light.nativeColor
     #endif
   }

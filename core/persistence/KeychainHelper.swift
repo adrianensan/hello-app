@@ -13,7 +13,6 @@ public class KeychainHelper {
   
   private let accessGroup: String?
   
-  #if os(iOS) || os(macOS) || os(watchOS)
   private var baseAttributes: [CFString: Any] {
     var attributes: [CFString: Any] = [
       kSecAttrService: service,
@@ -24,7 +23,6 @@ public class KeychainHelper {
     }
     return attributes
   }
-  #endif
   
   public init(service: String, group: String? = nil) {
     self.service = service

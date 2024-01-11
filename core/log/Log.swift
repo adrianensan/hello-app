@@ -15,13 +15,6 @@ public enum Log {
   public static var logLevel: LogLevel = .info
   #endif
   
-  private static var logsFolder: URL {
-    ((try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
-     ?? FileManager.default.temporaryDirectory)
-      .appendingPathComponent("Ambient")
-      .appendingPathComponent("logs")
-  }
-  
   public static var logger: Logger = Logger(ephemeral: ephemeral)
   
   private static func log(level: LogLevel, message: String, context: String) {

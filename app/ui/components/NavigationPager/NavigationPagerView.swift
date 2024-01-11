@@ -1,5 +1,11 @@
 import SwiftUI
 
+public extension View {
+  func nest(transform: (Self) -> some View) -> some View {
+    transform(self)
+  }
+}
+
 public extension Animation {
   static var pageAnimation: Animation {
     .spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.35)
@@ -13,15 +19,11 @@ public struct NavigationPagerView: View {
   @Environment(\.safeArea) var safeAreaInsets
   
   var model: PagerModel
-  var allowsBack: Bool
   
-  @State var viewDepth: CGFloat = 0
+  @State var viewDepth: CGFloat = 0  
   
-  @GestureState var backDragGestureState: CGSize = .zero
-  
-  public init(model: PagerModel, allowsBack: Bool = true) {
+  public init(model: PagerModel) {
     self.model = model
-    self.allowsBack = allowsBack
   }
   
   var previousPageOptions: PagerPageOptions {
@@ -33,6 +35,7 @@ public struct NavigationPagerView: View {
   }
   
   public var body: some View {
+      let _ = Self._printChanges()
     GeometryReader { geometry in
       ZStack(alignment: .leading) {
         HStack(spacing: 0) {
@@ -44,19 +47,17 @@ public struct NavigationPagerView: View {
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
-          .compositingGroup()
-          .offset(x: -CGFloat(model.viewDepth - 1) * geometry.size.width + backDragGestureState.width)
-          .animation(.pageAnimation, value: model.viewDepth)
-          .animation(backDragGestureState == .zero ? .pageAnimation : .interactive, value: backDragGestureState)
+          .handlePageBackSwipe(pageSize: geometry.size)
         
         #if os(iOS)
-        if allowsBack {
+        if model.config.allowsBack {
           BasicButton(haptics: .action, action: { model.popView() }) {
             BackButton(backText: "Back")
               .foregroundColor(
-                backDragGestureState.width > 32
-                ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
-                : currentPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
+//                backDragGestureState.width > 32
+//                ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
+//                : 
+                    currentPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color
               )
           }.zIndex(4)
             .padding(.horizontal, 8)
@@ -74,26 +75,6 @@ public struct NavigationPagerView: View {
       .environment(model.backProgressModel)
       .environment(\.helloPagerConfig, model.config)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(ClearClickableView())
-      .gesture(DragGesture(minimumDistance: allowsBack && model.viewDepth > 1 && currentPageOptions.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
-        .updating($backDragGestureState) { drag, state, transaction in
-          if drag.translation.width < 0 {
-            state = CGSize(width: 0, height: 0)
-          } else {
-            state = CGSize(width: drag.translation.width, height: 0)
-          }
-        }.onEnded { drag in
-          if drag.predictedEndTranslation.width > 200 {
-            model.popView()
-            ButtonHaptics.buttonFeedback()
-          }
-        })
-      .onChange(of: backDragGestureState) {
-        let progress = min(1, max(0, $0.width / 200))
-        if model.backProgressModel.backProgress != progress {
-          model.backProgressModel.backProgress = progress
-        }
-      }
   }
 }
 

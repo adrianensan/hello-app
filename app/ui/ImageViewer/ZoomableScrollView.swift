@@ -64,7 +64,7 @@ struct ZoomScrollView<Content: View>: UIViewRepresentable {
     }
   }
   
-  @EnvironmentObject private var uiProperties: UIProperties
+  @Environment(UIProperties.self) private var uiProperties
   
   private var contentSize: CGSize
   private var content: Content

@@ -4,7 +4,7 @@ import SwiftUI
 import HelloCore
 
 @MainActor
-public struct OFWindowRootView<Content: View>: View {
+public struct HelloWindowRootView<Content: View>: View {
   
   private var becomeActiveNotification: Notification.Name {
 #if os(macOS)
@@ -35,11 +35,10 @@ public struct OFWindowRootView<Content: View>: View {
 //  @PersistentState(.theme) private var orTheme
   
   @StateObject private var windowManager = OFWindowManager()
-  @ObservedObject private var hoverManager: HoverManager = .main
-  @ObservedObject private var themeManager: ActiveThemeManager = .main
+  private var themeManager: ActiveThemeManager = .main
   
   private var content: Content
-  @ObservedObject private var uiProperties: UIProperties
+  private var uiProperties: UIProperties
   @State var isActive: Bool = false
   
   public init(uiProperties: UIProperties, @ViewBuilder content: () -> Content) {
@@ -55,9 +54,9 @@ public struct OFWindowRootView<Content: View>: View {
 //    }
     
     switch colorScheme {
-    case .dark: return themeManager.darkTHeme
+    case .dark: return themeManager.darkTheme
     case .light: fallthrough
-    @unknown default: return themeManager.lightTHeme
+    @unknown default: return themeManager.lightTheme
     }
   }
   
@@ -83,12 +82,11 @@ public struct OFWindowRootView<Content: View>: View {
       }
     }.ignoresSafeArea()
       .environment(\.colorScheme, theme.isDark ? .dark : .light)
-      .environment(\.currentHover, hoverManager.currentHover)
       .environment(\.theme, HelloSwiftUITheme(theme: theme))
       .environment(\.isActive, isActive)
       .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)
-      .environmentObject(uiProperties)
+      .environment(uiProperties)
       .environmentObject(windowManager)
       .onAppear { isActive = isActiveSystem }
       .onReceive(NotificationCenter.default.publisher(for: becomeActiveNotification)) { _ in

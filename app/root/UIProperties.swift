@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-#if os(iOS) || os(watchOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias NativeEdgeInsets = UIEdgeInsets
 #elseif os(macOS)
 public typealias NativeEdgeInsets = NSEdgeInsets
@@ -39,13 +39,14 @@ public extension EdgeInsets {
 //}
 
 @MainActor
-public class UIProperties: ObservableObject {
+@Observable
+public class UIProperties {
   
-  @Published public var size: CGSize
-  @Published public var safeAreaInsets: EdgeInsets
-  @Published public var scaleFactor: CGFloat = 1
+  public var size: CGSize
+  public var safeAreaInsets: EdgeInsets
+  public var scaleFactor: CGFloat = 1
   #if os(iOS)
-  @Published public var keyboardFrame: CGRect = .zero
+  public var keyboardFrame: CGRect = .zero
   var keyboardAnimationDuration: CGFloat = 0
   
   public var isKeyboardShowing: Bool { keyboardFrame.height > 0 }

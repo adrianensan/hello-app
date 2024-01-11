@@ -9,7 +9,7 @@ public extension Color {
     var b: CGFloat = 0
     var o: CGFloat = 0
     
-#if os(iOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     guard NativeColor(self).getRed(&r, green: &g, blue: &b, alpha: &o) else {
       // You can handle the failure here as you want
       return .transparent

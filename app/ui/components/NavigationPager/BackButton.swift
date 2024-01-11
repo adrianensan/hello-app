@@ -68,9 +68,12 @@ public struct BackButton: View {
           .padding(.trailing, 10)
       }
     }.background {
-      Capsule(style: .continuous)
-        .fill(.thinMaterial)
-//        ClearClickableView()
+      ZStack {
+        Capsule(style: .continuous)
+          .fill(.thinMaterial)
+          .opacity(min(1, (backProgressModel.backProgress * backProgressModel.backProgress / 0.1)))
+        ClearClickableView()
+      }
         //        Capsule(style: .continuous)
         //          .fill(theme.textPrimary.swiftuiColor)
         //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)

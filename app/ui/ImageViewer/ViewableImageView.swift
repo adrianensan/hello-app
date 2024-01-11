@@ -34,11 +34,12 @@ public struct ViewableImageView: View {
         windowModel.showPopup(ImageViewer(image: image, originalFrame: nonObserved.imageFrame))
         isOpened = true
         ButtonHaptics.buttonFeedback()
-      }.onChange(of: windowModel.popupView == nil) {
-        if $0 && isOpened {
-          isOpened = false
-        }
       }
+//      .onChange(of: windowModel.popupView == nil) {
+//        if $0 && isOpened {
+//          isOpened = false
+//        }
+//      }
   }
 }
 #endif

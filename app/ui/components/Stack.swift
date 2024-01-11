@@ -8,30 +8,30 @@ public struct Stack<Content: View>: View {
   var alignment: Alignment
   var spacing: CGFloat
   var isReversed: Bool
-  var content: Content
+  var content: () -> Content
   
   public init(orientation: Orientation,
               alignment: Alignment = .center,
               spacing: CGFloat = 0,
               isReversed: Bool = false,
-              @ViewBuilder content: () -> Content) {
+              @ViewBuilder content: @escaping () -> Content) {
     self.orientation = orientation
     self.alignment = alignment
     self.spacing = spacing
     self.isReversed = isReversed
-    self.content = content()
+    self.content = content
   }
   
   public var body: some View {
     switch orientation {
     case .horizontal:
       HStack(alignment: alignment.vertical, spacing: spacing) {
-        content
+        content()
           .environment(\.layoutDirection, .leftToRight)
       }.environment(\.layoutDirection, isReversed ? .rightToLeft : .leftToRight)
     case .vertical:
       VStack(alignment: alignment.horizontal, spacing: spacing) {
-        content
+        content()
           .environment(\.layoutDirection, .leftToRight)
       }.environment(\.layoutDirection, isReversed ? .rightToLeft : .leftToRight)
     }

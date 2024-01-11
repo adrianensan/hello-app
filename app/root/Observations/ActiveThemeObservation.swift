@@ -3,7 +3,7 @@ import SwiftUI
 import HelloCore
 
 private struct HelloThemeEnvironmentKey: EnvironmentKey {
-#if os(iOS)
+#if os(iOS) || os(visionOS)
   static let defaultValue = HelloSwiftUITheme(theme: .dark)
 #else
   static let defaultValue = HelloSwiftUITheme(theme: .darkBlur)
@@ -17,6 +17,7 @@ public extension EnvironmentValues {
   }
 }
 
+@MainActor
 struct ActiveThemeObservationViewModifier: ViewModifier {
   
   @Environment(\.colorScheme) private var colorScheme: ColorScheme
@@ -25,11 +26,11 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
   
   private var currentTheme: HelloTheme {
     colorScheme == .dark
-    ? themeManager.darkTHeme
-    : themeManager.lightTHeme
+    ? themeManager.darkTheme
+    : themeManager.lightTheme
   }
   
-  @State var isActive: Bool = false
+  @State private var isActive: Bool = false
   
   func body(content: Content) -> some View {
     content
@@ -38,6 +39,7 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
   }
 }
 
+@MainActor
 public extension View {
   func observeActiveTheme() -> some View {
     modifier(ActiveThemeObservationViewModifier())

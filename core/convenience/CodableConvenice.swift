@@ -1,7 +1,5 @@
 import Foundation
 
-
-
 public extension Encodable {
   func data() throws -> Data {
     try JSONEncoder().encode(self)

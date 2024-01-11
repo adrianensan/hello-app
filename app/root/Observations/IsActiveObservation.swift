@@ -16,7 +16,7 @@ struct IsActiveObservationViewModifier: ViewModifier {
   private var becomeActiveNotification: Notification.Name {
 #if os(macOS)
     NSApplication.didBecomeActiveNotification
-#elseif os(iOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
     UIApplication.didBecomeActiveNotification
 #elseif os(watchOS)
     WKApplication.didBecomeActiveNotification
@@ -26,7 +26,7 @@ struct IsActiveObservationViewModifier: ViewModifier {
   private var resignActiveNotification: Notification.Name {
 #if os(macOS)
     NSApplication.didResignActiveNotification
-#elseif os(iOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
     UIApplication.willResignActiveNotification
 #elseif os(watchOS)
     WKApplication.didEnterBackgroundNotification
@@ -36,7 +36,7 @@ struct IsActiveObservationViewModifier: ViewModifier {
   private var isActiveSystem: Bool {
 #if os(macOS)
     NSApplication.shared.isActive
-#elseif os(iOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
     UIApplication.shared.applicationState == .active
 #elseif os(watchOS)
     true

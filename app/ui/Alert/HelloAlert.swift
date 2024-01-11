@@ -49,25 +49,35 @@ public struct HelloAlertConfig {
 @MainActor
 public struct HelloAlert: View {
   
-  @Environment(\.theme) var theme
-  @Environment(HelloWindowModel.self) var windowModel
+  @Environment(\.theme) private var theme
+  @Environment(HelloWindowModel.self) private var windowModel
   
-  @State var animateIn: Bool = false
-  @State var isDismissed: Bool = false
+  @State private var animateIn: Bool = false
+  @State private var isDismissed: Bool = false
   
-  var config: HelloAlertConfig
+  private var config: HelloAlertConfig
   
   public init(config: HelloAlertConfig) {
     self.config = config
   }
   
-  func dismiss() {
+  private func dismiss() {
     isDismissed = true
     animateIn = false
-    Task {
-      try await Task.sleep(seconds: 0.02)
-      windowModel.dismissAlert()
-    }
+    windowModel.dismissAlert()
+//    print("p1", "fsfsfsfsfsfsf")
+//    Task {
+//      print("p2", "fsfsfsfsfsfsf")
+//      do {
+//        print("start", "fsfsfsfsfsfsf")
+//        try await Task.sleep(seconds: 0.02)
+//        print("end", "fsfsfsfsfsfsf")
+//      } catch {
+//        print(error, "fsfsfsfsfsfsf")
+//      }
+//      print("continue", "fsfsfsfsfsfsf")
+//      windowModel.dismissAlert()
+//    }
   }
   
   public var body: some View {
@@ -81,7 +91,7 @@ public struct HelloAlert: View {
         if let message = config.message {
           Text(message)
             .font(.system(size: 13, weight: .regular, design: .rounded))
-            .foregroundColor(theme.foreground.primary.color)
+            .foregroundStyle(theme.foreground.primary.style)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
         }
@@ -91,14 +101,13 @@ public struct HelloAlert: View {
         .frame(height: 1)
       
       HStack(spacing: 0) {
-        Button(action: {
+        BasicButton(haptics: .action, action: {
           config.firstButton.action?()
           dismiss()
-          ButtonHaptics.buttonFeedback()
         }) {
           Text(config.firstButton.name)
             .font(.system(size: 17, weight: .semibold, design: .rounded))
-            .foregroundColor(config.firstButton.isDestructive ? .red : theme.accentColor)
+            .foregroundStyle(config.firstButton.isDestructive ? theme.error.style : theme.accent.style)
             .frame(height: 44)
             .frame(maxWidth: .infinity)
 //            .background(theme.rowBackground.swiftuiColor)
@@ -107,14 +116,13 @@ public struct HelloAlert: View {
         if let secondButton = config.secondButton {
           theme.foreground.primary.color.opacity(0.1)
             .frame(width: 1, height: 44)
-          Button(action: {
+          BasicButton(haptics: .action, action: {
             secondButton.action?()
             dismiss()
-            ButtonHaptics.buttonFeedback()
           }) {
             Text(secondButton.name)
               .font(.system(size: 17, weight: .semibold, design: .rounded))
-              .foregroundColor(secondButton.isDestructive ? .red : theme.accentColor)
+              .foregroundStyle(secondButton.isDestructive ? theme.error.style : theme.accent.style)
               .frame(height: 44)
               .frame(maxWidth: .infinity)
 //              .background(theme.rowBackground.swiftuiColor)
@@ -131,7 +139,7 @@ public struct HelloAlert: View {
       .shadow(color: .black.opacity(0.2), radius: 24)
       .scaleEffect(animateIn ? 1 : 0.6)
       .opacity(animateIn ? 1 : 0)
-      .animation(animateIn ? .dampSpring : .easeInOut(duration: 0.25), value: animateIn)
+      .animation(animateIn ? .dartSpring : .easeInOut(duration: 0.2), value: animateIn)
       .onTapGesture {}
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(Color.black

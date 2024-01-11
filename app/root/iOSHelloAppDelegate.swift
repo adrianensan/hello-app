@@ -1,24 +1,12 @@
 #if os(iOS)
 import SwiftUI
+import Intents
 
 import HelloCore
 
-public protocol HelloAppDelegateConformable {
-  associatedtype RootView: View
-  var rootView: RootView { get }
+class HelloAppDelegate: NSObject, UIApplicationDelegate {
   
-  func applicationDidLaunch()
-}
-
-public extension HelloAppDelegateConformable {
-  var rootView: Color { fatalError("No root view provided") }
-  
-  func applicationDidLaunch() {}
-}
-
-open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, HelloAppDelegateConformable {
-  
-//  public static var shared:  HelloAppDelegate?
+//  public static var shared: HelloAppDelegate?
   
   public var window: UIWindow?
   
@@ -31,20 +19,19 @@ open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, He
 //    //Hello.window = HelloWindow(view: HelloAppRootView(view: rootView))
 //  }
   
-  open var rootView: RootView { fatalError("No root view provided") }
-  open var persistence: HelloPersistence { fatalError() }
-  
-  public final func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    _ = HelloApplication.current
-    applicationDidLaunch()
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 //    Hello.rootViewController = viewController
-    
 //    viewController.onBrightnessChange = { ThemeObservable.shared.handleScreenBrightnessUpdate() }
-    let window = UIWindow()
-    let viewController = HelloRootViewController(window: window, wrappedView: rootView)
-    window.rootViewController = viewController
-    window.makeKeyAndVisible()
-    self.window = window
+    if !application.supportsMultipleScenes {
+      let window = UIWindow()
+      let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
+      window.rootViewController = viewController
+      window.makeKeyAndVisible()
+      self.window = window
+    }
+    Task {
+      await helloApplication.onLaunchInternal()
+    }
     
 //    Hello.cloudSyncHelper.syncAll()
 //    if StoreService.main.tipProducts.isEmpty {
@@ -53,9 +40,36 @@ open class HelloAppDelegate<RootView: View>: NSObject, UIApplicationDelegate, He
     return true
   }
   
-  open func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    Task { await helloApplication.becameActive() }
+  }
+  
+  func applicationWillResignActive(_ application: UIApplication) {
+    Task { await helloApplication.lostActive() }
+  }
+  
+  public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    let config = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+    config.delegateClass = SceneDelegate.self
+    return config
+  }
+  
+  func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
     .all
 //    Hello.persistence.lockRotation ? .portrait : .allButUpsideDown
+  }
+}
+
+public class SceneDelegate: NSObject, UISceneDelegate {
+  
+  public var window: UIWindow?
+  
+  public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = scene as? UIWindowScene else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
+    window.makeKeyAndVisible()
+    self.window = window
   }
 }
 #endif

@@ -337,14 +337,6 @@ public enum Persistence {
     }
   }
   
-  public static var defaultPathRoot: URL {
-    do {
-      return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-    } catch {
-      return FileManager.default.temporaryDirectory
-    }
-  }
-  
   public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID))
   
   public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
@@ -367,7 +359,7 @@ public enum Persistence {
     await Property.persistence.delete(property: property)
   }
   
-  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (Property.Value) -> Property.Value) async {
+  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (consuming Property.Value) -> Property.Value) async {
     await Property.persistence.atomicUpdate(property, update: update)
   }
   

@@ -10,12 +10,14 @@ public struct BasicButton<Content: View>: View {
   
   private var haptics: HapticsType
   private var action: () -> Void
-  private var content: Content
+  private var content: () -> Content
   
-  public init(haptics: HapticsType = .clickAndAction, action: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+  public init(haptics: HapticsType = .clickAndAction,
+              action: @escaping () -> Void,
+              @ViewBuilder content: @escaping () -> Content) {
     self.haptics = haptics
     self.action = action
-    self.content = content()
+    self.content = content
   }
   
   public var body: some View {
@@ -25,7 +27,7 @@ public struct BasicButton<Content: View>: View {
         ButtonHaptics.buttonFeedback()
       }
     }) {
-      content
+      content()
     }.buttonStyle(.hello(allowHaptics: haptics == .clickAndAction))
       .accessibilityElement()
       .accessibilityAddTraits(.isButton)

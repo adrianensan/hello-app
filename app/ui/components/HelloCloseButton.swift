@@ -1,7 +1,7 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
 public struct HelloCloseButton: View {
   
@@ -58,3 +58,4 @@ public struct HelloCloseButton: View {
       .animation(.interactive, value: dismissModel.dismissProgress)
   }
 }
+#endif
