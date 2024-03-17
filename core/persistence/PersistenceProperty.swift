@@ -113,20 +113,19 @@ public enum PersistenceType: Sendable {
   }
 }
 
-public struct NoOld: PersistenceProperty {
+
+extension Never: PersistenceProperty {
   
-  public var defaultValue: Bool? { nil }
+  public var defaultValue: Never { fatalError("") }
   
-  public var location: PersistenceType { .defaults(key: "nil") }
-  
-  public init() {}
+  public var location: PersistenceType { .memory(key: "never") }
 }
 
 public protocol PersistenceProperty: Sendable {
   
   associatedtype Value: Codable & Sendable
 //  associatedtype Key: PersistenceKey
-  associatedtype OldProperty: PersistenceProperty = NoOld
+  associatedtype OldProperty: PersistenceProperty = Never
   
   static var persistence: HelloPersistence { get }
   

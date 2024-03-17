@@ -2,10 +2,78 @@ import SwiftUI
 
 import HelloCore
 
-var helloApplication: (any HelloApplicationn)! = nil
+var helloApplication: (any HelloApplication)! = nil
+
+public struct HelloScene: Sendable {
+  
+  @available(visionOS 1.0, *)
+  public enum HelloImmersiveSceneType {
+    case mixed
+    case full
+  }
+  
+  public enum HelloSceneType {
+    case window
+    #if os(visionOS)
+    @available(visionOS 1.0, *)
+    case volumetric
+    @available(visionOS 1.0, *)
+    case immersive(HelloImmersiveSceneType)
+    #endif
+    
+    
+    #if os(iOS) || os(visionOS)
+    var systemRole: UISceneSession.Role {
+      #if os(iOS)
+      switch self {
+      case .window:
+          .windowApplication
+      }
+      #elseif os(visionOS)
+      switch self {
+      case .window:
+        .windowApplication
+      case .volumetric:
+        .windowApplicationVolumetric
+      case .immersive:
+        .immersiveSpaceApplication
+      }
+      #endif
+    }
+    #endif
+  }
+  
+  var type: HelloSceneType
+  #if os(visionOS)
+  var showBackground: Bool
+  #endif
+  var rootView: () -> AnyView
+  
+#if os(visionOS)
+  public init(type: HelloSceneType = .window,
+              showBackground: Bool = true,
+              rootView: @escaping () -> some View) {
+    self.type = type
+    self.showBackground = showBackground
+    self.rootView = { AnyView(rootView()) }
+  }
+#else
+  public init(type: HelloSceneType = .window,
+              rootView: @escaping () -> some View) {
+    self.type = type
+    self.rootView = { AnyView(rootView()) }
+  }
+#endif
+}
 
 @MainActor
-public protocol HelloApplicationn: AnyObject {
+public protocol HelloApplicationScenes: AnyObject {
+  
+  
+}
+
+@MainActor
+public protocol HelloApplication: AnyObject {
   
   static func load() -> Self
   
@@ -18,14 +86,22 @@ public protocol HelloApplicationn: AnyObject {
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) async
   func firstLaunch() async
   
+  func open(url: URL) -> Bool
+  
   func view() -> AnyView
+  
+  associatedtype Scenes: Scene
+  
+  @SceneBuilder
+  static var scene: Scenes { get }
+
 }
 
 #if os(watchOS)
 import WatchKit
 #endif
 
-public extension HelloApplicationn {
+public extension HelloApplication {
   
   static func manualStart() {
     guard helloApplication == nil else { return }
@@ -37,7 +113,6 @@ public extension HelloApplicationn {
   
   private static func setup() {
     guard helloApplication == nil else { return }
-    print("setup")
     _ = Log.logger
     CrashHandler.setup()
     helloApplication = load()
@@ -47,8 +122,10 @@ public extension HelloApplicationn {
     guard helloApplication == nil else { return }
     setup()
     
-    #if os(iOS) || os(tvOS) || os(visionOS)
+    #if os(iOS) || os(tvOS)
     _ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, nil, NSStringFromClass(HelloAppDelegate.self))
+    #elseif os(visionOS)
+    HelloSwiftUIApp<Self>.main()
     #elseif os(macOS)
     let appDelegate = HelloAppDelegate()
     NSApplication.shared.delegate = appDelegate
@@ -66,9 +143,11 @@ public extension HelloApplicationn {
   
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) {}
   func firstLaunch() {}
+  
+  func open(url: URL) -> Bool { false }
 }
 
-extension HelloApplicationn {
+extension HelloApplication {
   func onLaunchInternal() async {
 #if DEBUG
     await Persistence.save(true, for: .isDeveloper)

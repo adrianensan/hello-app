@@ -4,7 +4,40 @@ import UniformTypeIdentifiers
 import HelloApp
 import HelloCore
 
-public struct AppIconExporter {
+struct AppIconEmptyContents: Codable, Sendable {
+  var info: AppIconContentsInfo = AppIconContentsInfo()
+}
+
+struct AppIconContentsInfo: Codable, Sendable {
+  var author: String = "xcode"
+  var version: Int = 1
+}
+
+struct LayeredAppIconLayerContents: Codable, Sendable {
+  var filename: String
+}
+
+struct LayeredAppIconContents: Codable, Sendable {
+  var info: AppIconContentsInfo = AppIconContentsInfo()
+  var layers: [LayeredAppIconLayerContents] = []
+}
+
+enum VisionOSAppIconLayer: String, CaseIterable, Sendable {
+  case front
+  case middle
+  case back
+  
+  var fileName: String {
+    switch self {
+    case .front: "Front.solidimagestacklayer"
+    case .middle: "Middle.solidimagestacklayer"
+    case .back: "Back.solidimagestacklayer"
+    }
+  }
+}
+
+@MainActor
+public class AppIconExporter {
   
   let appName: String
   
@@ -31,13 +64,19 @@ public struct AppIconExporter {
 //      .aspectRatio(contentMode: .fill))
   }
   
-  public func export<AppIcon: WatchAppIcon>(watchOSIcon icon: AppIcon) async throws {
+//  public func exportAllIcons<AppIcon: BaseAppIcon>(iconType: AppIcon.Type) async throws {
+//    if let iOSIcons = (iconType as? IOSAppIcon)?.allIcons {
+//      export(iOSIcons: iOSIcons)
+//    }
+//  }
+  
+  public func export(watchOSIcon icon: some WatchAppIcon) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("watchOS") else { return }
     let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).appiconset")
     try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
     
     for scale in IconScale.watchOSIconScales {
-      try await save(view: baseImage(for: icon.watchView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
+      try await save(view: baseImage(for: icon.watchOSView.flattenedView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
                      to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
                      allowOpacity: false)
       try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: IconScale.watchOSIconScales)
@@ -45,17 +84,44 @@ public struct AppIconExporter {
     }
   }
   
-  public func export<AppIcon: IMessageAppIcon>(iMessageIcon icon: AppIcon) async throws {
+  public func export(iMessageIcon icon: some IMessageAppIcon) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("iMessage") else { return }
     let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).stickersiconset")
     try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
     
     for scale in IconScale.iMessageIconScales {
-      try await save(view: baseImage(for: icon.iMessageView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
+      try await save(view: baseImage(for: icon.iMessageView.flattenedView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
                      to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
                      allowOpacity: false)
       try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: IconScale.iMessageIconScales)
         .write(to: iconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
+    }
+  }
+  
+  public func export<AppIcon: VisionOSAppIcon>(visionOSIcons icons: [AppIcon]) async throws {
+    guard let exportPath = baseExportPath?.appendingPathComponent("visionOS") else { return }
+    for icon in AppIcon.allCases {
+      let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).solidimagestack")
+      try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
+      var layerContents = LayeredAppIconContents()
+      let scale = IconScale(size: 512, scaleFactor: 2, purpose: .vision)
+      for (i, layer) in icon.visionOSView.layers.enumerated() {
+        let layerName = "layer\(i)"
+        let layerFilename = "\(layerName).solidimagestacklayer"
+        let iconLayerURL = iconExportPath.appendingPathComponent(layerFilename)
+        let iconLayerInnerContentsURL = iconLayerURL.appendingPathComponent("Content.imageset")
+        layerContents.layers.append(LayeredAppIconLayerContents(filename: layerFilename))
+        try? FileManager.default.createDirectory(at: iconLayerInnerContentsURL, withIntermediateDirectories: true, attributes: [:])
+        try? AppIconEmptyContents().data().write(to: iconLayerURL.appendingPathComponent("Contents.json"))
+        
+        let imageLayerName = "\(icon.imageName)-\(layerName)"
+        try await save(view: baseImage(for: layer, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
+                       to: iconLayerInnerContentsURL.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: imageLayerName, scale: scale)),
+                       allowOpacity: i != icon.visionOSView.layers.count - 1)
+        try AppiconsetContentsGenerator.contentsFile(for: imageLayerName, with: [scale])
+          .write(to: iconLayerInnerContentsURL.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
+      }
+      try? layerContents.data().write(to: iconExportPath.appendingPathComponent("Contents.json"))
     }
   }
   
@@ -68,7 +134,7 @@ public struct AppIconExporter {
       // Main App Icon
       let scales = icon.imageName == AppIcon.defaultIcon.imageName ? IconScale.iOSMainIconScales : IconScale.iOSAlternateIconScales
       for scale in scales {
-        try await save(view: baseImage(for: icon.iOSView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
+        try await save(view: baseImage(for: icon.iOSView.flattenedView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
                        to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
                        allowOpacity: false)
       }
@@ -77,7 +143,7 @@ public struct AppIconExporter {
     }
   }
   
-  public func export<AppIcon: MacAppIcon>(macIcons icons: [AppIcon]) async throws {
+  public func export<AppIcon: MacOSAppIcon>(macIcons icons: [AppIcon]) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("macOS") else { return }
     
     // Main App Icon
@@ -86,7 +152,7 @@ public struct AppIconExporter {
     
     // Main App Icon
     for scale in IconScale.macOSMainIconScales {
-      try await save(view: baseImage(for: AppIcon.defaultIcon.macView.view, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
+      try await save(view: baseImage(for: AppIcon.defaultIcon.macOSView.view.flattenedView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
                      to: mainIconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: AppIcon.defaultIcon.imageName, scale: scale)),
                      allowOpacity: true)
     }
@@ -96,7 +162,7 @@ public struct AppIconExporter {
     for icon in AppIcon.allCases {
       try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
       
-      try await save(view: baseImage(for: icon.macView.view, scale: .init(size: CGSize(width: 256, height: 256), scaleFactor: 1, purpose: .mac)),
+      try await save(view: baseImage(for: icon.macOSView.view.flattenedView, scale: .init(size: CGSize(width: 256, height: 256), scaleFactor: 1, purpose: .mac)),
                      size: CGSize(width: 256, height: 256),
                      to: exportPath.appendingPathComponent("\(icon.imageName).png"),
                      allowOpacity: true)
@@ -110,23 +176,21 @@ public struct AppIconExporter {
   
   @MainActor
   func save<Content: View>(view: Content, size: CGSize, to path: URL, allowOpacity: Bool) async throws {
-    if #available(iOS 16, macOS 13, *) {
-      let imageRender = ImageRenderer(content: view.frame(size))
-      imageRender.isOpaque = !allowOpacity
-      //    imageRender.proposedSize = size
-      guard let cgImage = imageRender.cgImage else { throw AppIconCreateError.failedToRender }
-      let data = NSMutableData()
-      let downsampleOptions = [
-        kCGImageSourceCreateThumbnailFromImageAlways: true,
-        kCGImageSourceShouldCacheImmediately: true,
-        kCGImageSourceCreateThumbnailWithTransform: true,
-        kCGImageDestinationLossyCompressionQuality: 0.9,
-      ] as [NSObject: AnyObject] as [AnyHashable: Any] as CFDictionary
-      
-      guard let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, downsampleOptions) else { throw AppIconCreateError.failedGetData }
-      CGImageDestinationAddImage(destination, cgImage, downsampleOptions)
-      guard CGImageDestinationFinalize(destination) else { throw AppIconCreateError.failedGetData }
-      try data.write(to: path)
-    }
+    let imageRender = ImageRenderer(content: view.frame(size))
+    imageRender.isOpaque = !allowOpacity
+    //    imageRender.proposedSize = size
+    guard let cgImage = imageRender.cgImage else { throw AppIconCreateError.failedToRender }
+    let data = NSMutableData()
+    let downsampleOptions = [
+      kCGImageSourceCreateThumbnailFromImageAlways: true,
+      kCGImageSourceShouldCacheImmediately: true,
+      kCGImageSourceCreateThumbnailWithTransform: true,
+      kCGImageDestinationLossyCompressionQuality: 0.9,
+    ] as [NSObject: AnyObject] as [AnyHashable: Any] as CFDictionary
+    
+    guard let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, downsampleOptions) else { throw AppIconCreateError.failedGetData }
+    CGImageDestinationAddImage(destination, cgImage, downsampleOptions)
+    guard CGImageDestinationFinalize(destination) else { throw AppIconCreateError.failedGetData }
+    try data.write(to: path)
   }
 }

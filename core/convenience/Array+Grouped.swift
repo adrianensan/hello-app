@@ -1,6 +1,12 @@
 import Foundation
 
 public extension Array {
+  
+  mutating func popFirst() -> Element? {
+    guard !isEmpty else { return nil }
+    return removeFirst()
+  }
+  
   func grouped<Key: Hashable>(by keyGetter: (Element) -> Key) -> [[Element]] {
     var keyOrder: [Key] = []
     var grouped: [Key: [Element]] = [:]
@@ -34,6 +40,12 @@ public extension Collection where Element: Equatable {
 
 public extension ArraySlice {
   func repeated(count: Int) -> [Element] {
-    return [Element](repeating: [Element](self), count: count)
+    [Element](repeating: [Element](self), count: count)
+  }
+}
+
+public extension Array where Element: Identifiable {
+  var idsMappedToValues: [Element.ID: Element] {
+    Dictionary(map { ($0.id, $0) }, uniquingKeysWith: { (first, _) in first })
   }
 }

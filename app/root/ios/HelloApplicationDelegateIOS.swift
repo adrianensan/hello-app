@@ -4,6 +4,7 @@ import Intents
 
 import HelloCore
 
+@MainActor
 class HelloAppDelegate: NSObject, UIApplicationDelegate {
   
 //  public static var shared: HelloAppDelegate?
@@ -52,6 +53,13 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
     let config = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
     config.delegateClass = SceneDelegate.self
     return config
+  }
+  
+  func application(_ application: UIApplication,
+                   open url: URL,
+                   options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+  ) -> Bool {
+    helloApplication.open(url: url)
   }
   
   func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {

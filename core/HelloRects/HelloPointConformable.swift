@@ -13,6 +13,11 @@ public protocol HelloPointConformable<NumberType> {
 }
 
 public extension HelloPointConformable {
+  
+  var minCoordinate: NumberType { min(x, y) }
+  
+  var maxCoordinate: NumberType { max(x, y) }
+  
   static func +=(left: inout Self, right: Self) {
     left = left + right
   }

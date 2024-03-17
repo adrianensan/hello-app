@@ -104,7 +104,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   }
   
   override public var preferredContainerBackgroundStyle: UIContainerBackgroundStyle {
-    .glass
+    .hidden
   }
 }
 #endif

@@ -35,7 +35,6 @@ public struct NavigationPagerView: View {
   }
   
   public var body: some View {
-      let _ = Self._printChanges()
     GeometryReader { geometry in
       ZStack(alignment: .leading) {
         HStack(spacing: 0) {

@@ -15,7 +15,7 @@ public struct GalleryView<AppIcon: AnyAppIconView>: View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 60, maximum: 60), spacing: 12, alignment: .top)], spacing: 16) {
           ForEach(AppIcon.allIcons) { icon in
             VStack {
-              icon.view
+              icon.view.flattenedView
                 .frame(width: 60, height: 60)
                 .clipShape(AppIconShape())
                 .onTapGesture {
@@ -29,7 +29,7 @@ public struct GalleryView<AppIcon: AnyAppIconView>: View {
         }
         .padding(16)
       }.frame(maxWidth: .infinity, maxHeight: .infinity)
-      currentIcon.view
+      currentIcon.view.flattenedView
         .clipShape(AppIconShape())
         .frame(width: 512, height: 512)
         .padding(16)

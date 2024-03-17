@@ -59,10 +59,17 @@ enum AppiconsetContentsGenerator {
   static var contentsJsonFileSuffix: String {
     """
     ],
+    \(contentsInfoSection)
+    }
+    """
+  }
+  
+  static var contentsInfoSection: String {
+    """
     "info" : {
       "author" : "xcode",
       "version" : 1
-    }}
+    }
     """
   }
 }

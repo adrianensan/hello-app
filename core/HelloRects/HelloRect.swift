@@ -9,6 +9,10 @@ public protocol HelloNumeric: CustomStringConvertible, Hashable, Numeric, Sendab
 //  init(_ source: some BinaryFloatingPoint)
 }
 
+//public extension FloatingPoint {
+//  static var tau: Self { 2 * .pi }
+//}
+
 extension Int: HelloNumeric {}
 extension UInt: HelloNumeric {}
 extension Int64: HelloNumeric {}
@@ -27,9 +31,23 @@ public typealias IntPoint = HelloPoint<Int>
 public typealias IntSize = HelloSize<Int>
 public typealias IntRect = HelloRect<Int>
 
+public typealias FloatPoint = HelloPoint<Float>
+public typealias FloatSize = HelloSize<Float>
+public typealias FloatRect = HelloRect<Float>
+
 public typealias DoublePoint = HelloPoint<Double>
 public typealias DoubleSize = HelloSize<Double>
 public typealias DoubleRect = HelloRect<Double>
+
+extension SIMD2<Float>: HelloPointConformable {
+  public init(x: some BinaryFloatingPoint, y: some BinaryFloatingPoint) {
+    self.init(x: Float(x), y: Float(y))
+  }
+  
+  public init(x: some BinaryInteger, y: some BinaryInteger) {
+    self.init(x: Float(x), y: Float(y))
+  }
+}
 
 extension CGPoint: HelloPointConformable {
   public init(x: some BinaryFloatingPoint, y: some BinaryFloatingPoint) {

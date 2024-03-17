@@ -3,6 +3,18 @@ import Observation
 
 import HelloCore
 
+public struct HelloImageID {
+  public var source: HelloImageSource
+  public var variant: HelloImageVariant
+  
+  init(source: HelloImageSource, variant: HelloImageVariant) {
+    self.source = source
+    self.variant = variant
+  }
+    
+  public var id: String { "\(source.id)-\(variant.id)" }
+}
+
 public enum HelloImageSource: Hashable, Sendable, Identifiable {
   case asset(named: String)
   case resource(bundle: Bundle = .main, fileName: String)
@@ -42,12 +54,20 @@ public struct AnimatedImageFrame: Sendable, Hashable {
   public var duration: TimeInterval
 }
 
+@globalActor final public actor HellosActor: GlobalActor {
+    public static var shared: HellosActor = HellosActor()
+    
+    public typealias ActorType = HellosActor
+    
+    
+}
+
 @MainActor
 @Observable
 class HelloImageModel {
   private static var models: [String: Weak<HelloImageModel>] = [:]
   public static func model(for imageSource: HelloImageSource, variant: HelloImageVariant = .original) -> HelloImageModel {
-    let id = "\(imageSource.id)-\(variant.id)"
+    let id = HelloImageID(source: imageSource, variant: variant).id
     if let model = models[id]?.value {
       //      if model.image == nil && !model.isLoading {
       //        Task { try await model.load() }

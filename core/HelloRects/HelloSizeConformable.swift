@@ -67,6 +67,8 @@ public extension HelloSizeConformable {
 public extension HelloSizeConformable where NumberType: BinaryInteger {
   
   var doubleSize: DoubleSize { DoubleSize(width: Double(width), height: Double(height)) }
+  var floatSize: FloatSize { FloatSize(width: Float(width), height: Float(height)) }
+  var size3D: SIMD3<Float> { SIMD3(x: Float(width), y: Float(height), z: 0) }
   
   var diagonal: Double { doubleSize.diagonal }
   

@@ -235,3 +235,14 @@ public struct HelloDynamicColor: Sendable {
                       dark: dark.readableOverlayColor)
   }
 }
+
+public extension HelloColor {
+  static func *(left: Self, right: Float) -> Self {
+    let right = Double(right)
+    return HelloColor(r: left.r * right, g: left.g * right, b: left.b * right, a: left.a * right)
+  }
+  
+  static func +(left: Self, right: Self) -> Self {
+    HelloColor(r: left.r + right.r, g: left.g + right.g, b: left.b + right.b, a: left.a + right.a)
+  }
+}

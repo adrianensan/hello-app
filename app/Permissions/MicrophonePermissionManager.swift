@@ -1,6 +1,6 @@
 import AVFoundation
 
-#if os(ios) || os(macOS)
+#if os(iOS) || os(macOS)
 @MainActor
 public class MicrophonePermissionsManager {
   
