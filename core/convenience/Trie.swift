@@ -27,6 +27,26 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
     super.init()
   }
   
+  public init(valueAndKeys: [(T, [String])]) {
+    super.init()
+    for (value, keys) in valueAndKeys {
+      for key in keys {
+        var currentNode: TrieNode<T> = self
+        for character in key.utf8 {
+          if let node = currentNode.map[character] {
+            currentNode = node
+            continue
+          } else {
+            let newNode = TrieNode<T>()
+            currentNode.map[character] = newNode
+            currentNode = newNode
+          }
+        }
+        currentNode.value.insert(value)
+      }
+    }
+  }
+  
   public init(valuesMap: [String: T]) {
     super.init()
     for (key, value) in valuesMap {
@@ -81,6 +101,18 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
       node = node?.map[character]
     }
     return node
+  }
+  
+  public func firstMatch(searchTerm: String) -> T? {
+    var node: TrieNode<T>? = self
+    for character in searchTerm.utf8 {
+      node = node?.map[character]
+      guard let node else { return nil }
+      if let value = node.value.first {
+        return value
+      }
+    }
+    return nil
   }
   
   public func clear() {
