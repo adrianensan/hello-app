@@ -29,7 +29,7 @@ public struct HelloAppIconView: Sendable {
   
   public var flattenedView: some View {
     ZStack {
-      ForEach(0..<layers.count) { i in
+      ForEach(0..<layers.count, id: \.self) { i in
         layers[layers.count - 1 - i]
       }
     }

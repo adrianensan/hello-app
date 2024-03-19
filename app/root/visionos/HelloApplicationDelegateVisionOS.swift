@@ -20,7 +20,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   }
   
   public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-    return UISceneConfiguration(name: connectingSceneSession.configuration.name ?? options.userActivities.first?.activityType, sessionRole: .windowApplication)
+    UISceneConfiguration(name: connectingSceneSession.configuration.name ?? options.userActivities.first?.activityType, sessionRole: .windowApplication)
 //    let configName = connectingSceneSession.configuration.name ?? options.userActivities.first?.activityType
 //    guard let helloScene = helloApplication.scenes[configName] else {
 //      Log.error("No scene found for \(configName)")

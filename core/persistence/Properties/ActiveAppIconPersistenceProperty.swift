@@ -4,7 +4,7 @@ public struct ActiveAppIconPersistenceProperty: PersistenceProperty {
   
   public var defaultValue: String? { nil }
   
-  public var location: PersistenceType { .defaults(suite: .appGroup, key: "isDeveloper") }
+  public var location: PersistenceType { .defaults(suite: .appGroup, key: "app-icon") }
 }
 
 public extension PersistenceProperty where Self == ActiveAppIconPersistenceProperty {
