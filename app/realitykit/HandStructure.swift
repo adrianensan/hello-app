@@ -44,7 +44,7 @@ public struct FingerStructure: Sendable {
   }
   
   public var isFingerTopStraight: Bool {
-    let fingerBendAngleThreshold: Float = 0.1 * .pi
+    let fingerBendAngleThreshold: Float = 0.16 * .pi
     
     let IntermediateTipToTipSegment = tip.localPosition - intermediateTip.localPosition
     let IntermediateBaseToIntermediateTipSegment = intermediateTip.localPosition - intermediateBase.localPosition

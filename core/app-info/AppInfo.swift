@@ -20,6 +20,7 @@ public enum AppInfo {
       .deletingSuffix(".watchkitapp")
       .deletingSuffix(".watchkitapp.watchkitextension")
       .deletingSuffix(".messages-extension")
+      .deletingSuffix(".autofill-credential-extension")
   }
   public static var appGroup: String { "group.\(rootBundleID)" }
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
