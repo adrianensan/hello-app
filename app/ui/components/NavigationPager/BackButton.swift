@@ -78,7 +78,7 @@ public struct BackButton: View {
         //          .fill(theme.textPrimary.swiftuiColor)
         //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
       }
-    .padding(4)
+      .padding(4)
       .animation(.interactive, value: backProgressModel.backProgress)
       .hoverEffect(.lift)
   }

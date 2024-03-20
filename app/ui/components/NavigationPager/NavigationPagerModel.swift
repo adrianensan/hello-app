@@ -165,4 +165,10 @@ public class PagerModel {
     viewStack.remove(at: viewStack.count - 2)
     viewDepth = viewStack.count - 1
   }
+  
+  public func set(allowBack: Bool) {
+    guard var activePage = viewStack.last else { return }
+    activePage.options.allowBackOverride = allowBack
+    viewStack[viewStack.count - 1] = activePage
+  }
 }
