@@ -42,6 +42,18 @@ public struct FingerStructure: Sendable {
     && angle(between: knuckleToIntermediateBaseSegment,
              and: metacarpalToKnuckleSegment) < fingerBendAngleThreshold
   }
+  
+  public var isFingerTopStraight: Bool {
+    let fingerBendAngleThreshold: Float = 0.1 * .pi
+    
+    let IntermediateTipToTipSegment = tip.localPosition - intermediateTip.localPosition
+    let IntermediateBaseToIntermediateTipSegment = intermediateTip.localPosition - intermediateBase.localPosition
+    let knuckleToIntermediateBaseSegment = intermediateBase.localPosition - knuckle.localPosition
+    return angle(between: IntermediateTipToTipSegment,
+                 and: IntermediateBaseToIntermediateTipSegment) < fingerBendAngleThreshold
+    && angle(between: IntermediateBaseToIntermediateTipSegment,
+             and: knuckleToIntermediateBaseSegment) < fingerBendAngleThreshold
+  }
 }
 
 public struct ThumbStructure: Sendable {

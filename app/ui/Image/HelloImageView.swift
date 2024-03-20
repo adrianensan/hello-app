@@ -55,16 +55,16 @@ public struct HelloImageView: View {
   }
   
   public var body: some View {
-    if isActive, let frames = model.frames {
-      AnimatedHelloImageView(images: frames)
-        .dimForTheme()
-    } else if let image = model.image {
-      Image(nativeImage: image)
-        .resizable()
-        .aspectRatio(contentMode: resizeMode)
-        .dimForTheme()
-    } else {
-      Color.clear
+    Group {
+      if isActive, let frames = model.frames {
+        AnimatedHelloImageView(images: frames)
+          .dimForTheme()
+      } else  {
+        Image(nativeImage: model.image ?? .init())
+          .resizable()
+          .aspectRatio(contentMode: resizeMode)
+          .dimForTheme()
+      }
     }
   }
 }
