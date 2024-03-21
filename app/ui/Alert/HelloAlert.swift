@@ -110,6 +110,7 @@ public struct HelloAlert: View {
             .foregroundStyle(config.firstButton.isDestructive ? theme.error.style : theme.accent.style)
             .frame(height: 44)
             .frame(maxWidth: .infinity)
+            .clickable()
 //            .background(theme.rowBackground.swiftuiColor)
         }.buttonStyle(.highlight)
         
@@ -125,6 +126,7 @@ public struct HelloAlert: View {
               .foregroundStyle(secondButton.isDestructive ? theme.error.style : theme.accent.style)
               .frame(height: 44)
               .frame(maxWidth: .infinity)
+              .clickable()
 //              .background(theme.rowBackground.swiftuiColor)
           }.buttonStyle(.highlight)
         }
@@ -139,7 +141,7 @@ public struct HelloAlert: View {
       .shadow(color: .black.opacity(0.2), radius: 24)
       .scaleEffect(animateIn ? 1 : 0.6)
       .opacity(animateIn ? 1 : 0)
-      .animation(animateIn ? .dartSpring : .easeInOut(duration: 0.2), value: animateIn)
+      .animation(animateIn ? .dampSpring : .easeInOut(duration: 0.2), value: animateIn)
       .onTapGesture {}
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(Color.black

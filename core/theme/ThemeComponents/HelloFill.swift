@@ -14,7 +14,7 @@ public enum HelloFill: Codable, Sendable, Hashable {
     switch self {
     case .color(let color): return color
     case .gradient(let gradient): return gradient.mainColor
-    case .semanticColor(.accent): return .skyBlue
+    case .semanticColor(.accent): return HelloColor(r: 0.5, g: 0.6, b: 0.96)
     case .semanticColor(.error): return .fullRed
     }
   }
