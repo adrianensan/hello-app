@@ -126,7 +126,7 @@ public struct HandStructure: Sendable {
     index.isFingerStraight &&
     middle.isFingerStraight &&
     ring.isFingerStraight && 
-    little.isFingerStraight
+    little.isFingerTopStraight
   }
   
   public var isIndexAndThumbTouching: Bool {

@@ -64,11 +64,11 @@ public actor HelloPersistence {
         Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
         return
       }
-      await observable.internalValue = value
+      await observable.value = value
     }
   }
   
-  func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property, initiatedFromProperty: Bool) throws {
+  private func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
     guard allowSaving else { return }
     if property.isDeprecated {
       Log.warning("Using depreacted property \(property.self)", context: "Persistence")
@@ -116,14 +116,14 @@ public actor HelloPersistence {
       }
     case .memory: break
     }
-    if !initiatedFromProperty {
-      updated(value: value, for: property)
-    }
   }
   
-  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+  public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property, skipModelUpdate: Bool = false) {
     do {
-      try saveInternal(value, for: property, initiatedFromProperty: false)
+      try saveInternal(value, for: property)
+      if !skipModelUpdate {
+        updated(value: value, for: property)
+      }
     } catch {
       Log.error("Failed to save value for \(property.self). Error: \(error.localizedDescription)", context: "Persistence")
     }

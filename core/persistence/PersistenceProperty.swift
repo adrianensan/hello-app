@@ -181,26 +181,17 @@ extension PersistenceProperty {
 class PersistentObservable<Property: PersistenceProperty> {
 
   private let property: Property
-  private var pendingChanges: Int = 0
-  var internalValue: Property.Value
-  
-  var value: Property.Value {
-    get { internalValue }
-    set {
-      internalValue = newValue
-      Task { await Property.persistence.save(internalValue, for: property) }
-    }
-  }
+  var value: Property.Value
   
   @MainActor
   func updateValue(to newValue: Property.Value) async {
-    internalValue = newValue
-    await Property.persistence.save(internalValue, for: property)
+    value = newValue
+    await Property.persistence.save(value, for: property, skipModelUpdate: true)
   }
   
   init(_ property: Property) {
     self.property = property
-    internalValue = Property.persistence.storedValue(for: property)
+    value = Property.persistence.storedValue(for: property)
   }
 }
 
@@ -219,14 +210,16 @@ public class Persistent<Property: PersistenceProperty> {
       let _ = persistenObservable.value
     } onChange: { [weak self] in
       guard let self else { return }
-      value = self.persistenObservable.value
-      Task { await self.valueChanged() }
+      valueChanged()
     }
   }
   
   private func valueChanged() {
-    onUpdate?()
-    trackNextChange()
+    Task {
+      value = persistenObservable.value
+      trackNextChange()
+      onUpdate?()
+    }
   }
   
   public init(_ property: Property) {
