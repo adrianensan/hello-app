@@ -53,7 +53,7 @@ public struct HelloMenu: View {
             }.font(.system(size: 14, weight: .medium, design: .rounded))
               .foregroundColor(theme.foreground.primary.color)
               .padding(.horizontal, 12)
-              .frame(width: 240, height: 40)
+              .frame(width: 240, height: 44)
               .background(theme.backgroundView(isBaseLayer: true))
           }.buttonStyle(.highlight)
             .overlay {
@@ -64,10 +64,7 @@ public struct HelloMenu: View {
             }
         }
       }.clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous),
-                                         isBaseLayer: false))
-//        .componentBackground(color: theme.keyboardBackground,
-//                             RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(theme.floating.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous)))
     }
   }
 }

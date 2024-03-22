@@ -86,13 +86,14 @@ public struct SubtleButtonStyle: ButtonStyle {
 
 public struct HelloButtonStyle: ButtonStyle {
   
+  var clickStyle: HelloButtonClickStyle
   var allowHaptics: Bool
   
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .brightness(configuration.isPressed ? -0.05 : 0)
-      .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-      .scaleEffect(configuration.isPressed ? 0.96 : 1)
+      .brightness(configuration.isPressed ? clickStyle.highlightAmount : 0)
+      .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+      .scaleEffect(configuration.isPressed ? clickStyle.scaleAmount : 1)
       .animation(.button, value: configuration.isPressed)
       .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
   }
@@ -117,8 +118,7 @@ public extension ButtonStyle where Self == SubtleButtonStyle {
 }
 
 public extension ButtonStyle where Self == HelloButtonStyle {
-  static func hello(allowHaptics: Bool) -> HelloButtonStyle {
-    HelloButtonStyle(allowHaptics: allowHaptics)
-    
+  static func hello(clickStyle: HelloButtonClickStyle = .scale ,allowHaptics: Bool) -> HelloButtonStyle {
+    HelloButtonStyle(clickStyle: clickStyle, allowHaptics: allowHaptics)
   }
 }

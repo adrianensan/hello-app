@@ -21,7 +21,7 @@ public struct HelloAppRootView<Content: View>: View {
     ZStack {
       content()
         .compositingGroup()
-        .blur(radius: windowModel.alertView != nil || !windowModel.popupViews.isEmpty ? 2 : 0)
+        .blur(radius: windowModel.blurBackgroundForPopup && (windowModel.alertView != nil || !windowModel.popupViews.isEmpty) ? 2 : 0)
         .animation(.easeInOut(duration: 0.5), value: windowModel.alertView != nil || !windowModel.popupViews.isEmpty)
 //          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       

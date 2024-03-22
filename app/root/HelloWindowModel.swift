@@ -14,16 +14,19 @@ public class HelloWindowModel {
     var view: AnyView
   }
   
+  var blurBackgroundForPopup: Bool = true
   var popupViews: [PopupWindow] = []
   var alertView: HelloAlert?
   
   var alertViewID: String = UUID().uuidString
   
-  public func showPopup<Content: View>(_ view: Content) {
+  public func showPopup<Content: View>(blurBackground: Bool = true, _ view: Content) {
+    blurBackgroundForPopup = blurBackground
     popupViews.append(PopupWindow(id: UUID().uuidString, view: AnyView(view.id(UUID().uuidString))))
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
+    blurBackgroundForPopup = true
     alertViewID = UUID().uuidString
     alertView = HelloAlert(config: alertConfig)
   }
