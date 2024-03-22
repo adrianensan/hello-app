@@ -380,6 +380,11 @@ public enum Persistence {
   }
   
   public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    Property.persistence.fileURL(for: property)
+    Property.persistence.rootURL(for: property)
+  }
+  
+  public static func wipeFiles(location: FilePersistenceLocation) throws {
+    guard let url = location.url else { return }
+    try FileManager.default.removeItem(at: url)
   }
 }

@@ -34,10 +34,9 @@ public actor HelloImageDownloadManager {
         }
         do {
           let data = try await Downloader.main.download(from: url)
-          Log.info("Downloaded \(url)", context: "ImageDownloader")
           return data
         } catch {
-          Log.warning("Failed to download \(url)", context: "ImageDownloader")
+//          Log.warning("Failed to download \(url)", context: "ImageDownloader")
           throw error
         }
       }

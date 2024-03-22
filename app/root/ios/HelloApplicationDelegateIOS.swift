@@ -41,12 +41,16 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
     return true
   }
   
+  func applicationWillTerminate(_ application: UIApplication) {
+    helloApplication.onTerminateInternal()
+  }
+  
   func applicationDidBecomeActive(_ application: UIApplication) {
-    Task { await helloApplication.becameActive() }
+    Task { await helloApplication.becameActiveInternal() }
   }
   
   func applicationWillResignActive(_ application: UIApplication) {
-    Task { await helloApplication.lostActive() }
+    Task { await helloApplication.lostActiveInternal() }
   }
   
   public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {

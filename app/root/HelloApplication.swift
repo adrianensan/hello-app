@@ -79,6 +79,7 @@ public protocol HelloApplication: AnyObject {
   
   /// Do any work neede before the application is created
   func onLaunch() async
+  func onTerminate()
   
   func becameActive() async
   func lostActive() async
@@ -138,6 +139,8 @@ public extension HelloApplication {
     #endif
   }
   
+  func onTerminate() {}
+  
   func becameActive() async {}
   func lostActive() async {}
   
@@ -168,6 +171,11 @@ extension HelloApplication {
     }
     
     await onLaunch()
+  }
+  
+  func onTerminateInternal() {
+    try? Persistence.wipeFiles(location: .temporary)
+    onTerminate()
   }
   
   func becameActiveInternal() async {

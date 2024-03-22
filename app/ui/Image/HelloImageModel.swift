@@ -39,7 +39,11 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
     case .remoteURL(let url):
       "remote-url-\(url)"
     case .favicon(let url):
-      "favicon-url-\(url)"
+      if let helloURL = HelloURL(string: url) {
+        "favicon-url-\(helloURL.host)"
+      } else {
+        "favicon-url-\(url)"
+      }
     case .nativeImage(let nativeImage):
       "static-image--\(ObjectIdentifier(nativeImage).hashValue)"
     case .frames(let frames):
@@ -133,29 +137,28 @@ class HelloImageModel {
         }
       }
     case .favicon(let url):
+      guard var helloURL = HelloURL(string: url) else { return }
+      helloURL.scheme = "https"
+      let url = helloURL.rootURL
       if let cachedImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
         image = NativeImage(data: cachedImageData)
-//        Task { await loadFrames(from: cachedImageData) }
-      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
+      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
         Task {
           let resizedImageData = await ImageProcessor.processImageData(imageData: cachedOriginalImageData, maxSize: CGFloat(variant.size))
-          await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(resizedImageData, for: .cacheRemoteFavicon(url: url, variant: variant))
           image = NativeImage(data: resizedImageData)
-//          await loadFrames(from: resizedImageData)
         }
       } else {
         Task { [weak self] in
-          guard var helloURL = HelloURL(string: url) else { return }
-          helloURL.path = "/favicon.ico"
-//          let iconURL = try await LinkFaviconURLDataParser.main.getFaviconURL(of: url)
-          var imageData = try await HelloImageDownloadManager.main.download(from: helloURL.httpsURL)
+          var imageData = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
+          
           await Persistence.save(imageData, for: .tempDownload(url: url))
           switch variant {
           case .original: ()
           case .thumbnail(let size):
             imageData = await ImageProcessor.processImageData(imageData: imageData, maxSize: CGFloat(size))
           }
-          await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(imageData, for: .cacheRemoteFavicon(url: url, variant: variant))
           guard let self else { return }
           self.image = NativeImage(data: imageData)
 //          await loadFrames(from: imageData)
