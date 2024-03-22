@@ -154,6 +154,13 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
                a: a)
   }
   
+  public func darken(by darkenAmount: Double) -> HelloColor {
+    HelloColor(r: r * darkenAmount,
+               g: g * darkenAmount,
+               b: b * darkenAmount,
+               a: a)
+  }
+  
   public func isEssentiallySame(as otherColor: HelloColor) -> Bool {
     abs(r - otherColor.r) < 0.001 && abs(g - otherColor.g) < 0.001
     && abs(b - otherColor.b) < 0.001 && abs(a - otherColor.a) < 0.001

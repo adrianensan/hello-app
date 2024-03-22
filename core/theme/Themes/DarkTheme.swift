@@ -5,8 +5,10 @@ public extension HelloTheme {
     HelloTheme(id: "dark",
                name: "Dark",
                scheme: .dark,
-               baseLayer: .init(background: .color(color: HelloColor(r: 0.1, g: 0.1, b: 0.1),
-                                                   border: .init(color: .white.opacity(0.2)))))
+               baseLayer: .init(background: .color(color: HelloColor(r: 0.08, g: 0.08, b: 0.08),
+                                                   border: .init(color: .white.opacity(0.1)))),
+               surfaceLayer: .init(background: .color(color: HelloColor(r: 0.14, g: 0.14, b: 0.14),
+                                                   border: .init(color: .white.opacity(0.1)))))
   }
   
   static var black: HelloTheme {

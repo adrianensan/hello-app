@@ -16,6 +16,8 @@ public extension HelloTheme {
                floatingLayer: .init(background: .color(color: HelloColor(r: 1, g: 1, b: 1),
                                                        border: .init(color: .black.opacity(0.1)))),
                surfaceLayer: .init(background: .color(color: HelloColor(r: 1, g: 1, b: 1),
+                                                      border: .init(color: .black.opacity(0.1)))),
+               surfaceSectionLayer: .init(background: .color(color: HelloColor(r: 0.96, g: 0.96, b: 0.96),
                                                       border: .init(color: .black.opacity(0.1)))))
   }
 }

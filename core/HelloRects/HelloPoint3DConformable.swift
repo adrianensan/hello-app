@@ -27,6 +27,12 @@ public struct HelloPoint3D<NumberType: HelloNumeric>: HelloPoint3DConformable, H
     self.z = NumberType(z)
   }
   
+  public init(simd: SIMD3<Float>) {
+    self.x = NumberType(simd.x)
+    self.y = NumberType(simd.y)
+    self.z = NumberType(simd.z)
+  }
+  
   public var description: String { "(\(x), \(y), \(z))" }
 }
 
@@ -56,6 +62,24 @@ public extension HelloPoint3DConformable where Self == SIMD3<NumberType> {
 public extension HelloPoint3DConformable {
   var xy: HelloPoint<NumberType> {
     HelloPoint(x: x, y: y)
+  }
+}
+
+public extension HelloPoint3D {
+  static func +(left: Self, right: Self) -> Self {
+    Self(x: left.x + right.x, y: left.y + right.y, z: left.z + right.z)
+  }
+  
+  static func -(left: Self, right: Self) -> Self {
+    Self(x: left.x - right.x, y: left.y - right.y, z: left.z - right.z)
+  }
+  
+  static func +=(left: inout Self, right: Self) {
+    left = left + right
+  }
+  
+  static func -=(left: inout Self, right: Self) {
+    left = left - right
   }
 }
 
