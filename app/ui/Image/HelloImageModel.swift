@@ -39,8 +39,8 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
     case .remoteURL(let url):
       "remote-url-\(url)"
     case .favicon(let url):
-      if let helloURL = HelloURL(string: url) {
-        "favicon-url-\(helloURL.host)"
+      if !HelloURL(string: url).host.isEmpty {
+        "favicon-url-\(HelloURL(string: url).host)"
       } else {
         "favicon-url-\(url)"
       }
@@ -137,8 +137,8 @@ class HelloImageModel {
         }
       }
     case .favicon(let url):
-      guard var helloURL = HelloURL(string: url) else { return }
-      helloURL.scheme = "https"
+      var helloURL = HelloURL(string: url)
+      helloURL.scheme = .https
       let url = helloURL.rootURL
       if let cachedImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
         image = NativeImage(data: cachedImageData)

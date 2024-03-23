@@ -19,18 +19,19 @@ public actor LinkFaviconURLDataParser {
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     var helloURL = helloURL
+    helloURL.scheme = .https
     guard !inProgress.contains(helloURL.rootURL) else { throw LinkPreviewDataParserError.alreadyInProgress }
     inProgress.insert(helloURL.rootURL)
     defer { inProgress.remove(helloURL.rootURL) }
     
     helloURL.path = "/apple-touch-icon.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.httpsURL),
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url),
        let _ = NativeImage(data: imageData) {
       return imageData
     }
     
     helloURL.path = "/apple-touch-icon-precomposed.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.httpsURL),
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url),
        let _ = NativeImage(data: imageData) {
       return imageData
     }
@@ -47,7 +48,7 @@ public actor LinkFaviconURLDataParser {
     }
     
     helloURL.path = "/favicon.ico"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.httpsURL) {
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url) {
       return imageData
     }
     

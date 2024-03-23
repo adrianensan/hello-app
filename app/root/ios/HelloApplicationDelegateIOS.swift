@@ -63,7 +63,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
                    open url: URL,
                    options: [UIApplication.OpenURLOptionsKey : Any] = [:]
   ) -> Bool {
-    helloApplication.open(url: url)
+    helloApplication.open(url: HelloURL(string: url.absoluteString))
   }
   
   func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
@@ -82,6 +82,12 @@ public class SceneDelegate: NSObject, UISceneDelegate {
     window.rootViewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
     window.makeKeyAndVisible()
     self.window = window
+  }
+  
+  public func scene(_ scene: UIScene, openURLContexts urlContexts: Set<UIOpenURLContext>) {
+    for urlContext in urlContexts {
+      helloApplication.open(url: HelloURL(string: urlContext.url.absoluteString))
+    }
   }
 }
 #endif

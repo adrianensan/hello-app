@@ -36,7 +36,7 @@ public struct LogsNavigationPage: View {
   }
   
   public var body: some View {
-    NavigationPage(title: "Fluent Emoji Licence",
+    NavigationPage(title: "Logs",
                    model: scrollModel,
                    navBarContent: {
       ZStack {

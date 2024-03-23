@@ -87,7 +87,7 @@ public protocol HelloApplication: AnyObject {
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) async
   func firstLaunch() async
   
-  func open(url: URL) -> Bool
+  func open(url: HelloURL) -> Bool
   
   func view() -> AnyView
   
@@ -147,7 +147,7 @@ public extension HelloApplication {
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) {}
   func firstLaunch() {}
   
-  func open(url: URL) -> Bool { false }
+  func open(url: HelloURL) -> Bool { false }
 }
 
 extension HelloApplication {

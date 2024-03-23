@@ -15,8 +15,16 @@ public extension String {
     return String(dropFirst(prefix.count))
   }
   
+  mutating func deletePrefix(_ prefix: String) {
+    self = deletingPrefix(prefix)
+  }
+  
   func deletingSuffix(_ suffix: String) -> String {
     guard self.hasSuffix(suffix) else { return self }
     return String(dropLast(suffix.count))
+  }
+  
+  mutating func deleteSuffix(_ suffix: String) {
+    self = deletingSuffix(suffix)
   }
 }

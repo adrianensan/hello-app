@@ -216,6 +216,7 @@ public class Persistent<Property: PersistenceProperty> {
   
   private func valueChanged() {
     Task {
+      try? await Task.sleep(seconds: 0.02)
       value = persistenObservable.value
       trackNextChange()
       onUpdate?()
