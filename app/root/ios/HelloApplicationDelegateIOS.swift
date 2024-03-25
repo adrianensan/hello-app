@@ -89,5 +89,13 @@ public class SceneDelegate: NSObject, UISceneDelegate {
       helloApplication.open(url: HelloURL(string: urlContext.url.absoluteString))
     }
   }
+  
+  public func sceneDidBecomeActive(_ scene: UIScene) {
+    Task { await helloApplication.becameActiveInternal }
+  }
+  
+  public func sceneDidEnterBackground(_ scene: UIScene) {
+    Task { await helloApplication.lostActiveInternal() }
+  }
 }
 #endif

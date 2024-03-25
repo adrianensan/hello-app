@@ -130,6 +130,11 @@ public class PagerModel {
     }
   }
   
+  public func replaceStack(with newViewStack: [PagerPage]) {
+    viewStack = newViewStack
+    viewDepth = newViewStack.count
+  }
+  
   public func replaceView(with newView: some View, options: PagerPageOptions = PagerPageOptions()) {
     _ = viewStack.popLast()
     let newPage = PagerPage(id: options.id, view: newView, options: options)

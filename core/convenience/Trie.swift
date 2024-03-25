@@ -69,22 +69,24 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
     fatalError("init(from:) has not been implemented")
   }
   
-  public func add(value: T, for key: String) {
-    add(value: value, for: [key])
+  public func add(value: T, for key: String, addAtEveryNode: Bool = false) {
+    add(value: value, for: [key], addAtEveryNode: addAtEveryNode)
   }
   
-  public func add(value: T, for keys: [String]) {
+  public func add(value: T, for keys: [String], addAtEveryNode: Bool = false) {
     for key in keys {
       let key = key.lowercased()
       var currentNode: TrieNode<T> = self
       for character in key.utf8 {
         if let node = currentNode.map[character] {
           currentNode = node
-          continue
         } else {
           let newNode = TrieNode<T>()
           currentNode.map[character] = newNode
           currentNode = newNode
+        }
+        if addAtEveryNode {
+          currentNode.value.insert(value)
         }
       }
       currentNode.value.insert(value)
@@ -101,6 +103,15 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
       node = node?.map[character]
     }
     return node
+  }
+  
+  public func allCompletionOptions(for searchTerm: String) -> Set<T> {
+    traverse(searchTerm: searchTerm)?.searchAllTrie() ?? []
+  }
+  
+  public func hasMatches(for searchTerm: String) -> Bool {
+    let node = traverse(searchTerm: searchTerm)
+    return node?.value.isEmpty == false || node?.map.isEmpty == false
   }
   
   public func firstMatch(searchTerm: String) -> T? {
@@ -160,5 +171,9 @@ public class TrieNode<T: Codable & Hashable>: Codable {
     }
     
     return results
+  }
+  
+  public func hasChildren() {
+    
   }
 }

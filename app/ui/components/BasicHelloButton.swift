@@ -9,7 +9,7 @@ public enum HelloButtonClickStyle {
     case .scale:
       -0.05
     case .highlight:
-      0.05
+      0.2
     }
   }
   

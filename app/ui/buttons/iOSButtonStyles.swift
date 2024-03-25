@@ -86,16 +86,27 @@ public struct SubtleButtonStyle: ButtonStyle {
 
 public struct HelloButtonStyle: ButtonStyle {
   
+  @Environment(\.theme) private var theme
+  
   var clickStyle: HelloButtonClickStyle
   var allowHaptics: Bool
   
   public func makeBody(configuration: Configuration) -> some View {
-    configuration.label
-      .brightness(configuration.isPressed ? clickStyle.highlightAmount : 0)
-      .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-      .scaleEffect(configuration.isPressed ? clickStyle.scaleAmount : 1)
-      .animation(.button, value: configuration.isPressed)
-      .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
+    switch clickStyle {
+    case .scale:
+      configuration.label
+        .brightness(configuration.isPressed ? (theme.theme.isDark ? 1 : -1) * clickStyle.highlightAmount : 0)
+        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+        .scaleEffect(configuration.isPressed ? clickStyle.scaleAmount : 1)
+        .animation(.button, value: configuration.isPressed)
+        .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
+    case .highlight:
+      configuration.label
+        .brightness(configuration.isPressed ? (theme.theme.isDark ? 1 : -1) * clickStyle.highlightAmount : 0)
+      //        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+      //        .animation(.button, value: configuration.isPressed)
+        .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
+    }
   }
 }
 
