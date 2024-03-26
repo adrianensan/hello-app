@@ -38,7 +38,7 @@ public actor StoreService {
   public private(set) var isPurchasing: Bool = false
   
   init() {
-
+    Task { try await setup() }
   }
   
   public func refreshProducts(knownProductIDs: [String]) async throws -> [AvailableStoreProduct] {
@@ -58,7 +58,7 @@ public actor StoreService {
     }
   }
   
-  private func setup(knownProductIDs: [String]) async throws {
+  private func setup() async throws {
     Task {
       for await result in Transaction.updates {
         switch result {
@@ -69,10 +69,10 @@ public actor StoreService {
         }
       }
     }
-    try await refreshProducts(knownProductIDs: knownProductIDs)
+//    try await refreshProducts(knownProductIDs: knownProductIDs)
   }
   
-  func purchase(id productID: String) async throws {
+  public func purchase(id productID: String) async throws {
     guard !isPurchasing, let product = knownAvailableProducts.first(where:{ $0.id == productID }) else { return }
     isPurchasing = true
     defer { isPurchasing = false }
