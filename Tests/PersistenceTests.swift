@@ -12,6 +12,7 @@ final class HelloAppTests: XCTestCase {
   override func setUp() async throws {
     await Persistence.delete(.test)
     await Persistence.delete(.testInt)
+    try await Task.sleep(seconds: 0.02)
   }
   
   func testPersistenceThreadSafe() async throws {
@@ -69,8 +70,10 @@ final class HelloAppTests: XCTestCase {
 //        }
       }
     }
+    try await Task.sleep(seconds: 1)
     let result = await Persistence.value(.testInt)
     XCTAssertEqual(result, 100)
+    XCTAssertEqual(self.testInt, 100)
     XCTAssertEqual(self.testInt2, 100)
   }
 }
