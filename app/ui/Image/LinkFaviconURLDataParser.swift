@@ -20,23 +20,23 @@ public actor LinkFaviconURLDataParser {
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     var helloURL = helloURL
     helloURL.scheme = .https
-    guard !inProgress.contains(helloURL.rootURL) else { throw LinkPreviewDataParserError.alreadyInProgress }
-    inProgress.insert(helloURL.rootURL)
-    defer { inProgress.remove(helloURL.rootURL) }
+    guard !inProgress.contains(helloURL.root.string) else { throw LinkPreviewDataParserError.alreadyInProgress }
+    inProgress.insert(helloURL.root.string)
+    defer { inProgress.remove(helloURL.root.string) }
     
     helloURL.path = "/apple-touch-icon.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url),
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
        let _ = NativeImage(data: imageData) {
       return imageData
     }
     
     helloURL.path = "/apple-touch-icon-precomposed.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url),
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
        let _ = NativeImage(data: imageData) {
       return imageData
     }
     
-    if let pageData = try? await Downloader.main.download(from: helloURL.rootURL),
+    if let pageData = try? await Downloader.main.download(from: helloURL.root.string),
        let html = String(data: pageData, encoding: .utf8),
        let imageURL =
         (try? parse(rel: "apple-touch-icon", from: html, url: helloURL)) ??
@@ -48,7 +48,7 @@ public actor LinkFaviconURLDataParser {
     }
     
     helloURL.path = "/favicon.ico"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.url) {
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string) {
       return imageData
     }
     
@@ -80,7 +80,7 @@ public actor LinkFaviconURLDataParser {
     if faviconURL.hasPrefix("/") {
       var helloURL = helloURL
       helloURL.path = faviconURL
-      return helloURL.url
+      return helloURL.string
     } else {
       return faviconURL
     }

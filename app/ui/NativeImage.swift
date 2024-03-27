@@ -30,6 +30,7 @@ public extension Image {
   }
 }
 
+extension NativeImage: @unchecked Sendable {}
 public extension NativeImage {
   static func create(from cgImage: CGImage) -> NativeImage {
 #if os(iOS)

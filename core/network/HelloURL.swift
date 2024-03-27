@@ -97,12 +97,16 @@ public struct HelloURL: Codable, Sendable {
     self.parameters = parameters
   }
   
-  public var url: String {
-    "\(rootURL)\(path)\(parametersString)\(fragmentString)"
+  public var string: String {
+    "\(scheme)://\(host)\(portString)\(path)\(parametersString)\(fragmentString)"
   }
   
-  public var rootURL: String {
-    "\(scheme)://\(host)\(portString)"
+  public var url: URL? {
+    URL(string: string)
+  }
+  
+  public var root: HelloURL {
+    HelloURL(scheme: scheme, host: host, port: port)
   }
   
   private var portString: String {

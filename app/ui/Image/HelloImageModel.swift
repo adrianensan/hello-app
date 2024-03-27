@@ -139,7 +139,7 @@ class HelloImageModel {
     case .favicon(let url):
       var helloURL = HelloURL(string: url)
       helloURL.scheme = .https
-      let url = helloURL.rootURL
+      let url = helloURL.root.string
       if let cachedImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
         image = NativeImage(data: cachedImageData)
       } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
