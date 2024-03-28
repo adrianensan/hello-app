@@ -11,17 +11,28 @@ public struct NavigationPageBar<NavBarContent: View>: View {
   let title: String?
   let navBarContent: () -> NavBarContent
   
+  var titleHeight: CGFloat {
+    config.belowNavBarPadding > 0 ? 44 : config.defaultNavBarHeight
+  }
+  
   public var body: some View {
-    ZStack {
+    ZStack(alignment: .top) {
       if let title {
         NavigationPageTitle(title: title)
           .environment(scrollModel)
+          .frame(height: titleHeight)
+          .padding(.top, config.belowNavBarPadding)
       }
       navBarContent()
+        .frame(height: config.defaultNavBarHeight)
     }.font(.system(size: 20, weight: .semibold, design: .rounded))
       .foregroundColor(theme.foreground.primary.color)
       .padding(.horizontal, config.horizontalPagePadding)
-      .frame(height: config.defaultNavBarHeight)
+//      .padding(.top, config.belowNavBarPadding)
+      .frame(height: title == nil
+             ? max(config.defaultNavBarHeight, config.belowNavBarPadding)
+             : titleHeight + config.belowNavBarPadding,
+             alignment: .top)
   }
 }
 #endif

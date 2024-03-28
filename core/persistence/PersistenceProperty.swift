@@ -52,7 +52,7 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable {
 }
 
 public enum FilePersistenceLocation: Hashable, Sendable {
-  case decoument
+  case document
   case applicationSupport
   case appGroup
   case temporary
@@ -60,7 +60,7 @@ public enum FilePersistenceLocation: Hashable, Sendable {
   case custom(String)
   
   public static var allCases: [FilePersistenceLocation] { [
-    .decoument,
+    .document,
     .applicationSupport,
     .appGroup,
     .temporary,
@@ -69,7 +69,7 @@ public enum FilePersistenceLocation: Hashable, Sendable {
   
   public var id: String {
     switch self {
-    case .decoument: "document"
+    case .document: "document"
     case .applicationSupport: "support"
     case .appGroup: "appgroup"
     case .temporary: "temporary"
@@ -80,7 +80,7 @@ public enum FilePersistenceLocation: Hashable, Sendable {
   
   public var url: URL? {
     switch self {
-    case .decoument:
+    case .document:
       .documentsDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .applicationSupport:
       .applicationSupportDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
@@ -99,7 +99,7 @@ public enum FilePersistenceLocation: Hashable, Sendable {
 public enum PersistenceType: Sendable {
   
   case defaults(suite: DefaultsPersistenceSuite = .standard, key: String)
-  case file(location: FilePersistenceLocation = .decoument, path: String)
+  case file(location: FilePersistenceLocation = .document, path: String)
   case keychain(key: String)
   case memory(key: String)
   

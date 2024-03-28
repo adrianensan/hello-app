@@ -31,6 +31,14 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
     config.overrideNavBarContentScrolls ?? isSmallSize
   }
   
+  private var navBarHeight: CGFloat {
+    if config.belowNavBarPadding > 0 {
+      config.belowNavBarPadding + (title == nil ? 0 : 44)
+    } else {
+      config.defaultNavBarHeight
+    }
+  }
+  
   public var body: some View {
     ZStack(alignment: .top) {
       HelloScrollView(
@@ -42,7 +50,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
             NavigationPageBarScrolling(title: title, navBarContent: navBarContent)
           } else {
             Color.clear
-              .frame(width: config.defaultNavBarHeight, height: config.defaultNavBarHeight)
+              .frame(width: config.defaultNavBarHeight, height: navBarHeight)
           }
           content()
             .padding(.top, (title != nil ? 0.8 * -scrollModel.scrollThreshold + 8 : 0) + 8)
@@ -52,8 +60,8 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       })
       
       NavigationPageBarFixed(title: title, navBarContentScrolls: navBarContentScrolls, navBarContent: navBarContent)
-    }.onChange(of: isSmallSize, initial: true) {
-      scrollModel.scrollThreshold = isSmallSize ? 0 : -72
+    }.onChange(of: isSmallSize || title == nil, initial: true) {
+      scrollModel.scrollThreshold = isSmallSize || title == nil ? 2 : -72
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
   }

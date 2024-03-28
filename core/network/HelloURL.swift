@@ -25,6 +25,10 @@ public extension HelloURLScheme {
   static var https: HelloURLScheme {
     HelloURLScheme("https", defaultPort: 443)
   }
+  
+  static var file: HelloURLScheme {
+    HelloURLScheme("file", defaultPort: 443)
+  }
 }
 
 public struct HelloURL: Codable, Sendable {
