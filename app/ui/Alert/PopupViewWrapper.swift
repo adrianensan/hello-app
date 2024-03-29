@@ -1,6 +1,8 @@
 import SwiftUI
 
-extension Alignment {
+import HelloCore
+
+public extension Alignment {
   var unitPoint: UnitPoint {
     var x, y: CGFloat
     switch horizontal {
@@ -19,24 +21,56 @@ extension Alignment {
     
     return UnitPoint(x: x, y: y)
   }
+  
+  public var point: CGPoint {
+    CGPoint(x: unitPoint.x, y: unitPoint.y)
+  }
 }
 
 public struct PopupViewWrapper<Content: View>: View {
   
   @Environment(HelloWindowModel.self) private var windowModel
+  @Environment(\.windowFrame) private var windowFrame
+  @Environment(\.safeArea) private var safeArea
   
   @State private var isVisible: Bool
   
   private var content: (Binding<Bool>) -> Content
   private var position: CGPoint
+  private var size: CGSize?
   private var anchor: Alignment
   
-  public init(position: CGPoint, anchor: Alignment, @ViewBuilder content: @escaping (Binding<Bool>) -> Content) {
+  public init(position: CGPoint, size: CGSize? = nil, anchor: Alignment, @ViewBuilder content: @escaping (Binding<Bool>) -> Content) {
     let isVisible = State(initialValue: false)
     self._isVisible = isVisible
     self.content = content
     self.position = position
+    self.size = size
     self.anchor = anchor
+  }
+  
+  private var adjustedPosition: CGPoint {
+    if let size {
+      var position = position
+      let minWindowEdgeDistances = position - anchor.point * size - CGPoint(x: 8, y: safeArea.top + 8)
+      if minWindowEdgeDistances.x < 0 {
+        position.x -= minWindowEdgeDistances.x
+      }
+      if minWindowEdgeDistances.y < 0 {
+        position.y -= minWindowEdgeDistances.y
+      }
+      
+      let maxWindowEdgeDistances = position + (.one - anchor.point) * size + CGPoint(x: 8, y: safeArea.bottom + 8)
+      if maxWindowEdgeDistances.x > windowFrame.width {
+        position.x -= maxWindowEdgeDistances.x - windowFrame.width
+      }
+      if maxWindowEdgeDistances.y > windowFrame.height {
+        position.y -= maxWindowEdgeDistances.y - windowFrame.height
+      }
+      return position
+    } else {
+      return position
+    }
   }
   
   public var body: some View {
@@ -48,7 +82,7 @@ public struct PopupViewWrapper<Content: View>: View {
       .compositingGroup()
       .opacity(isVisible ? 1 : 0)
       .animation(isVisible ? .dampSpring : .easeInOut(duration: 0.25), value: isVisible)
-      .offset(x: position.x, y: position.y)
+      .offset(adjustedPosition)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .background(Color.black
         .opacity(isVisible ? 0.2 : 0)

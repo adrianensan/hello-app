@@ -36,7 +36,9 @@ public struct HelloMenu: View {
   }
   
   public var body: some View {
-    PopupViewWrapper(position: position, anchor: anchor) { isVisible in
+    PopupViewWrapper(position: position,
+                     size: CGSize(width: 240, height: CGFloat(items.count) * 44),
+                     anchor: anchor) { isVisible in
       VStack(spacing: 0) {
         ForEach(items) { item in
           Button(action: {

@@ -14,6 +14,8 @@ public protocol HelloPointConformable<NumberType> {
 
 public extension HelloPointConformable {
   
+  static var one: Self { Self(x: 1, y: 1) }
+  
   var minCoordinate: NumberType { min(x, y) }
   
   var maxCoordinate: NumberType { max(x, y) }

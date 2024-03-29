@@ -1,6 +1,6 @@
 import Foundation
 
-public indirect enum Device: CustomStringConvertible, Equatable {
+public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   case iPhone(IPhoneModel)
   case iPad(IPadModel)
   case iPod(IPodModel)
