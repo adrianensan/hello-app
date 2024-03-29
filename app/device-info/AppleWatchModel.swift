@@ -44,7 +44,7 @@ public enum AppleWatchModel: CustomStringConvertible, Equatable {
     case .series9_41mm: return "Series 9 - 41mm"
     case .series9_45mm: return "Series 9 - 45mm"
     case .ultra2: return "Ultra 2"
-    case .unknown(let modelNumber): return "? (\(modelNumber))"
+    case .unknown(let modelNumber): return "[\(modelNumber)]"
     }
   }
 

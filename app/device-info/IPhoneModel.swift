@@ -72,7 +72,7 @@ public enum IPhoneModel: CustomStringConvertible, Equatable {
     case .se1: return "SE (2016)"
     case .se2: return "SE (2020)"
     case .se3: return "SE (2022)"
-    case .unknown(let modelNumber): return "? (\(modelNumber))"
+    case .unknown(let modelNumber): return "[\(modelNumber)]"
     }
   }
 

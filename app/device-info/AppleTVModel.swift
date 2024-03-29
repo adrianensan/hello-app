@@ -14,7 +14,7 @@ public enum AppleTVModel: CustomStringConvertible, Equatable {
     case .tv: return "HD"
     case .tv4K: return "4k"
     case .tv4K2: return "4k (2nd generation)"
-    case .unknown(let modelNumber): return "? (\(modelNumber))"
+    case .unknown(let modelNumber): return "[\(modelNumber)]"
     }
   }
 

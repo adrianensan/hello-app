@@ -10,7 +10,7 @@ public enum IPodModel: CustomStringConvertible, Equatable {
   public var description: String {
     switch self {
     case .iPod7: return "(7th generation)"
-    case .unknown(let modelNumber): return "? (\(modelNumber))"
+    case .unknown(let modelNumber): return "[\(modelNumber)]"
     }
   }
 

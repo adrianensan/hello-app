@@ -59,7 +59,7 @@ public enum IPadModel: CustomStringConvertible, Equatable {
     case .pro12Inch4: return "Pro (12.9 inch) (4th generation)"
     case .pro12Inch5: return "Pro (12.9 inch) (5th generation)"
     case .pro12Inch6: return "Pro (12.9 inch) (6th generation)"
-    case .unknown(let modelNumber): return "? (\(modelNumber))"
+    case .unknown(let modelNumber): return "[\(modelNumber)]"
     }
   }
 
