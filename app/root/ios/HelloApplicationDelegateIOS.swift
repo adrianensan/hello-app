@@ -91,11 +91,15 @@ public class SceneDelegate: NSObject, UISceneDelegate {
   }
   
   public func sceneDidBecomeActive(_ scene: UIScene) {
-    Task { await helloApplication.becameActiveInternal }
+    Task { await helloApplication.becameActiveInternal() }
   }
   
   public func sceneDidEnterBackground(_ scene: UIScene) {
     Task { await helloApplication.lostActiveInternal() }
   }
+  
+//  public func sceneWillEnterForeground(_ scene: UIScene) {
+//    Task { await helloApplication.becameActiveInternal() }
+//  }
 }
 #endif
