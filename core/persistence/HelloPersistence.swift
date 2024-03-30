@@ -104,10 +104,10 @@ public actor HelloPersistence {
       }
     case .file(let location, let path):
       try save(value, to: fileURL(for: location, subPath: path))
-    case .keychain(let key):
+    case .keychain(let key, let appGroup, let isBiometricallyLocked):
       if let string = value as? String? {
         if let string = string {
-          try keychain.set(string, for: key)
+          try keychain.set(string, for: key, appGroup: appGroup, isBiometricallyLocked: isBiometricallyLocked)
         } else {
           try? keychain.remove(for: key)
         }
@@ -151,7 +151,7 @@ public actor HelloPersistence {
       }
     case .file(let location, let path):
       returnValue = value(at: fileURL(for: location, subPath: path), for: property)
-    case .keychain(let key):
+    case .keychain(let key, let appGroup, let isBiometricallyLocked):
       switch Property.Value.self {
       case is String.Type, is String?.Type:
         returnValue = (try? keychain.string(for: key) as? Property.Value) ?? property.defaultValue
@@ -201,7 +201,7 @@ public actor HelloPersistence {
     switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
     case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
-    case .keychain(let key): try? keychain.remove(for: key)
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): try? keychain.remove(for: key)
     case .memory: break
     }
     updated(value: property.defaultValue, for: property)
@@ -237,7 +237,7 @@ public actor HelloPersistence {
     switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
     case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
-    case .keychain(let key): (try? keychain.data(for: key)) != nil
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
     case .memory: cache[property.location.id] != nil
     }
   }
@@ -246,7 +246,7 @@ public actor HelloPersistence {
     switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
     case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
-    case .keychain(let key): (try? keychain.data(for: key)) != nil
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
     case .memory: false
     }
   }
@@ -337,7 +337,7 @@ public enum Persistence {
     }
   }
   
-  public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID))
+  public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup))
   
   public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
     await Property.persistence.save(value, for: property)

@@ -100,14 +100,14 @@ public enum PersistenceType: Sendable {
   
   case defaults(suite: DefaultsPersistenceSuite = .standard, key: String)
   case file(location: FilePersistenceLocation = .document, path: String)
-  case keychain(key: String)
+  case keychain(key: String, appGroup: Bool, isBiometricallyLocked: Bool)
   case memory(key: String)
   
   public var id: String {
     switch self {
     case .defaults(let suite, let key): "defaults-\(suite.id)-\(key)"
     case .file(let location, let path): "file-\(location.id)-\(path)"
-    case .keychain(let key): "keychain-\(key)"
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): "keychain-\(key)\(isBiometricallyLocked ? "-bio" : "")"
     case .memory(let key): "memory-\(key)"
     }
   }
