@@ -16,7 +16,7 @@ public struct HelloSectionItem<Content: View>: View {
     content()
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
-      .frame(maxWidth: .infinity, minHeight: 56)
+      .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
       .background(theme.surface.backgroundColor)
       .overlay {
         theme.foreground.primary.color.opacity(0.1)
@@ -39,8 +39,9 @@ public struct HelloSection<Content: View>: View {
   }
   
   public var body: some View {
-    content()
-      .background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
+    VStack(alignment: .leading, spacing: 0) {
+      content()
+    }.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
       .clipShape(.rect(cornerRadius: 16))
       .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
         .stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))

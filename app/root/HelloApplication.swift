@@ -88,6 +88,7 @@ public protocol HelloApplication: AnyObject {
   func firstLaunch() async
   
   func open(url: HelloURL) -> Bool
+  func openUserInteraction()
   
   func view() -> AnyView
   
@@ -124,7 +125,7 @@ public extension HelloApplication {
     setup()
     
     #if os(iOS) || os(tvOS)
-    _ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, nil, NSStringFromClass(HelloAppDelegate.self))
+    _ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(HelloUIApplication.self), NSStringFromClass(HelloAppDelegate.self))
     #elseif os(visionOS)
     HelloSwiftUIApp<Self>.main()
     #elseif os(macOS)
@@ -148,6 +149,7 @@ public extension HelloApplication {
   func firstLaunch() {}
   
   func open(url: HelloURL) -> Bool { false }
+  func openUserInteraction() {}
 }
 
 extension HelloApplication {
