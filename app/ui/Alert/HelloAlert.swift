@@ -101,7 +101,7 @@ public struct HelloAlert: View {
         .frame(height: 1)
       
       HStack(spacing: 0) {
-        BasicButton(haptics: .action, action: {
+        HelloButton(clickStyle: .highlight, haptics: .click, action: {
           config.firstButton.action?()
           dismiss()
         }) {
@@ -112,12 +112,12 @@ public struct HelloAlert: View {
             .frame(maxWidth: .infinity)
             .clickable()
 //            .background(theme.rowBackground.swiftuiColor)
-        }.buttonStyle(.highlight)
+        }
         
         if let secondButton = config.secondButton {
           theme.foreground.primary.color.opacity(0.1)
             .frame(width: 1, height: 44)
-          BasicButton(haptics: .action, action: {
+          HelloButton(clickStyle: .highlight, haptics: .click, action: {
             secondButton.action?()
             dismiss()
           }) {

@@ -40,7 +40,7 @@ public struct LogsNavigationPage: View {
                    model: scrollModel,
                    navBarContent: {
       ZStack {
-        BasicButton(action: {
+        HelloButton(action: {
           windowModel.show(alert: .init(title: "Clear Logs",
                                           message: "Are you sure you want to clear all logs?",
                                           firstButton: .init(name: "Clear",

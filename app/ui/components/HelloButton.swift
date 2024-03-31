@@ -23,7 +23,7 @@ public enum HelloButtonClickStyle {
   }
 }
 
-public struct BasicHelloButton<Content: View>: View {
+public struct HelloButton<Content: View>: View {
   
   public enum HapticsType {
     case none

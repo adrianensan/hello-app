@@ -94,7 +94,7 @@ public struct HelloModalView<Content: View>: View {
         .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
       
       #if os(iOS)
-      BasicHelloButton(action: { model.dismiss() }) {
+      HelloButton(action: { model.dismiss() }) {
         HelloCloseButton()
       }.zIndex(4)
         .padding(.top, isFullScreen ? safeAreaInsets.top + 8 : 8)

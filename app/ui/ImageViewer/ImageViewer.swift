@@ -57,7 +57,7 @@ public struct ImageViewer: View {
           .animation(.linear(duration: 1), value: dismissVelocity)
           .animation(.dampSpring, value: originalFrame)
       }
-      BasicButton(action: {
+      HelloButton(action: {
         if let originalFrameSaved {
           originalFrame = originalFrameSaved
         } else {
@@ -76,7 +76,6 @@ public struct ImageViewer: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
         .opacity(!isDissmising ? 1 : 0)
         .animation(.easeInOut(duration: 0.36), value: isDissmising)
-        
     }.background(Color.black
       .opacity(!isDissmising ? 1 : 0)
       .animation(.easeInOut(duration: 0.36), value: isDissmising))

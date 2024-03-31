@@ -15,7 +15,7 @@ public struct HelloToggle: View {
   }
   
   public var body: some View {
-    BasicButton(haptics: .action, action: { action() }) {
+    HelloButton(haptics: .action, action: { action() }) {
       Capsule(style: .continuous)
         .fill(.white)
         .frame(width: 28, height: 28)
@@ -27,6 +27,6 @@ public struct HelloToggle: View {
             .opacity(isSelected ? 1 : 0)
         }.background(Capsule(style: .continuous).fill(Color.black.opacity(0.1)))
         .animation(.dampSpring, value: isSelected)
-    }.buttonStyle(.subtleScale)
+    }
   }
 }

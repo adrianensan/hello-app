@@ -37,8 +37,7 @@ public class HelloWindowModel {
   }
   
   public func dismissAlert() {
-    print("Dismissing alert")
-//    guard alertView != nil else { return }
+    guard alertView != nil else { return }
     alertView = nil
   }
 }
