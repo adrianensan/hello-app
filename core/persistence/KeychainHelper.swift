@@ -46,7 +46,7 @@ public class KeychainHelper {
   
   private var baseAttributes: [CFString: Any] {
     var attributes: [CFString: Any] = [
-      kSecAttrService: service,
+      kSecAttrService: accessGroup ?? service,
       kSecClass: kSecClassGenericPassword
     ]
     return attributes
@@ -140,7 +140,7 @@ public class KeychainHelper {
     query[kSecAttrAccount] = key
     query[kSecMatchLimit] = kSecMatchLimitOne
     query[kSecReturnData] = true
-//    query[kSecUseAuthenticationUI] = kSecUseAuthenticationUISkip
+    query[kSecUseAuthenticationUI] = kSecUseAuthenticationUIAllow
     for (key, value) in additionalAttributes {
       query[key] = value
     }
