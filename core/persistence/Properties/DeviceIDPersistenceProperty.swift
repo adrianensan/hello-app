@@ -2,7 +2,7 @@ import Foundation
 
 public struct DeviceIDPersistenceProperty: PersistenceProperty {
   
-  public var defaultValue: Bool { false }
+  public var defaultValue: String { UUID().uuidString }
   
   public var location: PersistenceType { .defaults(key: "deviceID") }
 }

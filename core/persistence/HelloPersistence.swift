@@ -140,11 +140,21 @@ public actor HelloPersistence {
         is Int.Type, is Int?.Type,
         is Double.Type, is Double?.Type,
         is Data.Type, is Data?.Type:
-        returnValue = userDefaults(for: suite).object(forKey: key) as? Property.Value ?? property.defaultValue
+        if let value = userDefaults(for: suite).object(forKey: key) as? Property.Value {
+          returnValue = value
+        } else {
+          returnValue = property.defaultValue
+          if property.persistDefaultValue {
+            Task { await save(returnValue, for: property) }
+          }
+        }
       default:
         guard let data = userDefaults(for: suite).object(forKey: key) as? Data,
               let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
           returnValue = property.defaultValue
+          if property.persistDefaultValue {
+            Task { await save(returnValue, for: property) }
+          }
           break
         }
         returnValue = value

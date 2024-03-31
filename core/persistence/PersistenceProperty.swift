@@ -139,6 +139,8 @@ public protocol PersistenceProperty: Sendable {
   
   var allowCache: Bool { get }
   
+  var persistDefaultValue: Bool { get }
+  
   func cleanup(value: Value) -> Value
   
   var oldProperty: OldProperty? { get }
@@ -160,6 +162,7 @@ extension PersistenceProperty {
     case .memory: true
     }
   }
+  public var persistDefaultValue: Bool { false }
   public var isDeprecated: Bool { false }
   var id: String { location.id }
   
