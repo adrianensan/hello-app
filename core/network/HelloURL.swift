@@ -29,6 +29,10 @@ public extension HelloURLScheme {
   static var file: HelloURLScheme {
     HelloURLScheme("file", defaultPort: 443)
   }
+  
+  static var otp: HelloURLScheme {
+    HelloURLScheme("otpauth", defaultPort: 443)
+  }
 }
 
 public struct HelloURL: Codable, Sendable {
@@ -48,6 +52,12 @@ public struct HelloURL: Codable, Sendable {
     } else if string.hasPrefix(HelloURLScheme.http.schemeWithDelimeter) {
       scheme = .http
       string.deletePrefix(HelloURLScheme.http.schemeWithDelimeter)
+    } else if string.hasPrefix(HelloURLScheme.file.schemeWithDelimeter) {
+      scheme = .file
+      string.deletePrefix(HelloURLScheme.file.schemeWithDelimeter)
+    } else if string.hasPrefix(HelloURLScheme.otp.schemeWithDelimeter) {
+      scheme = .otp
+      string.deletePrefix(HelloURLScheme.otp.schemeWithDelimeter)
     } else if string.contains("://") {
       let splits = string.split(separator: ":", maxSplits: 1)
       scheme = .init(String(splits[0]))
