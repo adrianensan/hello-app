@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 import Observation
 
@@ -99,7 +98,6 @@ public class HelloScrollModel {
 public struct HelloScrollView<Content: View>: View {
   
   @Environment(\.theme) private var theme
-  @Environment(\.keyboardFrame) private var keyboardFrame
   
   @State private var model: HelloScrollModel
   
@@ -139,4 +137,3 @@ public struct HelloScrollView<Content: View>: View {
     }.environment(model)
   }
 }
-#endif

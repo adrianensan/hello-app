@@ -88,6 +88,7 @@ public protocol HelloApplication: AnyObject {
   func firstLaunch() async
   
   func open(url: HelloURL) -> Bool
+  func handle(notification: [AnyHashable: Any])
   func openUserInteraction()
   
   func view() -> AnyView
@@ -149,6 +150,7 @@ public extension HelloApplication {
   func firstLaunch() {}
   
   func open(url: HelloURL) -> Bool { false }
+  func handle(notification: [AnyHashable: Any]) { }
   func openUserInteraction() {}
 }
 

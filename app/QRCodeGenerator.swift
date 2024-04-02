@@ -1,3 +1,4 @@
+#if canImport(CoreImage)
 import CoreImage
 
 import HelloApp
@@ -21,3 +22,4 @@ public enum QRCodeGenerator {
     generate(from: "WIFI:S:\(ssid);T:\(type);P:\(password);;")
   }
 }
+#endif

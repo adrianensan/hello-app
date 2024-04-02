@@ -2,6 +2,7 @@ import SwiftUI
 
 #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias NativeImage = UIImage
+extension UIImage: @unchecked Sendable {}
 #elseif os(macOS)
 public typealias NativeImage = NSImage
 extension NativeImage {
@@ -30,7 +31,6 @@ public extension Image {
   }
 }
 
-extension NativeImage: @unchecked Sendable {}
 public extension NativeImage {
   static func create(from cgImage: CGImage) -> NativeImage {
 #if os(iOS)

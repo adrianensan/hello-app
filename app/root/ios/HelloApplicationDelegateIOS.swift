@@ -23,6 +23,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 //    Hello.rootViewController = viewController
 //    viewController.onBrightnessChange = { ThemeObservable.shared.handleScreenBrightnessUpdate() }
+    application.registerForRemoteNotifications()
     if !application.supportsMultipleScenes {
       let window = UIWindow()
       let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
@@ -69,6 +70,20 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
     .all
 //    Hello.persistence.lockRotation ? .portrait : .allButUpsideDown
+  }
+  
+  func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+    Log.verbose("Remote notification received")
+    helloApplication.handle(notification: userInfo)
+    return .noData
+  }
+  
+  func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    Log.verbose("Successfully registered for remote notifications")
+  }
+  
+  func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
+    Log.error("Failed to register for remote notifications: \(error.localizedDescription)")
   }
 }
 
