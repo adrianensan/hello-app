@@ -11,7 +11,12 @@ public class HelloWindowModel {
   
   struct PopupWindow: Identifiable, Sendable {
     var id: String
-    var view: AnyView
+    var view: () -> AnyView
+    
+    init(id: String = UUID().uuidString, view: @escaping () -> some View) {
+      self.id = id
+      self.view = { AnyView(view()) }
+    }
   }
   
   var blurBackgroundForPopup: Bool = true
@@ -22,7 +27,12 @@ public class HelloWindowModel {
   
   public func showPopup<Content: View>(blurBackground: Bool = true, _ view: Content) {
     blurBackgroundForPopup = blurBackground
-    popupViews.append(PopupWindow(id: UUID().uuidString, view: AnyView(view.id(UUID().uuidString))))
+    popupViews.append(PopupWindow { view.id(UUID().uuidString) })
+  }
+  
+  public func dismissPopup() {
+    guard !popupViews.isEmpty else { return }
+    popupViews.popLast()
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
@@ -31,13 +41,23 @@ public class HelloWindowModel {
     alertView = HelloAlert(config: alertConfig)
   }
   
-  public func dismissPopup() {
-    guard !popupViews.isEmpty else { return }
-    popupViews.popLast()
-  }
-  
   public func dismissAlert() {
     guard alertView != nil else { return }
     alertView = nil
+  }
+  
+  public func present(sheet: @MainActor @autoclosure @escaping () -> some View) {
+    blurBackgroundForPopup = false
+    popupViews.append(PopupWindow { HelloSheet { _ in sheet() } })
+  }
+  
+  public func present(view: @MainActor @autoclosure @escaping () -> some View) {
+    blurBackgroundForPopup = false
+    popupViews.append(PopupWindow { view() })
+  }
+  
+  public func dismissSheet() {
+    guard !popupViews.isEmpty else { return }
+    popupViews.popLast()
   }
 }

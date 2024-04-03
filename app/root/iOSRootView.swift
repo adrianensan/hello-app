@@ -22,12 +22,12 @@ public struct HelloAppRootView<Content: View>: View {
       content()
         .compositingGroup()
         .blur(radius: windowModel.blurBackgroundForPopup && (windowModel.alertView != nil || !windowModel.popupViews.isEmpty) ? 2 : 0)
-        .animation(.easeInOut(duration: 0.5), value: windowModel.alertView != nil || !windowModel.popupViews.isEmpty)
+        .animation(.easeInOut(duration: 0.24), value: windowModel.alertView != nil || !windowModel.popupViews.isEmpty)
 //          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
       
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in
-          popupView.view
+          popupView.view()
             .id(popupView.id)
             .zIndex(3 + 0.1 * Double((windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0)))
             .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),

@@ -11,11 +11,11 @@ class HelloAppDelegate: NSObject, NSApplicationDelegate {
   }
   
   func applicationDidBecomeActive(_ notification: Notification) {
-    Task { await helloApplication.becameActiveInternal() }
+    Task { await helloApplication.onBecameActiveInternal() }
   }
   
   func applicationDidResignActive(_ notification: Notification) {
-    Task { await helloApplication.lostActiveInternal() }
+    Task { await helloApplication.onResignActiveInternal() }
   }
   
   func applicationWillTerminate(_ notification: Notification) {

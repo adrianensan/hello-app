@@ -47,11 +47,15 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   }
   
   func applicationDidBecomeActive(_ application: UIApplication) {
-    Task { await helloApplication.becameActiveInternal() }
+    Task { await helloApplication.onBecameActiveInternal() }
   }
   
   func applicationWillResignActive(_ application: UIApplication) {
-    Task { await helloApplication.lostActiveInternal() }
+    Task { await helloApplication.onResignActiveInternal() }
+  }
+  
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    Task { await helloApplication.onBackgroundedInternal() }
   }
   
   public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -106,11 +110,15 @@ public class SceneDelegate: NSObject, UISceneDelegate {
   }
   
   public func sceneDidBecomeActive(_ scene: UIScene) {
-    Task { await helloApplication.becameActiveInternal() }
+    Task { await helloApplication.onBecameActiveInternal() }
   }
   
   public func sceneDidEnterBackground(_ scene: UIScene) {
-    Task { await helloApplication.lostActiveInternal() }
+    Task { await helloApplication.onBackgroundedInternal() }
+  }
+  
+  public func sceneWillResignActive(_ scene: UIScene) {
+    Task { await helloApplication.onResignActiveInternal() }
   }
   
 //  public func sceneWillEnterForeground(_ scene: UIScene) {

@@ -38,7 +38,9 @@ public struct HelloSwiftUIThemeLayer {
       secondary: HelloSwiftUIThemeForeground(color: theme.foregroundSecondary.mainColor.swiftuiColor,
                                              style: theme.foregroundSecondary.view),
       tertiary: HelloSwiftUIThemeForeground(color: theme.foregroundTertiary.mainColor.swiftuiColor,
-                                            style: theme.foregroundTertiary.view))
+                                            style: theme.foregroundTertiary.view),
+      quaternary: HelloSwiftUIThemeForeground(color: theme.foregroundQuaternary.mainColor.swiftuiColor,
+                                            style: theme.foregroundQuaternary.view))
     
     accent = HelloSwiftUIThemeForeground(color: theme.accent.mainColor.swiftuiColor,
                                          style: AnyShapeStyle(theme.accent.view))

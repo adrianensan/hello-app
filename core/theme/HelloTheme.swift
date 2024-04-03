@@ -17,6 +17,7 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
   public var foregroundPrimary: HelloFill
   public var foregroundSecondary: HelloFill
   public var foregroundTertiary: HelloFill
+  public var foregroundQuaternary: HelloFill
   
   public var font: HelloFont
   
@@ -28,6 +29,7 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
               textPrimary: HelloFill,
               textSecondary: HelloFill,
               textTertiary: HelloFill,
+              textQuaternary: HelloFill,
               font: HelloFont,
               accent: HelloFill,
               disabled: HelloFill,
@@ -36,6 +38,7 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
     self.foregroundPrimary = textPrimary
     self.foregroundSecondary = textSecondary
     self.foregroundTertiary = textTertiary
+    self.foregroundQuaternary = textQuaternary
     self.font = font
     self.accent = accent
     self.disabled = disabled
@@ -59,12 +62,14 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
       }
     }
     let foregroundPrimary = builder?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.96))
-    let foregroundSecondary = builder?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.86))
-    let foregroundTertiary = builder?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.8))
+    let foregroundSecondary = builder?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.8))
+    let foregroundTertiary = builder?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.64))
+    let foregroundQuaternary = builder?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.48))
     self.init(background: background,
               textPrimary: foregroundPrimary,
               textSecondary: foregroundSecondary,
               textTertiary: foregroundTertiary,
+              textQuaternary: foregroundQuaternary,
               font: builder?.font ?? underLayer.font ?? .rounded,
               accent: builder?.accent ?? underLayer.accent,
               disabled: .color(color: .white),
@@ -78,6 +83,7 @@ public struct HelloThemeLayerBuilder: Codable, Sendable {
   public var textPrimary: HelloFill?
   public var textSecondary: HelloFill?
   public var textTertiary: HelloFill?
+  public var textQuaternary: HelloFill?
   
   public var font: HelloFont?
   
@@ -89,6 +95,7 @@ public struct HelloThemeLayerBuilder: Codable, Sendable {
               foregroundPrimary: HelloFill? = nil,
               foregroundSecondary: HelloFill? = nil,
               foregroundTertiary: HelloFill? = nil,
+              foregroundQuaternary: HelloFill? = nil,
               font: HelloFont? = nil,
               accent: HelloFill? = nil,
               disabled: HelloFill? = nil,
@@ -97,6 +104,7 @@ public struct HelloThemeLayerBuilder: Codable, Sendable {
     self.textPrimary = foregroundPrimary
     self.textSecondary = foregroundSecondary
     self.textTertiary = foregroundTertiary
+    self.textQuaternary = foregroundQuaternary
     self.font = font
     self.accent = accent
     self.disabled = disabled
@@ -132,12 +140,14 @@ public struct HelloTheme: Codable, Hashable {
     do {
       let background = baseLayer?.background ?? (scheme == .light ? HelloTheme.light.baseLayer.background : HelloTheme.dark.baseLayer.background)
       let foregroundPrimary = baseLayer?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.96))
-      let foregroundSecondary = baseLayer?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.86))
-      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.8))
+      let foregroundSecondary = baseLayer?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.8))
+      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.64))
+      let foregroundQuaternary = baseLayer?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.48))
       self.baseLayer = HelloThemeLayer(background: background,
                                        textPrimary: foregroundPrimary,
                                        textSecondary: foregroundSecondary,
                                        textTertiary: foregroundTertiary,
+                                       textQuaternary: foregroundQuaternary,
                                        font: baseLayer?.font ?? .rounded,
                                        accent: baseLayer?.accent ?? .semanticColor(.accent),
                                        disabled: .color(color: .white),

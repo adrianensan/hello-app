@@ -81,11 +81,12 @@ public protocol HelloApplication: AnyObject {
   func onLaunch() async
   func onTerminate()
   
-  func becameActive() async
-  func lostActive() async
+  func onBecameActive() async
+  func onResignActive() async
+  func onBackgrounded() async
   
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) async
-  func firstLaunch() async
+  func onFirstLaunch() async
   
   func open(url: HelloURL) -> Bool
   func handle(notification: [AnyHashable: Any])
@@ -141,13 +142,15 @@ public extension HelloApplication {
     #endif
   }
   
+  func onLaunch() {}
   func onTerminate() {}
   
-  func becameActive() async {}
-  func lostActive() async {}
+  func onBecameActive() async {}
+  func onResignActive() async {}
+  func onBackgrounded() async {}
   
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) {}
-  func firstLaunch() {}
+  func onFirstLaunch() {}
   
   func open(url: HelloURL) -> Bool { false }
   func handle(notification: [AnyHashable: Any]) { }
@@ -169,7 +172,7 @@ extension HelloApplication {
         if let previousAppVersion {
           await helloApplication.versionUpdated(from: previousAppVersion, to: currentAppVersion)
         } else {
-          await helloApplication.firstLaunch()
+          await helloApplication.onFirstLaunch()
         }
       }
     }
@@ -182,11 +185,15 @@ extension HelloApplication {
     onTerminate()
   }
   
-  func becameActiveInternal() async {
-    await becameActive()
+  func onBecameActiveInternal() async {
+    await onBecameActive()
   }
   
-  func lostActiveInternal() async {
-    await lostActive()
+  func onResignActiveInternal() async {
+    await onResignActive()
+  }
+  
+  func onBackgroundedInternal() async {
+    await onBackgrounded()
   }
 }
