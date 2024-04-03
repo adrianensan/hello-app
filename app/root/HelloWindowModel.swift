@@ -5,6 +5,10 @@ import Observation
 @Observable
 public class HelloWindowModel {
   
+  func globalDismissKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+  }
+  
   #if os(iOS) || os(tvOS) || os(visionOS)
   public weak var window: UIWindow?
   #endif
@@ -48,11 +52,13 @@ public class HelloWindowModel {
   
   public func present(sheet: @MainActor @autoclosure @escaping () -> some View) {
     blurBackgroundForPopup = false
+    globalDismissKeyboard()
     popupViews.append(PopupWindow { HelloSheet { _ in sheet() } })
   }
   
   public func present(view: @MainActor @autoclosure @escaping () -> some View) {
     blurBackgroundForPopup = false
+    globalDismissKeyboard()
     popupViews.append(PopupWindow { view() })
   }
   

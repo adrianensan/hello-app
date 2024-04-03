@@ -64,7 +64,7 @@ public struct HelloButton<Content: View>: View {
   private var content: Content
   
   public init(clickStyle: HelloButtonClickStyle = .scale,
-              haptics: HapticsType = .clickAndAction,
+              haptics: HapticsType = .click,
               action: @escaping () -> Void,
               @ViewBuilder content: () -> Content) {
     self.haptics = haptics
