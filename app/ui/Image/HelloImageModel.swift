@@ -88,6 +88,7 @@ class HelloImageModel {
   }
   
   var image: NativeImage?
+  var padding: CGFloat = 0
   var frames: [AnimatedImageFrame]?
   private let imageSource: HelloImageSource
   
@@ -140,27 +141,30 @@ class HelloImageModel {
       var helloURL = HelloURL(string: url)
       helloURL.scheme = .https
       let url = helloURL.root.string
-      if let cachedImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
-        image = NativeImage(data: cachedImageData)
-      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteFavicon(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
+      if let cachedFavicon = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
+        image = NativeImage(data: cachedFavicon.data)
+        padding = cachedFavicon.type == .favicon ? 5 : 0
+      } else if var favicon = Persistence.initialValue(.cacheRemoteFavicon(url: url)) {
         Task {
-          let resizedImageData = await ImageProcessor.processImageData(imageData: cachedOriginalImageData, maxSize: CGFloat(variant.size))
-          await Persistence.save(resizedImageData, for: .cacheRemoteFavicon(url: url, variant: variant))
-          image = NativeImage(data: resizedImageData)
+          favicon.data = await ImageProcessor.processImageData(imageData: favicon.data, maxSize: CGFloat(variant.size))
+          await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
+          image = NativeImage(data: favicon.data)
+          padding = favicon.type == .favicon ? 5 : 0
         }
       } else {
         Task { [weak self] in
-          var imageData = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
+          var favicon = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
           
-          await Persistence.save(imageData, for: .tempDownload(url: url))
+          await Persistence.save(favicon.data, for: .tempDownload(url: url))
           switch variant {
           case .original: ()
           case .thumbnail(let size):
-            imageData = await ImageProcessor.processImageData(imageData: imageData, maxSize: CGFloat(size))
+            favicon.data = await ImageProcessor.processImageData(imageData: favicon.data, maxSize: CGFloat(size))
           }
-          await Persistence.save(imageData, for: .cacheRemoteFavicon(url: url, variant: variant))
+          await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           guard let self else { return }
-          self.image = NativeImage(data: imageData)
+          self.image = NativeImage(data: favicon.data)
+          padding = favicon.type == .favicon ? 5 : 0
 //          await loadFrames(from: imageData)
         }
       }

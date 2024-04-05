@@ -64,6 +64,7 @@ public struct HelloImageView: View {
           .resizable()
           .aspectRatio(contentMode: resizeMode)
           .dimForTheme()
+          .padding(model.padding)
       }
     }
   }

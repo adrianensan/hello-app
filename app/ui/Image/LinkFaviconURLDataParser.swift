@@ -17,7 +17,7 @@ public actor LinkFaviconURLDataParser {
   
   var inProgress: Set<String> = []
   
-  func getFavicon(for helloURL: HelloURL) async throws -> Data {
+  func getFavicon(for helloURL: HelloURL) async throws -> HelloFavicon {
     var helloURL = helloURL
     helloURL.scheme = .https
     guard !inProgress.contains(helloURL.root.string) else { throw LinkPreviewDataParserError.alreadyInProgress }
@@ -36,14 +36,16 @@ public actor LinkFaviconURLDataParser {
     if let html {
       do {
         let imageURL = try parse(rel: "apple-touch-icon", from: html, url: helloURL)
-        return try await HelloImageDownloadManager.main.download(from: imageURL)
+        return HelloFavicon(data: try await HelloImageDownloadManager.main.download(from: imageURL),
+                            type: .appleTouch)
       } catch {
         Log.error(error.localizedDescription)
       }
       
       do {
         let imageURL = try parse(rel: "apple-touch-icon-precomposed", from: html, url: helloURL)
-        return try await HelloImageDownloadManager.main.download(from: imageURL)
+        return HelloFavicon(data: try await HelloImageDownloadManager.main.download(from: imageURL),
+                            type: .appleTouch)
       } catch {
         Log.error(error.localizedDescription)
       }
@@ -52,26 +54,28 @@ public actor LinkFaviconURLDataParser {
     helloURL.path = "/apple-touch-icon.png"
     if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
        let _ = NativeImage(data: imageData) {
-      return imageData
+      return HelloFavicon(data: imageData, type: .appleTouch)
     }
     
     helloURL.path = "/apple-touch-icon-precomposed.png"
     if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
        let _ = NativeImage(data: imageData) {
-      return imageData
+      return HelloFavicon(data: imageData, type: .appleTouch)
     }
     
     if let html {
       do {
         let imageURL = try parse(rel: "shortcut icon", from: html, url: helloURL)
-        return try await HelloImageDownloadManager.main.download(from: imageURL)
+        return HelloFavicon(data: try await HelloImageDownloadManager.main.download(from: imageURL),
+                            type: .favicon)
       } catch {
         Log.error(error.localizedDescription)
       }
       
       do {
         let imageURL = try parse(rel: "icon", from: html, url: helloURL)
-        return try await HelloImageDownloadManager.main.download(from: imageURL)
+        return HelloFavicon(data: try await HelloImageDownloadManager.main.download(from: imageURL),
+                            type: .favicon)
       } catch {
         Log.error(error.localizedDescription)
       }
@@ -79,7 +83,7 @@ public actor LinkFaviconURLDataParser {
     
     helloURL.path = "/favicon.ico"
     if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string) {
-      return imageData
+      return HelloFavicon(data: imageData, type: .favicon)
     }
     
     throw LinkPreviewDataParserError.previewDataNotFound
