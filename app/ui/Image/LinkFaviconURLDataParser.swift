@@ -24,6 +24,31 @@ public actor LinkFaviconURLDataParser {
     inProgress.insert(helloURL.root.string)
     defer { inProgress.remove(helloURL.root.string) }
     
+    let html: String?
+    do {
+      let pageData = try await Downloader.main.download(from: helloURL.root.string)
+      html = try String(data: pageData, encoding: .utf8)
+    } catch {
+      Log.error(error.localizedDescription)
+      html = nil
+    }
+    
+    if let html {
+      do {
+        let imageURL = try parse(rel: "apple-touch-icon", from: html, url: helloURL)
+        return try await HelloImageDownloadManager.main.download(from: imageURL)
+      } catch {
+        Log.error(error.localizedDescription)
+      }
+      
+      do {
+        let imageURL = try parse(rel: "apple-touch-icon-precomposed", from: html, url: helloURL)
+        return try await HelloImageDownloadManager.main.download(from: imageURL)
+      } catch {
+        Log.error(error.localizedDescription)
+      }
+    }
+    
     helloURL.path = "/apple-touch-icon.png"
     if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
        let _ = NativeImage(data: imageData) {
@@ -36,15 +61,20 @@ public actor LinkFaviconURLDataParser {
       return imageData
     }
     
-    if let pageData = try? await Downloader.main.download(from: helloURL.root.string),
-       let html = String(data: pageData, encoding: .utf8),
-       let imageURL =
-        (try? parse(rel: "apple-touch-icon", from: html, url: helloURL)) ??
-        (try? parse(rel: "apple-touch-icon-precomposed", from: html, url: helloURL)) ??
-        (try? parse(rel: "shortcut icon", from: html, url: helloURL)) ??
-        (try? parse(rel: "icon", from: html, url: helloURL)),
-       let imageData = try? await HelloImageDownloadManager.main.download(from: imageURL) {
-        return imageData
+    if let html {
+      do {
+        let imageURL = try parse(rel: "shortcut icon", from: html, url: helloURL)
+        return try await HelloImageDownloadManager.main.download(from: imageURL)
+      } catch {
+        Log.error(error.localizedDescription)
+      }
+      
+      do {
+        let imageURL = try parse(rel: "icon", from: html, url: helloURL)
+        return try await HelloImageDownloadManager.main.download(from: imageURL)
+      } catch {
+        Log.error(error.localizedDescription)
+      }
     }
     
     helloURL.path = "/favicon.ico"
@@ -56,17 +86,29 @@ public actor LinkFaviconURLDataParser {
   }
   
   private func parse(rel: String, from html: String, url helloURL: HelloURL) throws -> String {
-    guard let headStartIndex = html.range(of: "<head")?.upperBound,
-          let headEndIndex = html.range(of: "</head>")?.lowerBound,
-          headStartIndex < headEndIndex else {
-      throw LinkPreviewDataParserError.previewDataNotFound
+    let headStartIndex: String.Index
+    let headEndIndex: String.Index
+    if let headStart = html.range(of: "<head>")?.upperBound {
+      headStartIndex = headStart
+    } else {
+      Log.warning("Failed to find head start, using start index")
+      headStartIndex = html.startIndex
+    }
+    if let headEnd = html.range(of: "</head>", range: headStartIndex..<html.endIndex)?.lowerBound {
+      headEndIndex = headEnd
+    } else {
+      Log.warning("Failed to find head end, using end index")
+      headEndIndex = html.endIndex
+    }
+    guard headStartIndex < headEndIndex else {
+      throw HelloError("head element error")
     }
     
     let head = html[headStartIndex..<headEndIndex]
     
     guard let iconSectionStartIndex = head.range(of: #"rel="\#(rel)""#)?.upperBound,
           let iconSectionEndIndex = head.range(of: ">", range: iconSectionStartIndex..<head.endIndex)?.lowerBound else {
-      throw LinkPreviewDataParserError.previewDataNotFound
+      throw HelloError("requested rel component not found")
     }
     
     let iconLine = head[iconSectionStartIndex..<iconSectionEndIndex]
@@ -74,7 +116,7 @@ public actor LinkFaviconURLDataParser {
     guard let iconStartIndex = iconLine.range(of: "href=\"")?.upperBound,
           let iconEndIndex = iconLine.range(of: "\"", range: iconStartIndex..<iconLine.endIndex)?.lowerBound,
           iconStartIndex < iconEndIndex else {
-      throw LinkPreviewDataParserError.previewDataNotFound
+      throw HelloError("href component of rel not found")
     }
     let faviconURL = String(iconLine[iconStartIndex..<iconEndIndex]).removingHTMLEntities
     if faviconURL.hasPrefix("/") {
@@ -84,17 +126,5 @@ public actor LinkFaviconURLDataParser {
     } else {
       return faviconURL
     }
-    
-    guard let iconSectionStartIndex =
-            head.range(of: #"rel="apple-touch-icon""#)?.upperBound ??
-            head.range(of: #"rel="apple-touch-icon-precomposed""#)?.upperBound,
-          // ??
-          //            head.range(of: #"rel="icon""#)?.upperBound ??
-            //            head.range(of: #"rel="shortcut icon""#)?.upperBound,
-            let iconSectionEndIndex = head.range(of: ">", range: iconSectionStartIndex..<head.endIndex)?.lowerBound else {
-      throw LinkPreviewDataParserError.previewDataNotFound
-    }
-    
-    
   }
 }

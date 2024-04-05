@@ -21,6 +21,9 @@ public struct NavigationPageTitle: View {
   
   public var body: some View {
     Text(title)
+      .minimumScaleFactor(0.8)
+      .lineLimit(1)
+      .padding(.horizontal, 36)
       .offset(y: 0.5 * (min(titleOffset, max(scrollModel.scrollOffset + titleOffset, 0)) + (isSmallSize ? 1 : 0.5) * scrollModel.overscroll))
       .scaleEffect(1 + 0.004 * (min(titleOffset, max(scrollModel.scrollOffset + titleOffset, 0)) + 0.2 * scrollModel.overscroll))
   }
