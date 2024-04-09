@@ -5,7 +5,7 @@ public struct CachedRemoteFaviconPersistenceProperty: PersistenceProperty {
   public let url: String
   public let variant: HelloImageVariant
   
-  public var defaultValue: HelloFavicon? { nil }
+  public var defaultValue: Data? { nil }
   
   public var location: PersistenceType { .file(location: .cache, path: "cache-favicons/\(variant.id)/\(url.fileSafeString)") }
   

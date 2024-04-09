@@ -142,29 +142,33 @@ class HelloImageModel {
       helloURL.scheme = .https
       let url = helloURL.root.string
       if let cachedFavicon = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
-        image = NativeImage(data: cachedFavicon.data)
-        padding = cachedFavicon.type == .favicon ? 5 : 0
+        image = NativeImage(data: cachedFavicon)
+        padding = image?.hasFlatEdge == true ? 0 : 5
+//        padding = image?.hasFlatEdge cachedFavicon.type == .favicon ? 5 : 0
+//        backgroundFill = image?.borderColor
       } else if var favicon = Persistence.initialValue(.cacheRemoteFavicon(url: url)) {
         Task {
-          favicon.data = await ImageProcessor.processImageData(imageData: favicon.data, maxSize: CGFloat(variant.size))
+          favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size), allowTransparency: true)
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
-          image = NativeImage(data: favicon.data)
-          padding = favicon.type == .favicon ? 5 : 0
+          image = NativeImage(data: favicon)
+          padding = image?.hasFlatEdge == true ? 0 : 5
+//          backgroundFill = image?.borderColor
         }
       } else {
         Task { [weak self] in
           var favicon = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
           
-          await Persistence.save(favicon.data, for: .tempDownload(url: url))
+          await Persistence.save(favicon, for: .tempDownload(url: url))
           switch variant {
           case .original: ()
           case .thumbnail(let size):
-            favicon.data = await ImageProcessor.processImageData(imageData: favicon.data, maxSize: CGFloat(size))
+            favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size), allowTransparency: true)
           }
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           guard let self else { return }
-          self.image = NativeImage(data: favicon.data)
-          padding = favicon.type == .favicon ? 5 : 0
+          image = NativeImage(data: favicon)
+          padding = image?.hasFlatEdge == true ? 0 : 5
+//          backgroundFill = image?.borderColor
 //          await loadFrames(from: imageData)
         }
       }

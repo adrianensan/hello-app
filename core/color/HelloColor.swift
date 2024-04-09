@@ -2,24 +2,33 @@ import Foundation
 
 public typealias HelloColour = HelloColor
 
+public enum HelloColorSpace: String, Codable, Equatable, Hashable, Identifiable, Sendable {
+  case sRGB
+  case p3
+  
+  public var id: String { rawValue }
+}
+
 public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   public var r: Double
   public var g: Double
   public var b: Double
   public var a: Double
+  public var colorSpace: HelloColorSpace
   
   static func cap(_ value: Double) -> Double {
     min(1, max(0, value))
   }
   
-  public init(r: Double, g: Double, b: Double, a: Double = 1) {
+  public init(r: Double, g: Double, b: Double, a: Double = 1, colorSpace: HelloColorSpace = .p3) {
     self.r = Self.cap(r)
     self.g = Self.cap(g)
     self.b = Self.cap(b)
     self.a = Self.cap(a)
+    self.colorSpace = colorSpace
   }
   
-  public init(h: Double, s: Double, b: Double, a: Double = 1) {
+  public init(h: Double, s: Double, b: Double, a: Double = 1, colorSpace: HelloColorSpace = .p3) {
     let h = Self.cap(h)
     let s = Self.cap(s)
     let b = Self.cap(b)
@@ -56,6 +65,7 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
       self.b = z + minV
     }
     self.a = Self.cap(a)
+    self.colorSpace = colorSpace
   }
   
   public init?(hexCode: String) {
@@ -70,7 +80,8 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
     
     self.init(r: Double((hexNumber & 0xFF0000) >> 16) / 255.0,
               g: Double((hexNumber & 0x00FF00) >> 8) / 255.0,
-              b: Double((hexNumber & 0x0000FF)) / 255.0)
+              b: Double((hexNumber & 0x0000FF)) / 255.0,
+              colorSpace: .sRGB)
   }
   
   public var id: Double {
@@ -82,7 +93,7 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   public var dark: HelloColor { self }
   
   public func opacity(_ alpha: CGFloat) -> HelloColor {
-    HelloColor(r: r, g: g, b: b, a: a * alpha)
+    HelloColor(r: r, g: g, b: b, a: a * alpha, colorSpace: colorSpace)
   }
   
   public var brightness: Double {
@@ -99,6 +110,10 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
   
   public var isGreyscale: Bool {
     r == b && b == g
+  }
+  
+  public var isOpaque: Bool {
+    a == 1
   }
   
   public var isEssentiallyGreyscale: Bool {
@@ -144,21 +159,23 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
     }
     
     b += brightness
-    return HelloColor(h: h, s: s, b: b, a: a)
+    return HelloColor(h: h, s: s, b: b, a: a, colorSpace: colorSpace)
   }
   
   public func withFakeAlpha(_ alpha: Double, background: HelloColor) -> HelloColor {
     HelloColor(r: r * alpha + background.r * (1 - alpha),
                g: g * alpha + background.g * (1 - alpha),
                b: b * alpha + background.b * (1 - alpha),
-               a: a)
+               a: a,
+               colorSpace: colorSpace)
   }
   
   public func darken(by darkenAmount: Double) -> HelloColor {
     HelloColor(r: r * darkenAmount,
                g: g * darkenAmount,
                b: b * darkenAmount,
-               a: a)
+               a: a,
+               colorSpace: colorSpace)
   }
   
   public func isEssentiallySame(as otherColor: HelloColor) -> Bool {

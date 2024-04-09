@@ -37,7 +37,7 @@ public struct AnimatedHelloImageView: View {
 }
 
 @MainActor
-public struct HelloImageView: View {
+public struct HelloImageView<Fallback: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
@@ -46,12 +46,15 @@ public struct HelloImageView: View {
   
   private let model: HelloImageModel
   private let resizeMode: ContentMode
+  private let fallback: @MainActor () -> Fallback
   
   public init(_ source: HelloImageSource, 
               variant: HelloImageVariant = .original,
-              resizeMode: ContentMode = .fit) {
+              resizeMode: ContentMode = .fit,
+              fallback: @MainActor @escaping () -> Fallback) {
     model = .model(for: source, variant: variant)
     self.resizeMode = resizeMode
+    self.fallback = fallback
   }
   
   public var body: some View {
@@ -59,14 +62,27 @@ public struct HelloImageView: View {
       if isActive, let frames = model.frames {
         AnimatedHelloImageView(images: frames)
           .dimForTheme()
-      } else  {
-        Image(nativeImage: model.image ?? .init())
+      } else if let image = model.image {
+        Image(nativeImage: image)
           .resizable()
           .aspectRatio(contentMode: resizeMode)
           .dimForTheme()
           .padding(model.padding)
+      } else {
+        fallback()
       }
     }
+  }
+}
+
+public extension HelloImageView where Fallback == Color {
+  init(_ source: HelloImageSource,
+                   variant: HelloImageVariant = .original,
+                   resizeMode: ContentMode = .fit) {
+    self.init(source,
+              variant: variant,
+              resizeMode: resizeMode,
+              fallback: { Color.clear })
   }
 }
 

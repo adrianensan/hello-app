@@ -66,4 +66,17 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
   }
 }
+
+public extension NavigationPage where NavBarContent == EmptyView {
+  public init(title: String? = nil,
+              allowScroll: Bool = true,
+              model: HelloScrollModel? = nil,
+              @ViewBuilder content: @escaping () -> Content) {
+    self.init(title: title,
+              allowScroll: allowScroll,
+              model: model,
+              navBarContent: { EmptyView() },
+              content: content)
+  }
+}
 #endif

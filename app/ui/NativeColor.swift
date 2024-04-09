@@ -8,13 +8,27 @@ public typealias NativeColor = UIColor
 public typealias NativeColor = NSColor
 #endif
 
+public extension HelloColorSpace {
+  var swiftuiColorSpace: Color.RGBColorSpace {
+    switch self {
+    case .sRGB: .sRGB
+    case .p3: .displayP3
+    }
+  }
+}
+
 public extension HelloColor {
   var nativeColor: NativeColor {
-    NativeColor(displayP3Red: r, green: g, blue: b, alpha: a)
+    switch colorSpace {
+    case .p3:
+      NativeColor(displayP3Red: r, green: g, blue: b, alpha: a)
+    case .sRGB:
+      NativeColor(red: r, green: g, blue: b, alpha: a)
+    }
   }
   
   var swiftuiColor: Color {
-    Color(.displayP3, red: r, green: g, blue: b, opacity: a)
+    Color(colorSpace.swiftuiColorSpace, red: r, green: g, blue: b, opacity: a)
   }
 }
 

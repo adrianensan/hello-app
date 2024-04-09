@@ -42,8 +42,7 @@ public class ImageProcessor {
   
   public static func processImageData(imageData: Data, maxSize: CGFloat, allowTransparency: Bool = false) async -> Data {
 #if os(iOS) || os(tvOS) || os(visionOS)
-    guard let image = UIImage(data: imageData, scale: 1),
-          image.size.width > maxSize || image.size.height > maxSize
+    guard let image = UIImage(data: imageData, scale: 1)
     else { return imageData }
     var size = CGSize(width: floor(image.size.width), height: floor(image.size.height))
 #else
