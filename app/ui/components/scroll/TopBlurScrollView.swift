@@ -116,7 +116,6 @@ public struct HelloScrollView<Content: View>: View {
   }
   
   public var body: some View {
-//    let _ = Self._printChanges()
     ScrollViewReader { scrollView in
       ScrollView(allowScroll ? .vertical : [], showsIndicators: showsIndicators) {
         VStack(spacing: 0) {

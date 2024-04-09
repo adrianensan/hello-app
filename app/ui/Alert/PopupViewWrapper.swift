@@ -85,7 +85,7 @@ public struct PopupViewWrapper<Content: View>: View {
       .offset(adjustedPosition)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .background(Color.black
-        .opacity(isVisible ? 0.2 : 0)
+        .opacity(isVisible ? 0.1 : 0)
         .nest {
           #if os(tvOS)
           $0

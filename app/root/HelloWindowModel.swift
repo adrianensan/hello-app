@@ -1,13 +1,13 @@
 import SwiftUI
 import Observation
 
+public func globalDismissKeyboard() {
+  UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+
 @MainActor
 @Observable
 public class HelloWindowModel {
-  
-  func globalDismissKeyboard() {
-    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-  }
   
   #if os(iOS) || os(tvOS) || os(visionOS)
   public weak var window: UIWindow?
@@ -65,5 +65,10 @@ public class HelloWindowModel {
   public func dismissSheet() {
     guard !popupViews.isEmpty else { return }
     popupViews.popLast()
+  }
+  
+  public func dismissAllPopups() {
+    guard !popupViews.isEmpty else { return }
+    popupViews = []
   }
 }

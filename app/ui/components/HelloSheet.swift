@@ -60,6 +60,6 @@ public struct HelloSheet<Content: View>: View {
         if !$0 {
           windowModel.dismissPopup()
         }
-      }
+      }.transformEnvironment(\.safeArea) { $0.top = Device.currentEffective.screenCornerRadius }
   }
 }
