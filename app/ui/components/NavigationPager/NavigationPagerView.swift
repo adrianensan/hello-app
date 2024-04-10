@@ -73,6 +73,7 @@ public struct NavigationPagerView: View {
     }.environment(model)
       .environment(model.backProgressModel)
       .environment(\.helloPagerConfig, model.config)
+      .environment(\.helloDismiss, { model.popView() })
       .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
@@ -85,5 +86,16 @@ public extension EnvironmentValues {
   var helloPagerConfig: HelloPagerConfig {
     get { self[HelloPagerConfigEnvironmentKey.self] }
     set { self[HelloPagerConfigEnvironmentKey.self] = newValue }
+  }
+}
+
+private struct HelloDismissEnvironmentKey: EnvironmentKey {
+  static let defaultValue = { }
+}
+
+public extension EnvironmentValues {
+  var helloDismiss: () -> Void {
+    get { self[HelloDismissEnvironmentKey.self] }
+    set { self[HelloDismissEnvironmentKey.self] = newValue }
   }
 }

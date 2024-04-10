@@ -28,7 +28,7 @@ public struct HelloAppRootView<Content: View>: View {
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in
           popupView.view()
-            .id(popupView.id)
+            .id(popupView.instanceID)
             .zIndex(3 + 0.1 * Double((windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0)))
             .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                     removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
