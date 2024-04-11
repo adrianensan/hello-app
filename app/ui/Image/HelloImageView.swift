@@ -37,7 +37,7 @@ public struct AnimatedHelloImageView: View {
 }
 
 @MainActor
-public struct HelloImageView<Fallback: View>: View {
+public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
@@ -46,14 +46,28 @@ public struct HelloImageView<Fallback: View>: View {
   
   private let model: HelloImageModel
   private let resizeMode: ContentMode
+  private let custom: (@MainActor (NativeImage) -> CustomView)?
   private let fallback: @MainActor () -> Fallback
   
-  public init(_ source: HelloImageSource, 
+  fileprivate init(_ source: HelloImageSource,
               variant: HelloImageVariant = .original,
               resizeMode: ContentMode = .fit,
+              custom: (@MainActor (NativeImage) -> CustomView)?,
               fallback: @MainActor @escaping () -> Fallback) {
     model = .model(for: source, variant: variant)
     self.resizeMode = resizeMode
+    self.custom = custom
+    self.fallback = fallback
+  }
+  
+  public init(_ source: HelloImageSource,
+              variant: HelloImageVariant = .original,
+              resizeMode: ContentMode = .fit,
+              @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
+              fallback: @MainActor @escaping () -> Fallback) {
+    model = .model(for: source, variant: variant)
+    self.resizeMode = resizeMode
+    self.custom = custom
     self.fallback = fallback
   }
   
@@ -63,11 +77,14 @@ public struct HelloImageView<Fallback: View>: View {
         AnimatedHelloImageView(images: frames)
           .dimForTheme()
       } else if let image = model.image {
-        Image(nativeImage: image)
-          .resizable()
-          .aspectRatio(contentMode: resizeMode)
-          .dimForTheme()
-          .padding(model.padding)
+        if let custom {
+          custom(image)
+        } else {
+          Image(nativeImage: image)
+            .resizable()
+            .aspectRatio(contentMode: resizeMode)
+            .dimForTheme()
+        }
       } else {
         fallback()
       }
@@ -77,11 +94,38 @@ public struct HelloImageView<Fallback: View>: View {
 
 public extension HelloImageView where Fallback == Color {
   init(_ source: HelloImageSource,
-                   variant: HelloImageVariant = .original,
-                   resizeMode: ContentMode = .fit) {
+       variant: HelloImageVariant = .original,
+       resizeMode: ContentMode = .fit,
+       @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView) {
     self.init(source,
               variant: variant,
               resizeMode: resizeMode,
+              custom: custom,
+              fallback: { Color.clear })
+  }
+}
+
+public extension HelloImageView where CustomView == EmptyView {
+  init(_ source: HelloImageSource,
+       variant: HelloImageVariant = .original,
+       resizeMode: ContentMode = .fit,
+       fallback: @MainActor @escaping () -> Fallback) {
+    self.init(source,
+              variant: variant,
+              resizeMode: resizeMode,
+              custom: nil,
+              fallback: fallback)
+  }
+}
+
+public extension HelloImageView where CustomView == EmptyView, Fallback == Color {
+  init(_ source: HelloImageSource,
+       variant: HelloImageVariant = .original,
+       resizeMode: ContentMode = .fit) {
+    self.init(source,
+              variant: variant,
+              resizeMode: resizeMode,
+              custom: nil,
               fallback: { Color.clear })
   }
 }

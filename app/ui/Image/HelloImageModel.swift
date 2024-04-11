@@ -88,7 +88,6 @@ class HelloImageModel {
   }
   
   var image: NativeImage?
-  var padding: CGFloat = 0
   var frames: [AnimatedImageFrame]?
   private let imageSource: HelloImageSource
   
@@ -143,7 +142,6 @@ class HelloImageModel {
       let url = helloURL.root.string
       if let cachedFavicon = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
         image = NativeImage(data: cachedFavicon)
-        padding = image?.hasFlatEdge == true ? 0 : 5
 //        padding = image?.hasFlatEdge cachedFavicon.type == .favicon ? 5 : 0
 //        backgroundFill = image?.borderColor
       } else if var favicon = Persistence.initialValue(.cacheRemoteFavicon(url: url)) {
@@ -151,7 +149,6 @@ class HelloImageModel {
           favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size), allowTransparency: true)
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           image = NativeImage(data: favicon)
-          padding = image?.hasFlatEdge == true ? 0 : 5
 //          backgroundFill = image?.borderColor
         }
       } else {
@@ -167,7 +164,6 @@ class HelloImageModel {
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           guard let self else { return }
           image = NativeImage(data: favicon)
-          padding = image?.hasFlatEdge == true ? 0 : 5
 //          backgroundFill = image?.borderColor
 //          await loadFrames(from: imageData)
         }

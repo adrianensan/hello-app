@@ -54,8 +54,8 @@ public extension NativeImage {
   }
   
   var hasFlatEdge: Bool {
-    abs(size.width - size.height) < 2 && size.width * scale > 16 &&
-    (stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelColor(at: CGPoint(x: CGFloat($0) * size.width, y: 0))?.isOpaque == true } ||
+    abs(size.width - size.height) < 2 && size.width * scale > 8 &&
+    (stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelColor(at: CGPoint(x: CGFloat($0) * size.width, y: 0))?.isOpaque == true } &&
     stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelColor(at: CGPoint(x: 0, y: CGFloat($0) * size.height))?.isOpaque == true })
   }
 }
