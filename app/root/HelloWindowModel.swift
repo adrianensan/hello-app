@@ -18,7 +18,7 @@ public class HelloWindowModel {
     var instanceID: String
     var view: () -> AnyView
     
-    var id: String {  instanceID}
+    var id: String { instanceID }
     
     init(viewID: String, view: @escaping () -> some View) {
       self.viewID = viewID
@@ -29,9 +29,6 @@ public class HelloWindowModel {
   
   var blurBackgroundForPopup: Bool = true
   var popupViews: [PopupWindow] = []
-  var alertView: HelloAlert?
-  
-  var alertViewID: String = UUID().uuidString
   
   public func showPopup<Content: View>(blurBackground: Bool = true, _ view: Content) {
     blurBackgroundForPopup = blurBackground
@@ -45,13 +42,8 @@ public class HelloWindowModel {
   
   public func show(alert alertConfig: HelloAlertConfig) {
     blurBackgroundForPopup = true
-    alertViewID = UUID().uuidString
-    alertView = HelloAlert(config: alertConfig)
-  }
-  
-  public func dismissAlert() {
-    guard alertView != nil else { return }
-    alertView = nil
+    globalDismissKeyboard()
+    popupViews.append(PopupWindow(viewID: alertConfig.id) { HelloAlert(config: alertConfig) })
   }
   
   public func present(id: String = UUID().uuidString,
@@ -74,6 +66,11 @@ public class HelloWindowModel {
   }
   
   public func dismissSheet(id: String) {
+    guard !popupViews.isEmpty else { return }
+    popupViews = popupViews.filter { $0.viewID != id }
+  }
+  
+  public func dismiss(id: String) {
     guard !popupViews.isEmpty else { return }
     popupViews = popupViews.filter { $0.viewID != id }
   }

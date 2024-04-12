@@ -9,11 +9,9 @@ public struct HelloAppRootView<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(UIProperties.self) private var uiProperties
   
-  @State private var showHelloModal: Bool = false//Hello.isFirstLaunch
+  private var content: @MainActor () -> Content
   
-  private var content: () -> Content
-  
-  public init(_ content: @escaping () -> Content) {
+  public init(_ content: @MainActor @escaping () -> Content) {
     self.content = content
   }
   
@@ -21,9 +19,8 @@ public struct HelloAppRootView<Content: View>: View {
     ZStack {
       content()
         .compositingGroup()
-        .blur(radius: windowModel.blurBackgroundForPopup && (windowModel.alertView != nil || !windowModel.popupViews.isEmpty) ? 2 : 0)
-        .animation(.easeInOut(duration: 0.24), value: windowModel.alertView != nil || !windowModel.popupViews.isEmpty)
-//          .frame(width: uiProperties.size.width, height: uiProperties.size.height)
+        .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
+        .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
       
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in
@@ -35,18 +32,7 @@ public struct HelloAppRootView<Content: View>: View {
             .allowsHitTesting(windowModel.popupViews.contains(where: { $0.id == popupView.id }))
         }
       }
-      
-      if let alertView = windowModel.alertView {
-        alertView
-          .id(windowModel.alertViewID)
-          .zIndex(4)
-          .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
-                                  removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
-          .allowsHitTesting(windowModel.alertView != nil)
-      }
-    }
-//    .frame(width: uiProperties.size.width, height: uiProperties.size.height)
-      .environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
+    }.environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .observeKeyboardFrame()
       .observeIsActive()

@@ -1,5 +1,13 @@
 import SwiftUI
 
+public struct HelloSheetCoordinateSpace: CoordinateSpaceProtocol {
+  public var coordinateSpace: CoordinateSpace { .named("hello-sheet") }
+}
+
+public extension CoordinateSpaceProtocol where Self == HelloSheetCoordinateSpace {
+  public static var sheet: HelloSheetCoordinateSpace { HelloSheetCoordinateSpace() }
+}
+
 @MainActor
 public struct HelloSheet<Content: View>: View {
   
@@ -8,6 +16,7 @@ public struct HelloSheet<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var isVisible: Bool
+  @State private var hasMovedDuringDrag: Bool = false
   @GestureState private var drag: CGSize = .zero
   
   private var id: String
@@ -45,20 +54,13 @@ public struct HelloSheet<Content: View>: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       .background(Color.black
         .opacity(isVisible ? 0.2 : 0)
-        .nest {
-#if os(tvOS)
-          $0
-#else
-          $0.onTapGesture {
-            dismiss()
-          }
-#endif
-        }.animation(.easeInOut(duration: 0.2), value: isVisible))
-      .gesture(DragGesture(minimumDistance: 1, coordinateSpace: .named("sheet"))
+        .animation(.easeInOut(duration: 0.2), value: isVisible))
+      .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
         .updating($drag) { value, state, transaction in
           state = value.translation
         }.onEnded { gesture in
-          if gesture.predictedEndTranslation.height > 200 {
+          print(gesture.predictedEndTranslation)
+          if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
             dismiss()
           }
         })

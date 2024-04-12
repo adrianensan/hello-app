@@ -30,6 +30,7 @@ public struct HelloAlertConfig {
     }
   }
   
+  var id: String = UUID().uuidString
   var title: String
   var message: String?
   var firstButton: HelloAlertViewItem
@@ -64,7 +65,7 @@ public struct HelloAlert: View {
   private func dismiss() {
     isDismissed = true
     animateIn = false
-    windowModel.dismissAlert()
+    windowModel.dismiss(id: config.id)
 //    print("p1", "fsfsfsfsfsfsf")
 //    Task {
 //      print("p2", "fsfsfsfsfsfsf")
