@@ -11,20 +11,45 @@ public actor LinkFaviconURLDataParser {
     case previewDataNotFound
     case alreadyInProgress
     case failedToPrase
+    case skip
   }
   
   public static let main = LinkFaviconURLDataParser()
   
-  var inProgress: Set<String> = []
+  private var inProgress: Set<String> = []
+  @PersistentAsync(.failedFaviconFetches) private var failedFaviconFetches
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
+    if let failedFetch = failedFaviconFetches[helloURL.string] {
+      guard Date.now.timeIntervalSince1970 - failedFetch > 60 * 60 * 24 else {
+        Log.warning("Skipping favicon fetch for \(helloURL.string) due to previous failure")
+        throw LinkPreviewDataParserError.skip
+      }
+      failedFaviconFetches[helloURL.string] = nil
+    }
     var helloURL = helloURL
     helloURL.scheme = .https
+    var effectiveHelloURL = helloURL
     guard !inProgress.contains(helloURL.root.string) else { throw LinkPreviewDataParserError.alreadyInProgress }
     inProgress.insert(helloURL.root.string)
     defer { inProgress.remove(helloURL.root.string) }
     
-    let pageData = try await Downloader.main.download(from: helloURL.root.string)
+    let pageData: Data
+    do {
+      do {
+        pageData = try await Downloader.main.download(from: effectiveHelloURL.root.string)
+      } catch {
+        if !effectiveHelloURL.host.starts(with: "www.") {
+          effectiveHelloURL.host = "www.\(effectiveHelloURL.host)"
+          pageData = try await Downloader.main.download(from: effectiveHelloURL.root.string)
+        } else {
+          throw error
+        }
+      }
+    } catch {
+      failedFaviconFetches[helloURL.string] = Date.now.timeIntervalSince1970
+      throw error
+    }
     let html: String?
     do {
       html = try String(data: pageData, encoding: .utf8)
@@ -35,7 +60,7 @@ public actor LinkFaviconURLDataParser {
     
     if let html {
       do {
-        let imageURL = try parse(rel: "apple-touch-icon", from: html, url: helloURL)
+        let imageURL = try parse(rel: "apple-touch-icon", from: html, url: effectiveHelloURL)
         let imageData = try await HelloImageDownloadManager.main.download(from: imageURL)
         guard let image = NativeImage(data: imageData), image.size.width > 2 else { throw HelloError("Unable to parse image") }
         return imageData
@@ -44,7 +69,7 @@ public actor LinkFaviconURLDataParser {
       }
       
       do {
-        let imageURL = try parse(rel: "apple-touch-icon-precomposed", from: html, url: helloURL)
+        let imageURL = try parse(rel: "apple-touch-icon-precomposed", from: html, url: effectiveHelloURL)
         let imageData = try await HelloImageDownloadManager.main.download(from: imageURL)
         guard let image = NativeImage(data: imageData), image.size.width > 2 else { throw HelloError("Unable to parse image") }
         return imageData
@@ -53,21 +78,21 @@ public actor LinkFaviconURLDataParser {
       }
     }
     
-    helloURL.path = "/apple-touch-icon.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
+    effectiveHelloURL.path = "/apple-touch-icon.png"
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: effectiveHelloURL.string),
        let image = NativeImage(data: imageData), image.size.width > 2 {
       return imageData
     }
     
-    helloURL.path = "/apple-touch-icon-precomposed.png"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
+    effectiveHelloURL.path = "/apple-touch-icon-precomposed.png"
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: effectiveHelloURL.string),
        let image = NativeImage(data: imageData), image.size.width > 2 {
       return imageData
     }
     
     if let html {
       do {
-        let imageURL = try parse(rel: "shortcut icon", from: html, url: helloURL)
+        let imageURL = try parse(rel: "shortcut icon", from: html, url: effectiveHelloURL)
         let imageData = try await HelloImageDownloadManager.main.download(from: imageURL)
         guard let image = NativeImage(data: imageData), image.size.width > 2 else { throw HelloError("Unable to parse image") }
         return imageData
@@ -76,7 +101,7 @@ public actor LinkFaviconURLDataParser {
       }
       
       do {
-        let imageURL = try parse(rel: "icon", from: html, url: helloURL)
+        let imageURL = try parse(rel: "icon", from: html, url: effectiveHelloURL)
         let imageData = try await HelloImageDownloadManager.main.download(from: imageURL)
         guard let image = NativeImage(data: imageData), image.size.width > 2 else { throw HelloError("Unable to parse image") }
         return imageData
@@ -85,12 +110,13 @@ public actor LinkFaviconURLDataParser {
       }
     }
     
-    helloURL.path = "/favicon.ico"
-    if let imageData = try? await HelloImageDownloadManager.main.download(from: helloURL.string),
+    effectiveHelloURL.path = "/favicon.ico"
+    if let imageData = try? await HelloImageDownloadManager.main.download(from: effectiveHelloURL.string),
        let image = NativeImage(data: imageData), image.size.width > 2 {
       return imageData
     }
     
+    failedFaviconFetches[helloURL.string] = Date.now.timeIntervalSince1970
     throw LinkPreviewDataParserError.previewDataNotFound
   }
   

@@ -40,7 +40,9 @@ public struct NavigationPagerView: View {
         HStack(spacing: 0) {
           ForEach(model.viewStack) { page in
             page.view
+//              id(page.id)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+              .clickable()
               .allowsHitTesting(model.allowInteraction && model.activePageID == page.id)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))

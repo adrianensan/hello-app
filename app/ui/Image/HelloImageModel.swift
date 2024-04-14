@@ -142,14 +142,11 @@ class HelloImageModel {
       let url = helloURL.root.string
       if let cachedFavicon = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
         image = NativeImage(data: cachedFavicon)
-//        padding = image?.hasFlatEdge cachedFavicon.type == .favicon ? 5 : 0
-//        backgroundFill = image?.borderColor
       } else if var favicon = Persistence.initialValue(.cacheRemoteFavicon(url: url)) {
         Task {
           favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size), allowTransparency: true)
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           image = NativeImage(data: favicon)
-//          backgroundFill = image?.borderColor
         }
       } else {
         Task { [weak self] in
@@ -164,8 +161,6 @@ class HelloImageModel {
           await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
           guard let self else { return }
           image = NativeImage(data: favicon)
-//          backgroundFill = image?.borderColor
-//          await loadFrames(from: imageData)
         }
       }
     case .nativeImage(let nativeImage):

@@ -68,28 +68,30 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     let observedView = AnyView(HelloAppRootView(wrappedView)
       .environment(uiProperties)
       .environment(windowModel)
-      .onPreferenceChange(StatusBarStyleKey.self) { style in
-        guard let viewController = Self.instances[id],
-              viewController.statusBarStyle != style else { return }
-        viewController.statusBarStyle = style
-        viewController.setNeedsStatusBarAppearanceUpdate()
-      }.onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
-        guard let viewController = Self.instances[id],
-              viewController.hideHomeIndicator != hideHomeIndicator else { return }
-        viewController.hideHomeIndicator = hideHomeIndicator
-        viewController.setNeedsUpdateOfHomeIndicatorAutoHidden()
-        viewController.setNeedsUpdateOfScreenEdgesDeferringSystemGestures()
-      }.onPreferenceChange(LockOrientationKey.self) { lockRotation in
-        guard let viewController = Self.instances[id],
-              viewController.lockRotation != lockRotation else { return }
-        viewController.lockRotation = lockRotation
-        
-        //window.windowScene?.interfaceOrientation != .portrait
-        if lockRotation {
-          UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
-        }
-        UIViewController.attemptRotationToDeviceOrientation()
-      }.ignoresSafeArea())
+//      .onPreferenceChange(StatusBarStyleKey.self) { style in
+//        guard let viewController = Self.instances[id],
+//              viewController.statusBarStyle != style else { return }
+//        viewController.statusBarStyle = style
+//        viewController.setNeedsStatusBarAppearanceUpdate()
+//      }
+//      .onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
+//        guard let viewController = Self.instances[id],
+//              viewController.hideHomeIndicator != hideHomeIndicator else { return }
+//        viewController.hideHomeIndicator = hideHomeIndicator
+//        viewController.setNeedsUpdateOfHomeIndicatorAutoHidden()
+//        viewController.setNeedsUpdateOfScreenEdgesDeferringSystemGestures()
+//      }.onPreferenceChange(LockOrientationKey.self) { lockRotation in
+//        guard let viewController = Self.instances[id],
+//              viewController.lockRotation != lockRotation else { return }
+//        viewController.lockRotation = lockRotation
+//        
+//        //window.windowScene?.interfaceOrientation != .portrait
+//        if lockRotation {
+//          UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
+//        }
+//        UIViewController.attemptRotationToDeviceOrientation()
+//      }
+      .ignoresSafeArea())
     
     super.init(rootView: observedView)
     Self.instances[id] = self

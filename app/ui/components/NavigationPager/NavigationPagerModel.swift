@@ -85,6 +85,12 @@ public class PagerModel {
     viewDepth = initialViewStack.count
   }
   
+  public init(config: HelloPagerConfig = HelloPagerConfig(), rootView: some View) {
+    self.config = config
+    viewStack = [PagerPage(view: rootView)]
+    viewDepth = 1
+  }
+  
   public var activePage: PagerPage? {
     if viewDepth > 0 && viewDepth <= viewStack.count {
       return viewStack[viewDepth - 1]
@@ -145,7 +151,7 @@ public class PagerModel {
   }
   
   public func popView(animated: Bool = true) {
-//    dismissKeyboard()
+    globalDismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {

@@ -2,10 +2,10 @@ import SwiftUI
 
 struct NavigationPageBackswipe: ViewModifier {
   
-  @Environment(PagerModel.self) var pagerModel
-  @Environment(BackProgressModel.self) var backProgressModel
+  @Environment(PagerModel.self) private var pagerModel
+  @Environment(BackProgressModel.self) private var backProgressModel
   
-  @GestureState var backDragGestureState: CGSize = .zero
+  @GestureState private var backDragGestureState: CGSize = .zero
   let size: CGSize
   
   func body(content: Content) -> some View {
@@ -18,7 +18,7 @@ struct NavigationPageBackswipe: ViewModifier {
 #if os(tvOS)
         $0
 #else
-        $0.gesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
+        $0.gesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 1 : .infinity, coordinateSpace: .global)
           .updating($backDragGestureState) { drag, state, transaction in
             if drag.translation.width < 0 {
               state = CGSize(width: 0, height: 0)
@@ -30,7 +30,9 @@ struct NavigationPageBackswipe: ViewModifier {
               pagerModel.popView()
               ButtonHaptics.buttonFeedback()
             }
-          })
+          }).onTapGesture {
+            globalDismissKeyboard()
+          }
 #endif
       }.onChange(of: backDragGestureState) {
         let progress = min(1, max(0, $0.width / 200))
