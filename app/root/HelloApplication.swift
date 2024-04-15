@@ -75,7 +75,7 @@ public protocol HelloApplicationScenes: AnyObject {
 @MainActor
 public protocol HelloApplication: AnyObject {
   
-  static func load() -> Self
+  nonisolated static func load() -> Self
   
   /// Do any work neede before the application is created
   func onLaunch() async
@@ -115,14 +115,14 @@ public extension HelloApplication {
     }
   }
   
-  private static func setup() {
+  nonisolated private static func setup() {
     guard helloApplication == nil else { return }
     _ = Log.logger
     CrashHandler.setup()
     helloApplication = load()
   }
   
-  static func main() {
+  nonisolated static func main() {
     guard helloApplication == nil else { return }
     setup()
     
