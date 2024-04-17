@@ -3,7 +3,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 class HelloAppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ notification: Notification) {
     NSApplication.shared.registerForRemoteNotifications()

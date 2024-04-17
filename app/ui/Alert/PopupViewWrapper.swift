@@ -32,6 +32,7 @@ public struct PopupViewWrapper<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeArea
+  @Environment(\.viewID) private var viewID
   
   @State private var isVisible: Bool
   
@@ -102,7 +103,11 @@ public struct PopupViewWrapper<Content: View>: View {
         isVisible = true
       }.onChange(of: isVisible) {
         if !$0 {
-          windowModel.dismissPopup()
+          if let viewID {
+            windowModel.dismiss(id: viewID)
+          } else {
+            windowModel.dismissPopup()
+          }
         }
       }
   }

@@ -1,9 +1,15 @@
 import SwiftUI
 import Observation
 
+#if os(iOS)
 public func globalDismissKeyboard() {
   UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }
+#else
+public func globalDismissKeyboard() {
+  
+}
+#endif
 
 @MainActor
 @Observable
@@ -20,10 +26,14 @@ public class HelloWindowModel {
     
     var id: String { instanceID }
     
-    init(viewID: String, view: @escaping () -> some View) {
+    init(instanceID: String = UUID().uuidString, viewID: String, view: @escaping () -> some View) {
+      self.instanceID = instanceID
       self.viewID = viewID
-      self.instanceID = UUID().uuidString
-      self.view = { AnyView(view()) }
+      self.view = { 
+        AnyView(view()
+          .id(instanceID)
+          .environment(\.viewID, viewID))
+      }
     }
   }
   
@@ -32,7 +42,7 @@ public class HelloWindowModel {
   
   public func showPopup<Content: View>(blurBackground: Bool = true, _ view: Content) {
     blurBackgroundForPopup = blurBackground
-    popupViews.append(PopupWindow(viewID: String(describing: Content.self)) { view.id(UUID().uuidString) })
+    popupViews.append(PopupWindow(viewID: String(describing: Content.self)) { view })
   }
   
   public func dismissPopup() {
@@ -60,16 +70,6 @@ public class HelloWindowModel {
     popupViews.append(PopupWindow(viewID: String(describing: view.self)) { view() })
   }
   
-  public func dismissSheet() {
-    guard !popupViews.isEmpty else { return }
-    popupViews.popLast()
-  }
-  
-  public func dismissSheet(id: String) {
-    guard !popupViews.isEmpty else { return }
-    popupViews = popupViews.filter { $0.viewID != id }
-  }
-  
   public func dismiss(id: String) {
     guard !popupViews.isEmpty else { return }
     popupViews = popupViews.filter { $0.viewID != id }
@@ -78,5 +78,16 @@ public class HelloWindowModel {
   public func dismissAllPopups() {
     guard !popupViews.isEmpty else { return }
     popupViews = []
+  }
+}
+
+private struct ViewIDEnvironmentKey: EnvironmentKey {
+  static let defaultValue: String? = nil
+}
+
+public extension EnvironmentValues {
+  var viewID: String? {
+    get { self[ViewIDEnvironmentKey.self] }
+    set { self[ViewIDEnvironmentKey.self] = newValue }
   }
 }

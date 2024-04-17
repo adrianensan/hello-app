@@ -18,7 +18,7 @@ struct NavigationPageBackswipe: ViewModifier {
 #if os(tvOS)
         $0
 #else
-        $0.gesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 1 : .infinity, coordinateSpace: .global)
+        $0.gesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
           .updating($backDragGestureState) { drag, state, transaction in
             if drag.translation.width < 0 {
               state = CGSize(width: 0, height: 0)

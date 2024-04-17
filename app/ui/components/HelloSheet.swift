@@ -38,9 +38,10 @@ public struct HelloSheet<Content: View>: View {
   }
   
   func dismiss() {
+    ButtonHaptics.buttonFeedback()
     isVisible = false
     Task {
-      windowModel.dismissSheet(id: id)
+      windowModel.dismiss(id: id)
     }
   }
   
@@ -50,16 +51,23 @@ public struct HelloSheet<Content: View>: View {
       .frame(height: isVisible ? nil : 1, alignment: .top)
       .animation(isVisible ? .dampSpring : .easeInOut(duration: 0.25), value: isVisible)
       .offset(y: isVisible ? yDrag : 8)
-      .animation(.interactive, value: yDrag)
+      .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       .background(Color.black
         .opacity(isVisible ? 0.2 : 0)
+        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
+          .updating($drag) { value, state, transaction in
+            state = value.translation
+          }.onEnded { gesture in
+            if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
+              dismiss()
+            }
+          })
         .animation(.easeInOut(duration: 0.2), value: isVisible))
-      .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
+      .gesture(DragGesture(minimumDistance: 1, coordinateSpace: .sheet)
         .updating($drag) { value, state, transaction in
           state = value.translation
         }.onEnded { gesture in
-          print(gesture.predictedEndTranslation)
           if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
             dismiss()
           }
@@ -68,7 +76,7 @@ public struct HelloSheet<Content: View>: View {
       .onAppear {
         guard !isVisible else { return }
         isVisible = true
-      }.transformEnvironment(\.safeArea) { $0.top = Device.currentEffective.screenCornerRadius + 16 }
+      }.transformEnvironment(\.safeArea) { $0.top = 0 }
       .environment(\.helloDismiss, { dismiss() })
       .environment(\.hasAppeared, isVisible)
   }

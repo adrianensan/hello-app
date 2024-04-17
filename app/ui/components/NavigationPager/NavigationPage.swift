@@ -61,7 +61,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       
       NavigationPageBarFixed(title: title, navBarContentScrolls: navBarContentScrolls, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
-      scrollModel.scrollThreshold = isSmallSize || title == nil ? 2 : -72
+      scrollModel.scrollThreshold = isSmallSize || title == nil ? 0 : -72
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
   }

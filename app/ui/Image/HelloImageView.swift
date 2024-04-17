@@ -79,6 +79,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       } else if let image = model.image {
         if let custom {
           custom(image)
+            .environment(model)
         } else {
           Image(nativeImage: image)
             .resizable()

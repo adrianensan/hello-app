@@ -22,7 +22,7 @@ public actor LinkFaviconURLDataParser {
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     if let failedFetch = failedFaviconFetches[helloURL.string] {
       guard Date.now.timeIntervalSince1970 - failedFetch > 60 * 60 * 24 else {
-        Log.warning("Skipping favicon fetch for \(helloURL.string) due to previous failure")
+        Log.verbose("Skipping favicon fetch for \(helloURL.string) due to previous failure")
         throw LinkPreviewDataParserError.skip
       }
       failedFaviconFetches[helloURL.string] = nil

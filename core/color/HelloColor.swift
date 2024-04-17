@@ -9,7 +9,7 @@ public enum HelloColorSpace: String, Codable, Equatable, Hashable, Identifiable,
   public var id: String { rawValue }
 }
 
-public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
+public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, CustomStringConvertible {
   public var r: Double
   public var g: Double
   public var b: Double
@@ -120,8 +120,20 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable {
     abs(r - b) < 0.1 && abs(b - g) < 0.1
   }
   
+  public var isEffectivelyBlack: Bool {
+    r <= 0.1 && g <= 0.1 && b <= 0.1
+  }
+  
+  public var isEffectivelyWhite: Bool {
+    r > 0.92 && g > 0.92 && b > 0.92
+  }
+  
   public var readableOverlayColor: HelloColor {
     isDark ? .white : .black
+  }
+  
+  public var description: String {
+    "(r: \(String(format: "%.2f", r)), g: \(String(format: "%.2f", g)), b: \(String(format: "%.2f", b)), a: \(String(format: "%.2f", a)))"
   }
   
   public var alpha: CGFloat { a }

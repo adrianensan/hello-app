@@ -65,13 +65,11 @@ public struct AnimatedImageFrame: Sendable, Hashable {
     public static var shared: HellosActor = HellosActor()
     
     public typealias ActorType = HellosActor
-    
-    
 }
 
 @MainActor
 @Observable
-class HelloImageModel {
+public class HelloImageModel {
   private static var models: [String: Weak<HelloImageModel>] = [:]
   public static func model(for imageSource: HelloImageSource, variant: HelloImageVariant = .original) -> HelloImageModel {
     let id = HelloImageID(source: imageSource, variant: variant).id
@@ -87,9 +85,9 @@ class HelloImageModel {
     }
   }
   
-  var image: NativeImage?
-  var frames: [AnimatedImageFrame]?
-  private let imageSource: HelloImageSource
+  public private(set) var image: NativeImage?
+  public private(set) var frames: [AnimatedImageFrame]?
+  public let imageSource: HelloImageSource
   
   private init(imageSource: HelloImageSource, variant: HelloImageVariant) {
     self.imageSource = imageSource
