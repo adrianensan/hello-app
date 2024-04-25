@@ -50,10 +50,10 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   private let fallback: @MainActor () -> Fallback
   
   fileprivate init(_ source: HelloImageSource,
-              variant: HelloImageVariant = .original,
-              resizeMode: ContentMode = .fit,
-              custom: (@MainActor (NativeImage) -> CustomView)?,
-              fallback: @MainActor @escaping () -> Fallback) {
+                   variant: HelloImageVariant = .original,
+                   resizeMode: ContentMode = .fit,
+                   custom: (@MainActor (NativeImage) -> CustomView)?,
+                   fallback: @MainActor @escaping () -> Fallback) {
     model = .model(for: source, variant: variant)
     self.resizeMode = resizeMode
     self.custom = custom

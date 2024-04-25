@@ -14,7 +14,7 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable {
     switch self {
     case .debug: "curlybraces"
     case .verbose: "curlybraces"
-    case .info: "info.circle.fill"
+    case .info: "info"
     case .meta: "power"
     case .warning: "exclamationmark.triangle.fill"
     case .error: "exclamationmark.octagon.fill"

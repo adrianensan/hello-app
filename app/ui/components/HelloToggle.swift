@@ -25,7 +25,10 @@ public struct HelloToggle: View {
           Capsule(style: .continuous)
             .fill(theme.accentStyle)
             .opacity(isSelected ? 1 : 0)
-        }.background(Capsule(style: .continuous).fill(Color.black.opacity(0.1)))
+        }.background(Capsule(style: .continuous)
+          .fill(Color.black.opacity(0.1))
+          .overlay(Capsule(style: .continuous)
+            .stroke(theme.foreground.primary.color.opacity(0.1), lineWidth: 1)))
         .animation(.dampSpring, value: isSelected)
     }
   }

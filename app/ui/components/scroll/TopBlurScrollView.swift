@@ -23,6 +23,7 @@ public class HelloScrollModel {
   @ObservationIgnored fileprivate var animateScroll: Bool = false
   public fileprivate(set) var scrollOffset: CGFloat = 0
   public fileprivate(set) var dismissProgress: CGFloat = 0
+  public fileprivate(set) var showScrollIndicator: Bool
   
   public var scrollThreshold: CGFloat
   fileprivate let coordinateSpaceName: String = UUID().uuidString
@@ -31,8 +32,9 @@ public class HelloScrollModel {
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
   @ObservationIgnored private var isActive: Bool = true
   
-  public init(scrollThreshold: CGFloat = 0) {
+  public init(scrollThreshold: CGFloat = 0, showScrollIndicator: Bool = false) {
     self.scrollThreshold = scrollThreshold
+    self.showScrollIndicator = showScrollIndicator
   }
   
   public var overscroll: CGFloat = 0
@@ -102,22 +104,19 @@ public struct HelloScrollView<Content: View>: View {
   @State private var model: HelloScrollModel
   
   private let allowScroll: Bool
-  private let showsIndicators: Bool
   private var content: () -> Content
   
   public init(allowScroll: Bool = true,
-              showsIndicators: Bool = true,
               model: HelloScrollModel? = nil,
               @ViewBuilder content: @escaping () -> Content) {
     self.allowScroll = allowScroll
-    self.showsIndicators = showsIndicators
     self.content = content
     _model = State(wrappedValue: model ?? HelloScrollModel())
   }
   
   public var body: some View {
     ScrollViewReader { scrollView in
-      ScrollView(allowScroll ? .vertical : [], showsIndicators: showsIndicators) {
+      ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
         VStack(spacing: 0) {
           PositionReaderView(onPositionChange: { model.update(offset: $0.y) },
                              coordinateSpace: .named(model.coordinateSpaceName))

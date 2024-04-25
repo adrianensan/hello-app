@@ -136,14 +136,15 @@ public class HelloImageModel {
       }
     case .favicon(let url):
       var helloURL = HelloURL(string: url)
+      guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
       helloURL.scheme = .https
       let url = helloURL.root.string
-      if let cachedFavicon = Persistence.initialValue(.cacheRemoteFavicon(url: url, variant: variant)) {
+      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant)) {
         image = NativeImage(data: cachedFavicon)
-      } else if var favicon = Persistence.initialValue(.cacheRemoteFavicon(url: url)) {
+      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url)) {
         Task {
           favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size), allowTransparency: true)
-          await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
           image = NativeImage(data: favicon)
         }
       } else {
@@ -156,7 +157,7 @@ public class HelloImageModel {
           case .thumbnail(let size):
             favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size), allowTransparency: true)
           }
-          await Persistence.save(favicon, for: .cacheRemoteFavicon(url: url, variant: variant))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
           guard let self else { return }
           image = NativeImage(data: favicon)
         }

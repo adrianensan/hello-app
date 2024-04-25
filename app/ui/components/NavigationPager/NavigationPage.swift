@@ -43,7 +43,6 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
     ZStack(alignment: .top) {
       HelloScrollView(
         allowScroll: allowScroll,
-        showsIndicators: false,
         model: scrollModel,
         content: {
           if navBarContentScrolls {
@@ -53,15 +52,18 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
               .frame(width: config.defaultNavBarHeight, height: navBarHeight)
           }
           content()
-            .padding(.top, (title != nil ? 0.8 * -scrollModel.scrollThreshold + 8 : 0) + 8)
+            .padding(.top, (config.overrideNavBarTitleScrollsDown != false && title != nil ? 0.8 * -scrollModel.scrollThreshold + 16 : 0))
             .padding(.horizontal, config.horizontalPagePadding)
             .frame(maxWidth: .infinity)
+            .background(ClearClickableView().onTapGesture {
+              globalDismissKeyboard()
+            })
 //            .background(ClearClickableView())
       })
       
       NavigationPageBarFixed(title: title, navBarContentScrolls: navBarContentScrolls, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
-      scrollModel.scrollThreshold = isSmallSize || title == nil ? 0 : -72
+      scrollModel.scrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 0 : -72
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
   }

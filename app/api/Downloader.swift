@@ -40,7 +40,7 @@ public actor Downloader {
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
     let requestStartTime = Date().timeIntervalSince1970
-    var logStart = url.absoluteString.removingPercentEncoding ?? url.absoluteString
+    var urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
     let (data, urlResponse): (Data, URLResponse)
     do {
@@ -51,26 +51,25 @@ public actor Downloader {
       (data, urlResponse) = try await session.data(from: url, delegate: delegate)
     } catch {
       let requestDuration = Date().timeIntervalSince1970 - requestStartTime
-      logStart += String(format: " (%.2fs)", requestDuration)
-      Log.error("\(logStart) failed with error: \(error.localizedDescription)", context: "Downloader")
+      Log.error("\(String(format: "(%.2fs)", requestDuration)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
       throw error
     }
     let requestDuration = Date().timeIntervalSince1970 - requestStartTime
-    logStart += String(format: " (%.2fs)", requestDuration)
+    let duration = String(format: "(%.2fs)", requestDuration)
     
     guard let httpResponse = urlResponse as? HTTPURLResponse else {
-      Log.error("\(logStart) failed", context: "Downloader")
+      Log.error("\(duration) \(urlString) Failed to convert response to HTTP response", context: "Downloader")
       throw APIError.fail
     }
     
-    logStart += " \(httpResponse.statusCode)"
+    let status = "\(httpResponse.statusCode)"
     
     guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
-      Log.error("\(logStart)", context: "Downloader")
+      Log.error("\(duration) \(status) \(urlString)", context: "Downloader")
       throw APIError.httpError(statusCode: httpResponse.statusCode)
     }
     
-    Log.info("\(logStart)", context: "Downloader")
+    Log.info("\(duration) \(status) \(urlString)", context: "Downloader")
     return data
   }
 }

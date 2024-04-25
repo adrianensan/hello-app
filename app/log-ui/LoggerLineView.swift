@@ -6,6 +6,8 @@ struct LoggerLineView: View {
   
   let logStatement: LogStatement
   
+  @State private var isExpanded: Bool = false
+  
   var backgroundColor: Color {
     switch logStatement.level {
     case .fatal, .wtf: return .red
@@ -57,7 +59,7 @@ struct LoggerLineView: View {
   var body: some View {
     HStack(alignment: .top, spacing: 2) {
       Image(systemName: logStatement.level.icon)
-        .font(.system(size: iconSize, weight: .black, design: .rounded))
+        .font(.system(size: iconSize, weight: .bold, design: .rounded))
         .foregroundColor(symbolColor)
         .frame(width: iconSize, height: iconSize + 2)
       
@@ -74,13 +76,16 @@ struct LoggerLineView: View {
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
         .foregroundColor(.primary)
         .textSelection(.enabled)
-        .fixedSize(horizontal: false, vertical: true)
+        .lineLimit(isExpanded ? nil : 1)
+        .fixedSize(horizontal: false, vertical: isExpanded)
       #else
       (Text("\(logStatement.context)").bold() + Text(" \(logStatement.message)"))
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
         .foregroundColor(.primary)
         .fixedSize(horizontal: false, vertical: true)
       #endif
-    }
+    }.frame(height: isExpanded ? nil : 16)
+      .clickable()
+      .onTapGesture { isExpanded.toggle() }
   }
 }

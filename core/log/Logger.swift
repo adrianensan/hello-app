@@ -12,7 +12,7 @@ public actor Logger: Sendable {
   public private(set) var logStatements: [LogStatement]
   public weak var subscriber: (any LoggerSubscriber)?
   
-  private var lastLoggedTime: TimeInterval = Date.now.timeIntervalSince1970
+  private var lastLoggedTime: TimeInterval = epochTime
   private var isFlushPending: Bool = true
   private var isEphemeral: Bool = false
   

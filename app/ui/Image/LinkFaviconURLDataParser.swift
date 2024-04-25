@@ -21,7 +21,7 @@ public actor LinkFaviconURLDataParser {
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     if let failedFetch = failedFaviconFetches[helloURL.string] {
-      guard Date.now.timeIntervalSince1970 - failedFetch > 60 * 60 * 24 else {
+      guard epochTime - failedFetch > 60 * 60 * 24 else {
         Log.verbose("Skipping favicon fetch for \(helloURL.string) due to previous failure")
         throw LinkPreviewDataParserError.skip
       }
@@ -47,7 +47,7 @@ public actor LinkFaviconURLDataParser {
         }
       }
     } catch {
-      failedFaviconFetches[helloURL.string] = Date.now.timeIntervalSince1970
+      failedFaviconFetches[helloURL.string] = epochTime
       throw error
     }
     let html: String?
@@ -116,7 +116,7 @@ public actor LinkFaviconURLDataParser {
       return imageData
     }
     
-    failedFaviconFetches[helloURL.string] = Date.now.timeIntervalSince1970
+    failedFaviconFetches[helloURL.string] = epochTime
     throw LinkPreviewDataParserError.previewDataNotFound
   }
   
@@ -144,7 +144,7 @@ public actor LinkFaviconURLDataParser {
     guard let iconRelStartIndex = head.range(of: #"rel="\#(rel)""#)?.upperBound,
           let iconSectionStartIndex = head.range(of: "<link", options: .backwards, range: head.startIndex..<iconRelStartIndex)?.upperBound,
           let iconSectionEndIndex = head.range(of: ">", range: iconSectionStartIndex..<head.endIndex)?.lowerBound else {
-      throw HelloError("requested rel component not found")
+      throw HelloError("rel component \(rel) not found")
     }
     
     let iconLine = head[iconSectionStartIndex..<iconSectionEndIndex]
@@ -152,7 +152,7 @@ public actor LinkFaviconURLDataParser {
     guard let iconStartIndex = iconLine.range(of: "href=\"")?.upperBound,
           let iconEndIndex = iconLine.range(of: "\"", range: iconStartIndex..<iconLine.endIndex)?.lowerBound,
           iconStartIndex < iconEndIndex else {
-      throw HelloError("href component of rel not found")
+      throw HelloError("href of rel component \(rel) not found")
     }
     let faviconURL = String(iconLine[iconStartIndex..<iconEndIndex]).removingHTMLEntities
     if faviconURL.hasPrefix("//") {

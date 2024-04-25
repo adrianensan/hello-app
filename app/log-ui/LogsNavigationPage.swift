@@ -18,22 +18,10 @@ public struct LogsNavigationPage: View {
   @Environment(HelloWindowModel.self) var windowModel
   
   @State var loggerObservable = LoggerObservable(logger: Log.logger)
-  @State var scrollModel = HelloScrollModel()
+  @State var scrollModel = HelloScrollModel(showScrollIndicator: true)
   @State var nonObserved = NonObservedStorage()
   
   public init() {}
-  
-  public func scrollToBottom(attempt: Int = 0) {
-    guard attempt < 6 else { return }
-    scrollModel.scroll(to: .view(id: "logs-end"))
-    
-    Task {
-      try await Task.sleep(seconds: 0.4)
-      if nonObserved.isFollowingNew && nonObserved.lastBottomY > nonObserved.bottomY {
-        scrollToBottom(attempt: attempt + 1)
-      }
-    }
-  }
   
   public var body: some View {
     NavigationPage(title: "Logs",
@@ -94,7 +82,7 @@ public struct LogsNavigationPage: View {
           }.onAppear {
             Task {
               try await Task.sleep(seconds: 0.02)
-              scrollToBottom()
+              scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
             }
           }
       }

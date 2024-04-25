@@ -20,6 +20,7 @@ public enum AppInfo {
       .deletingSuffix(".watchkitapp")
       .deletingSuffix(".watchkitapp.watchkitextension")
       .deletingSuffix(".messages-extension")
+      .deletingSuffix(".keyboard-extension")
       .deletingSuffix(".autofill-credential-extension")
   }
   public static var appGroup: String { "group.\(rootBundleID)" }

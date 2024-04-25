@@ -24,7 +24,7 @@ public struct HelloCloseButton: View {
           Circle()
             .trim(from: 0, to: dismissProgress)
             .stroke(helloTheme.floating.foreground.primary.color,
-                    style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
             .rotationEffect(.radians(-0.5 * .pi))
             .opacity(sqrt(dismissProgress))
             .opacity(dismissProgress == 1 ? 0 : 1)
@@ -38,28 +38,27 @@ public struct HelloCloseButton: View {
             .animation(.easeInOut(duration: 0.2), value: dismissProgress)
         }.frame(width: 8, height: 8)
           .padding(.top, 8)
-          .offset(y: min(1, 2 * dismissProgress) * 6)
+          .offset(y: min(1, 5 * dismissProgress) * 6)
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        
         ZStack {
           Capsule(style: .continuous)
             .fill(helloTheme.floating.foreground.primary.color)
-            .frame(width: 2, height: 20 - min(1, 2 * dismissProgress) * 10)
-            .frame(height:20, alignment: .top)
+            .frame(width: 3, height: 20 - min(1, 5 * dismissProgress) * 10)
+            .frame(height: 20, alignment: .top)
             .rotationEffect(.radians(0.25 * .pi))
           
           Capsule(style: .continuous)
             .fill(helloTheme.floating.foreground.primary.color)
-            .frame(width: 2, height: 20 - min(1, 2 * dismissProgress) * 10)
+            .frame(width: 3, height: 20 - min(1, 5 * dismissProgress) * 10)
             .frame(height: 20, alignment: .top)
             .rotationEffect(.radians(-0.25 * .pi))
           
           Capsule(style: .continuous)
             .fill(helloTheme.floating.foreground.primary.color)
-            .frame(width: 2, height: dismissProgress * 40)
+            .frame(width: 3, height: dismissProgress * 40)
             .frame(width: 1, height: 1, alignment: .bottom)
         }.frame(width: 40, height: 40)
-          .offset(y: min(1, 2 * dismissProgress) * 10)
+          .offset(y: min(1, 5 * dismissProgress) * 10)
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       }.frame(width: 40, height: 40 + dismissProgress * 40)
         .background(helloTheme.floating.backgroundView(for: Capsule(style: .continuous)))
@@ -68,6 +67,7 @@ public struct HelloCloseButton: View {
         .animation(.interactive, value: dismissProgress)
     }.onChange(of: scrollModel.dismissProgress) {
       if scrollModel.dismissProgress == 1 {
+        ButtonHaptics.buttonFeedback()
         onDismiss()
       }
     }

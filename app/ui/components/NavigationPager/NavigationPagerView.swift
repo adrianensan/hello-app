@@ -1,14 +1,32 @@
 import SwiftUI
 
+public enum GestureType: Hashable, Sendable {
+  case normal
+  case highPriority
+  case disabled
+}
+
 public extension View {
-  func nest(transform: (Self) -> some View) -> some View {
+  func nest(@ViewBuilder transform: (Self) -> some View) -> some View {
     transform(self)
+  }
+  
+  @ViewBuilder
+  func gesture(type: GestureType, _ gesture: some Gesture) -> some View {
+    switch type {
+    case .normal:
+      self.gesture(gesture)
+    case .highPriority:
+      self.highPriorityGesture(gesture)
+    case .disabled:
+      self
+    }
   }
 }
 
 public extension Animation {
   static var pageAnimation: Animation {
-    .spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.35)
+    .spring(response: 0.36, dampingFraction: 0.8, blendDuration: 0)
   }
 }
 
@@ -42,12 +60,21 @@ public struct NavigationPagerView: View {
             page.view
 //              id(page.id)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-              .clickable()
+              .background(ClearClickableView().onTapGesture {
+                globalDismissKeyboard()
+              })
               .allowsHitTesting(model.allowInteraction && model.activePageID == page.id)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
+            theme.foreground.primary.color
+              .opacity(0.04)
+              .frame(width: 8)
+//              .padding(.horizontal, 16)
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
+          .background(ClearClickableView().onTapGesture {
+            globalDismissKeyboard()
+          })
           .handlePageBackSwipe(pageSize: geometry.size)
         
         #if os(iOS)

@@ -16,7 +16,7 @@ public struct NavigationPageTitle: View {
   }
   
   private var titleOffset: CGFloat {
-    isSmallSize ? 0 : 72
+    config.overrideNavBarTitleScrollsDown == false || isSmallSize ? 0 : 72
   }
   
   public var body: some View {

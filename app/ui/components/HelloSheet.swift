@@ -8,6 +8,25 @@ public extension CoordinateSpaceProtocol where Self == HelloSheetCoordinateSpace
   public static var sheet: HelloSheetCoordinateSpace { HelloSheetCoordinateSpace() }
 }
 
+public extension NamedCoordinateSpace {
+  public static var sheet: NamedCoordinateSpace { .named("hello-sheet") }
+}
+
+@MainActor
+@Observable
+public class HelloSheetModel {
+  public private(set) var dragToDismissType: GestureType
+  
+  public init(dragToDismissType: GestureType = .highPriority) {
+    self.dragToDismissType = dragToDismissType
+  }
+  
+  public func update(dragToDismissType: GestureType) {
+    guard self.dragToDismissType != dragToDismissType else { return }
+    self.dragToDismissType = dragToDismissType
+  }
+}
+
 @MainActor
 public struct HelloSheet<Content: View>: View {
   
@@ -16,16 +35,16 @@ public struct HelloSheet<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var isVisible: Bool
-  @State private var hasMovedDuringDrag: Bool = false
+  @State private var model: HelloSheetModel
   @GestureState private var drag: CGSize = .zero
   
   private var id: String
   private var content: () -> Content
   
-  public init(id: String, @ViewBuilder content: @escaping () -> Content) {
+  public init(id: String, dragToDismissType: GestureType = .highPriority, content: @MainActor @escaping () -> Content) {
     self.id = id
-    let isVisible = State(initialValue: false)
-    self._isVisible = isVisible
+    self._isVisible = State(initialValue: false)
+    self._model = State(initialValue: HelloSheetModel(dragToDismissType: dragToDismissType))
     self.content = content
   }
   
@@ -38,19 +57,20 @@ public struct HelloSheet<Content: View>: View {
   }
   
   func dismiss() {
-    ButtonHaptics.buttonFeedback()
     isVisible = false
     Task {
       windowModel.dismiss(id: id)
     }
   }
-  
+
   public var body: some View {
     content()
+      .environment(model)
+      .coordinateSpace(.sheet)
       .compositingGroup()
       .frame(height: isVisible ? nil : 1, alignment: .top)
-      .animation(isVisible ? .dampSpring : .easeInOut(duration: 0.25), value: isVisible)
-      .offset(y: isVisible ? yDrag : 8)
+      .animation(.dampSpring, value: isVisible)
+      .offset(y: isVisible ? yDrag : 0)
       .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       .background(Color.black
@@ -64,7 +84,7 @@ public struct HelloSheet<Content: View>: View {
             }
           })
         .animation(.easeInOut(duration: 0.2), value: isVisible))
-      .gesture(DragGesture(minimumDistance: 1, coordinateSpace: .sheet)
+      .gesture(type: model.dragToDismissType, DragGesture(minimumDistance: 1, coordinateSpace: .sheet)
         .updating($drag) { value, state, transaction in
           state = value.translation
         }.onEnded { gesture in

@@ -57,11 +57,12 @@ public class HelloWindowModel {
   }
   
   public func present(id: String = UUID().uuidString,
+                      dragToDismissType: GestureType = .highPriority,
                       sheet: @MainActor @autoclosure @escaping () -> some View) {
     guard !popupViews.contains(where: { $0.viewID == id }) else { return }
     blurBackgroundForPopup = false
     globalDismissKeyboard()
-    popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, content: sheet) })
+    popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, dragToDismissType: dragToDismissType, content: sheet) })
   }
   
   public func present(view: @MainActor @autoclosure @escaping () -> some View) {

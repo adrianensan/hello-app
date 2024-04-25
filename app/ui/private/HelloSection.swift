@@ -16,10 +16,11 @@ public struct HelloSectionItem<Content: View>: View {
     content()
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
+      .foregroundStyle(theme.surface.foreground.primary.style)
       .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
       .background(theme.surface.backgroundColor)
       .overlay {
-        theme.foreground.primary.color.opacity(0.1)
+        theme.surface.foreground.primary.color.opacity(0.1)
           .padding(.leading, 52)
           .frame(height: 1)
           .offset(y: -1)

@@ -31,17 +31,20 @@ public struct HelloPagerConfig: Sendable {
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
   public var overrideNavBarContentScrolls: Bool?
+  public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
   
   public init(defaultNavBarHeight: CGFloat = 60,
               horizontalPagePadding: CGFloat = 16,
               belowNavBarPadding: CGFloat = 0,
               overrideNavBarContentScrolls: Bool? = nil,
+              overrideNavBarTitleScrollsDown: Bool? = nil,
               allowsBack: Bool = true) {
     self.defaultNavBarHeight = defaultNavBarHeight
     self.horizontalPagePadding = horizontalPagePadding
     self.belowNavBarPadding = belowNavBarPadding
     self.overrideNavBarContentScrolls = overrideNavBarContentScrolls
+    self.overrideNavBarTitleScrollsDown = overrideNavBarTitleScrollsDown
     self.allowsBack = allowsBack
   }
 }

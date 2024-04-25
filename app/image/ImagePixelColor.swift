@@ -9,7 +9,7 @@ public class ImagePixelReader {
     return ImagePixelReader(cgImage: cgImage)
   }
   
-  private var data: UnsafePointer<UInt8>
+  private var data: [UInt8]
   private var colorSpace: CGColorSpaceModel
   private var size: IntSize
   private let bytesPerRow: Int
@@ -20,15 +20,22 @@ public class ImagePixelReader {
     guard let colorSpaceModel = cgImage.colorSpace?.model,
           [.rgb, .monochrome].contains(colorSpaceModel)
     else { return nil }
-    data = CFDataGetBytePtr(cfPixelData)
+    let dataPointer = CFDataGetBytePtr(cfPixelData)
+    data = Array(UnsafeBufferPointer(start: dataPointer, count: cgImage.width * cgImage.height * cgImage.bitsPerPixel / 8))
     self.colorSpace = colorSpaceModel
     self.size = IntSize(width: cgImage.width, height: cgImage.height)
     self.bytesPerRow = cgImage.bytesPerRow
     self.bytesPerPixel = cgImage.bitsPerPixel / 8
   }
   
-  public func pixelColor(at point: CGPoint) -> HelloColor? {
-    let pixelIndex: Int = ((Int(size.width) * Int(point.y)) + Int(point.x)) * bytesPerPixel
+  public func pixelColor(percentage point: CGPoint) -> HelloColor? {
+    pixelColor(at: IntPoint(x: Int(point.x * Double(size.width)),
+                            y: Int(point.y * Double(size.height))))
+  }
+  
+  public func pixelColor(at point: IntPoint) -> HelloColor? {
+    guard point.x < size.width && point.y < size.height else { return nil }
+    let pixelIndex: Int = ((size.width * point.y) + point.x) * bytesPerPixel
     
     switch colorSpace {
     case .rgb:
@@ -119,8 +126,8 @@ public extension NativeImage {
   var hasFlatEdge: Bool {
     guard let pixelReader = ImagePixelReader.reader(for: self) else { return false }
     return abs(size.width - size.height) < 2 && size.width > 8 &&
-    (stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelReader.pixelColor(at: CGPoint(x: CGFloat($0) * size.width, y: 0))?.isOpaque == true } &&
-     stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelReader.pixelColor(at: CGPoint(x: 0, y: CGFloat($0) * size.height))?.isOpaque == true })
+    (stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelReader.pixelColor(percentage: CGPoint(x: $0, y: 0))?.isOpaque == true } &&
+     stride(from: 0.2, to: 0.8, by: 0.04).allSatisfy { pixelReader.pixelColor(percentage: CGPoint(x: 0, y: $0))?.isOpaque == true })
   }
   
   var needsTint: Bool {
@@ -129,7 +136,7 @@ public extension NativeImage {
     guard let pixelReader = ImagePixelReader.reader(for: self) else { return false }
     return stride(from: 0.0, to: 1.0, by: 0.1).allSatisfy { x in
       stride(from: 0.0, to: 1.0, by: 0.1).allSatisfy { y in
-        guard let pixelColor = pixelReader.pixelColor(at: CGPoint(x: CGFloat(x) * size.width, y: CGFloat(y) * size.height)) else { return false }
+        guard let pixelColor = pixelReader.pixelColor(percentage: CGPoint(x: x, y: y)) else { return false }
         guard pixelColor.alpha > 0.1 else { return true }
         if let color {
           return color.isEffectivelyBlack && pixelColor.isEffectivelyBlack || color.isEffectivelyWhite && pixelColor.isEffectivelyWhite
