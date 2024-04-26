@@ -26,7 +26,7 @@ public extension View {
 
 public extension Animation {
   static var pageAnimation: Animation {
-    .spring(response: 0.36, dampingFraction: 0.8, blendDuration: 0)
+    .spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0)
   }
 }
 
@@ -68,7 +68,7 @@ public struct NavigationPagerView: View {
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             theme.foreground.primary.color
               .opacity(0.04)
-              .frame(width: 8)
+              .frame(width: 10)
 //              .padding(.horizontal, 16)
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)

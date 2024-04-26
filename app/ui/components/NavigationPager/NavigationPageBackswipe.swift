@@ -8,7 +8,7 @@ struct NavigationPageBackswipe: ViewModifier {
   @GestureState private var backDragGestureState: CGSize = .zero
   let size: CGSize
   
-  var pageSpacing: CGFloat { size.width + 8 }
+  var pageSpacing: CGFloat { size.width + 10 }
   
   func body(content: Content) -> some View {
     content
