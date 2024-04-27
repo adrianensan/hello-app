@@ -60,12 +60,12 @@ public struct HelloButton<Content: View>: View {
   
   private var haptics: HapticsType
   private var clickStyle: HelloButtonClickStyle
-  private var action: () -> Void
+  private var action: () async throws -> Void
   private var content: Content
   
   public init(clickStyle: HelloButtonClickStyle = .scale,
               haptics: HapticsType = .click,
-              action: @escaping () -> Void,
+              action: @escaping () async throws -> Void,
               @ViewBuilder content: () -> Content) {
     self.haptics = haptics
     self.clickStyle = clickStyle
@@ -75,7 +75,10 @@ public struct HelloButton<Content: View>: View {
   
   public var body: some View {
     Button(action: {
-      action()
+      Task {
+        try? await Task.sleep(seconds: 0.02)
+        try await action()
+      }
       if haptics.hapticsOnAction {
         Haptics.buttonFeedback()
       }

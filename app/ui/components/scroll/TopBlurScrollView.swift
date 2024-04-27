@@ -25,14 +25,18 @@ public class HelloScrollModel {
   public fileprivate(set) var dismissProgress: CGFloat = 0
   public fileprivate(set) var showScrollIndicator: Bool
   
-  public var scrollThreshold: CGFloat
+  public var scrollThreshold: CGFloat?
+  var defaultScrollThreshold: CGFloat = 0
+  
+  var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
+  
   fileprivate let coordinateSpaceName: String = UUID().uuidString
   @ObservationIgnored fileprivate var readyForDismiss: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
   @ObservationIgnored private var isActive: Bool = true
   
-  public init(scrollThreshold: CGFloat = 0, showScrollIndicator: Bool = false) {
+  public init(scrollThreshold: CGFloat? = nil, showScrollIndicator: Bool = false) {
     self.scrollThreshold = scrollThreshold
     self.showScrollIndicator = showScrollIndicator
   }
@@ -41,7 +45,7 @@ public class HelloScrollModel {
   
   public var hasScrolled: Bool = false// { scrollOffset < scrollThreshold }
   
-  public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, scrollThreshold))) }
+  public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
   
   public func scroll(to scrollTarget: HelloScrollTarget, animated: Bool = true) {
     animateScroll = animated
@@ -75,7 +79,7 @@ public class HelloScrollModel {
     
     guard scrollOffset != offset else { return }
     scrollOffset = offset
-    let hasScrolled = scrollOffset < scrollThreshold
+    let hasScrolled = scrollOffset < effectiveScrollThreshold
     if self.hasScrolled != hasScrolled {
       self.hasScrolled = hasScrolled
     }

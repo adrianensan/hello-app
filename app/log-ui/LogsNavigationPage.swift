@@ -83,11 +83,16 @@ public struct LogsNavigationPage: View {
             Task {
               try await Task.sleep(seconds: 0.02)
               scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
+              try await Task.sleep(seconds: 0.1)
+              scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
+              try await Task.sleep(seconds: 0.1)
+              scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
             }
           }
       }
-    }.environment(\.helloPagerConfig, HelloPagerConfig(defaultNavBarHeight: helloPagerConfig.defaultNavBarHeight,
-                                                       horizontalPagePadding: 8))
+    }.transformEnvironment(\.helloPagerConfig) {
+      $0.horizontalPagePadding = 8
+    }
   }
 }
 #endif

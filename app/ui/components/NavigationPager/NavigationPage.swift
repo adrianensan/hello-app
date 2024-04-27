@@ -47,23 +47,22 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         content: {
           if navBarContentScrolls {
             NavigationPageBarScrolling(title: title, navBarContent: navBarContent)
-          } else {
-            Color.clear
-              .frame(width: config.defaultNavBarHeight, height: navBarHeight)
           }
           content()
-            .padding(.top, (config.overrideNavBarTitleScrollsDown != false && title != nil ? 0.8 * -scrollModel.scrollThreshold + 16 : 0))
+            .padding(.top, max(-scrollModel.effectiveScrollThreshold - 2, 0))
             .padding(.horizontal, config.horizontalPagePadding)
             .frame(maxWidth: .infinity)
             .background(ClearClickableView().onTapGesture {
               globalDismissKeyboard()
             })
 //            .background(ClearClickableView())
-      })
+        }).safeAreaInset(edge: .top, spacing: 0) {
+          Color.clear.frame(height: !navBarContentScrolls ? navBarHeight : 0)
+        }
       
       NavigationPageBarFixed(title: title, navBarContentScrolls: navBarContentScrolls, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
-      scrollModel.scrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 0 : -72
+      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 2 : -82
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
   }
