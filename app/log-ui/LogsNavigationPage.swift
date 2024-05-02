@@ -75,13 +75,13 @@ public struct LogsNavigationPage: View {
           .onChange(of: loggerObservable.lineCount) { _ in
             if nonObserved.isFollowingNew {
               Task {
-                try await Task.sleep(seconds: 0.02)
+                try await Task.sleepForOneFrame()
                 scrollModel.scroll(to: .view(id: "logs-end"))
               }
             }
           }.onAppear {
             Task {
-              try await Task.sleep(seconds: 0.02)
+              try await Task.sleepForOneFrame()
               scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
               try await Task.sleep(seconds: 0.1)
               scrollModel.scroll(to: .view(id: "logs-end"), animated: false)

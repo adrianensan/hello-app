@@ -26,24 +26,30 @@ public struct PagerPage: Sendable, Identifiable {
   }
 }
 
+public enum NavigationPageNavigationBarStyle: Sendable {
+  case fixed
+  case scrollsWithContent
+  case none
+}
+
 public struct HelloPagerConfig: Sendable {
-  public var defaultNavBarHeight: CGFloat
+  public var navBarHeight: CGFloat
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
-  public var overrideNavBarContentScrolls: Bool?
+  public var navBarStyle: NavigationPageNavigationBarStyle
   public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
   
-  public init(defaultNavBarHeight: CGFloat = 60,
+  public init(navBarHeight: CGFloat = 60,
               horizontalPagePadding: CGFloat = 16,
               belowNavBarPadding: CGFloat = 0,
-              overrideNavBarContentScrolls: Bool? = nil,
+              navBarStyle: NavigationPageNavigationBarStyle = .fixed,
               overrideNavBarTitleScrollsDown: Bool? = nil,
               allowsBack: Bool = true) {
-    self.defaultNavBarHeight = defaultNavBarHeight
+    self.navBarHeight = navBarHeight
     self.horizontalPagePadding = horizontalPagePadding
     self.belowNavBarPadding = belowNavBarPadding
-    self.overrideNavBarContentScrolls = overrideNavBarContentScrolls
+    self.navBarStyle = navBarStyle
     self.overrideNavBarTitleScrollsDown = overrideNavBarTitleScrollsDown
     self.allowsBack = allowsBack
   }
@@ -172,7 +178,7 @@ public class PagerModel {
     viewStack[viewStack.count - 1].options.backAction?()
     viewDepth = viewStack.count - backPageCount
     Task {
-      try await Task.sleep(seconds: 0.02)
+      try await Task.sleepForOneFrame()
       _ = viewStack.popLast()
     }
   }

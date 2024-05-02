@@ -27,15 +27,15 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
     _scrollModel = State(initialValue: model ?? HelloScrollModel())
   }
   
-  private var navBarContentScrolls: Bool {
-    config.overrideNavBarContentScrolls ?? isSmallSize
+  private var navBarStyle: NavigationPageNavigationBarStyle {
+    config.navBarStyle ?? (isSmallSize ? .scrollsWithContent : .fixed)
   }
   
   private var navBarHeight: CGFloat {
     if config.belowNavBarPadding > 0 {
       config.belowNavBarPadding + (title == nil ? 0 : 44)
     } else {
-      config.defaultNavBarHeight
+      config.navBarHeight
     }
   }
   
@@ -45,7 +45,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         allowScroll: allowScroll,
         model: scrollModel,
         content: {
-          if navBarContentScrolls {
+          if navBarStyle == .scrollsWithContent {
             NavigationPageBarScrolling(title: title, navBarContent: navBarContent)
           }
           content()
@@ -57,14 +57,17 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
             })
 //            .background(ClearClickableView())
         }).safeAreaInset(edge: .top, spacing: 0) {
-          Color.clear.frame(height: !navBarContentScrolls ? navBarHeight : 0)
+          Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)
         }
       
-      NavigationPageBarFixed(title: title, navBarContentScrolls: navBarContentScrolls, navBarContent: navBarContent)
+      NavigationPageBarFixed(title: title, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
       scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 2 : -82
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
+      .transformEnvironment(\.helloPagerConfig) {
+        $0.navBarStyle = navBarStyle
+      }
   }
 }
 

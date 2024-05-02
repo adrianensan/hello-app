@@ -82,7 +82,7 @@ public struct ImageViewer: View {
     .allowsHitTesting(!isDissmising)
     .onAppear {
       Task {
-        try await Task.sleep(seconds: 0.02)
+        try await Task.sleepForOneFrame()
         originalFrame = nil
       }
     }

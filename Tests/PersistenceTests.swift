@@ -12,7 +12,7 @@ final class HelloAppTests: XCTestCase {
   override func setUp() async throws {
     await Persistence.delete(.test)
     await Persistence.delete(.testInt)
-    try await Task.sleep(seconds: 0.02)
+    try await Task.sleepForOneFrame()
   }
   
   func testPersistenceThreadSafe() async throws {

@@ -89,7 +89,7 @@ public struct NavigationPagerView: View {
               )
           }.zIndex(4)
             .padding(.horizontal, 8)
-            .frame(height: model.config.defaultNavBarHeight)
+            .frame(height: model.config.navBarHeight)
             .padding(.top, safeAreaInsets.top)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .opacity(model.viewDepth > 1 && currentPageOptions.allowBackOverride != false ? 1 : 0)

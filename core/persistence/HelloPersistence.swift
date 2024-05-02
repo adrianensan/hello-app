@@ -397,4 +397,19 @@ public enum Persistence {
     guard let url = location.url else { return }
     try FileManager.default.removeItem(at: url)
   }
+  
+  public static func nuke() {
+    for filePersistenceLocation in FilePersistenceLocation.allCases {
+      if let url = filePersistenceLocation.url {
+        try? FileManager.default.removeItem(at: url)
+      }
+    }
+    for defaultsSuite in DefaultsPersistenceSuite.allCases {
+      if let userDefaults = defaultsSuite.userDefaults {
+        for key in userDefaults.dictionaryRepresentation().keys {
+          userDefaults.removeObject(forKey: key)
+        }
+      }
+    }
+  }
 }

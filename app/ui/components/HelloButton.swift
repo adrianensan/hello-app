@@ -76,7 +76,7 @@ public struct HelloButton<Content: View>: View {
   public var body: some View {
     Button(action: {
       Task {
-        try? await Task.sleep(seconds: 0.02)
+        try? await Task.sleepForOneFrame()
         try await action()
       }
       if haptics.hapticsOnAction {
