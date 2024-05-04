@@ -163,7 +163,7 @@ public extension HelloAPIClient {
                                       isRetry: Bool = false,
                                       retryHandler: (@Sendable (APIError) async throws -> Bool)? = nil,
                                       uploadProgressUpdate: (@Sendable (Double) -> Bool)? = nil) async throws -> HelloAPIResponse<Endpoint.ResponseType> {
-    let requestStartTime = Date().timeIntervalSince1970
+    let requestStartTime = epochTime
     var logStart = endpoint.method.description + " " + endpoint.urlString
     
     var request: URLRequest
@@ -180,7 +180,7 @@ public extension HelloAPIClient {
       do {
         (data, urlResponse) = try await session.data(for: request)
       } catch {
-        let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+        let requestDuration = epochTime - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)
         Log.error("\(logStart) failed with error: \(error.localizedDescription)", context: "API")
         throw error
@@ -198,7 +198,7 @@ public extension HelloAPIClient {
         request.httpBody = nil
         (data, urlResponse) = try await session.upload(for: request, from: bodyData, delegate: delegate)
       } catch {
-        let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+        let requestDuration = epochTime - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)
         Log.error("\(logStart) failed with error: \(error.localizedDescription)", context: "API")
         throw error
@@ -208,13 +208,13 @@ public extension HelloAPIClient {
         let wsSession = session.webSocketTask(with: request)
         throw APIError.invalidRequest
       } catch {
-        let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+        let requestDuration = epochTime - requestStartTime
         logStart += String(format: " (%.2fs)", requestDuration)
         Log.error("\(logStart) failed with error: \(error.localizedDescription)", context: "API")
         throw error
       }
     }
-    let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+    let requestDuration = epochTime - requestStartTime
     logStart += String(format: " (%.2fs)", requestDuration)
     
     guard let httpResponse = urlResponse as? HTTPURLResponse else {
@@ -279,13 +279,13 @@ public extension HelloAPIClient {
   
   func websocketsSession<Endpoint: APIEndpoint>(endpoint: Endpoint) throws -> URLSessionWebSocketTask {
     let urlRequest = try request(for: endpoint)
-    let requestStartTime = Date().timeIntervalSince1970
+    let requestStartTime = epochTime
     var logStart = endpoint.path
     
     let session = session.webSocketTask(with: urlRequest)
     session.maximumMessageSize = 3145728
     
-    let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+    let requestDuration = epochTime - requestStartTime
     logStart += String(format: " (%.2fs)", requestDuration)
     Log.info("\(logStart)", context: "API")
     

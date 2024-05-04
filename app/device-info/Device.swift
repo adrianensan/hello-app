@@ -1,9 +1,10 @@
 import Foundation
 
+import HelloCore
+
 public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   case iPhone(IPhoneModel)
   case iPad(IPadModel)
-  case iPod(IPodModel)
   case appleWatch(AppleWatchModel)
   case appleTV(AppleTVModel)
   case mac
@@ -14,54 +15,58 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   
   public static var currentEffective: Device {
     switch current {
-    case .simulator(let simulatedDevice): return simulatedDevice
-    default: return current
+    case .simulator(let simulatedDevice): simulatedDevice
+    default: current
     }
   }
   
   public var description: String {
     switch self {
-    case .iPhone(let model): return "iPhone \(model.description)"
-    case .iPad(let model): return "iPad \(model.description)"
-    case .iPod(let model): return "iPod Touch \(model.description)"
-    case .appleWatch(let model): return "Watch \(model.description)"
-    case .appleTV(let model): return "AppleTV \(model.description)"
-    case .mac: return "Mac"
-    case .simulator(let simulatedDevice): return "Simulator (\(simulatedDevice.description))"
-    case .unknown(let identifier): return "Unkown Device (\(identifier))"
+    case .iPhone(let model): "iPhone \(model.description)"
+    case .iPad(let model): "iPad \(model.description)"
+    case .appleWatch(let model): "Apple Watch \(model.description)"
+    case .appleTV(let model): "Apple TV \(model.description)"
+    case .mac: "Mac"
+    case .simulator(let simulatedDevice): "Simulator (\(simulatedDevice.description))"
+    case .unknown(let identifier): "Unkown Device (\(identifier))"
     }
   }
   
   public var supportsTrueBlack: Bool {
     switch self {
     case .iPhone(let model):
-      return [
-        .x, .xs, .xsMax,
-        ._11Pro, ._11ProMax, ._11,
-        ._12mini, ._12, ._12Pro, ._12ProMax,
-        ._13mini, ._13, ._13Pro, ._13ProMax].contains(model)
-    case .appleWatch: return true
-    case .simulator(let simulatedDevice): return simulatedDevice.supportsTrueBlack
-    default: return false
+      [.xs, .xsMax,
+       ._11Pro, ._11ProMax, ._11,
+       ._12mini, ._12, ._12Pro, ._12ProMax,
+       ._13mini, ._13, ._13Pro, ._13ProMax,
+       ._14, ._14Plus, ._14Pro, ._14ProMax,
+       ._15, ._15Plus, ._15Pro, ._15ProMax].contains(model)
+    case .appleWatch: true
+    case .simulator(let simulatedDevice): simulatedDevice.supportsTrueBlack
+    default: false
     }
   }
   
   public var supportsCellularConnections: Bool {
     switch self {
-    case .iPhone: return true
-    case .simulator(let simulatedDevice): return simulatedDevice.supportsCellularConnections
-    default: return false
+    case .iPhone: true
+    case .simulator(let simulatedDevice): simulatedDevice.supportsCellularConnections
+    default: false
     }
   }
   
-  public var hasSmallScreen: Bool {
+  public enum BiometricsPopupLocation {
+    case top
+    case center
+  }
+  
+  public var biometricsPopupLocation: BiometricsPopupLocation {
     switch self {
     case .iPhone(let model):
-      return [.se1].contains(model)
-    case .iPod(let model):
-      return [.iPod7].contains(model)
-    case .simulator(let simulatedDevice): return simulatedDevice.hasSmallScreen
-    default: return false
+      [._14Pro, ._14ProMax, ._15, ._15Plus, ._15Pro, ._15ProMax].contains(model) ? .top : .center
+    case .iPad: .center
+    case .simulator(let simulatedDevice): simulatedDevice.biometricsPopupLocation
+    default: .center
     }
   }
   
@@ -82,26 +87,9 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   
   public var tryBottomHeavy: Bool {
     switch self {
-    case .iPhone(_), .iPod(_):
-      return true
-    case .simulator(let simulatedDevice): return simulatedDevice.tryBottomHeavy
-    default: return false
-    }
-  }
-  
-  public var isSlow: Bool {
-    switch self {
-    case .iPhone(let model):
-      return [.se1, ._6s, ._6sPlus, ._7, ._7Plus].contains(model)
-    case .iPod:
-      return true
-    case .appleWatch(let model):
-      switch model {
-      case .series3_38mm, .series3_42mm: return true
-      default: return false
-      }
-    case .simulator(let simulatedDevice): return simulatedDevice.isSlow
-    default: return false
+    case .iPhone: true
+    case .simulator(let simulatedDevice): simulatedDevice.tryBottomHeavy
+    default: false
     }
   }
   
@@ -113,41 +101,46 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
     switch self {
     case .iPhone(let iPhoneModel):
       switch iPhoneModel {
-      case .x, .xs, ._11Pro: return 134
-      case .xsMax, ._11ProMax: return 148
-      case ._11, .xr: return 134
-      case ._12mini, ._13mini: return 120
-      case ._12, ._12Pro, ._13, ._13Pro: return 134
-      case ._12ProMax, ._13ProMax: return 152
-      default: return 0
+      case .xs, ._11Pro: 134
+      case .xsMax, ._11ProMax: 148
+      case ._11, .xr: 134
+      case ._12mini, ._13mini: 120
+      case ._12, ._12Pro, ._13, ._13Pro: 134
+      case ._12ProMax, ._13ProMax: 152
+      default: 0
       }
     case .iPad(let iPadModel):
       switch iPadModel {
       case .air4, .pro11Inch1, .pro11Inch2, .pro11Inch3,
-          .pro12Inch3, .pro12Inch4, .pro12Inch5: return 134
-      default: return 0
+          .pro12Inch3, .pro12Inch4, .pro12Inch5: 134
+      default: 0
       }
-    case .simulator(let simulatedDevice): return simulatedDevice.homeBarWidth
-    default: return 0
+    case .simulator(let simulatedDevice): simulatedDevice.homeBarWidth
+    default: 0
     }
   }
   
   public var iconName: String {
     switch self {
-    case .iPhone:
-      return screenCornerRadius > 0 ? "iphone" : "iphone.homebutton"
-    case .iPad:
-      return screenCornerRadius > 0 ? "ipad" : "ipad.homebutton"
-    case .iPod: return "ipodtouch"
-    case .appleWatch: return "applewatch"
-    case .appleTV: return "appletv"
-    case .mac: return "laptopcomputer"
-    case .unknown: return "airplayaudio"
-    case .simulator(let simulatedDevice): return simulatedDevice.iconName
+    case .iPhone: screenCornerRadius > 0 ? "iphone" : "iphone.homebutton"
+    case .iPad: screenCornerRadius > 0 ? "ipad" : "ipad.homebutton"
+    case .appleWatch: "applewatch"
+    case .appleTV: "appletv"
+    case .mac: "laptopcomputer"
+    case .unknown: "airplayaudio"
+    case .simulator(let simulatedDevice): simulatedDevice.iconName
     }
   }
   
   public static var deviceModelIdentifier: String {
+//    size_t len = 0;
+//    sysctlbyname("hw.model", NULL, &len, NULL, 0);
+//    if (len) {
+//      char *model = malloc(len*sizeof(char));
+//      sysctlbyname("hw.model", model, &len, NULL, 0);
+//      printf("%s\n", model);
+//      free(model);
+//    }
     var systemInfo = utsname()
     uname(&systemInfo)
     let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -159,24 +152,23 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   }
   
   static func infer(from id: String) -> Device {
-    if id.hasPrefix(IPhoneModel.identifierPrefix) {
-      return .iPhone(.inferFrom(modelNumber: id))
-    } else if id.hasPrefix(IPadModel.identifierPrefix) {
-      return .iPad(.inferFrom(modelNumber: id))
-    } else if id.hasPrefix(IPodModel.identifierPrefix) {
-      return .iPod(.inferFrom(modelNumber: id))
-    } else if id.hasPrefix(AppleWatchModel.identifierPrefix) {
-      return .appleWatch(.inferFrom(modelNumber: id))
-    } else if id.hasPrefix(AppleTVModel.identifierPrefix) {
-      return .appleTV(.inferFrom(modelNumber: id))
-    } else if id.hasPrefix("x64_86") || id.hasPrefix("arm64") {
+    switch id {
+    case hasPrefix(IPhoneModel.identifierPrefix):
+      .iPhone(.inferFrom(modelNumber: id))
+    case hasPrefix(IPadModel.identifierPrefix):
+      .iPad(.inferFrom(modelNumber: id))
+    case hasPrefix(AppleWatchModel.identifierPrefix):
+      .appleWatch(.inferFrom(modelNumber: id))
+    case hasPrefix(AppleTVModel.identifierPrefix):
+      .appleTV(.inferFrom(modelNumber: id))
+    case hasPrefix("arm64"), hasPrefix("x64_86"):
       if let simulatorDeviceModel = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] {
-        return .simulator(device: Device.infer(from: simulatorDeviceModel))
+        .simulator(device: Device.infer(from: simulatorDeviceModel))
       } else {
-        return .mac
+        .mac
       }
-    } else {
-      return .unknown(identifier: id)
+    default:
+      .unknown(identifier: id)
     }
   }
 }

@@ -59,7 +59,7 @@ public class HelloScrollModel {
   fileprivate func update(offset: CGFloat) {
     guard isActive else { return }
     if offset < 0 {
-      timeReachedTop = Date().timeIntervalSince1970
+      timeReachedTop = epochTime
     }
     
     if readyForDismiss
@@ -70,7 +70,7 @@ public class HelloScrollModel {
     
     if !readyForDismiss
         && offset >= 0 && offset < scrollOffset
-        && Date().timeIntervalSince1970 - timeReachedTop > 0.1 {
+        && epochTime - timeReachedTop > 0.1 {
       readyForDismiss = true
     } else if readyForDismiss && offset < 0 {
       readyForDismiss = false

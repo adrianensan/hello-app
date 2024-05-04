@@ -75,7 +75,7 @@ public protocol HelloApplicationScenes: AnyObject {
 @MainActor
 public protocol HelloApplication: AnyObject {
   
-  nonisolated static func load() -> Self
+  static func load() -> Self
   
   /// Do any work neede before the application is created
   func onLaunch() async
@@ -90,7 +90,9 @@ public protocol HelloApplication: AnyObject {
   
   func open(url: HelloURL) -> Bool
   func handle(notification: [AnyHashable: Any])
-  func openUserInteraction()
+  #if os(iOS)
+  func touchesUpdate(to touches: [HelloTouch])
+  #endif
   
   func view() -> AnyView
   
@@ -115,14 +117,14 @@ public extension HelloApplication {
     }
   }
   
-  nonisolated private static func setup() {
+  private static func setup() {
     guard helloApplication == nil else { return }
     _ = Log.logger
     CrashHandler.setup()
     helloApplication = load()
   }
   
-  nonisolated static func main() {
+  static func main() {
     guard helloApplication == nil else { return }
     setup()
     
@@ -154,7 +156,9 @@ public extension HelloApplication {
   
   func open(url: HelloURL) -> Bool { false }
   func handle(notification: [AnyHashable: Any]) { }
-  func openUserInteraction() {}
+  #if os(iOS)
+  func touchesUpdate(to touches: [HelloTouch]) {}
+  #endif
 }
 
 extension HelloApplication {
@@ -196,4 +200,11 @@ extension HelloApplication {
   func onBackgroundedInternal() async {
     await onBackgrounded()
   }
+  
+  #if os(iOS)
+  func touchesUpdateInternal(to touches: [HelloTouch]) {
+    TouchesModel.main.activeTouches = touches
+    touchesUpdate(to: touches)
+  }
+  #endif
 }

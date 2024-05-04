@@ -1,6 +1,8 @@
 #if os(iOS)
 import SwiftUI
 
+import HelloCore
+
 @MainActor
 public struct CustomScrollView<Content: View>: View {
   
@@ -16,8 +18,6 @@ public struct CustomScrollView<Content: View>: View {
   let allowScroll: Bool
   let showsIndicators: Bool
   var onScrollUpdate: (CGFloat) -> Void
-  /// Passes the progress of dismiss,
-  /// return whether the scrollview should stop updating due to a dismiss
   var onDismissUpdate: ((CGFloat) -> Void)?
   var content: Content
   
@@ -41,7 +41,7 @@ public struct CustomScrollView<Content: View>: View {
   func update(offset: CGFloat) {
     Task {
       if offset < 0 {
-        nonObservedStorage.timeReachedtop = Date().timeIntervalSince1970
+        nonObservedStorage.timeReachedtop = epochTime
       }
       
       if nonObservedStorage.readyForDismiss
@@ -52,7 +52,7 @@ public struct CustomScrollView<Content: View>: View {
       
       if !nonObservedStorage.readyForDismiss
           && offset >= 0 && offset < nonObservedStorage.scrollOffset
-          && Date().timeIntervalSince1970 - nonObservedStorage.timeReachedtop > 0.1 {
+          && epochTime - nonObservedStorage.timeReachedtop > 0.1 {
         nonObservedStorage.readyForDismiss = true
       } else if nonObservedStorage.readyForDismiss && offset < 0 {
         nonObservedStorage.readyForDismiss = false

@@ -39,7 +39,7 @@ public actor Downloader {
     guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
-    let requestStartTime = Date().timeIntervalSince1970
+    let requestStartTime = epochTime
     var urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
     let (data, urlResponse): (Data, URLResponse)
@@ -50,11 +50,11 @@ public actor Downloader {
       }
       (data, urlResponse) = try await session.data(from: url, delegate: delegate)
     } catch {
-      let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+      let requestDuration = epochTime - requestStartTime
       Log.error("\(String(format: "(%.2fs)", requestDuration)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
       throw error
     }
-    let requestDuration = Date().timeIntervalSince1970 - requestStartTime
+    let requestDuration = epochTime - requestStartTime
     let duration = String(format: "(%.2fs)", requestDuration)
     
     guard let httpResponse = urlResponse as? HTTPURLResponse else {

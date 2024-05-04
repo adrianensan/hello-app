@@ -24,13 +24,13 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
 //    Hello.rootViewController = viewController
 //    viewController.onBrightnessChange = { ThemeObservable.shared.handleScreenBrightnessUpdate() }
     application.registerForRemoteNotifications()
-    if !application.supportsMultipleScenes {
-      let window = UIWindow()
-      let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
-      window.rootViewController = viewController
-      window.makeKeyAndVisible()
-      self.window = window
-    }
+//    if !application.supportsMultipleScenes {
+//      let window = UIWindow()
+//      let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
+//      window.rootViewController = viewController
+//      window.makeKeyAndVisible()
+//      self.window = window
+//    }
     Task {
       await helloApplication.onLaunchInternal()
     }

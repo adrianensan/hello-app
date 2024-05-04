@@ -7,7 +7,7 @@ public struct LogStatement: Codable, Identifiable, Sendable {
   public var message: String
   public var context: String
   
-  public init(level: LogLevel, message: String, context: String, timeStamp: TimeInterval = Date().timeIntervalSince1970) {
+  public init(level: LogLevel, message: String, context: String, timeStamp: TimeInterval = epochTime) {
     self.level = level
     self.message = message
     self.context = context
@@ -21,6 +21,6 @@ public struct LogStatement: Codable, Identifiable, Sendable {
   }
   
   public var formattedLine: String {
-    "[\(level)] [\(context)] \(timeStampString) \(message)"
+    "[\(level)] \(timeStampString) [\(context)] \(message)"
   }
 }

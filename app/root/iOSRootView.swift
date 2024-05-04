@@ -9,6 +9,8 @@ public struct HelloAppRootView<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(UIProperties.self) private var uiProperties
   
+  @Persistent(.showTouches) private var showTouches
+  
   private var content: @MainActor () -> Content
   
   public init(_ content: @MainActor @escaping () -> Content) {
@@ -31,6 +33,10 @@ public struct HelloAppRootView<Content: View>: View {
                                     removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             .allowsHitTesting(windowModel.popupViews.contains(where: { $0.id == popupView.id }))
         }
+      }
+      
+      if showTouches {
+        TouchesVisualizer()
       }
     }.environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)

@@ -35,7 +35,7 @@ public actor Logger: Sendable {
   public func log(_ logStatement: LogStatement) async throws {
     logStatements.append(logStatement)
     guard !isEphemeral else { return }
-    self.lastLoggedTime = Date().timeIntervalSince1970
+    self.lastLoggedTime = epochTime
     Task { await self.subscriber?.statementLogged() }
     if !self.isFlushPending {
       self.isFlushPending = true
@@ -69,13 +69,13 @@ public actor Logger: Sendable {
       return
     }
     guard isFlushPending else { return }
-    var diff = Date().timeIntervalSince1970 - lastLoggedTime
+    var diff = epochTime - lastLoggedTime
     while diff < 5 {
       try await Task.sleep(seconds: 5 - diff)
-      diff = Date().timeIntervalSince1970 - lastLoggedTime
+      diff = epochTime - lastLoggedTime
     }
     isFlushPending = false
-    let oldestAllowed = Date().timeIntervalSince1970 - 60 * 60 * 24 * 2
+    let oldestAllowed = epochTime - 60 * 60 * 24 * 2
     logStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }))
     await flushReal()
   }

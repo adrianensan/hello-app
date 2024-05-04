@@ -6,7 +6,7 @@ extension Device {
     switch self {
     case .iPhone(let iPhoneModel):
       switch iPhoneModel {
-      case .x, .xs, .xsMax: return 209
+      case .xs, .xsMax: return 209
       case ._11Pro, ._11ProMax: return 214
       case ._11, .xr: return 220
       case ._12mini: return 214
@@ -25,7 +25,7 @@ extension Device {
     switch self {
     case .iPhone(let iPhoneModel):
       switch iPhoneModel {
-      case .x, .xs, .xsMax, ._11Pro, ._11ProMax: return 28
+      case .xs, .xsMax, ._11Pro, ._11ProMax: return 28
       case .xr, ._11: return 29
       case ._12mini, ._12, ._12Pro,._12ProMax: return 32
       case ._13, ._13Pro, ._13ProMax: return 34
