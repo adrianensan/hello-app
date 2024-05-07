@@ -84,6 +84,7 @@ public struct HelloButton<Content: View>: View {
       }
     }) {
       content
+        .clickable()
     }.buttonStyle(.hello(clickStyle: clickStyle, allowHaptics: haptics.hapticsOnClick))
       .accessibilityElement()
       .accessibilityAddTraits(.isButton)

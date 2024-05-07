@@ -4,23 +4,28 @@ import HelloCore
 
 public struct PagerPage: Sendable, Identifiable {
   public var id: String
+  public var name: String?
   public var view: AnyView
   public var options: PagerPageOptions
   
   @MainActor
   public init(id: String = UUID().uuidString,
+              name: String? = nil,
               view: some View,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
+    self.name = name
     self.view = AnyView(view.id(id))
     self.options = options
   }
   
   @MainActor
   public init(id: String = UUID().uuidString,
+              name: String? = nil,
               view: AnyView,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
+    self.name = name
     self.view = view
     self.options = options
   }
@@ -116,7 +121,7 @@ public class PagerModel {
     activePage?.options.type
   }
   
-  public func push<Page: View>(view: Page, animated: Bool = true, withOptions options: PagerPageOptions = PagerPageOptions()) {
+  public func push<Page: View>(view: Page, name: String? = nil, animated: Bool = true, withOptions options: PagerPageOptions = PagerPageOptions()) {
     guard allowInteraction else { return }
 //    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
@@ -131,7 +136,7 @@ public class PagerModel {
     }
     allowInteraction = false
     lastPage = String(describing: view)
-    let newPage = PagerPage(id: options.id, view: view, options: options)
+    let newPage = PagerPage(id: options.id, name: name, view: view, options: options)
     viewStack.append(newPage)
     if animated {
       Task {

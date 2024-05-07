@@ -25,6 +25,8 @@ public struct HelloToggle: View {
           Capsule(style: .continuous)
             .fill(theme.accentStyle)
             .opacity(isSelected ? 1 : 0)
+            .frame(width: isSelected ? 52 : 32, height: 32)
+            .frame(width: 52, height: 32, alignment: .leading)
         }.background(Capsule(style: .continuous)
           .fill(Color.black.opacity(0.1))
           .overlay(Capsule(style: .continuous)

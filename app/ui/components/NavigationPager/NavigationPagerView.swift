@@ -67,7 +67,7 @@ public struct NavigationPagerView: View {
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             theme.foreground.primary.color
-              .opacity(0.04)
+              .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness)
               .frame(width: 10)
 //              .padding(.horizontal, 16)
           }
@@ -80,7 +80,7 @@ public struct NavigationPagerView: View {
         #if os(iOS)
         if model.config.allowsBack {
           HelloButton(haptics: .action, action: { model.popView() }) {
-            BackButton(backText: "Back")
+            BackButton()
               .foregroundColor(
 //                backDragGestureState.width > 32
 //                ? previousPageOptions.headerContentColorOverride?.swiftuiColor ?? theme.text.primary.color

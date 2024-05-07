@@ -57,6 +57,7 @@ public struct HelloModalView<Content: View>: View {
   @Environment(\.windowFrame) var windowFrame
   @Environment(\.safeArea) var safeAreaInsets
   
+  @State var scrollModel = HelloScrollModel()
   @State var model: HelloModalModel
   
   var forceFullScreen: Bool
@@ -94,9 +95,8 @@ public struct HelloModalView<Content: View>: View {
         .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
       
       #if os(iOS)
-      HelloButton(action: { model.dismiss() }) {
-        HelloCloseButton { model.dismiss() }
-      }.zIndex(4)
+      HelloCloseButton { model.dismiss() }
+        .zIndex(4)
         .padding(.top, isFullScreen ? safeAreaInsets.top + 8 : 8)
         .padding(.trailing, isFullScreen ? safeAreaInsets.trailing + 8 : 8)
         .frame(width: settingsSize.width, height: settingsSize.height, alignment: .topTrailing)
@@ -116,5 +116,6 @@ public struct HelloModalView<Content: View>: View {
       .onAppear { model.animateIn = true }
       .environment(model)
       .environment(model.dismissModel)
+      .environment(scrollModel)
   }
 }

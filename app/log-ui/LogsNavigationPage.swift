@@ -40,7 +40,7 @@ public struct LogsNavigationPage: View {
             .font(.system(size: 22, weight: .medium, design: .rounded))
             .foregroundStyle(theme.foreground.primary.style)
             .frame(width: 44, height: 44)
-            .background(ClearClickableView())
+            .clickable()
         }.padding(.trailing, 16)
           .frame(maxWidth: .infinity, alignment: .trailing)
       }
@@ -82,8 +82,6 @@ public struct LogsNavigationPage: View {
           }.onAppear {
             Task {
               try await Task.sleepForOneFrame()
-              scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
-              try await Task.sleep(seconds: 0.1)
               scrollModel.scroll(to: .view(id: "logs-end"), animated: false)
               try await Task.sleep(seconds: 0.1)
               scrollModel.scroll(to: .view(id: "logs-end"), animated: false)

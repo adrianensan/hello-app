@@ -19,17 +19,16 @@ public class BackProgressModel {
 public struct BackButton: View {
   
   @Environment(\.theme) private var theme
+  @Environment(PagerModel.self) var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
   var rotationInterval: CGFloat = 0.6
-  var backText: String?
   
   var rotationIntervalProgress: CGFloat {
     max(0, min(1, backProgressModel.backProgress / rotationInterval))
   }
   
-  public init(backText: String? = nil) {
-    self.backText = backText
+  public init() {
   }
   
   public var body: some View {
@@ -58,28 +57,37 @@ public struct BackButton: View {
         .offset(x: -6)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
         .frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
-        .padding(-4)
+        .padding(.leading, -4)
       
-      if let backText {
-        Text(backText)
-          .font(.system(size: 14, weight: .semibold, design: .rounded))
-          .foregroundStyle(theme.floating.foreground.primary.style)
-          .fixedSize()
-          .padding(.trailing, 10)
-      }
+      let effectiveBackProgress: CGFloat = pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
+      VStack(alignment: .leading, spacing: 0) {
+        ForEach(Array(pagerModel.viewStack.dropLast().enumerated()), id: \.element.id) { index, page in
+          let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) - effectiveBackProgress
+          Text(page.name ?? "Back")
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .foregroundStyle(theme.floating.foreground.primary.style)
+            .fixedSize()
+            .frame(height: 15)
+            .opacity(1 - 0.6 * abs(distance))
+            .scaleEffect(1 - 0.2 * abs(distance), anchor: .leading)
+        }
+      }.frame(height: 15, alignment: .bottom)
+        .offset(y: 15 * effectiveBackProgress)
+        .padding(.trailing, 12)
+        .animation(.pageAnimation, value: pagerModel.viewStack.count)
+        .animation(.pageAnimation, value: pagerModel.viewDepth)
     }.background {
       ZStack {
         Capsule(style: .continuous)
           .fill(.thinMaterial)
-          .opacity(min(1, (backProgressModel.backProgress * backProgressModel.backProgress / 0.1)))
-        ClearClickableView()
+          .opacity(min(1, (backProgressModel.backProgress / 0.2)))
       }
         //        Capsule(style: .continuous)
         //          .fill(theme.textPrimary.swiftuiColor)
         //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
       }
       .padding(4)
-      .animation(.interactive, value: backProgressModel.backProgress)
+      .animation(backProgressModel.backProgress == 0 ? .pageAnimation : .interactive, value: backProgressModel.backProgress)
       .hoverEffect(.lift)
   }
 }

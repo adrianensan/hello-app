@@ -42,14 +42,20 @@ public enum Encryption {
     return Data(SHA256.hash(data: stringData + salt))
   }
   
-  public static var randomSalt: Data {
+  nonisolated public static var randomBytes: [UInt8] {
     get throws {
       var buffer: [UInt8] = .init(repeating: 0, count: SHA512.byteCount)
       guard SecRandomCopyBytes(kSecRandomDefault, SHA512.byteCount, &buffer) == 0 else {
         Log.wtf("Failed to generate random bytes", context: "Encryption")
         throw HelloError("Failed to generate random bytes")
       }
-      return Data(buffer)
+      return buffer
+    }
+  }
+  
+  public static var randomSalt: Data {
+    get throws {
+      return Data(try randomBytes)
     }
   }
   
