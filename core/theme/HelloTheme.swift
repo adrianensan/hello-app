@@ -54,7 +54,7 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
       switch underLayer.background {
       case .color, .gradient:
         background = .color(color: .white.withFakeAlpha(0.1, background: backgroundColor),
-                            border: HelloBorder(color: backgroundColor.readableOverlayColor.opacity(0.1), width: 1))
+                            border: HelloBorder(color: backgroundColor.readableOverlayColor.opacity(0.1 - 0.025 * backgroundColor.readableOverlayColor.brightness), width: 1))
       case .blur(let dark, let overlay, let border):
         background = .color(color: .white.opacity(0.2))
       case .image(let helloImageBackground):

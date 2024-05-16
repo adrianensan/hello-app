@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 import Observation
 
@@ -30,4 +29,3 @@ public extension View {
     modifier(ObserveSmallWindowSizeViewModifier(isSmallWindow: isSmallWindow, threshold: threshold))
   }
 }
-#endif

@@ -31,16 +31,65 @@ public extension UIImage {
 public extension CGImage {
   var data: Data? {
     guard let mutableData = CFDataCreateMutable(nil, 0),
-          let destination = CGImageDestinationCreateWithData(mutableData, UTType.png.identifier as CFString, 1, nil) else { return nil }
+          let destination = CGImageDestinationCreateWithData(mutableData, utType ?? UTType.png.identifier as CFString, 1, nil) else { return nil }
     CGImageDestinationAddImage(destination, self, nil)
     guard CGImageDestinationFinalize(destination) else { return nil }
     return mutableData as Data
   }
 }
 
+@globalActor final public actor ImageProcessingActor: GlobalActor {
+  public static let shared: ImageProcessingActor = ImageProcessingActor()
+}
+
+@ImageProcessingActor
 public class ImageProcessor {
   
-  public static func processImageData(imageData: Data, maxSize: CGFloat, allowTransparency: Bool = false) async -> Data {
+  public enum HelloImageError: Error, Sendable {
+    case invalidData
+    case failedToCreateDestination
+    case failedToResize
+  }
+  
+  public enum HelloImageFormat: Codable, Sendable {
+    case jpg
+    case png
+    case heic
+    case gif
+    case tiff
+    
+    public var utType: UTType {
+      switch self {
+      case .jpg: .jpeg
+      case .png: .png
+      case .heic: .heic
+      case .gif: .gif
+      case .tiff: .tiff
+      }
+    }
+  }
+  
+  public static func resize(imageData: Data, maxSize: Int, format: HelloImageFormat = .heic) throws -> Data {
+    guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else {
+      throw HelloImageError.failedToCreateDestination
+    }
+    
+    let mutableData = NSMutableData()
+    guard let destination = CGImageDestinationCreateWithData(mutableData, format.utType.identifier as CFString, 1, nil) else {
+      throw HelloImageError.failedToCreateDestination
+    }
+    
+    CGImageDestinationAddImageFromSource(destination, imageSource, 0, [
+      kCGImageSourceCreateThumbnailWithTransform: true,
+      kCGImageSourceCreateThumbnailFromImageAlways: true,
+      kCGImageSourceThumbnailMaxPixelSize: maxSize,
+      kCGImageDestinationLossyCompressionQuality: 0.5,
+    ] as CFDictionary)
+    guard CGImageDestinationFinalize(destination), !mutableData.isEmpty else { throw HelloImageError.failedToResize }
+    return mutableData as Data
+  }
+  
+  public static func processImageData(imageData: Data, maxSize: CGFloat, allowTransparency: Bool = true) async -> Data {
 #if os(iOS) || os(tvOS) || os(visionOS)
     guard let image = UIImage(data: imageData, scale: 1)
     else { return imageData }

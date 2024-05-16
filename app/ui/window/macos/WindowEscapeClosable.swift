@@ -3,7 +3,7 @@ import SwiftUI
 
 fileprivate struct ClosableByEscapeViewModifier: ViewModifier {
   
-  @EnvironmentObject var windowModel: OFWindowModel
+  @Environment(HelloWindowModel.self) private var windowModel
   
   func body(content: Content) -> some View {
     content.background(

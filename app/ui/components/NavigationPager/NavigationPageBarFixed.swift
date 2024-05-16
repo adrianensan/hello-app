@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 @MainActor
@@ -27,4 +26,3 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
   }
 }
-#endif

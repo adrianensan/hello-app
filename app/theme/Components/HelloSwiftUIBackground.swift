@@ -5,13 +5,13 @@ import HelloCore
 public extension HelloBackground {
   
   @ViewBuilder
-  func view(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
+  func view(for shape: some InsettableShape, isBaseLayer: Bool = true) -> some View {
     switch self {
     case .color(let color, let border):
       ZStack {
         shape.fill(color.swiftuiColor)
         if !isBaseLayer, let border {
-          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+          shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }
       }
     case .gradient(let gradient):
@@ -23,18 +23,18 @@ public extension HelloBackground {
           .background(BehindWindowBlur(material: .fullScreenUI, isBaseLayer: isBaseLayer))
           .clipShape(shape)
         if !isBaseLayer, let border {
-          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+          shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }
         #elseif os(iOS)
         shape.fill((overlay ?? .transparent).swiftuiColor)
           .background(.ultraThinMaterial)
         if !isBaseLayer, let border {
-          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+          shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }
         #else
         shape.fill((overlay ?? .transparent).swiftuiColor)
         if !isBaseLayer, let border {
-          shape.stroke(border.color.swiftuiColor, lineWidth: border.width)
+          shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }
         #endif
       }

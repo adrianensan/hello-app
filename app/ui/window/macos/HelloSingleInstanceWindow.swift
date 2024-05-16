@@ -3,14 +3,17 @@ import Foundation
 import AppKit
 
 @MainActor
-public protocol OFSingleInstanceWindow: OFWindow {
+public protocol HelloSingleInstanceWindow: HelloWindow {
+  
+  init()
   
   static var current: Self? { get set }
-  
-  static var newInstance: Self { get }
 }
 
-public extension OFSingleInstanceWindow {
+public extension HelloSingleInstanceWindow {
+  
+  static var isCreated: Bool { current != nil }
+  
   static func bringToFront() {
     current?.bringToFront()
   }
@@ -19,7 +22,7 @@ public extension OFSingleInstanceWindow {
     if let current {
       return current
     } else {
-      let newInstance = newInstance
+      let newInstance = Self()
       current = newInstance
       return newInstance
     }

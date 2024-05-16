@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 @MainActor
@@ -45,9 +44,12 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         allowScroll: allowScroll,
         model: scrollModel,
         content: {
+          #if os(iOS)
           if navBarStyle == .scrollsWithContent {
             NavigationPageBarScrolling(title: title, navBarContent: navBarContent)
           }
+          #endif
+          
           content()
             .padding(.top, max(-scrollModel.effectiveScrollThreshold - 2, 0))
             .padding(.horizontal, config.horizontalPagePadding)
@@ -62,7 +64,11 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       
       NavigationPageBarFixed(title: title, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
+      #if os(iOS)
       scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 2 : -82
+      #else
+      scrollModel.defaultScrollThreshold = 0
+      #endif
     }.environment(scrollModel)
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
       .transformEnvironment(\.helloPagerConfig) {
@@ -83,4 +89,3 @@ public extension NavigationPage where NavBarContent == EmptyView {
               content: content)
   }
 }
-#endif

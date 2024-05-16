@@ -42,8 +42,6 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
   
-  @Environment(HelloWindowModel.self) private var windowModel
-  
   private let model: HelloImageModel
   private let resizeMode: ContentMode
   private let custom: (@MainActor (NativeImage) -> CustomView)?

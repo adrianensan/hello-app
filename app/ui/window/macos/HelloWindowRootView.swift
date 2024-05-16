@@ -34,7 +34,7 @@ public struct HelloWindowRootView<Content: View>: View {
   
 //  @PersistentState(.theme) private var orTheme
   
-  @StateObject private var windowManager = OFWindowManager()
+  @State private var windowManager = HelloWindowManager()
   private var themeManager: ActiveThemeManager = .main
   
   private var content: Content
@@ -85,9 +85,9 @@ public struct HelloWindowRootView<Content: View>: View {
       .environment(\.theme, HelloSwiftUITheme(theme: theme))
       .environment(\.isActive, isActive)
       .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
-      .environment(\.safeArea, uiProperties.safeAreaInsets)
+      .environment(\.safeArea, EdgeInsets()) //uiProperties.safeAreaInsets)
       .environment(uiProperties)
-      .environmentObject(windowManager)
+      .environment(windowManager)
       .onAppear { isActive = isActiveSystem }
       .onReceive(NotificationCenter.default.publisher(for: becomeActiveNotification)) { _ in
         isActive = true

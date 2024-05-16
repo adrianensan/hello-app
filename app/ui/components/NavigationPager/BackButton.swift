@@ -14,7 +14,6 @@ public class BackProgressModel {
   public var backProgress: CGFloat = 0
 }
 
-#if os(iOS)
 @MainActor
 public struct BackButton: View {
   
@@ -88,7 +87,6 @@ public struct BackButton: View {
       }
       .padding(4)
       .animation(backProgressModel.backProgress == 0 ? .pageAnimation : .interactive, value: backProgressModel.backProgress)
-      .hoverEffect(.lift)
+//      .hoverEffect(.lift)
   }
 }
-#endif

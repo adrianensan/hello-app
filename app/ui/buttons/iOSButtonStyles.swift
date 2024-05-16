@@ -106,6 +106,7 @@ public struct HelloButtonStyle: ButtonStyle {
       //        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
       //        .animation(.button, value: configuration.isPressed)
         .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
+        .background(Color(hue: 0, saturation: 0, brightness: (theme.theme.isDark ? 1 : 0), opacity: configuration.isPressed ? 0.1 : 0))
     }
   }
 }

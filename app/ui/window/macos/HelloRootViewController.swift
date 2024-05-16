@@ -1,11 +1,13 @@
 #if os(macOS)
 import SwiftUI
 
-public class OFWindowManager: ObservableObject {
+@MainActor
+@Observable
+public class HelloWindowManager {
   
-  @Published public var popupView: AnyView?
-  var popupViewPosition: CGPoint = .zero
-  weak var window: OFWindow?
+  public var popupView: AnyView?
+  @ObservationIgnored var popupViewPosition: CGPoint = .zero
+  @ObservationIgnored weak var window: HelloWindow?
   
   public func showPopup<Content: View>(_ view: Content, at position: CGPoint) {
     popupViewPosition = position
@@ -18,7 +20,7 @@ public class OFWindowManager: ObservableObject {
   }
 }
 
-class OFRootViewController<Content: View>: NSViewController {
+public class HelloRootViewController<Content: View>: NSViewController {
   
   // When using SwiftUI as the rootview alongside full window content, it becomes impossible to
   // properly ignore safe area (same is true on iOS).
@@ -91,7 +93,7 @@ class OFRootViewController<Content: View>: NSViewController {
     super.init(nibName: nil, bundle: nil)
   }
   
-  override func loadView() {
+  override public func loadView() {
     view = noSafeAreaNSView
   }
   
@@ -100,7 +102,7 @@ class OFRootViewController<Content: View>: NSViewController {
     fatalError("Unavailable")
   }
   
-  override func viewDidLayout() {
+  override public func viewDidLayout() {
     super.viewDidLayout()
     Task {
       uiProperties.updateSize(to: noSafeAreaNSView.frame.size)

@@ -1,6 +1,18 @@
 import Foundation
 
 public extension String {
+  subscript(_ i: Int) -> Character {
+    self[index(for: i)]
+  }
+  
+  subscript(_ range: Range<Int>) -> Substring {
+    self[index(for: range.lowerBound)..<index(for: range.upperBound)]
+  }
+  
+  func index(for offset: Int) -> Index {
+    index(startIndex, offsetBy: offset)
+  }
+  
   var fileSafeString: String {
     var filtered = String(filter { !"/\\:".contains($0) })
     filtered = filtered.components(separatedBy: "?")[0]

@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 @MainActor
@@ -28,4 +27,3 @@ public struct NavigationPageTitle: View {
       .scaleEffect(1 + 0.004 * (min(titleOffset, max(scrollModel.scrollOffset + titleOffset, 0)) + 0.2 * scrollModel.overscroll))
   }
 }
-#endif

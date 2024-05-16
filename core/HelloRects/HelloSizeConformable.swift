@@ -42,9 +42,19 @@ public extension HelloSizeConformable {
     Self(width: left.width / right, height: left.height / right)
   }
   
+  static func +(left: Self, right: NumberType) -> Self {
+    Self(width: left.width + right, height: left.height + right)
+  }
+  
+  static func -(left: Self, right: NumberType) -> Self {
+    Self(width: left.width - right, height: left.height - right)
+  }
+  
   var minSide: NumberType { min(width, height) }
   
   var maxSide: NumberType { max(width, height) }
+  
+  var maxDimension: NumberType { max(width, height) }
   
   var center: HelloPoint<NumberType> { HelloPoint<NumberType>(x: width / 2, y: height / 2) }
   
@@ -53,15 +63,19 @@ public extension HelloSizeConformable {
   var zeroedRect: HelloRect<NumberType> { HelloRect<NumberType>(origin: .zero, size: HelloSize<NumberType>(width: width, height: height)) }
   
   func sizeThatFits(with aspectRatio: NumberType) -> Self {
-      let currentAspectRatio = height / width
-      if currentAspectRatio > aspectRatio {
-        return Self(width: width, height: width * aspectRatio)
-      } else if currentAspectRatio < aspectRatio {
-        return Self(width: height / aspectRatio, height: height)
-      } else {
-        return self
-      }
+    let currentAspectRatio = height / width
+    if currentAspectRatio > aspectRatio {
+      return Self(width: width, height: width * aspectRatio)
+    } else if currentAspectRatio < aspectRatio {
+      return Self(width: height / aspectRatio, height: height)
+    } else {
+      return self
     }
+  }
+  
+  func padded(by padding: NumberType) -> Self {
+    self - padding - padding
+  }
 }
 
 public extension HelloSizeConformable where NumberType: BinaryInteger {

@@ -11,6 +11,8 @@ public func globalDismissKeyboard() {
 }
 #endif
 
+#if !os(macOS)
+
 @MainActor
 @Observable
 public class HelloWindowModel {
@@ -81,6 +83,7 @@ public class HelloWindowModel {
     popupViews = []
   }
 }
+#endif
 
 private struct ViewIDEnvironmentKey: EnvironmentKey {
   static let defaultValue: String? = nil

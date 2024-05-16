@@ -2,7 +2,7 @@
 import Foundation
 
 @MainActor
-public protocol OFConditionalInstanceWindow<Key>: OFWindow {
+public protocol HelloConditionalInstanceWindow<Key>: HelloWindow {
   
   associatedtype Key: Hashable
   
@@ -13,7 +13,7 @@ public protocol OFConditionalInstanceWindow<Key>: OFWindow {
   static func newInstance(for key: Key) -> Self
 }
 
-public extension OFConditionalInstanceWindow {
+public extension HelloConditionalInstanceWindow {
   static func bringToFront(key: Key) {
     current[key]?.show()
   }

@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 public struct HelloSheetCoordinateSpace: CoordinateSpaceProtocol {
@@ -107,3 +108,4 @@ public struct HelloSheet<Content: View>: View {
       .environment(\.hasAppeared, isVisible)
   }
 }
+#endif

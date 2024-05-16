@@ -77,7 +77,7 @@ public struct NavigationPagerView: View {
           })
           .handlePageBackSwipe(pageSize: geometry.size)
         
-        #if os(iOS)
+//        #if os(iOS)
         if model.config.allowsBack {
           HelloButton(haptics: .action, action: { model.popView() }) {
             BackButton()
@@ -96,7 +96,7 @@ public struct NavigationPagerView: View {
             .animation(.easeInOut(duration: 0.2), value: model.viewDepth)
             .allowsHitTesting(model.viewDepth > 1 && currentPageOptions.allowBackOverride != false)
         }
-        #endif
+//        #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
 //        .clipShape(Rectangle())
     }.environment(model)

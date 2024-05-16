@@ -88,7 +88,7 @@ public class KeychainHelper {
     if isBiometricallyLocked, let accessControl = try? Self.bioSecAccessControl {
       query[kSecAttrAccessControl] = accessControl
     } else {
-      query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlock
+      query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
     }
     
     let status = SecItemAdd(query as CFDictionary, nil)

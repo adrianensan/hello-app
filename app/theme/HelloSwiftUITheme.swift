@@ -11,7 +11,7 @@ public struct HelloSwiftUITheme {
     theme.baseLayer.background.view(for: Rectangle())
   }
   
-  public func backgroundView(for shape: some Shape, isBaseLayer: Bool = true) -> some View {
+  public func backgroundView(for shape: some InsettableShape, isBaseLayer: Bool = true) -> some View {
     theme.baseLayer.background.view(for: shape, isBaseLayer: isBaseLayer)
   }
   

@@ -17,6 +17,10 @@ class HelloAppDelegate: NSObject, NSApplicationDelegate {
     Task { await helloApplication.onResignActiveInternal() }
   }
   
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    helloApplication.terminatesWhenAllWindowsClosed
+  }
+  
   func applicationWillTerminate(_ notification: Notification) {
     helloApplication.onTerminateInternal()
   }
@@ -32,6 +36,14 @@ class HelloAppDelegate: NSObject, NSApplicationDelegate {
   
   func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
     Log.error("Failed to register for remote notifications: \(error.localizedDescription)")
+  }
+  
+  func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    for window in sender.windows {
+      window.makeKeyAndOrderFront(self)
+    }
+    helloApplication.onDockIconClick()
+    return true
   }
 }
 #endif

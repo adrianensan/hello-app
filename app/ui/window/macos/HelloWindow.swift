@@ -11,17 +11,17 @@ public enum UserDraggableArea: Equatable {
 }
 
 @MainActor
-protocol OFDefaultWindow: OFWindow {
+protocol HelloDefaultWindow: HelloWindow {
   
 }
 
-extension OFDefaultWindow {
+extension HelloDefaultWindow {
   func close() {
     nsWindow.close()
   }
 }
 
-class OFNSWindow: NSWindow {
+class HelloNSWindow: NSWindow {
   
   var unrestrictedFrame: Bool = false
   var canBecomeKeyOverride: Bool?
@@ -45,43 +45,130 @@ class OFNSWindow: NSWindow {
     }
   }
   
-  override func mouseDragged(with event: NSEvent) {
-    super.mouseDragged(with: event)
-    onMouseDragged?(event.locationInWindow, CGSize(width: event.deltaX, height: event.deltaY))
+  override func animationResizeTime(_ newFrame: NSRect) -> TimeInterval {
+    1
   }
   
-  override func mouseDown(with event: NSEvent) {
-    super.mouseDown(with: event)
-    if canBecomeMain && !NSApp.isActive {
+  override func sendEvent(_ event: NSEvent) {
+    super.sendEvent(event)
+    switch event.type {
+    case .leftMouseDown:
+      onMouseDown?(event.locationInWindow)
+      if canBecomeMain && !NSApp.isActive {
+        NSApp.activate(ignoringOtherApps: true)
+        makeKeyAndOrderFront(nil)
+      }
+      switch draggableArea {
+      case .fullWindow:
+        performDrag(with: event)
+      case .top(let points):
+        if event.locationInWindow.y > frame.size.height - points {
+          performDrag(with: event)
+        }
+      case .leading(let points):
+        if event.locationInWindow.x < points {
+          performDrag(with: event)
+        }
+      case .none: break
+      }
+    case .leftMouseUp:
+      onMouseUp?()
+      //    case .rightMouseDown:
+      //      <#code#>
+      //    case .rightMouseUp:
+      //      <#code#>
+      //    case .mouseMoved:
+      //      <#code#>
+    case .leftMouseDragged:
+      onMouseDragged?(event.locationInWindow, CGSize(width: event.deltaX, height: event.deltaY))
+      //    case .rightMouseDragged:
+      //      <#code#>
+      //    case .mouseEntered:
+      //      <#code#>
+      //    case .mouseExited:
+      //      <#code#>
+      //    case .keyDown:
+      //      <#code#>
+      //    case .keyUp:
+      //      <#code#>
+    default: ()
+    }
+  }
+}
+
+class HelloNSPanel: NSPanel {
+  
+  var unrestrictedFrame: Bool = false
+  var canBecomeKeyOverride: Bool?
+  var canBecomeMainOverride: Bool?
+  
+  override func sendEvent(_ event: NSEvent) {
+    super.sendEvent(event)
+    switch event.type {
+    case .leftMouseDown:
       NSApp.activate(ignoringOtherApps: true)
-      makeKeyAndOrderFront(nil)
-    }
-    onMouseDown?(event.locationInWindow)
-    switch draggableArea {
-    case .fullWindow:
-      performDrag(with: event)
-    case .top(let points):
-      if event.locationInWindow.y > frame.size.height - points {
+      onMouseDown?(event.locationInWindow)
+      switch draggableArea {
+      case .fullWindow:
         performDrag(with: event)
+      case .top(let points):
+        if event.locationInWindow.y > frame.size.height - points {
+          performDrag(with: event)
+        }
+      case .leading(let points):
+        if event.locationInWindow.x < points {
+          performDrag(with: event)
+        }
+      case .none: break
       }
-    case .leading(let points):
-      if event.locationInWindow.x < points {
-        performDrag(with: event)
-      }
-    case .none: break
+    case .leftMouseUp:
+      onMouseUp?()
+//    case .rightMouseDown:
+//      <#code#>
+//    case .rightMouseUp:
+//      <#code#>
+//    case .mouseMoved:
+//      <#code#>
+    case .leftMouseDragged:
+      onMouseDragged?(event.locationInWindow, CGSize(width: event.deltaX, height: event.deltaY))
+//    case .rightMouseDragged:
+//      <#code#>
+//    case .mouseEntered:
+//      <#code#>
+//    case .mouseExited:
+//      <#code#>
+//    case .keyDown:
+//      <#code#>
+//    case .keyUp:
+//      <#code#>
+    default: ()
     }
   }
   
-  override func mouseUp(with event: NSEvent) {
-    super.mouseUp(with: event)
-    onMouseUp?()
+  override var canBecomeKey: Bool { canBecomeKeyOverride ?? super.canBecomeKey }
+  
+  override var canBecomeMain: Bool { canBecomeMainOverride ?? super.canBecomeMain }
+  
+  var onMouseDown: ((_ point: CGPoint) -> Void)?
+  var onMouseUp: (() -> Void)?
+  var onMouseDragged: ((_ point: CGPoint, _ translation: CGSize) -> Void)?
+  
+  var draggableArea: UserDraggableArea = .fullWindow
+  
+  override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+    if unrestrictedFrame {
+      return frameRect
+    } else {
+      return super.constrainFrameRect(frameRect, to: screen)
+    }
   }
 }
 
 @MainActor
-public class OFWindowModel: ObservableObject {
-  public weak var window: OFWindow?
-  @Published public var subWindowID: String?
+@Observable
+public class HelloWindowModel {
+  public weak var window: HelloWindow?
+  public var subWindowID: String?
   
   public func subWindowClosed() {
     if let oldSubWindowID = subWindowID {
@@ -92,81 +179,84 @@ public class OFWindowModel: ObservableObject {
       }
     }
   }
+  
+  public func dismiss(id: String) { }
+  public func dismissPopup() { }
 }
 
 @MainActor
-fileprivate class OFWindowDelegate: NSObject, NSWindowDelegate {
+fileprivate class HelloWindowDelegate: NSObject, NSWindowDelegate {
   
-  private weak var ofWindow: OFWindow?
+  private weak var helloWindow: HelloWindow?
   
-  fileprivate init(ofWindow: OFWindow) {
-    self.ofWindow = ofWindow
+  fileprivate init(helloWindow: HelloWindow) {
+    self.helloWindow = helloWindow
   }
   
   func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
-    ofWindow?.willResize(to: frameSize) ?? frameSize
+    helloWindow?.willResize(to: frameSize) ?? frameSize
   }
   
   func windowDidResize(_ notification: Notification) {
-    ofWindow?.onResizeInternal()
-    ofWindow?.onResize()
-    ofWindow?.onFrameChanged()
+    helloWindow?.onResizeInternal()
+    helloWindow?.onResize()
+    helloWindow?.onFrameChanged()
   }
   
   func windowDidChangeOcclusionState(_ notification: Notification) {
-    ofWindow?.onOcclusionStateChanged()
+    helloWindow?.onOcclusionStateChanged()
   }
   
   func windowDidMiniaturize(_ notification: Notification) {
-    ofWindow?.onMinimize()
+    helloWindow?.onMinimize()
   }
   
   func windowWillMiniaturize(_ notification: Notification) {
-    ofWindow?.willMinimize()
+    helloWindow?.willMinimize()
   }
   
   func windowDidDeminiaturize(_ notification: Notification) {
-    ofWindow?.onDeMinimize()
+    helloWindow?.onDeMinimize()
   }
   func windowWillClose(_ notification: Notification) {
-    ofWindow?.onCloseInternal()
-    ofWindow?.onClose()
+    helloWindow?.onCloseInternal()
+    helloWindow?.onClose()
   }
   
   func windowDidMove(_ notification: Notification) {
-    ofWindow?.onMove()
-    ofWindow?.onFrameChanged()
+    helloWindow?.onMove()
+    helloWindow?.onFrameChanged()
   }
   
   func windowDidBecomeKey(_ notification: Notification) {
-    ofWindow?.onFocus()
+    helloWindow?.onFocus()
   }
   
   func windowDidResignKey(_ notification: Notification) {
-    ofWindow?.onKeyFocusLostInternal()
-    ofWindow?.onKeyFocusLost()
+    helloWindow?.onKeyFocusLostInternal()
+    helloWindow?.onKeyFocusLost()
   }
   
   func windowDidResignMain(_ notification: Notification) {
-    ofWindow?.onMainFocusLostInternal()
-    ofWindow?.onMainFocusLost()
+    helloWindow?.onMainFocusLostInternal()
+    helloWindow?.onMainFocusLost()
   }
 
   func windowDidChangeScreen(_ notification: Notification) {
-    ofWindow?.onScreenChange()
+    helloWindow?.onScreenChange()
   }
   
   func windowWillStartLiveResize(_ notification: Notification) {
-    ofWindow?.onLiveResizeStart()
+    helloWindow?.onLiveResizeStart()
   }
   
   func windowDidEndLiveResize(_ notification: Notification) {
-    ofWindow?.onLiveResizeEnd()
+    helloWindow?.onLiveResizeEnd()
   }
 }
 
 @MainActor
-open class OFWindow: OFDefaultWindow {
+open class HelloWindow: HelloDefaultWindow {
   
   public enum AutoCloseBehaviour {
     case onHoverLost
@@ -192,16 +282,17 @@ open class OFWindow: OFDefaultWindow {
   var isMouseInWindow: Bool = false
   
   public let uiProperties: UIProperties
-  public let windowModel: OFWindowModel
+  public let windowModel: HelloWindowModel
   private let size: Size
   
-  private var ref: OFWindow?
-  private var delegate: OFWindowDelegate?
+  private var ref: HelloWindow?
+  private var delegate: HelloWindowDelegate?
   
   public var draggableArea: UserDraggableArea {
-    get { (nsWindow as? OFNSWindow)?.draggableArea ?? .none }
+    get { (nsWindow as? HelloNSWindow)?.draggableArea ?? (nsWindow as? HelloNSPanel)?.draggableArea ?? .none }
     set {
-      (nsWindow as? OFNSWindow)?.draggableArea = newValue
+      (nsWindow as? HelloNSWindow)?.draggableArea = newValue
+      (nsWindow as? HelloNSPanel)?.draggableArea = newValue
 //      nsWindow.draggableArea = newValue
       nsWindow.isMovable = false
       nsWindow.isMovableByWindowBackground = false
@@ -220,21 +311,21 @@ open class OFWindow: OFDefaultWindow {
   
   public var temporaryWindowID: String? { temporaryWindow?.id }
   
-  private var temporaryWindow: OFWindow?
-  public var subWindow: OFWindow?
+  private var temporaryWindow: HelloWindow?
+  public var subWindow: HelloWindow?
   private var nativeSubWindow: NSWindow?
-  private weak var parentWindow: OFWindow?
+  private weak var parentWindow: HelloWindow?
   private var expectedCloseButtonY: CGFloat?
   
   public init<Content: View>(view: Content,
-                      id: String = UUID().uuidString,
-                      parentWindow: OFWindow? = nil,
-                      size: Size = .resizable(initialSize: CGSize(width: 400, height: 300)),
-                      windowFlags: NSWindow.StyleMask = [.closable, .titled, .fullSizeContentView],
-                      forceKey: Bool? = nil,
-                      canBecomeMainOverride: Bool? = nil,
-                      isPanel: Bool = false,
-                      unrestrictedFrame: Bool = false) {
+                             id: String = UUID().uuidString,
+                             parentWindow: HelloWindow? = nil,
+                             size: Size = .resizable(initialSize: CGSize(width: 400, height: 300)),
+                             windowFlags: NSWindow.StyleMask = [.closable, .titled, .fullSizeContentView],
+                             forceKey: Bool? = nil,
+                             canBecomeMainOverride: Bool? = nil,
+                             isPanel: Bool = false,
+                             unrestrictedFrame: Bool = false) {
     self.id = id
     self.parentWindow = parentWindow
     var initialSize: CGSize
@@ -251,22 +342,27 @@ open class OFWindow: OFDefaultWindow {
     self.size = size
     uiProperties = UIProperties()
     if isPanel {
-      let panel = NSPanel(contentRect: CGRect(origin: .zero, size: initialSize),
+      let panel = HelloNSPanel(contentRect: CGRect(origin: .zero, size: initialSize),
                          styleMask: [.borderless, .nonactivatingPanel],
                          backing: .buffered,
                          defer: true)
-      panel.isFloatingPanel = true
+//      panel.
+//      print(panel.ignoresMouseEvents)
       panel.hidesOnDeactivate = false
       nsWindow = panel
     } else {
-      nsWindow = OFNSWindow(contentRect: CGRect(origin: .zero, size: initialSize),
+      nsWindow = HelloNSWindow(contentRect: CGRect(origin: .zero, size: initialSize),
                             styleMask: windowFlags,
-                            backing: .buffered, defer: true)
+                            backing: .buffered, 
+                            defer: true)
     }
-    windowModel = OFWindowModel()
-    (nsWindow as? OFNSWindow)?.unrestrictedFrame = unrestrictedFrame
-    (nsWindow as? OFNSWindow)?.canBecomeKeyOverride = forceKey
-    (nsWindow as? OFNSWindow)?.canBecomeMainOverride = canBecomeMainOverride ?? forceKey
+    windowModel = HelloWindowModel()
+    (nsWindow as? HelloNSWindow)?.unrestrictedFrame = unrestrictedFrame
+    (nsWindow as? HelloNSWindow)?.canBecomeKeyOverride = forceKey
+    (nsWindow as? HelloNSWindow)?.canBecomeMainOverride = canBecomeMainOverride ?? forceKey
+    (nsWindow as? HelloNSPanel)?.unrestrictedFrame = unrestrictedFrame
+    (nsWindow as? HelloNSPanel)?.canBecomeKeyOverride = forceKey
+    (nsWindow as? HelloNSPanel)?.canBecomeMainOverride = canBecomeMainOverride ?? forceKey
 
     uiProperties.extraSafeArea = extraTopSafeArea
     
@@ -278,7 +374,7 @@ open class OFWindow: OFDefaultWindow {
     nsWindow.isMovable = true
     nsWindow.isMovableByWindowBackground = true
     nsWindow.isReleasedWhenClosed = false
-    delegate = OFWindowDelegate(ofWindow: self)
+    delegate = HelloWindowDelegate(helloWindow: self)
     nsWindow.delegate = delegate
     
     windowModel.window = self
@@ -294,7 +390,7 @@ open class OFWindow: OFDefaultWindow {
     uiProperties.updateSafeAreaInsets(to: nsWindow.contentView?.safeAreaInsets ?? NSEdgeInsets())
     switch size {
     case .fixed(let size):
-      let rootViewController = OFRootViewController(rootView: view.frame(size).environmentObject(windowModel), uiProperties: uiProperties)
+      let rootViewController = HelloRootViewController(rootView: view.frame(size).environment(windowModel), uiProperties: uiProperties)
       rootViewController.onMouseEntered = { [weak self] in self?.onMouseEnteredInternal() }
       rootViewController.onMouseExited = { [weak self] in self?.onMouseExitedInternal() }
       rootViewController.onMouseMoved = { [weak self] point in self?.onMouseMoved(to: point) }
@@ -305,14 +401,14 @@ open class OFWindow: OFDefaultWindow {
       nsWindow.contentMaxSize = size
       nsWindow.maxSize = size
     case .fixedAuto:
-      let rootViewController = OFRootViewController(rootView: view.environmentObject(windowModel), uiProperties: uiProperties)
+      let rootViewController = HelloRootViewController(rootView: view.environment(windowModel), uiProperties: uiProperties)
       rootViewController.onMouseEntered = { [weak self] in self?.onMouseEnteredInternal() }
       rootViewController.onMouseExited = { [weak self] in self?.onMouseExitedInternal() }
       rootViewController.onMouseMoved = { [weak self] point in self?.onMouseMoved(to: point) }
       rootViewController.onCursorUpdate = { [weak self] in self?.onCursorUpdate() }
       nsWindow.contentViewController = rootViewController
     case .resizable(_, let minSize, _, let maxSize):
-      let rootViewController = OFRootViewController(rootView: view.frame(minSize: minSize, maxSize: maxSize, alignment: .top).environmentObject(windowModel), uiProperties: uiProperties)
+      let rootViewController = HelloRootViewController(rootView: view.frame(minSize: minSize, maxSize: maxSize, alignment: .top).environment(windowModel), uiProperties: uiProperties)
       rootViewController.onMouseEntered = { [weak self] in self?.onMouseEnteredInternal() }
       rootViewController.onMouseExited = { [weak self] in self?.onMouseExitedInternal() }
       rootViewController.onMouseMoved = { [weak self] point in self?.onMouseMoved(to: point) }
@@ -324,7 +420,7 @@ open class OFWindow: OFDefaultWindow {
       nsWindow.maxSize = maxSize
     case .fullScreen:
       draggableArea = .none
-      let rootViewController = OFRootViewController(rootView: view.environmentObject(windowModel), uiProperties: uiProperties)
+      let rootViewController = HelloRootViewController(rootView: view.environment(windowModel), uiProperties: uiProperties)
       rootViewController.onMouseEntered = { [weak self] in self?.onMouseEnteredInternal() }
       rootViewController.onMouseExited = { [weak self] in self?.onMouseExitedInternal() }
       rootViewController.onMouseMoved = { [weak self] point in self?.onMouseMoved(to: point) }
@@ -343,9 +439,12 @@ open class OFWindow: OFDefaultWindow {
       }
       matchFullScreenSize()
     }
-    (nsWindow as? OFNSWindow)?.onMouseDown = { [weak self] in self?.onMouseDown(at: $0) }
-    (nsWindow as? OFNSWindow)?.onMouseUp = { [weak self] in self?.onMouseUp() }
-    (nsWindow as? OFNSWindow)?.onMouseDragged = { [weak self] in self?.onMouseDragged(at: $0, by: $1) }
+    (nsWindow as? HelloNSWindow)?.onMouseDown = { [weak self] in self?.onMouseDown(at: $0) }
+    (nsWindow as? HelloNSWindow)?.onMouseUp = { [weak self] in self?.onMouseUp() }
+    (nsWindow as? HelloNSWindow)?.onMouseDragged = { [weak self] in self?.onMouseDragged(at: $0, by: $1) }
+    (nsWindow as? HelloNSPanel)?.onMouseDown = { [weak self] in self?.onMouseDown(at: $0) }
+    (nsWindow as? HelloNSPanel)?.onMouseUp = { [weak self] in self?.onMouseUp() }
+    (nsWindow as? HelloNSPanel)?.onMouseDragged = { [weak self] in self?.onMouseDragged(at: $0, by: $1) }
     updateControlButtons()
     if hideWindowButtons {
       nsWindow.standardWindowButton(.closeButton)?.isHidden = true
@@ -474,7 +573,7 @@ open class OFWindow: OFDefaultWindow {
     nsWindow.close()
   }
   
-  public func show(temporaryWindow: OFWindow) {
+  public func show(temporaryWindow: HelloWindow) {
     closeTemporaryWindow()
     self.temporaryWindow = temporaryWindow
     temporaryWindow.show()
@@ -486,7 +585,7 @@ open class OFWindow: OFDefaultWindow {
     temporaryWindow.close()
   }
   
-  public func show(subWindow: OFWindow) {
+  public func show(subWindow: HelloWindow) {
     self.subWindow?.parentWindow = nil
     closeSubWindow()
     subWindow.parentWindow = self
@@ -501,7 +600,7 @@ open class OFWindow: OFDefaultWindow {
     nativeSubWindow.makeKeyAndOrderFront(self)
   }
   
-  public func show(subView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onFocusLost) {
+  public func show(subView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onFocusLost) {
     show(subWindow: HelloSubWindow(id: id,
                                    anchor: .init(point: point, alignment: alignment),
                                    autoCloseBehaviour: autoCloseBehaviour,
@@ -510,14 +609,15 @@ open class OFWindow: OFDefaultWindow {
                                    content: subView))
   }
   
-  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onHoverLost) {
+  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onHoverLost) {
     show(temporaryWindow: HelloSubWindow(id: id,
                                          anchor: .init(point: point, alignment: alignment),
                                          autoCloseBehaviour: autoCloseBehaviour,
                                          parentWindow: nil,
                                          windowLevel: nsWindow.level,
                                          content: temporarySubView,
-                                         canBecomeMain: false))
+                                         canBecomeMain: false,
+                                         canBecomeKey: false))
   }
   
   public func closeSubWindow() {

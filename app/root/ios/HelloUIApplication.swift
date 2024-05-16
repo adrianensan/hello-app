@@ -29,7 +29,9 @@ public class HelloUIApplication: UIApplication {
     let allTouchIDs = (event.allTouches ?? []).map { $0.hash }
     activeTouches.removeAll { !allTouchIDs.contains($0.id) }
     
+    #if os(iOS)
     helloApplication.touchesUpdateInternal(to: activeTouches)
+    #endif
   }
 }
 #endif

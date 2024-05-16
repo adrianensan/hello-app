@@ -70,17 +70,25 @@ public struct AnimatedImageFrame: Sendable, Hashable {
 @MainActor
 @Observable
 public class HelloImageModel {
-  private static var models: [String: Weak<HelloImageModel>] = [:]
+  private static var models: [String: HelloImageModel] = [:]
+  private static var weakModels: [String: Weak<HelloImageModel>] = [:]
   public static func model(for imageSource: HelloImageSource, variant: HelloImageVariant = .original) -> HelloImageModel {
     let id = HelloImageID(source: imageSource, variant: variant).id
-    if let model = models[id]?.value {
-      //      if model.image == nil && !model.isLoading {
-      //        Task { try await model.load() }
-      //      }
+    if let model = models[id] ?? weakModels[id]?.value {
       return model
     } else {
       let model = HelloImageModel(imageSource: imageSource, variant: variant)
-      models[id] = Weak(value: model)
+//      weakModels[id] = Weak(value: model)
+      switch variant {
+      case .original:
+        weakModels[id] = Weak(value: model)
+      case .thumbnail(let size):
+        if size <= 300 {
+          models[id] = model
+        } else {
+          weakModels[id] = Weak(value: model)
+        }
+      }
       return model
     }
   }
@@ -114,7 +122,7 @@ public class HelloImageModel {
         Task { await loadFrames(from: cachedImageData) }
       } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
         Task {
-          let resizedImageData = await ImageProcessor.processImageData(imageData: cachedOriginalImageData, maxSize: CGFloat(variant.size))
+          let resizedImageData = try await ImageProcessor.resize(imageData: cachedOriginalImageData, maxSize: variant.size)
           await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant))
           image = NativeImage(data: resizedImageData)
           await loadFrames(from: resizedImageData)
@@ -126,7 +134,7 @@ public class HelloImageModel {
           switch variant {
           case .original: ()
           case .thumbnail(let size):
-            imageData = await ImageProcessor.processImageData(imageData: imageData, maxSize: CGFloat(size))
+            imageData = try await ImageProcessor.resize(imageData: imageData, maxSize: size)
           }
           await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant))
           guard let self else { return }
@@ -143,7 +151,7 @@ public class HelloImageModel {
         image = NativeImage(data: cachedFavicon)
       } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url)) {
         Task {
-          favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size), allowTransparency: true)
+          favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
           await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
           image = NativeImage(data: favicon)
         }
@@ -155,7 +163,7 @@ public class HelloImageModel {
           switch variant {
           case .original: ()
           case .thumbnail(let size):
-            favicon = await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size), allowTransparency: true)
+            favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size))
           }
           await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
           guard let self else { return }

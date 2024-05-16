@@ -100,7 +100,7 @@ public enum PersistenceType: Sendable {
   
   case defaults(suite: DefaultsPersistenceSuite = .standard, key: String)
   case file(location: FilePersistenceLocation = .document, path: String)
-  case keychain(key: String, appGroup: Bool, isBiometricallyLocked: Bool)
+  case keychain(key: String, appGroup: Bool, isBiometricallyLocked: Bool = false)
   case memory(key: String)
   
   public var id: String {

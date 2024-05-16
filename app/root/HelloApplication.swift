@@ -92,6 +92,9 @@ public protocol HelloApplication: AnyObject {
   func handle(notification: [AnyHashable: Any])
   #if os(iOS)
   func touchesUpdate(to touches: [HelloTouch])
+  #elseif os(macOS)
+  var terminatesWhenAllWindowsClosed: Bool { get }
+  func onDockIconClick()
   #endif
   
   func view() -> AnyView
@@ -158,6 +161,9 @@ public extension HelloApplication {
   func handle(notification: [AnyHashable: Any]) { }
   #if os(iOS)
   func touchesUpdate(to touches: [HelloTouch]) {}
+  #elseif os(macOS)
+  var terminatesWhenAllWindowsClosed: Bool { true }
+  func onDockIconClick() {}
   #endif
 }
 

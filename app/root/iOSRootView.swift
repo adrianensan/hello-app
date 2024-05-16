@@ -35,9 +35,11 @@ public struct HelloAppRootView<Content: View>: View {
         }
       }
       
+      #if os(iOS)
       if showTouches {
         TouchesVisualizer()
       }
+      #endif
     }.environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.safeArea, uiProperties.safeAreaInsets)
       .observeKeyboardFrame()

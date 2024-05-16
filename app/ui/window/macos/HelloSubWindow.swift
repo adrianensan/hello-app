@@ -3,7 +3,7 @@ import SwiftUI
 
 import HelloCore
 
-open class HelloSubWindow: OFWindow {
+open class HelloSubWindow: HelloWindow {
   
   private var anchor: WindowAnchor
   
@@ -45,17 +45,18 @@ open class HelloSubWindow: OFWindow {
     return target
   }
   
-  private var autoCloseBehaviourOption: OFWindow.AutoCloseBehaviour
+  private var autoCloseBehaviourOption: HelloWindow.AutoCloseBehaviour
   
-  override public var autoCloseBehaviour: OFWindow.AutoCloseBehaviour { autoCloseBehaviourOption }
+  override public var autoCloseBehaviour: HelloWindow.AutoCloseBehaviour { autoCloseBehaviourOption }
   
   public init(id: String = UUID().uuidString,
               anchor: WindowAnchor,
-              autoCloseBehaviour: OFWindow.AutoCloseBehaviour = .onFocusLost,
-              parentWindow: OFWindow? = nil,
+              autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onFocusLost,
+              parentWindow: HelloWindow? = nil,
               windowLevel: NSWindow.Level = .tornOffMenu,
               content: @autoclosure () -> some View,
-              canBecomeMain: Bool = false) {
+              canBecomeMain: Bool = false,
+              canBecomeKey: Bool? = nil) {
     self.anchor = anchor
     autoCloseBehaviourOption = autoCloseBehaviour
     super.init(view: content().closableByEscape(),
@@ -63,7 +64,7 @@ open class HelloSubWindow: OFWindow {
                parentWindow: parentWindow,
                size: .fixedAuto,
                windowFlags: [.fullSizeContentView, .titled, .closable],
-               forceKey: autoCloseBehaviour == .onHoverLost || autoCloseBehaviour == .onHoverLostRespectingMouseInWindow ? false : nil,
+               forceKey: canBecomeKey ?? (autoCloseBehaviour == .onHoverLost || autoCloseBehaviour == .onHoverLostRespectingMouseInWindow ? false : nil),
                canBecomeMainOverride: canBecomeMain)
     draggableArea = .none
     nsWindow.collectionBehavior = [.transient, .ignoresCycle, .stationary]

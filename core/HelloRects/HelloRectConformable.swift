@@ -142,6 +142,15 @@ public extension HelloRectConformable {
     
     return clippedRect
   }
+  
+  public func padded(by padding: NumberType) -> Self {
+    var paddedRect = self
+    paddedRect.origin.x += padding
+    paddedRect.origin.y += padding
+    paddedRect.size.width -= 2 * padding
+    paddedRect.size.height -= 2 * padding
+    return paddedRect
+  }
 }
 
 public func round<RectType: HelloRectConformable>(_ rect: RectType) -> RectType where RectType.NumberType: BinaryFloatingPoint {

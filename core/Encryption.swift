@@ -11,9 +11,7 @@ public struct EncryptedData: Codable, Sendable {
 }
 
 @globalActor final public actor EncryptionActor: GlobalActor {
-  public static var shared: EncryptionActor = EncryptionActor()
-  
-  public typealias ActorType = EncryptionActor
+  public static let shared: EncryptionActor = EncryptionActor()
 }
 
 @EncryptionActor

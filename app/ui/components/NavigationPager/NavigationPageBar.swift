@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 @MainActor
@@ -35,4 +34,3 @@ public struct NavigationPageBar<NavBarContent: View>: View {
              alignment: .top)
   }
 }
-#endif

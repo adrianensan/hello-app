@@ -1,6 +1,7 @@
 import Foundation
 
 public enum AppInfo {
+  public static let teamID = "QS4LCPSUAU"
   public static let bundleID: String = Bundle.main.bundleIdentifier ?? "?"
   public static let version: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
   public static let build: String = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
@@ -23,6 +24,10 @@ public enum AppInfo {
       .deletingSuffix(".keyboard-extension")
       .deletingSuffix(".autofill-credential-extension")
   }
+  #if os(macOS)
+  public static var appGroup: String { "\(teamID).group.\(rootBundleID)" }
+  #else
   public static var appGroup: String { "group.\(rootBundleID)" }
+  #endif
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
 }
