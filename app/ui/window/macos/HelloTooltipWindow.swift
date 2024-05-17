@@ -28,12 +28,14 @@ public class HelloTooltipWindow: HelloWindow {
     super.init(view: content(),
                id: id,
                size: .fixedAuto,
-               windowFlags: [.borderless])
+               windowFlags: [.borderless],
+               isPanel: true)
     draggableArea = .none
     nsWindow.ignoresMouseEvents = true
     nsWindow.collectionBehavior = [.transient, .ignoresCycle, .stationary]
     nsWindow.level = .statusBar
     nsWindow.backgroundColor = .clear
+    nsWindow.isOpaque = false
   }
   
   override public func show() {

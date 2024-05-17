@@ -10,6 +10,7 @@ public protocol HelloSingleInstanceWindow: HelloWindow {
   static var current: Self? { get set }
 }
 
+@MainActor
 public extension HelloSingleInstanceWindow {
   
   static var isCreated: Bool { current != nil }

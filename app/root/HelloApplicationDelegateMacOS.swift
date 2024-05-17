@@ -39,11 +39,11 @@ class HelloAppDelegate: NSObject, NSApplicationDelegate {
   }
   
   func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-    for window in sender.windows {
+    for window in sender.windows where window.canBecomeKey {
       window.makeKeyAndOrderFront(self)
     }
     helloApplication.onDockIconClick()
-    return true
+    return false
   }
 }
 #endif

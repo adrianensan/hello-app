@@ -343,11 +343,12 @@ open class HelloWindow: HelloDefaultWindow {
     uiProperties = UIProperties()
     if isPanel {
       let panel = HelloNSPanel(contentRect: CGRect(origin: .zero, size: initialSize),
-                         styleMask: [.borderless, .nonactivatingPanel],
+                         styleMask: windowFlags,
                          backing: .buffered,
                          defer: true)
 //      panel.
 //      print(panel.ignoresMouseEvents)
+      panel.styleMask.insert(.nonactivatingPanel)
       panel.hidesOnDeactivate = false
       nsWindow = panel
     } else {

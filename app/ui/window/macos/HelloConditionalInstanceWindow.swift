@@ -6,11 +6,11 @@ public protocol HelloConditionalInstanceWindow<Key>: HelloWindow {
   
   associatedtype Key: Hashable
   
+  init(_ key: Key)
+  
   static var current: [Key: Self] { get set }
   
   var key: Key { get }
-  
-  static func newInstance(for key: Key) -> Self
 }
 
 public extension HelloConditionalInstanceWindow {
@@ -22,7 +22,7 @@ public extension HelloConditionalInstanceWindow {
     if let current = current[key] {
       current.show()
     } else {
-      let newInstance = newInstance(for: key)
+      let newInstance = Self(key)
       current[key] = newInstance
       newInstance.show()
     }
