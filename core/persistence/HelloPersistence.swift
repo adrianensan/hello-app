@@ -31,7 +31,11 @@ public actor HelloPersistence {
   }
   
   nonisolated private func userDefaults(for suite: DefaultsPersistenceSuite) -> UserDefaults {
-    suite.userDefaults ?? .standard
+    guard let defaults = suite.userDefaults else {
+      Log.error("Failed to get defaults for \(suite.id)", context: "Persistence")
+      return .standard
+    }
+    return defaults
 //    if let userDefaults = userDefaultsCache[suite] {
 //      return userDefaults
 //    } else {
@@ -42,7 +46,11 @@ public actor HelloPersistence {
   }
   
   nonisolated private func baseURL(for location: FilePersistenceLocation) -> URL {
-    location.url ?? .temporaryDirectory
+    guard let url = location.url else {
+      Log.error("Failed to get URL for \(location.id)", context: "Persistence")
+      return .temporaryDirectory
+    }
+    return url
 //    if let url = baseURLs[location] {
 //      return url
 //    } else {
@@ -254,10 +262,12 @@ public actor HelloPersistence {
   
   nonisolated public func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
-    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
-    case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
-    case .memory: false
+    case .defaults(let suite, let key): return userDefaults(for: suite).object(forKey: key) != nil
+    case .file(let location, let path): 
+      print(fileURL(for: location, subPath: path).relativePath)
+      return FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): return (try? keychain.data(for: key)) != nil
+    case .memory: return false
     }
   }
   
@@ -318,7 +328,6 @@ public actor HelloPersistence {
       }
     }
   }
-  
   
   nonisolated private func size(of url: URL) -> Int {
     guard let resourceValues = try? url.resourceValues(forKeys: [

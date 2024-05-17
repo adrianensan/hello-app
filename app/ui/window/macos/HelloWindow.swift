@@ -170,6 +170,8 @@ public class HelloWindowModel {
   public weak var window: HelloWindow?
   public var subWindowID: String?
   
+  public init() {}
+  
   public func subWindowClosed() {
     if let oldSubWindowID = subWindowID {
       Task {

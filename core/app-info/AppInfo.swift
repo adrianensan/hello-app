@@ -9,20 +9,14 @@ public enum AppInfo {
   public static let displayName: String = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "?"
   public static let copyright: String = Bundle.main.infoDictionary?["NSHumanReadableCopyright"] as? String ?? "?"
   
-  #if targetEnvironment(simulator)
+  #if DEBUG || targetEnvironment(simulator)
   public static let isTestBuild = true
   #else
   public static let isTestBuild = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
   #endif
   
   public static var rootBundleID: String {
-    bundleID
-      .deletingSuffix(".widget")
-      .deletingSuffix(".watchkitapp")
-      .deletingSuffix(".watchkitapp.watchkitextension")
-      .deletingSuffix(".messages-extension")
-      .deletingSuffix(".keyboard-extension")
-      .deletingSuffix(".autofill-credential-extension")
+    bundleID.components(separatedBy: ".").prefix(3).joined(separator: ".")
   }
   #if os(macOS)
   public static var appGroup: String { "\(teamID).group.\(rootBundleID)" }
