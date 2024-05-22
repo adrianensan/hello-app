@@ -3,12 +3,12 @@ import AppKit
 
 import HelloCore
 
-public protocol CursorTrackingDelegate: AnyObject {
-  func cursorPositionDidChage(to point: CGPoint)
-}
-
 @MainActor
 public class CursorTrackingManager {
+  
+  public protocol Delegate: AnyObject {
+    func cursorPositionDidChage(to point: CGPoint)
+  }
   
   public static let main = CursorTrackingManager()
   
@@ -43,7 +43,7 @@ public class CursorTrackingManager {
   private func cursorPositionChanged(to position: CGPoint) {
     currentMousePosition = position
     for (i, wrappedDelegate) in delegates.enumerated().reversed() {
-      guard let delegate = wrappedDelegate.value as? any CursorTrackingDelegate else {
+      guard let delegate = wrappedDelegate.value as? any Delegate else {
         delegates.remove(at: i)
         continue
       }
@@ -51,7 +51,7 @@ public class CursorTrackingManager {
     }
   }
   
-  public func add(delegate: some CursorTrackingDelegate) {
+  public func add(delegate: some Delegate) {
     delegates.append(Weak(value: delegate))
   }
   

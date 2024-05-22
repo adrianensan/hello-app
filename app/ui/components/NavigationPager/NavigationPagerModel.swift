@@ -38,25 +38,35 @@ public enum NavigationPageNavigationBarStyle: Sendable {
 }
 
 public struct HelloPagerConfig: Sendable {
+  
+  #if os(iOS)
+  public static let defaultNavBarHeight: CGFloat = 60
+  #else
+  public static let defaultNavBarHeight: CGFloat = 56
+  #endif
+  
   public var navBarHeight: CGFloat
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
   public var navBarStyle: NavigationPageNavigationBarStyle
   public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
+  public var backGestureType: GestureType
   
-  public init(navBarHeight: CGFloat = 60,
+  public init(navBarHeight: CGFloat = Self.defaultNavBarHeight,
               horizontalPagePadding: CGFloat = 16,
               belowNavBarPadding: CGFloat = 0,
               navBarStyle: NavigationPageNavigationBarStyle = .fixed,
               overrideNavBarTitleScrollsDown: Bool? = nil,
-              allowsBack: Bool = true) {
+              allowsBack: Bool = true,
+              backGestureType: GestureType = .highPriority) {
     self.navBarHeight = navBarHeight
     self.horizontalPagePadding = horizontalPagePadding
     self.belowNavBarPadding = belowNavBarPadding
     self.navBarStyle = navBarStyle
     self.overrideNavBarTitleScrollsDown = overrideNavBarTitleScrollsDown
     self.allowsBack = allowsBack
+    self.backGestureType = backGestureType
   }
 }
 
@@ -102,6 +112,12 @@ public class PagerModel {
   public init(config: HelloPagerConfig = HelloPagerConfig(), rootView: some View) {
     self.config = config
     viewStack = [PagerPage(view: rootView)]
+    viewDepth = 1
+  }
+  
+  public init(config: HelloPagerConfig = HelloPagerConfig(), rootPage: PagerPage) {
+    self.config = config
+    viewStack = [rootPage]
     viewDepth = 1
   }
   
@@ -167,6 +183,9 @@ public class PagerModel {
   public func popView(animated: Bool = true) {
     globalDismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
+    if pagesToRemove > 0 {
+      print(pagesToRemove)
+    }
     if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {
         _ = viewStack.popLast()

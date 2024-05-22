@@ -65,7 +65,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       NavigationPageBarFixed(title: title, navBarContent: navBarContent)
     }.onChange(of: isSmallSize || title == nil, initial: true) {
       #if os(iOS)
-      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 2 : -82
+      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? -2 : -82
       #else
       scrollModel.defaultScrollThreshold = 0
       #endif

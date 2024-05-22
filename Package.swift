@@ -28,26 +28,10 @@ let package = Package(
   targets: additionalTargets + [
     .target(name: "HelloCore",
             dependencies: [],
-            path: "core",
-            swiftSettings: [
-              .enableUpcomingFeature("DisableOutwardActorInference"),
-              .enableUpcomingFeature("ImportObjcForwardDeclarations"),
-              .enableUpcomingFeature("BareSlashRegexLiterals"),
-              .enableUpcomingFeature("ExistentialAny"),
-              .enableUpcomingFeature("ForwardTrailingClosures"),
-              .enableUpcomingFeature("ConciseMagicFile")
-            ]),
+            path: "core"),
     .target(name: "HelloApp",
             dependencies: ["HelloCore"],
-            path: "app",
-            swiftSettings: [
-              .enableUpcomingFeature("DisableOutwardActorInference"),
-              .enableUpcomingFeature("ImportObjcForwardDeclarations"),
-              .enableUpcomingFeature("BareSlashRegexLiterals"),
-              .enableUpcomingFeature("ExistentialAny"),
-              .enableUpcomingFeature("ForwardTrailingClosures"),
-              .enableUpcomingFeature("ConciseMagicFile")
-            ]),
+            path: "app"),
     .target(name: "HelloServer",
             dependencies: ["HelloCore", opensslTargetDependency],
             path: "server/code"),

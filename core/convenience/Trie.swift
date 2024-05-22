@@ -1,6 +1,6 @@
 import Foundation
 
-public class Trie<T: Codable & Hashable>: TrieNode<T> {
+public final class Trie<T: Codable & Hashable>: TrieNode<T>, Sendable {
   
 //  public static func constructFrom<T: Codable & Hashable>(valuesMap: [String: T]) -> Trie<T> {
 //    let root = Trie<T>()
@@ -131,7 +131,7 @@ public class Trie<T: Codable & Hashable>: TrieNode<T> {
   }
 }
 
-public class TrieNode<T: Codable & Hashable>: Codable {
+public class TrieNode<T: Codable & Hashable>: Codable, Sendable {
   
   public internal(set) var value: Set<T>
   public internal(set) var map: [UInt8: TrieNode]

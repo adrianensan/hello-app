@@ -18,7 +18,7 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
       .background(
         ZStack {
           Rectangle().fill(.ultraThinMaterial)
-          theme.backgroundColor.opacity(0.8)
+          theme.header.backgroundColor.opacity(0.8)
         }.compositingGroup()
           .shadow(color: .black.opacity(0.12), radius: 24)
           .opacity(scrollModel.hasScrolled ? 1 : 0)

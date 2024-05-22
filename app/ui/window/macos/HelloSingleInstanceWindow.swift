@@ -3,7 +3,7 @@ import Foundation
 import AppKit
 
 @MainActor
-public protocol HelloSingleInstanceWindow: HelloWindow {
+public protocol HelloSingleInstanceWindow: HelloDefaultWindow {
   
   init()
   
@@ -24,6 +24,11 @@ public extension HelloSingleInstanceWindow {
       return current
     } else {
       let newInstance = Self()
+      newInstance.onCloseSupplementary = {
+        if newInstance === Self.current {
+          Self.current = nil
+        }
+      }
       current = newInstance
       return newInstance
     }
@@ -31,11 +36,6 @@ public extension HelloSingleInstanceWindow {
   
   static func show() {
     currentCreatingIfNeeded().show()
-  }
-  
-  func close() {
-    nsWindow.close()
-    Self.current = nil
   }
   
   static func close() {

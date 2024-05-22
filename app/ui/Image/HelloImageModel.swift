@@ -61,15 +61,12 @@ public struct AnimatedImageFrame: Sendable, Hashable {
   public var duration: TimeInterval
 }
 
-@globalActor final public actor HellosActor: GlobalActor {
-    public static var shared: HellosActor = HellosActor()
-    
-    public typealias ActorType = HellosActor
-}
-
 @MainActor
 @Observable
 public class HelloImageModel {
+  
+  public static var useAppGroup: Bool = false
+  
   private static var models: [String: HelloImageModel] = [:]
   private static var weakModels: [String: Weak<HelloImageModel>] = [:]
   public static func model(for imageSource: HelloImageSource, variant: HelloImageVariant = .original) -> HelloImageModel {
@@ -117,13 +114,13 @@ public class HelloImageModel {
       image = nativeImage
       Task { await loadFrames(from: data) }
     case .remoteURL(let url):
-      if let cachedImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant)) {
+      if let cachedImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: true)) {
         image = NativeImage(data: cachedImageData)
         Task { await loadFrames(from: cachedImageData) }
-      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url)) ?? Persistence.initialValue(.tempDownload(url: url)) {
+      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: true)) ?? Persistence.initialValue(.tempDownload(url: url)) {
         Task {
           let resizedImageData = try await ImageProcessor.resize(imageData: cachedOriginalImageData, maxSize: variant.size)
-          await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
           image = NativeImage(data: resizedImageData)
           await loadFrames(from: resizedImageData)
         }
@@ -136,7 +133,7 @@ public class HelloImageModel {
           case .thumbnail(let size):
             imageData = try await ImageProcessor.resize(imageData: imageData, maxSize: size)
           }
-          await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
           guard let self else { return }
           self.image = NativeImage(data: imageData)
           await loadFrames(from: imageData)
@@ -147,12 +144,12 @@ public class HelloImageModel {
       guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
       helloURL.scheme = .https
       let url = helloURL.root.string
-      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant)) {
+      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: true)) {
         image = NativeImage(data: cachedFavicon)
-      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url)) {
+      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: true)) {
         Task {
           favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
           image = NativeImage(data: favicon)
         }
       } else {
@@ -165,7 +162,7 @@ public class HelloImageModel {
           case .thumbnail(let size):
             favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size))
           }
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
           guard let self else { return }
           image = NativeImage(data: favicon)
         }

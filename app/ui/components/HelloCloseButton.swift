@@ -70,6 +70,10 @@ public struct HelloCloseButton: View {
         ButtonHaptics.buttonFeedback()
         onDismiss()
       }
+    }.onChange(of: scrollModel.isDismissed) {
+      if scrollModel.isDismissed {
+        onDismiss()
+      }
     }
   }
 }

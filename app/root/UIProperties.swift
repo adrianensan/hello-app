@@ -66,7 +66,9 @@ public class UIProperties {
   
   public func updateSafeAreaInsets(to nsEdgeInsets: NativeEdgeInsets) {
     var edgeInsets = EdgeInsets(nsEdgeInsets)
+    #if os(iOS)
     edgeInsets.top += extraSafeArea
+    #endif
     guard safeAreaInsets != edgeInsets else { return }
     safeAreaInsets = edgeInsets
   }

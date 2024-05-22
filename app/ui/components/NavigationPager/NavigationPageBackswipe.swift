@@ -1,9 +1,11 @@
 import SwiftUI
 
+@MainActor
 struct NavigationPageBackswipe: ViewModifier {
   
   @Environment(PagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
+  @Environment(\.helloPagerConfig) private var pagerConfig
   
   @GestureState private var backDragGestureState: CGSize = .zero
   let size: CGSize
@@ -20,7 +22,7 @@ struct NavigationPageBackswipe: ViewModifier {
 #if os(tvOS)
         $0
 #else
-        $0.highPriorityGesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
+        $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 8 : .infinity, coordinateSpace: .global)
           .updating($backDragGestureState) { drag, state, transaction in
             if drag.translation.width < 0 {
               state = CGSize(width: 0, height: 0)

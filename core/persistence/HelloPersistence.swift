@@ -262,12 +262,10 @@ public actor HelloPersistence {
   
   nonisolated public func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
-    case .defaults(let suite, let key): return userDefaults(for: suite).object(forKey: key) != nil
-    case .file(let location, let path): 
-      print(fileURL(for: location, subPath: path).relativePath)
-      return FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
-    case .keychain(let key, let appGroup, let isBiometricallyLocked): return (try? keychain.data(for: key)) != nil
-    case .memory: return false
+    case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
+    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
+    case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
+    case .memory: false
     }
   }
   

@@ -63,18 +63,20 @@ public struct NavigationPagerView: View {
               .background(ClearClickableView().onTapGesture {
                 globalDismissKeyboard()
               })
+//              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))
               .allowsHitTesting(model.allowInteraction && model.activePageID == page.id)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             theme.foreground.primary.color
               .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness)
+//            Color.clear
               .frame(width: 10)
-//              .padding(.horizontal, 16)
+//              .padding(.horizontal, 27)
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
-          .background(ClearClickableView().onTapGesture {
-            globalDismissKeyboard()
-          })
+//          .background(ClearClickableView().onTapGesture {
+//            globalDismissKeyboard()
+//          })
           .handlePageBackSwipe(pageSize: geometry.size)
         
 //        #if os(iOS)
@@ -90,7 +92,17 @@ public struct NavigationPagerView: View {
           }.zIndex(4)
             .padding(.horizontal, 8)
             .frame(height: model.config.navBarHeight)
-            .padding(.top, safeAreaInsets.top)
+            .padding(.top, {
+              #if os(iOS)
+              safeAreaInsets.top
+              #elseif os(macOS)
+              if safeAreaInsets.top > 0 {
+                0.5 * safeAreaInsets.top + 8
+              } else {
+                safeAreaInsets.top
+              }
+              #endif
+            }())
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .opacity(model.viewDepth > 1 && currentPageOptions.allowBackOverride != false ? 1 : 0)
             .animation(.easeInOut(duration: 0.2), value: model.viewDepth)
@@ -98,6 +110,9 @@ public struct NavigationPagerView: View {
         }
 //        #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
+//        .background(theme.backgroundView)
+//        .background(theme.foreground.primary.color
+//          .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness))
 //        .clipShape(Rectangle())
     }.environment(model)
       .environment(model.backProgressModel)

@@ -67,17 +67,11 @@ public struct HelloScene: Sendable {
 }
 
 @MainActor
-public protocol HelloApplicationScenes: AnyObject {
-  
-  
-}
-
-@MainActor
 public protocol HelloApplication: AnyObject {
   
   static func load() -> Self
   
-  /// Do any work neede before the application is created
+  /// Do any work needed before the application is created
   func onLaunch() async
   func onTerminate()
   

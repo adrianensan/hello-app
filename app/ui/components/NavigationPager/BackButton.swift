@@ -58,7 +58,7 @@ public struct BackButton: View {
         .frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
         .padding(.leading, -4)
       
-      let effectiveBackProgress: CGFloat = pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
+      let effectiveBackProgress: CGFloat = pagerModel.viewDepth > 1 && pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
       VStack(alignment: .leading, spacing: 0) {
         ForEach(Array(pagerModel.viewStack.dropLast().enumerated()), id: \.element.id) { index, page in
           let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) - effectiveBackProgress
@@ -85,7 +85,6 @@ public struct BackButton: View {
         //          .fill(theme.textPrimary.swiftuiColor)
         //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
       }
-      .padding(4)
       .animation(backProgressModel.backProgress == 0 ? .pageAnimation : .interactive, value: backProgressModel.backProgress)
 //      .hoverEffect(.lift)
   }

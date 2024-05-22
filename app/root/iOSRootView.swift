@@ -40,8 +40,8 @@ public struct HelloAppRootView<Content: View>: View {
         TouchesVisualizer()
       }
       #endif
-    }.environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
-      .environment(\.safeArea, uiProperties.safeAreaInsets)
+    }.environment(\.safeArea, uiProperties.safeAreaInsets)
+      .observeWindowFrame()
       .observeKeyboardFrame()
       .observeIsActive()
       .observeActiveTheme()

@@ -106,7 +106,7 @@ public class HelloRootViewController<Content: View>: NSViewController {
     super.viewDidLayout()
     Task {
       uiProperties.updateSize(to: noSafeAreaNSView.frame.size)
-      uiProperties.updateSafeAreaInsets(to: noSafeAreaNSView.realSafeAreaInsets)
+//      uiProperties.updateSafeAreaInsets(to: noSafeAreaNSView.realSafeAreaInsets)
     }
   }
 }

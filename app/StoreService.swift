@@ -30,7 +30,7 @@ import StoreKit
 
 public actor StoreService {
   
-  public static var main: StoreService = StoreService()
+  public static let main: StoreService = StoreService()
   
   public var knownAvailableProducts: [Product] = []
   public var tips: [UInt64: Decimal] = [:]

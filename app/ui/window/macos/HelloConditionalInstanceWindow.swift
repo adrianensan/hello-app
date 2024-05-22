@@ -9,8 +9,6 @@ public protocol HelloConditionalInstanceWindow<Key>: HelloWindow {
   init(_ key: Key)
   
   static var current: [Key: Self] { get set }
-  
-  var key: Key { get }
 }
 
 public extension HelloConditionalInstanceWindow {
@@ -23,23 +21,15 @@ public extension HelloConditionalInstanceWindow {
       current.show()
     } else {
       let newInstance = Self(key)
+      newInstance.onCloseSupplementary = { Self.current[key] = nil }
       current[key] = newInstance
       newInstance.show()
     }
   }
   
-  func close() {
-    nsWindow.close()
-    Self.current[key] = nil
-  }
-  
   static func close(key: Key) {
     current[key]?.close()
     current[key] = nil
-  }
-  
-  func windowWillClose(_ notification: Notification) {
-    Self.current[key] = nil
   }
 }
 #endif

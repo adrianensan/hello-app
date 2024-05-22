@@ -85,7 +85,7 @@ public struct HelloWindowRootView<Content: View>: View {
       .environment(\.theme, HelloSwiftUITheme(theme: theme))
       .environment(\.isActive, isActive)
       .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
-      .environment(\.safeArea, EdgeInsets()) //uiProperties.safeAreaInsets)
+      .environment(\.safeArea, uiProperties.safeAreaInsets)
       .environment(uiProperties)
       .environment(windowManager)
       .onAppear { isActive = isActiveSystem }

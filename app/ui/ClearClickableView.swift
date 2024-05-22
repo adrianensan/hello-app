@@ -17,6 +17,7 @@ struct ClickableViewModifier: ViewModifier {
   }
 }
 
+@MainActor
 public struct ClearClickableView: View {
   
   @Persistent(.showDebugBorders) private var showDebugBorders
@@ -35,6 +36,7 @@ public struct ClearClickableView: View {
   }
 }
 
+@MainActor
 public extension View {
   func clickable() -> some View {
     modifier(ClickableViewModifier())

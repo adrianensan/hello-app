@@ -58,11 +58,18 @@ public struct HelloButton<Content: View>: View {
     }
   }
   
+  private class NonObserved {
+    var hasClicked: Bool = false
+  }
+  
   #if os(macOS)
   @Environment(\.theme) private var theme
+  @Environment(\.contentShape) private var contentShape
   
   @State private var isHovered: Bool = false
   #endif
+  
+  @State private var nonObserved = NonObserved()
   
   private var haptics: HapticsType
   private var clickStyle: HelloButtonClickStyle
@@ -82,16 +89,16 @@ public struct HelloButton<Content: View>: View {
   public var body: some View {
     #if os(macOS)
     Button(action: {
+      guard !nonObserved.hasClicked else { return }
+      nonObserved.hasClicked = true
       Task {
         try? await Task.sleepForOneFrame()
         try await action()
-      }
-      if haptics.hapticsOnAction {
-        Haptics.buttonFeedback()
+        nonObserved.hasClicked = false
       }
     }) {
       content
-        .background(theme.foreground.primary.color.opacity(isHovered ? 0.08 : 0))
+        .background(contentShape?.fill(theme.foreground.primary.style.opacity(isHovered ? 0.08 : 0)))
         .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.1 : 0)
         .clickable()
     }.buttonStyle(.hello(clickStyle: clickStyle, allowHaptics: haptics.hapticsOnClick))

@@ -4,6 +4,16 @@ import HelloCore
 
 public struct HelloSwiftUITheme {
   
+  public enum HelloSwiftUIThemeLayerID: String, Sendable, Identifiable {
+    case base
+    case surface
+    case surfaceSection
+    case header
+    case floating
+    
+    public var id: String { rawValue }
+  }
+  
   public var theme: HelloTheme
   
   public var backgroundColor: Color { base.backgroundColor }
@@ -42,6 +52,16 @@ public struct HelloSwiftUITheme {
   public var surfaceSectionLayer: HelloSwiftUIThemeLayer { surfaceSection }
   public var header: HelloSwiftUIThemeLayer
   public var floating: HelloSwiftUIThemeLayer
+  
+  public func layer(_ layer: HelloSwiftUIThemeLayerID) -> HelloSwiftUIThemeLayer {
+    switch layer {
+    case .base: base
+    case .surface: surface
+    case .surfaceSection: surfaceSection
+    case .header: header
+    case .floating: floating
+    }
+  }
   
   public func font(size: CGFloat, weight: Font.Weight) -> Font {
     theme.baseLayer.font.font(size: size, weight: weight)

@@ -23,3 +23,14 @@ public extension EnvironmentValues {
     set { self[WindowFrameEnvironmentKey.self] = newValue }
   }
 }
+
+private struct IsFullscreenEnvironmentKey: EnvironmentKey {
+  static let defaultValue = false
+}
+
+public extension EnvironmentValues {
+  var isFullscreen: Bool {
+    get { self[IsFullscreenEnvironmentKey.self] }
+    set { self[IsFullscreenEnvironmentKey.self] = newValue }
+  }
+}

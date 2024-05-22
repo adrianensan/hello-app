@@ -11,14 +11,7 @@ public enum UserDraggableArea: Equatable {
 }
 
 @MainActor
-protocol HelloDefaultWindow: HelloWindow {
-  
-}
-
-extension HelloDefaultWindow {
-  func close() {
-    nsWindow.close()
-  }
+public protocol HelloDefaultWindow: HelloWindow {
 }
 
 class HelloNSWindow: NSWindow {
@@ -39,9 +32,9 @@ class HelloNSWindow: NSWindow {
   
   override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
     if unrestrictedFrame {
-      return frameRect
+      frameRect
     } else {
-      return super.constrainFrameRect(frameRect, to: screen)
+      super.constrainFrameRect(frameRect, to: screen)
     }
   }
   
@@ -157,9 +150,9 @@ class HelloNSPanel: NSPanel {
   
   override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
     if unrestrictedFrame {
-      return frameRect
+      frameRect
     } else {
-      return super.constrainFrameRect(frameRect, to: screen)
+      super.constrainFrameRect(frameRect, to: screen)
     }
   }
 }
@@ -277,10 +270,12 @@ open class HelloWindow: HelloDefaultWindow {
     case fullScreen
   }
   
+  public static var defaultTopSafeArea: CGFloat?
+  
   public let id: String
   public let uniqueID: String = UUID().uuidString
   public let nsWindow: NSWindow
-  var onCloseExtra: (() -> Void)?
+  internal var onCloseSupplementary: (() -> Void)?
   var isMouseInWindow: Bool = false
   
   public let uiProperties: UIProperties
@@ -305,10 +300,7 @@ open class HelloWindow: HelloDefaultWindow {
   
   open var autoCloseBehaviour: AutoCloseBehaviour { .never }
   
-  open var extraTopSafeArea: CGFloat { 0 }
-  open var closeButtonPosition: CGPoint? { nil }
-  open var minimizeButtonPosition: CGPoint? { nil }
-  open var maximizeButtonPosition: CGPoint? { nil }
+  open var topSafeAreaOverride: CGFloat? { Self.defaultTopSafeArea }
   open var hideWindowButtons: Bool { false }
   
   public var temporaryWindowID: String? { temporaryWindow?.id }
@@ -317,7 +309,6 @@ open class HelloWindow: HelloDefaultWindow {
   public var subWindow: HelloWindow?
   private var nativeSubWindow: NSWindow?
   private weak var parentWindow: HelloWindow?
-  private var expectedCloseButtonY: CGFloat?
   
   public init<Content: View>(view: Content,
                              id: String = UUID().uuidString,
@@ -366,8 +357,6 @@ open class HelloWindow: HelloDefaultWindow {
     (nsWindow as? HelloNSPanel)?.unrestrictedFrame = unrestrictedFrame
     (nsWindow as? HelloNSPanel)?.canBecomeKeyOverride = forceKey
     (nsWindow as? HelloNSPanel)?.canBecomeMainOverride = canBecomeMainOverride ?? forceKey
-
-    uiProperties.extraSafeArea = extraTopSafeArea
     
     nsWindow.titlebarAppearsTransparent = true
     nsWindow.titlebarSeparatorStyle = .none
@@ -449,11 +438,6 @@ open class HelloWindow: HelloDefaultWindow {
     (nsWindow as? HelloNSPanel)?.onMouseUp = { [weak self] in self?.onMouseUp() }
     (nsWindow as? HelloNSPanel)?.onMouseDragged = { [weak self] in self?.onMouseDragged(at: $0, by: $1) }
     updateControlButtons()
-    if hideWindowButtons {
-      nsWindow.standardWindowButton(.closeButton)?.isHidden = true
-      nsWindow.standardWindowButton(.miniaturizeButton)?.isHidden = true
-      nsWindow.standardWindowButton(.zoomButton)?.isHidden = true
-    }
     ref = self
   }
     
@@ -512,8 +496,8 @@ open class HelloWindow: HelloDefaultWindow {
   fileprivate func onCloseInternal() {
     closeTemporaryWindow()
     closeSubWindow()
-    onCloseExtra?()
-    onCloseExtra = nil
+    onCloseSupplementary?()
+    onCloseSupplementary = nil
     ref = nil
     let wasFocused = nsWindow.isKeyWindow
     Task {
@@ -658,46 +642,28 @@ open class HelloWindow: HelloDefaultWindow {
   }
   
   public func updateControlButtons() {
-    if let closeButtonPosition {
-      nsWindow.standardWindowButton(.closeButton)?.frame.origin = closeButtonPosition
-    }
-    if let minimizeButtonPosition {
-      nsWindow.standardWindowButton(.miniaturizeButton)?.frame.origin = minimizeButtonPosition
-    }
-    if let maximizeButtonPosition {
-      nsWindow.standardWindowButton(.zoomButton)?.frame.origin = maximizeButtonPosition
-    }
-    guard extraTopSafeArea > 0 else { return }
-    let current = (nsWindow.standardWindowButton(.closeButton)?.frame.origin.y ?? 0)
-    if let expectedCloseButtonY {
-      guard expectedCloseButtonY < current else { return }
-    }
-    expectedCloseButtonY = current - 0.5 * extraTopSafeArea
-    nsWindow.standardWindowButton(.closeButton)?.frame.origin += CGPoint(x: 0.5 * extraTopSafeArea,
-                                                                         y: -0.5 * extraTopSafeArea)
-    nsWindow.standardWindowButton(.miniaturizeButton)?.frame.origin += CGPoint(x: 0.5 * extraTopSafeArea,
-                                                                               y: -0.5 * extraTopSafeArea)
-    nsWindow.standardWindowButton(.zoomButton)?.frame.origin += CGPoint(x: 0.5 * extraTopSafeArea,
-                                                                        y: -0.5 * extraTopSafeArea)
-  }
-}
-
-#elseif os(iOS)
-
-import SwiftUI
-
-@MainActor
-public class OFWindowModel: ObservableObject {
-  public weak var window: UIWindow?
-  public var subWindowID: String?
-  
-  public func subWindowClosed() {
-    if let oldSubWindowID = subWindowID {
-      Task {
-        try await Task.sleep(seconds: 0.2)
-        guard subWindowID == oldSubWindowID else { return }
-        subWindowID = nil
+    nsWindow.standardWindowButton(.closeButton)?.isHidden = hideWindowButtons
+    nsWindow.standardWindowButton(.miniaturizeButton)?.isHidden = hideWindowButtons
+    nsWindow.standardWindowButton(.zoomButton)?.isHidden = hideWindowButtons
+    if hideWindowButtons {
+      uiProperties.updateSafeAreaInsets(to: .init())
+    } else if !hideWindowButtons {
+      let heightOffset = nsWindow.standardWindowButton(.closeButton)?.superview?.frame.height ?? 0
+      defer {
+        uiProperties.updateSafeAreaInsets(to: NativeEdgeInsets(top: topSafeAreaOverride ?? heightOffset,
+                                                               left: 0, bottom: 0, right: 0))
       }
+      guard let closeButtonFrame = nsWindow.standardWindowButton(.closeButton)?.frame else { return }
+      guard let topSafeAreaOverride else { return }
+      let buttonYPosition: CGFloat = -0.5 * topSafeAreaOverride - 0.5 * closeButtonFrame.height + heightOffset
+      guard nsWindow.standardWindowButton(.closeButton)?.frame.origin.y != buttonYPosition else { return }
+      nsWindow.standardWindowButton(.closeButton)?.frame.origin.y = buttonYPosition
+      nsWindow.standardWindowButton(.miniaturizeButton)?.frame.origin.y = buttonYPosition
+      nsWindow.standardWindowButton(.zoomButton)?.frame.origin.y = buttonYPosition
+      
+      nsWindow.standardWindowButton(.closeButton)?.frame.origin.x = 0.5 * topSafeAreaOverride - 0.5 * closeButtonFrame.width
+      nsWindow.standardWindowButton(.miniaturizeButton)?.frame.origin.x = 0.5 * topSafeAreaOverride - 0.5 * closeButtonFrame.width + 1 * 1.5 * closeButtonFrame.width
+      nsWindow.standardWindowButton(.zoomButton)?.frame.origin.x = 0.5 * topSafeAreaOverride - 0.5 * closeButtonFrame.width + 2 * 1.5 * closeButtonFrame.width
     }
   }
 }

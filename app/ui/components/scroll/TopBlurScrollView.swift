@@ -23,6 +23,7 @@ public class HelloScrollModel {
   @ObservationIgnored fileprivate var animateScroll: Bool = false
   public fileprivate(set) var scrollOffset: CGFloat = 0
   public fileprivate(set) var dismissProgress: CGFloat = 0
+  public fileprivate(set) var isDismissed: Bool = false
   public fileprivate(set) var showScrollIndicator: Bool
   
   public var scrollThreshold: CGFloat?
@@ -56,12 +57,16 @@ public class HelloScrollModel {
     self.isActive = isActive
   }
   
+  public func resetDismissState() {
+    isDismissed = false
+  }
+  
   fileprivate func update(offset: CGFloat) {
     guard isActive else { return }
     if offset < 0 {
       timeReachedTop = epochTime
     }
-    
+
     if readyForDismiss
         && !isDismissing
         && offset > scrollOffset {
@@ -90,10 +95,22 @@ public class HelloScrollModel {
       overscroll = 0
     }
     
+    #if os(iOS)
+    if !isDismissed && dismissProgress == 1 && TouchesModel.main.activeTouches.isEmpty {
+      isDismissed = true
+    }
+    #endif
+    
     if isDismissing {
       let newDismissProgress = min(1, max(0, offset / 100))
       guard dismissProgress != newDismissProgress else { return }
       dismissProgress = newDismissProgress
+      
+      #if !os(iOS)
+      if !isDismissed && dismissProgress == 1 {
+        isDismissed = true
+      }
+      #endif
     } else if dismissProgress != 0 {
       dismissProgress = 0
     }

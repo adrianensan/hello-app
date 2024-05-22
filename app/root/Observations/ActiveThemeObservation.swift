@@ -17,6 +17,17 @@ public extension EnvironmentValues {
   }
 }
 
+private struct HelloContentShapeEnvironmentKey: EnvironmentKey {
+  static let defaultValue: AnyInsettableShape? = nil
+}
+
+public extension EnvironmentValues {
+  var contentShape: AnyInsettableShape? {
+    get { self[HelloContentShapeEnvironmentKey.self] }
+    set { self[HelloContentShapeEnvironmentKey.self] = newValue }
+  }
+}
+
 @MainActor
 struct ActiveThemeObservationViewModifier: ViewModifier {
   

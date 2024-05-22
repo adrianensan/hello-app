@@ -12,6 +12,7 @@ public extension Animation {
   }
 }
 
+@MainActor
 public struct HighlightButtonStyle: ButtonStyle {
   
   var highlightAmount: CGFloat = 0.06
@@ -35,6 +36,7 @@ public struct HighlightButtonStyle: ButtonStyle {
   #endif
 }
 
+@MainActor
 public extension ButtonStyle where Self == HighlightButtonStyle {
   static var highlight: HighlightButtonStyle { HighlightButtonStyle() }
 }
@@ -87,6 +89,7 @@ public struct SubtleButtonStyle: ButtonStyle {
 public struct HelloButtonStyle: ButtonStyle {
   
   @Environment(\.theme) private var theme
+  @Environment(\.contentShape) private var contentShape
   
   var clickStyle: HelloButtonClickStyle
   var allowHaptics: Bool
@@ -106,7 +109,7 @@ public struct HelloButtonStyle: ButtonStyle {
       //        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
       //        .animation(.button, value: configuration.isPressed)
         .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
-        .background(Color(hue: 0, saturation: 0, brightness: (theme.theme.isDark ? 1 : 0), opacity: configuration.isPressed ? 0.1 : 0))
+        .background(contentShape?.fill(Color(hue: 0, saturation: 0, brightness: (theme.theme.isDark ? 1 : 0), opacity: configuration.isPressed ? 0.1 : 0)))
     }
   }
 }
