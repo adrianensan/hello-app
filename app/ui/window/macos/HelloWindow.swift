@@ -177,6 +177,16 @@ public class HelloWindowModel {
   
   public func dismiss(id: String) { }
   public func dismissPopup() { }
+  
+  public func resize(to newSize: CGSize, animated: Bool = false) {
+    guard let window else { return }
+    var frame = window.frame
+    let heightChange = newSize.height - frame.size.height
+    frame.origin.x = frame.midX - 0.5 * newSize.width
+    frame.origin.y -= heightChange
+    frame.size = newSize
+    window.set(frame: frame, animated: animated)
+  }
 }
 
 @MainActor
@@ -314,7 +324,7 @@ open class HelloWindow: HelloDefaultWindow {
                              id: String = UUID().uuidString,
                              parentWindow: HelloWindow? = nil,
                              size: Size = .resizable(initialSize: CGSize(width: 400, height: 300)),
-                             windowFlags: NSWindow.StyleMask = [.closable, .titled, .fullSizeContentView],
+                             windowFlags: NSWindow.StyleMask = [.closable, .titled, .fullSizeContentView, .miniaturizable],
                              forceKey: Bool? = nil,
                              canBecomeMainOverride: Bool? = nil,
                              isPanel: Bool = false,
@@ -518,6 +528,20 @@ open class HelloWindow: HelloDefaultWindow {
     var frame = nsWindow.frame
     frame.origin -= (nsWindow.screen?.frame.origin ?? .zero)
     return frame
+  }
+  
+  public func set(frame: CGRect, animated: Bool) {
+    let targetFrame = round(frame)
+    guard nsWindow.frame != targetFrame else { return }
+    if animated {
+      NSAnimationContext.runAnimationGroup { context in
+        context.duration = 0.4
+        context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        nsWindow.animator().setFrame(targetFrame, display: true, animate: true)
+      }
+    } else {
+      nsWindow.setFrame(targetFrame, display: true, animate: false)
+    }
   }
   
   open func show() {

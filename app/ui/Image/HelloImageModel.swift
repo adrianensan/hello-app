@@ -23,6 +23,7 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
   case favicon(String)
   case nativeImage(NativeImage)
   case frames([AnimatedImageFrame])
+  case data(Data)
   
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.id == rhs.id
@@ -48,6 +49,8 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
       "static-image--\(ObjectIdentifier(nativeImage).hashValue)"
     case .frames(let frames):
       "animated-image-\(frames.count)-\((frames.first?.image).map { ObjectIdentifier($0).hashValue } ?? 0)"
+    case .data(let data):
+      "data-\(data.hashValue)"
     }
   }
   
@@ -114,13 +117,13 @@ public class HelloImageModel {
       image = nativeImage
       Task { await loadFrames(from: data) }
     case .remoteURL(let url):
-      if let cachedImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: true)) {
+      if let cachedImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
         image = NativeImage(data: cachedImageData)
         Task { await loadFrames(from: cachedImageData) }
-      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: true)) ?? Persistence.initialValue(.tempDownload(url: url)) {
+      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) ?? Persistence.initialValue(.tempDownload(url: url)) {
         Task {
           let resizedImageData = try await ImageProcessor.resize(imageData: cachedOriginalImageData, maxSize: variant.size)
-          await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
+          await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           image = NativeImage(data: resizedImageData)
           await loadFrames(from: resizedImageData)
         }
@@ -133,7 +136,7 @@ public class HelloImageModel {
           case .thumbnail(let size):
             imageData = try await ImageProcessor.resize(imageData: imageData, maxSize: size)
           }
-          await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
+          await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           guard let self else { return }
           self.image = NativeImage(data: imageData)
           await loadFrames(from: imageData)
@@ -144,12 +147,12 @@ public class HelloImageModel {
       guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
       helloURL.scheme = .https
       let url = helloURL.root.string
-      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: true)) {
+      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
         image = NativeImage(data: cachedFavicon)
-      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: true)) {
+      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
         Task {
           favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           image = NativeImage(data: favicon)
         }
       } else {
@@ -162,7 +165,7 @@ public class HelloImageModel {
           case .thumbnail(let size):
             favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size))
           }
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: true))
+          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           guard let self else { return }
           image = NativeImage(data: favicon)
         }
@@ -172,6 +175,8 @@ public class HelloImageModel {
     case .frames(let frames):
       image = frames.first?.image
       self.frames = frames
+    case .data(let data):
+      image = NativeImage(data: data)
     }
   }
   

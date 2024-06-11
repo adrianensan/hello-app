@@ -5,11 +5,13 @@ import HelloCore
 
 public enum HelloScrollTarget: Sendable, Identifiable, Hashable {
   case top
+  case bottom
   case view(id: String)
   
   public var id: String {
     switch self {
-    case .top: "scrollViewTop"
+    case .top: "scroll-view-top"
+    case .bottom: "scroll-view-bottom"
     case .view(let id): id
     }
   }
@@ -20,7 +22,7 @@ public enum HelloScrollTarget: Sendable, Identifiable, Hashable {
 public class HelloScrollModel {
   
   fileprivate var scrollTarget: HelloScrollTarget?
-  @ObservationIgnored fileprivate var animateScroll: Bool = false
+  @ObservationIgnored fileprivate var scrollAnimation: Animation?
   public fileprivate(set) var scrollOffset: CGFloat = 0
   public fileprivate(set) var dismissProgress: CGFloat = 0
   public fileprivate(set) var isDismissed: Bool = false
@@ -48,8 +50,12 @@ public class HelloScrollModel {
   
   public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
   
-  public func scroll(to scrollTarget: HelloScrollTarget, animated: Bool = true) {
-    animateScroll = animated
+  public func scroll(to scrollTarget: HelloScrollTarget, animated: Bool = false) {
+    scroll(to: scrollTarget, animation: animated ? .easeOut(duration: 0.5) : nil)
+  }
+  
+  public func scroll(to scrollTarget: HelloScrollTarget, animation: Animation?) {
+    scrollAnimation = animation
     self.scrollTarget = scrollTarget
   }
   
@@ -143,13 +149,15 @@ public struct HelloScrollView<Content: View>: View {
                              coordinateSpace: .named(model.coordinateSpaceName))
             .frame(height: 0)
           content()
+          Color.clear.frame(height: 0)
+            .id(HelloScrollTarget.bottom.id)
         }.id(HelloScrollTarget.top.id)
       }.coordinateSpace(name: model.coordinateSpaceName)
         .insetBySafeArea()
         .onChange(of: model.scrollTarget) {
           guard let scrollTarget = model.scrollTarget else { return }
           model.scrollTarget = nil
-          withAnimation(model.animateScroll ? .easeOut(duration: 0.5) : nil) {
+          withAnimation(model.scrollAnimation) {
             scrollView.scrollTo(scrollTarget.id, anchor: .top)
           }
         }

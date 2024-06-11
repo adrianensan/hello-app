@@ -8,6 +8,7 @@ public struct ScrollFadeMask: View {
   private var topFadeAmount: CGFloat
   private var bottomFadeAmount: CGFloat
   private var topPadding: CGFloat
+  private var bottomPadding: CGFloat
   private var showTop: Bool
   private var showBottom: Bool
   
@@ -15,12 +16,14 @@ public struct ScrollFadeMask: View {
               topFadeAmount: CGFloat = 8,
               bottomFadeAmount: CGFloat = 8,
               topPadding: CGFloat = 0,
+              bottomPadding: CGFloat = 0,
               showTop: Bool = true,
               showBottom: Bool = true) {
     self.orientation = orientation
     self.topFadeAmount = topFadeAmount
     self.bottomFadeAmount = bottomFadeAmount
     self.topPadding = topPadding
+    self.bottomPadding = bottomPadding
     self.showTop = showTop
     self.showBottom = showBottom
   }
@@ -43,6 +46,7 @@ public struct ScrollFadeMask: View {
         .frame(width: orientation == .vertical ? nil : bottomFadeAmount,
                height: orientation == .vertical ? bottomFadeAmount : nil)
       }
+      Color.clear.frame(width: bottomPadding, height: bottomPadding)
     }
   }
 }

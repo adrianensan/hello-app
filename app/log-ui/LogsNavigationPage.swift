@@ -76,7 +76,7 @@ public struct LogsNavigationPage: View {
             if nonObserved.isFollowingNew {
               Task {
                 try await Task.sleepForOneFrame()
-                scrollModel.scroll(to: .view(id: "logs-end"))
+                scrollModel.scroll(to: .view(id: "logs-end"), animated: true)
               }
             }
           }.onAppear {

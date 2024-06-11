@@ -74,10 +74,6 @@ public struct HelloAPIResponse<Content: Decodable & Sendable>: Sendable {
 //}
 
 public protocol HelloAPIClient: Actor {
-  var scheme: String { get }
-  
-  var host: String { get }
-  
   var session: URLSession { get }
   
   var userAgentString: String { get }
@@ -90,10 +86,6 @@ public protocol HelloAPIClient: Actor {
 }
 
 public extension HelloAPIClient {
-  
-  var scheme: String { "https" }
-  
-  var apiRoot: String { "\(scheme)://\(host)" }
   
   var userAgentString: String { "\(AppInfo.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
   
@@ -274,6 +266,49 @@ public extension HelloAPIClient {
       }
       Log.info("\(logStart)", context: "API")
       return HelloAPIResponse(headers: headers, content: decodedResponse)
+    }
+  }
+  
+  func stream<Endpoint: APIEndpoint>(from endpoint: Endpoint) async throws -> AsyncThrowingStream<Endpoint.ResponseType, any Error> {
+    var request: URLRequest
+    do {
+      request = try self.request(for: endpoint)
+    } catch {
+      Log.error(error.localizedDescription, context: "API")
+      throw error
+    }
+    let (stream, urlSession) = try await session.bytes(for: request)
+    return AsyncThrowingStream(Endpoint.ResponseType.self) { continuation in
+      Task {
+        do {
+//          for try await byte in stream {
+//            if let chunk = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: byte) {
+//              continuation.yield(chunk)
+//            }
+//          }
+          for try await line in stream.lines {
+            let components = line.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
+            guard components.count == 2, components[0] == "data" else {
+              if let chunk = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: line.data(using: .utf8)!) {
+                continuation.yield(chunk)
+              }
+              continue
+            }
+            
+            let message = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if message == "[DONE]" {
+              continuation.finish()
+              return
+            } else if let chunk = try? JSONDecoder().decode(Endpoint.ResponseType.self, from: message.data(using: .utf8)!) {
+              continuation.yield(chunk)
+            }
+          }
+          continuation.finish()
+        } catch {
+          continuation.finish(throwing: error)
+        }
+      }
     }
   }
   

@@ -112,7 +112,7 @@ public class AppIconExporter {
         let iconLayerInnerContentsURL = iconLayerURL.appendingPathComponent("Content.imageset")
         layerContents.layers.append(LayeredAppIconLayerContents(filename: layerFilename))
         try? FileManager.default.createDirectory(at: iconLayerInnerContentsURL, withIntermediateDirectories: true, attributes: [:])
-        try? AppIconEmptyContents().data().write(to: iconLayerURL.appendingPathComponent("Contents.json"))
+        try? AppIconEmptyContents().jsonData.write(to: iconLayerURL.appendingPathComponent("Contents.json"))
         
         let imageLayerName = "\(icon.imageName)-\(layerName)"
         try await save(view: baseImage(for: layer, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
@@ -121,7 +121,7 @@ public class AppIconExporter {
         try AppiconsetContentsGenerator.contentsFile(for: imageLayerName, with: [scale])
           .write(to: iconLayerInnerContentsURL.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
       }
-      try? layerContents.data().write(to: iconExportPath.appendingPathComponent("Contents.json"))
+      try? layerContents.jsonData.write(to: iconExportPath.appendingPathComponent("Contents.json"))
     }
   }
   

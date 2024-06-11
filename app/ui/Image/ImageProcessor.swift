@@ -140,7 +140,7 @@ public class ImageProcessor {
                  respectFlipped: true,
                  hints: [:])
       NSGraphicsContext.restoreGraphicsState()
-      return bitmapRep.representation(using: .png, properties: [.compressionFactor: 0.9]) ?? imageData
+      return bitmapRep.representation(using: .png, properties: [.compressionFactor: 0.8]) ?? imageData
     }
     
     return imageData

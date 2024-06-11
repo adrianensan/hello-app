@@ -23,7 +23,9 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 //    Hello.rootViewController = viewController
 //    viewController.onBrightnessChange = { ThemeObservable.shared.handleScreenBrightnessUpdate() }
-    application.registerForRemoteNotifications()
+    if helloApplication.supportsNotifications {
+      application.registerForRemoteNotifications()
+    }
 //    if !application.supportsMultipleScenes {
 //      let window = UIWindow()
 //      let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
@@ -72,7 +74,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   }
   
   func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-    .all
+    .portrait
 //    Hello.persistence.lockRotation ? .portrait : .allButUpsideDown
   }
   
@@ -98,7 +100,7 @@ public class SceneDelegate: NSObject, UISceneDelegate {
   public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
-    window.rootViewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
+    window.rootViewController = HelloRootViewController(window: window, wrappedView: helloApplication.rootView)
     window.makeKeyAndVisible()
     self.window = window
   }

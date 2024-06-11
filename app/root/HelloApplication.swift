@@ -84,6 +84,9 @@ public protocol HelloApplication: AnyObject {
   
   func open(url: HelloURL) -> Bool
   func handle(notification: [AnyHashable: Any])
+  
+  var supportsNotifications: Bool { get }
+  
   #if os(iOS)
   func touchesUpdate(to touches: [HelloTouch])
   #elseif os(macOS)
@@ -91,12 +94,14 @@ public protocol HelloApplication: AnyObject {
   func onDockIconClick()
   #endif
   
-  func view() -> AnyView
+  var rootView: AnyView { get }
   
+  #if os(visionOS)
   associatedtype Scenes: Scene
   
   @SceneBuilder
   static var scene: Scenes { get }
+  #endif
 
 }
 
@@ -147,6 +152,8 @@ public extension HelloApplication {
   func onBecameActive() async {}
   func onResignActive() async {}
   func onBackgrounded() async {}
+  
+  var supportsNotifications: Bool { false }
   
   func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) {}
   func onFirstLaunch() {}

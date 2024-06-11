@@ -51,6 +51,10 @@ public struct NoButtonStyle: ButtonStyle {
   }
 }
 
+public extension ButtonStyle where Self == NoButtonStyle {
+  static var noStyle: NoButtonStyle { NoButtonStyle() }
+}
+
 public struct ScaleButtonStyle: ButtonStyle {
   
   public func makeBody(configuration: Configuration) -> some View {
@@ -112,10 +116,6 @@ public struct HelloButtonStyle: ButtonStyle {
         .background(contentShape?.fill(Color(hue: 0, saturation: 0, brightness: (theme.theme.isDark ? 1 : 0), opacity: configuration.isPressed ? 0.1 : 0)))
     }
   }
-}
-
-public extension ButtonStyle where Self == NoButtonStyle {
-  static var noStyle: NoButtonStyle { NoButtonStyle() }
 }
 
 public extension ButtonStyle where Self == ScaleButtonStyle {

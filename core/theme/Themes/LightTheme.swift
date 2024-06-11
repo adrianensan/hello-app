@@ -14,7 +14,8 @@ public extension HelloTheme {
                scheme: .light,
                baseLayer: .init(background: .color(color: HelloColor(r: 0.98, g: 0.98, b: 0.98),
                                                    border: .init(color: .black.opacity(0.2))),
-                                accent: accent))
+                                accent: accent),
+               headerLayer: .init(background: .blur(dark: false, overlay: HelloColor(r: 1, g: 1, b: 1).opacity(0.4))))
   }
   
   static func warmLight(accent: HelloFill) -> HelloTheme {
