@@ -17,7 +17,7 @@ public extension View {
     case .normal:
       self.gesture(gesture)
     case .highPriority:
-      self.highPriorityGesture(gesture)
+      self.simultaneousGesture(gesture)
     case .disabled:
       self
     }
@@ -30,7 +30,6 @@ public extension Animation {
   }
 }
 
-@MainActor
 public struct NavigationPagerView: View {
   
   @Environment(\.theme) var theme
@@ -64,7 +63,7 @@ public struct NavigationPagerView: View {
                 globalDismissKeyboard()
               })
 //              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))
-              .allowsHitTesting(model.allowInteraction && model.activePageID == page.id)
+              .allowsHitTesting(model.allowInteraction && model.activePageID == page.id && model.backProgressModel.backProgress == 0)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             theme.foreground.primary.color
@@ -74,6 +73,7 @@ public struct NavigationPagerView: View {
 //              .padding(.horizontal, 27)
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
+          .disabled(model.backProgressModel.backProgress != 0)
 //          .background(ClearClickableView().onTapGesture {
 //            globalDismissKeyboard()
 //          })
@@ -119,27 +119,5 @@ public struct NavigationPagerView: View {
       .environment(\.helloPagerConfig, model.config)
       .environment(\.helloDismiss, { model.popView() })
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-  }
-}
-
-private struct HelloPagerConfigEnvironmentKey: EnvironmentKey {
-  static let defaultValue = HelloPagerConfig()
-}
-
-public extension EnvironmentValues {
-  var helloPagerConfig: HelloPagerConfig {
-    get { self[HelloPagerConfigEnvironmentKey.self] }
-    set { self[HelloPagerConfigEnvironmentKey.self] = newValue }
-  }
-}
-
-private struct HelloDismissEnvironmentKey: EnvironmentKey {
-  static let defaultValue = { }
-}
-
-public extension EnvironmentValues {
-  var helloDismiss: () -> Void {
-    get { self[HelloDismissEnvironmentKey.self] }
-    set { self[HelloDismissEnvironmentKey.self] = newValue }
   }
 }

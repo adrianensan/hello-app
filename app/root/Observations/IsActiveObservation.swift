@@ -1,27 +1,5 @@
 import SwiftUI
 
-private struct IsActiveEnvironmentKey: EnvironmentKey {
-  static let defaultValue = true
-}
-
-public extension EnvironmentValues {
-  var isActive: Bool {
-    get { self[IsActiveEnvironmentKey.self] }
-    set { self[IsActiveEnvironmentKey.self] = newValue }
-  }
-}
-
-private struct HasAppearedEnvironmentKey: EnvironmentKey {
-  static let defaultValue = true
-}
-
-public extension EnvironmentValues {
-  var hasAppeared: Bool {
-    get { self[HasAppearedEnvironmentKey.self] }
-    set { self[HasAppearedEnvironmentKey.self] = newValue }
-  }
-}
-
 struct IsActiveObservationViewModifier: ViewModifier {
   
   private var becomeActiveNotification: Notification.Name {

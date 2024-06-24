@@ -1,17 +1,6 @@
 import SwiftUI
 
 #if os(iOS)
-private struct KeyboardFrameEnvironmentKey: EnvironmentKey {
-  static let defaultValue = CGRect()
-}
-
-public extension EnvironmentValues {
-  var keyboardFrame: CGRect {
-    get { self[KeyboardFrameEnvironmentKey.self] }
-    set { self[KeyboardFrameEnvironmentKey.self] = newValue }
-  }
-}
-
 struct KeyboardFrameObservationViewModifier: ViewModifier {
   
   @State private var keyboardFrame: CGRect = .zero

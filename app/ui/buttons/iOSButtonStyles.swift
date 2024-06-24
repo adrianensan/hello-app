@@ -12,7 +12,6 @@ public extension Animation {
   }
 }
 
-@MainActor
 public struct HighlightButtonStyle: ButtonStyle {
   
   var highlightAmount: CGFloat = 0.06

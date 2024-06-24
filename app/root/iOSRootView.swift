@@ -3,7 +3,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct HelloAppRootView<Content: View>: View {
   
   @Environment(HelloWindowModel.self) private var windowModel

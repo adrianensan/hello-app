@@ -4,7 +4,6 @@ import Observation
 import HelloCore
 
 #if os(iOS)
-@MainActor
 public struct SafeAreaInsetsViewModifier: ViewModifier {
   
   @Environment(\.safeArea) private var safeAreaInsets
@@ -31,7 +30,6 @@ public extension View {
   }
 }
 #else
-@MainActor
 public struct SafeAreaInsetsViewModifier: ViewModifier {
   
   @Environment(\.safeArea) private var safeAreaInsets

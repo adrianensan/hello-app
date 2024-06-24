@@ -3,7 +3,6 @@ import Observation
 
 import HelloCore
 
-@MainActor
 public struct ObserveSmallWindowSizeViewModifier: ViewModifier {
   
   @Environment(\.windowFrame) private var windowFrame

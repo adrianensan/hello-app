@@ -84,14 +84,3 @@ public class HelloWindowModel {
   }
 }
 #endif
-
-private struct ViewIDEnvironmentKey: EnvironmentKey {
-  static let defaultValue: String? = nil
-}
-
-public extension EnvironmentValues {
-  var viewID: String? {
-    get { self[ViewIDEnvironmentKey.self] }
-    set { self[ViewIDEnvironmentKey.self] = newValue }
-  }
-}

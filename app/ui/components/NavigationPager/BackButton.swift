@@ -12,9 +12,9 @@ extension Animation {
 public class BackProgressModel {
   
   public var backProgress: CGFloat = 0
+  @ObservationIgnored public var backSwipeAllowance: Bool?
 }
 
-@MainActor
 public struct BackButton: View {
   
   @Environment(\.theme) private var theme
@@ -79,6 +79,7 @@ public struct BackButton: View {
       ZStack {
         Capsule(style: .continuous)
           .fill(.thinMaterial)
+          .blur(radius: 16 * (1 - min(1, (backProgressModel.backProgress / 0.4))))
           .opacity(min(1, (backProgressModel.backProgress / 0.2)))
       }
         //        Capsule(style: .continuous)

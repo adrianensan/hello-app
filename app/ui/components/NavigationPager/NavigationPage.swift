@@ -1,6 +1,5 @@
 import SwiftUI
 
-@MainActor
 public struct NavigationPage<Content: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme

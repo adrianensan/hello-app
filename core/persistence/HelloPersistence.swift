@@ -76,15 +76,11 @@ public actor HelloPersistence {
     }
   }
   
-  private func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
-    guard allowSaving else { return }
+  nonisolated func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
     if property.isDeprecated {
       Log.warning("Using depreacted property \(property.self)", context: "Persistence")
     }
     let value = property.cleanup(value: value)
-    if property.allowCache {
-      cache[property.location.id] = value
-    }
     
     switch property.location {
     case .defaults(let suite, let key):
@@ -127,8 +123,12 @@ public actor HelloPersistence {
   }
   
   public func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property, skipModelUpdate: Bool = false) {
+    guard allowSaving else { return }
     do {
       try saveInternal(value, for: property)
+      if property.allowCache {
+        cache[property.location.id] = property.cleanup(value: value)
+      }
       if !skipModelUpdate {
         updated(value: value, for: property)
       }
@@ -158,7 +158,7 @@ public actor HelloPersistence {
         }
       default:
         guard let data = userDefaults(for: suite).object(forKey: key) as? Data,
-              let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+              let value = try? Property.Value.decodeJSON(from: data) else {
           returnValue = property.defaultValue
           if property.persistDefaultValue {
             Task { await save(returnValue, for: property) }
@@ -182,7 +182,7 @@ public actor HelloPersistence {
         case is Data.Type, is Data?.Type:
           returnValue = (data as? Property.Value) ?? property.defaultValue
         default:
-          guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+          guard let value = try? Property.Value.decodeJSON(from: data) else {
             returnValue = property.defaultValue
             break
           }
@@ -242,7 +242,7 @@ public actor HelloPersistence {
     }
   }
   
-  public func size<Property: PersistenceProperty>(of property: Property) -> Int {
+  nonisolated public func size<Property: PersistenceProperty>(of property: Property) -> Int {
     switch property.location {
     case .defaults: 0
     case .file(let location, let path): size(of: fileURL(for: location, subPath: path))
@@ -287,7 +287,7 @@ public actor HelloPersistence {
     }
   }
   
-  private func save(_ value: some Codable & Sendable, to url: URL) throws {
+  nonisolated private func save(_ value: some Codable & Sendable, to url: URL) throws {
     do {
       if !FileManager.default.fileExists(atPath: url.deletingLastPathComponent().path) {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -301,7 +301,7 @@ public actor HelloPersistence {
     } else {
       var data: Data? = value as? Data
       if data == nil {
-        data = try JSONEncoder().encode(value)
+        data = try value.jsonData
       }
       try data?.write(to: url)
     }
@@ -319,7 +319,7 @@ public actor HelloPersistence {
       case is Data.Type, is Data?.Type:
         return (data as? Property.Value) ?? property.defaultValue
       default:
-        guard let value = try? JSONDecoder().decode(Property.Value.self, from: data) else {
+        guard let value = try? Property.Value.decodeJSON(from: data) else {
           return property.defaultValue
         }
         return value
@@ -360,6 +360,10 @@ public enum Persistence {
     await Property.persistence.save(value, for: property)
   }
   
+  public static func unsafeSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+    try? Property.persistence.saveInternal(value, for: property)
+  }
+  
   public static func value<Property: PersistenceProperty>(_ property: Property) async -> Property.Value {
     await Property.persistence.value(for: property)
   }
@@ -380,8 +384,8 @@ public enum Persistence {
     await Property.persistence.atomicUpdate(property, update: update)
   }
   
-  public static func size<Property: PersistenceProperty>(of property: Property) async -> Int {
-    await Property.persistence.size(of: property)
+  public static func size<Property: PersistenceProperty>(of property: Property) -> Int {
+    Property.persistence.size(of: property)
   }
   
   public static func isSet<Property: PersistenceProperty>(property: Property) async -> Bool {

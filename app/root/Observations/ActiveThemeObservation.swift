@@ -2,30 +2,18 @@ import SwiftUI
 
 import HelloCore
 
-private struct HelloThemeEnvironmentKey: EnvironmentKey {
-#if os(iOS) || os(visionOS)
-  static let defaultValue = HelloSwiftUITheme(theme: .dark)
-#else
-  static let defaultValue = HelloSwiftUITheme(theme: .darkBlur)
-#endif
-}
-
 public extension EnvironmentValues {
-  var theme: HelloSwiftUITheme {
-    get { self[HelloThemeEnvironmentKey.self] }
-    set { self[HelloThemeEnvironmentKey.self] = newValue }
-  }
-}
-
-private struct HelloContentShapeEnvironmentKey: EnvironmentKey {
-  static let defaultValue: AnyInsettableShape? = nil
-}
-
-public extension EnvironmentValues {
-  var contentShape: AnyInsettableShape? {
-    get { self[HelloContentShapeEnvironmentKey.self] }
-    set { self[HelloContentShapeEnvironmentKey.self] = newValue }
-  }
+  @Entry var theme: HelloSwiftUITheme = HelloSwiftUITheme(theme: .warmLight)
+  @Entry var contentShape: AnyInsettableShape? = nil
+  @Entry var isActive: Bool = true
+  @Entry var hasAppeared: Bool = true
+  @Entry var viewID: String? = nil
+  @Entry var windowFrame: CGRect = .zero
+  @Entry var safeArea: EdgeInsets = EdgeInsets()
+  @Entry var keyboardFrame: CGRect = .zero
+  @Entry var isFullscreen: Bool = false
+  @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
+  @Entry var helloDismiss: () -> Void = {}
 }
 
 @MainActor
@@ -46,6 +34,8 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
   func body(content: Content) -> some View {
     content
       .environment(\.theme, HelloSwiftUITheme(theme: currentTheme))
+      .foregroundStyle(currentTheme.baseLayer.foregroundPrimary.mainColor.swiftuiColor)
+      .backgroundStyle(currentTheme.baseLayer.background.mainColor.swiftuiColor)
       .animation(.easeInOut(duration: 0.2), value: currentTheme.id)
   }
 }

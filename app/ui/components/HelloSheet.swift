@@ -28,7 +28,6 @@ public class HelloSheetModel {
   }
 }
 
-@MainActor
 public struct HelloSheet<Content: View>: View {
   
   @Environment(\.windowFrame) private var windowFrame
@@ -67,11 +66,10 @@ public struct HelloSheet<Content: View>: View {
 
   public var body: some View {
     content()
-      .padding(.bottom, safeArea.bottom - 5)
+      .padding(.bottom, safeArea.bottom)
       .clipShape(RoundedRectangle(cornerRadius: Device.current.screenCornerRadius, style: .continuous))
       .clipShape(RoundedRectangle(cornerRadius: Device.current.screenCornerRadius, style: .continuous))
       .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: Device.current.screenCornerRadius, style: .continuous), isBaseLayer: false))
-      .padding(5)
       .environment(model)
       .coordinateSpace(.sheet)
       .compositingGroup()

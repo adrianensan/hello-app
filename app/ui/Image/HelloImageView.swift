@@ -2,7 +2,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct AnimatedHelloImageView: View {
   
   @Environment(\.theme) private var theme
@@ -36,7 +35,6 @@ public struct AnimatedHelloImageView: View {
   }
 }
 
-@MainActor
 public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   @Environment(\.theme) private var theme
@@ -129,12 +127,11 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
   }
 }
 
-@MainActor
 public struct HelloFallbackImageView: View {
   
-  public struct HelloImageOption: Sendable {
-    var imageSource: HelloImageSource
-    var variant: HelloImageVariant
+  public struct HelloImageOption: Equatable, Sendable {
+    public var imageSource: HelloImageSource
+    public var variant: HelloImageVariant
     
     public init(imageSource: HelloImageSource, variant: HelloImageVariant) {
       self.imageSource = imageSource

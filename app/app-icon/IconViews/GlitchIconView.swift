@@ -37,7 +37,6 @@ fileprivate struct BaseGlitchIconView: View {
   }
 }
 
-@MainActor
 public struct GlitchIconView: View {
   
   private class NonObserved {

@@ -22,7 +22,8 @@ public enum HelloScrollTarget: Sendable, Identifiable, Hashable {
 public class HelloScrollModel {
   
   fileprivate var scrollTarget: HelloScrollTarget?
-  @ObservationIgnored fileprivate var scrollAnimation: Animation?
+  var swiftuiScrollPosition = ScrollPosition()
+  
   public fileprivate(set) var scrollOffset: CGFloat = 0
   public fileprivate(set) var dismissProgress: CGFloat = 0
   public fileprivate(set) var isDismissed: Bool = false
@@ -44,9 +45,16 @@ public class HelloScrollModel {
     self.showScrollIndicator = showScrollIndicator
   }
   
+  #if os(iOS)
+  public var isScreenTouched: Bool { !TouchesModel.main.activeTouches.isEmpty }
+  #else
+  public var isScreenTouched: Bool { false }
+  #endif
+  
   public var overscroll: CGFloat = 0
   
   public var hasScrolled: Bool = false// { scrollOffset < scrollThreshold }
+  public var hasScrolledDuringTouch: Bool = false
   
   public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
   
@@ -55,8 +63,16 @@ public class HelloScrollModel {
   }
   
   public func scroll(to scrollTarget: HelloScrollTarget, animation: Animation?) {
-    scrollAnimation = animation
-    self.scrollTarget = scrollTarget
+    withAnimation(animation) {
+      switch scrollTarget {
+      case .top:
+        swiftuiScrollPosition.scrollTo(edge: .top)
+      case .bottom:
+        swiftuiScrollPosition.scrollTo(edge: .bottom)
+      case .view(let id):
+        swiftuiScrollPosition.scrollTo(id: id)
+      }
+    }
   }
   
   public func setActive(_ isActive: Bool) {
@@ -88,8 +104,17 @@ public class HelloScrollModel {
       isDismissing = false
     }
     
+    #if os(iOS)
+    if !isScreenTouched {
+      TouchesModel.main.hasScrolledDuringTouch = false
+    }
+    #endif
+    
     guard scrollOffset != offset else { return }
     scrollOffset = offset
+    #if os(iOS)
+    TouchesModel.main.hasScrolledDuringTouch = isScreenTouched
+    #endif
     let hasScrolled = scrollOffset < effectiveScrollThreshold
     if self.hasScrolled != hasScrolled {
       self.hasScrolled = hasScrolled
@@ -102,7 +127,7 @@ public class HelloScrollModel {
     }
     
     #if os(iOS)
-    if !isDismissed && dismissProgress == 1 && TouchesModel.main.activeTouches.isEmpty {
+    if !isDismissed && dismissProgress == 1 && !isScreenTouched {
       isDismissed = true
     }
     #endif
@@ -123,7 +148,6 @@ public class HelloScrollModel {
   }
 }
 
-@MainActor
 public struct HelloScrollView<Content: View>: View {
   
   @Environment(\.theme) private var theme
@@ -142,25 +166,16 @@ public struct HelloScrollView<Content: View>: View {
   }
   
   public var body: some View {
-    ScrollViewReader { scrollView in
-      ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
-        VStack(spacing: 0) {
-          PositionReaderView(onPositionChange: { model.update(offset: $0.y) },
-                             coordinateSpace: .named(model.coordinateSpaceName))
-            .frame(height: 0)
-          content()
-          Color.clear.frame(height: 0)
-            .id(HelloScrollTarget.bottom.id)
-        }.id(HelloScrollTarget.top.id)
-      }.coordinateSpace(name: model.coordinateSpaceName)
-        .insetBySafeArea()
-        .onChange(of: model.scrollTarget) {
-          guard let scrollTarget = model.scrollTarget else { return }
-          model.scrollTarget = nil
-          withAnimation(model.scrollAnimation) {
-            scrollView.scrollTo(scrollTarget.id, anchor: .top)
-          }
-        }
-    }.environment(model)
+    ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
+      content()
+    }.scrollPosition($model.swiftuiScrollPosition)
+      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
+        -geometry.contentOffset.y - geometry.contentInsets.top
+      }, action: { _, newScrollOffset in
+        model.update(offset: newScrollOffset)
+      })
+      .coordinateSpace(name: model.coordinateSpaceName)
+      .insetBySafeArea()
+      .environment(model)
   }
 }

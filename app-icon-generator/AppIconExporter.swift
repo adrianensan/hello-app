@@ -131,15 +131,26 @@ public class AppIconExporter {
       let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).appiconset")
       try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
       
-      // Main App Icon
-      let scales = icon.imageName == AppIcon.defaultIcon.imageName ? IconScale.iOSMainIconScales : IconScale.iOSAlternateIconScales
-      for scale in scales {
-        try await save(view: baseImage(for: icon.iOSView.flattenedView, scale: scale), size: scale.size * CGFloat(scale.scaleFactor),
-                       to: iconExportPath.appendingPathComponent(AppiconsetContentsGenerator.fileName(appIconName: icon.imageName, scale: scale)),
+      var contents = AppIconAssetsContents.iOS(name: icon.imageName)
+      
+      try await save(view: icon.iOSView.light.flattenedView, size: CGSize(width: 1024, height: 1024),
+                     to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "light")),
+                     allowOpacity: false)
+      if let darkIcon = icon.iOSView.dark, let tintableIcon = icon.iOSView.tintable {
+        try await save(view: darkIcon.flattenedView, size: CGSize(width: 1024, height: 1024),
+                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "dark")),
+                       allowOpacity: true)
+        try await save(view: tintableIcon.flattenedView, size: CGSize(width: 1024, height: 1024),
+                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "tintable")),
                        allowOpacity: false)
+        try AppIconAssetsContents.iOS(name: icon.imageName)
+          .prettyJSONData
+          .write(to: iconExportPath.appendingPathComponent("Contents.json"))
+      } else {
+        try AppIconAssetsContents.iOSClassic(name: icon.imageName)
+          .prettyJSONData
+          .write(to: iconExportPath.appendingPathComponent("Contents.json"))
       }
-      try AppiconsetContentsGenerator.contentsFile(for: icon.imageName, with: scales)
-        .write(to: iconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
     }
   }
   

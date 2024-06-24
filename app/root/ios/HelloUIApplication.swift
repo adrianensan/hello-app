@@ -15,7 +15,7 @@ public class HelloUIApplication: UIApplication {
     
     for touch in event.allTouches ?? [] {
       switch touch.phase {
-      case .ended, .cancelled:
+      case .ended, .cancelled, .regionExited:
         activeTouches.removeAll { $0.id == touch.hash }
       default:
         if let index = activeTouches.firstIndex(where: { touch.hash == $0.id }) {
@@ -26,7 +26,7 @@ public class HelloUIApplication: UIApplication {
       }
     }
     
-    let allTouchIDs = (event.allTouches ?? []).map { $0.hash }
+    let allTouchIDs = Set((event.allTouches ?? []).map { $0.hash })
     activeTouches.removeAll { !allTouchIDs.contains($0.id) }
     
     #if os(iOS)

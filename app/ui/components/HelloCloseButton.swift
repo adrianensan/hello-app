@@ -3,7 +3,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct HelloCloseButton: View {
   
   @Environment(\.theme) private var helloTheme

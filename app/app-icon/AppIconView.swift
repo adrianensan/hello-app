@@ -2,6 +2,54 @@ import SwiftUI
 
 import HelloCore
 
+public struct HelloIOSAppIconView: Sendable {
+  public var light: HelloAppIconView
+  public var dark: HelloAppIconView?
+  public var tintable: HelloAppIconView?
+  
+  private init(light: HelloAppIconView,
+               dark: HelloAppIconView? = nil,
+               tintable: HelloAppIconView? = nil) {
+    self.light = light
+    self.dark = dark
+    self.tintable = tintable
+  }
+  
+  public static func classic(_ icon: HelloAppIconView) -> HelloIOSAppIconView {
+    HelloIOSAppIconView(light: icon)
+  }
+  
+  public static func variants(light: HelloAppIconView, dark: HelloAppIconView, tintable: HelloAppIconView) -> HelloIOSAppIconView {
+    HelloIOSAppIconView(light: light, dark: dark, tintable: tintable)
+  }
+  
+  public static func auto(icon: some View, accent: HelloColor) -> HelloIOSAppIconView {
+    HelloIOSAppIconView(
+      light: HelloAppIconView(
+        front: icon.foregroundStyle(.white),
+        back: LinearGradient(
+          colors: [accent.modify(saturation: 0.1, brightness: -0.25).swiftuiColor,
+                   accent.swiftuiColor,
+                   accent.modify(saturation: -0.05, brightness: 0.1).swiftuiColor],
+          startPoint: .top,
+          endPoint: .bottom)),
+      dark: HelloAppIconView(
+        view: icon.foregroundStyle(LinearGradient(
+          colors: [accent.modify(saturation: -0.05, brightness: 0.1).swiftuiColor,
+                   accent.swiftuiColor,
+                   accent.modify(saturation: 0.1, brightness: -0.2).swiftuiColor],
+          startPoint: .top,
+          endPoint: .bottom)
+        )),
+      tintable: HelloAppIconView(
+        front: icon.foregroundStyle(LinearGradient(
+          colors: [.white, Color(white: 0.6)],
+          startPoint: .top,
+          endPoint: .bottom)),
+        back: Color.black))
+  }
+}
+
 public struct HelloAppIconView: Sendable {
   public var layers: [AnyView]
   
@@ -63,7 +111,7 @@ public protocol AnyAppIconView: BaseAppIcon {
 public extension AnyAppIconView {
   var view: HelloAppIconView {
     if let iosAppIcon = self as? any IOSAppIcon {
-      return iosAppIcon.iOSView
+      return iosAppIcon.iOSView.light
     } else if let macAppIcon = self as? any MacOSAppIcon {
       return macAppIcon.macOSView.view
     } else {
@@ -75,11 +123,11 @@ public extension AnyAppIconView {
 }
 
 public protocol IOSAppIcon: AnyAppIconView {
-  var iOSView: HelloAppIconView { get }
+  var iOSView: HelloIOSAppIconView { get }
 }
 
 public extension IOSAppIcon {
-  var iOSView: HelloAppIconView { view }
+  var iOSView: HelloIOSAppIconView { .classic(view) }
 }
 
 public protocol MacOSAppIcon: AnyAppIconView {

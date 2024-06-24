@@ -47,7 +47,6 @@ public struct HelloAlertConfig {
   }
 }
 
-@MainActor
 public struct HelloAlert: View {
   
   @Environment(\.theme) private var theme

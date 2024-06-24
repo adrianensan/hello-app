@@ -1,6 +1,5 @@
 import SwiftUI
 
-@MainActor
 public struct NavigationPageBarFixed<NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
@@ -15,14 +14,18 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
     NavigationPageBar(title: title, navBarContent: navBarContent)
       .frame(maxWidth: .infinity)
       .padding(.top, safeAreaInsets.top)
+      .padding(.bottom, 0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .background(
         ZStack {
           Rectangle().fill(.ultraThinMaterial)
           theme.header.backgroundColor.opacity(0.8)
         }.compositingGroup()
           .shadow(color: .black.opacity(0.12), radius: 24)
-          .opacity(scrollModel.hasScrolled ? 1 : 0)
-      ).frame(maxHeight: .infinity, alignment: .top)
+          .compositingGroup()
+          .blur(radius: 8 * (1 - scrollModel.scrollThresholdProgress))
+          .opacity(scrollModel.hasScrolled ? 1 : scrollModel.scrollThresholdProgress)
+      ).padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
+      .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
   }
 }

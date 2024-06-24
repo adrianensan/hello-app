@@ -3,7 +3,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct HelloWindowRootView<Content: View>: View {
   
   private var becomeActiveNotification: Notification.Name {

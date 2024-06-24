@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol BaseAppIcon: Codable, Equatable, Identifiable, CaseIterable {
+public protocol BaseAppIcon: Codable, Equatable, Identifiable, CaseIterable, Sendable {
   
   init?(rawValue: String)
   

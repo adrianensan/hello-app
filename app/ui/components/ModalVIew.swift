@@ -50,7 +50,6 @@ public class HelloModalModel {
 }
 
 @available(tvOS, unavailable)
-@MainActor
 public struct HelloModalView<Content: View>: View {
   
   @Environment(\.theme) var helloTheme

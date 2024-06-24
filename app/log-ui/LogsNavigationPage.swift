@@ -3,7 +3,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct LogsNavigationPage: View {
   
   class NonObservedStorage {

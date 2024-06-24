@@ -5,7 +5,6 @@ import CoreImage.CIFilterBuiltins
 
 import HelloCore
 
-@MainActor
 public struct StaticIconView: View {
   
   private static var _image: NativeImage?

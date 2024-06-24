@@ -26,8 +26,6 @@ public actor Downloader {
   
   private var downloadingURLs: Set<URL> = []
   
-  public init() {}
-  
   public func download(from urlString: String, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
     guard let url = URLComponents(string: urlString)?.url else {
       throw APIError.invalidURL
@@ -35,7 +33,7 @@ public actor Downloader {
     return try await download(from: url, downloadProgressUpdate: downloadProgressUpdate)
   }
   
-  public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
+  public func download(from url: URL, downloadProgressUpdate: (@MainActor @Sendable (Double) -> Void)? = nil) async throws -> Data {
     guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
@@ -44,11 +42,26 @@ public actor Downloader {
     
     let (data, urlResponse): (Data, URLResponse)
     do {
-      var delegate: HelloAPIDownloadTaskDelegate?
-      if let progressUpdater = downloadProgressUpdate {
-        delegate = HelloAPIDownloadTaskDelegate(progressUpdater: progressUpdater)
+      let dataURL = try await withCheckedThrowingContinuation { continuation in
+        let asyncBytes: URLSession.AsyncBytes
+        let task = session.downloadTask(with: URLRequest(url: url))
+        task.delegate = HelloAPIDownloadTaskDelegate(continuation: continuation, progressUpdater: downloadProgressUpdate ?? { _ in })
+        task.resume()
+//        (asyncBytes, urlResponse) = try await session.bytes(from: url)
+//        let length = (urlResponse.expectedContentLength)
+//        var dataProgress = Data()
+//        dataProgress.reserveCapacity(Int(length))
+//        
+//        for try await byte in asyncBytes {
+//          dataProgress.append(byte)
+//          //        let progress = Double(dataProgress.count) / Double(length)
+//          //        if dataProgress.count % 1_000_000 == 0 {
+//          //          Task { @MainActor in downloadProgressUpdate?(progress) }
+//          //        }
+//        }
+//        data = dataProgress
       }
-      (data, urlResponse) = try await session.data(from: url, delegate: delegate)
+      data = try Data(contentsOf: dataURL)
     } catch {
       let requestDuration = epochTime - requestStartTime
       Log.error("\(String(format: "(%.2fs)", requestDuration)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
@@ -57,32 +70,36 @@ public actor Downloader {
     let requestDuration = epochTime - requestStartTime
     let duration = String(format: "(%.2fs)", requestDuration)
     
-    guard let httpResponse = urlResponse as? HTTPURLResponse else {
-      Log.error("\(duration) \(urlString) Failed to convert response to HTTP response", context: "Downloader")
-      throw APIError.fail
-    }
-    
-    let status = "\(httpResponse.statusCode)"
-    
-    guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
-      Log.error("\(duration) \(status) \(urlString)", context: "Downloader")
-      throw APIError.httpError(statusCode: httpResponse.statusCode)
-    }
-    
-    Log.info("\(duration) \(status) \(urlString)", context: "Downloader")
+    Log.info("\(duration) \(urlString)", context: "Downloader")
     return data
   }
 }
 
-class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDataDelegate {
+class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDownloadDelegate {
   
+  var continuation: CheckedContinuation<URL, any Error>?
   let progressUpdater: (Double) -> Void
   
-  init(progressUpdater: @escaping (Double) -> Void) {
+  init(continuation: CheckedContinuation<URL, any Error>, progressUpdater: @escaping (Double) -> Void) {
+    self.continuation = continuation
     self.progressUpdater = progressUpdater
   }
   
-  public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-    progressUpdater(Double(dataTask.countOfBytesReceived) / Double(dataTask.countOfBytesExpectedToReceive))
+  func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    progressUpdater(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))
   }
+  
+  func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+    continuation?.resume(returning: location)
+    continuation = nil
+  }
+  
+  func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+    continuation?.resume(throwing: error ?? HelloError("Error"))
+    continuation = nil
+  }
+  
+//  public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+//    progressUpdater(Double(dataTask.countOfBytesReceived) / Double(dataTask.countOfBytesExpectedToReceive))
+//  }
 }

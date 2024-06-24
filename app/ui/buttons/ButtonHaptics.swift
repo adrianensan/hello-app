@@ -17,11 +17,11 @@ public enum ButtonHaptics {
 
 public extension View {
   func buttonHaptics(isPressed: Bool) -> some View {
-    onChange(of: isPressed, perform: {
-      if $0 {
+    onChange(of: isPressed) {
+      if isPressed {
         ButtonHaptics.buttonFeedback()
       }
-    })
+    }
   }
 }
 

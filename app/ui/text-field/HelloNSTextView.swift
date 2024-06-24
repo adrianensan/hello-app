@@ -153,7 +153,6 @@ public class HelloNSTextView: NSTextView, NSTextViewDelegate {
   }
 }
 
-@MainActor
 public struct HelloTextView<FocusValue: Hashable>: NSViewRepresentable {
   
   @Binding var text: String

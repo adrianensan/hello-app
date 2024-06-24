@@ -2,7 +2,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 public struct FrameAnimation: View {
   
   public enum RepeatBehaviour: Equatable, Sendable {

@@ -1,6 +1,5 @@
 import SwiftUI
 
-@MainActor
 public struct NavigationPageTitle: View {
   
   @Environment(\.theme) private var theme

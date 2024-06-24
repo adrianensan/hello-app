@@ -22,7 +22,6 @@ class HelloFocusNSSecureTextField: NSSecureTextField, NSTextFieldDelegate {
 }
 
 
-@MainActor
 public struct HelloNSTextField<FocusValue: Hashable>: NSViewRepresentable {
   
   public class Coordinator: NSObject, NSTextFieldDelegate {

@@ -5,7 +5,6 @@ import CoreImage.CIFilterBuiltins
 
 import HelloCore
 
-@MainActor
 public struct PixelatedIconView: View {
   
   private static var _image: NativeImage?

@@ -1,7 +1,6 @@
 #if os(iOS)
 import SwiftUI
 
-@MainActor
 public struct NavigationPageBarScrolling<NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme

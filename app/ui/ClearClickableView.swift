@@ -17,7 +17,6 @@ struct ClickableViewModifier: ViewModifier {
   }
 }
 
-@MainActor
 public struct ClearClickableView: View {
   
   @Persistent(.showDebugBorders) private var showDebugBorders
