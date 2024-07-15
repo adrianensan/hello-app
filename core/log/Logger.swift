@@ -1,8 +1,9 @@
 import Foundation
 
 @MainActor
-public protocol LoggerSubscriber: AnyObject {
-  func statementLogged()
+public protocol LoggerSubscriber: AnyObject, Sendable {
+  func statementLogged(_: LogStatement)
+  func refresh(_: [LogStatement])
 }
 
 public actor Logger: Sendable {
@@ -25,7 +26,7 @@ public actor Logger: Sendable {
     }
     
     logStatements.append(LogStatement(level: .meta, message: "", context: "-----Launch-----"))
-    Task { try await flush() }
+    Task { try await flush(force: false) }
   }
   
   private func generateRawString() -> String {
@@ -36,10 +37,10 @@ public actor Logger: Sendable {
     logStatements.append(logStatement)
     guard !isEphemeral else { return }
     self.lastLoggedTime = epochTime
-    Task { await self.subscriber?.statementLogged() }
+    Task { await self.subscriber?.statementLogged(logStatement) }
     if !self.isFlushPending {
       self.isFlushPending = true
-      try await flush()
+      try await flush(force: false)
     }
   }
   
@@ -51,10 +52,10 @@ public actor Logger: Sendable {
   
   public func clear() async throws {
     logStatements = []
-    Task { await subscriber?.statementLogged() }
+    Task { await subscriber?.refresh([]) }
     if !isFlushPending {
       isFlushPending = true
-      try await flush()
+      try await flush(force: false)
     }
   }
   
@@ -76,7 +77,11 @@ public actor Logger: Sendable {
     }
     isFlushPending = false
     let oldestAllowed = epochTime - 60 * 60 * 24 * 2
-    logStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }))
+    let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }))
+    if logStatements.first?.id != filteredLogStatements.first?.id {
+      await subscriber?.refresh(filteredLogStatements)
+      logStatements = filteredLogStatements
+    }
     await flushReal()
   }
   

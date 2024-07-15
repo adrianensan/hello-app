@@ -1,5 +1,10 @@
 import Foundation
 
+@globalActor final public actor HelloLogActor: GlobalActor {
+  public static let shared: HelloLogActor = HelloLogActor()
+}
+
+@MainActor
 public enum Log {
   
   #if DEBUG
@@ -33,36 +38,36 @@ public enum Log {
     Task { try await logger.terminate() }
   }
   
-  public static func verbose(_ message: String, context: String = "") {
-    log(level: .verbose, message: message, context: context)
+  nonisolated public static func verbose(_ message: String, context: String = "") {
+    Task { await log(level: .verbose, message: message, context: context) }
   }
   
-  public static func debug(_ message: String, context: String = "") {
-    log(level: .debug, message: message, context: context)
+  nonisolated public static func debug(_ message: String, context: String = "") {
+    Task { await log(level: .debug, message: message, context: context) }
   }
   
-  public static func info(_ message: String, context: String = "") {
-    log(level: .info, message: message, context: context)
+  nonisolated public static func info(_ message: String, context: String = "") {
+    Task { await log(level: .info, message: message, context: context) }
   }
   
-  public static func warning(_ message: String, context: String = "") {
-    log(level: .warning, message: message, context: context)
+  nonisolated public static func warning(_ message: String, context: String = "") {
+    Task { await log(level: .warning, message: message, context: context) }
   }
   
-  public static func error(_ message: String, context: String = "") {
-    log(level: .error, message: message, context: context)
+  nonisolated public static func error(_ message: String, context: String = "") {
+    Task { await log(level: .error, message: message, context: context) }
   }
   
-  public static func fatal(_ message: String, context: String = "") {
-    log(level: .fatal, message: message, context: context)
+  nonisolated public static func fatal(_ message: String, context: String = "") {
+    Task { await log(level: .fatal, message: message, context: context) }
   }
   
-  public static func wtf(_ message: String, context: String = "") {
-    log(level: .wtf, message: message, context: context)
+  nonisolated public static func wtf(_ message: String, context: String = "") {
+    Task { await log(level: .wtf, message: message, context: context) }
   }
   
-  public static func meta(_ message: String, context: String = "") {
-    log(level: .meta, message: message, context: context)
+  nonisolated public static func meta(_ message: String, context: String = "") {
+    Task { await log(level: .meta, message: message, context: context)}
   }
 }
 

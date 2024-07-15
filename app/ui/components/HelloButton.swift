@@ -73,17 +73,17 @@ public struct HelloButton<Content: View>: View {
   
   private var haptics: HapticsType
   private var clickStyle: HelloButtonClickStyle
-  private var action: () async throws -> Void
-  private var content: Content
+  private var action: @MainActor () async throws -> Void
+  private var content: @MainActor () -> Content
   
   public init(clickStyle: HelloButtonClickStyle = .scale,
               haptics: HapticsType = .click,
-              action: @escaping () async throws -> Void,
-              @ViewBuilder content: () -> Content) {
+              action: @MainActor @escaping () async throws -> Void,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
     self.haptics = haptics
     self.clickStyle = clickStyle
     self.action = action
-    self.content = content()
+    self.content = content
   }
   
   public var body: some View {
@@ -97,7 +97,7 @@ public struct HelloButton<Content: View>: View {
         nonObserved.hasClicked = false
       }
     }) {
-      content
+      content()
         .background(contentShape?.fill(theme.foreground.primary.style.opacity(isHovered ? 0.08 : 0)))
         .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.1 : 0)
         .clickable()
@@ -115,7 +115,7 @@ public struct HelloButton<Content: View>: View {
         Haptics.buttonFeedback()
       }
     }) {
-      content
+      content()
         .clickable()
     }.buttonStyle(.hello(clickStyle: clickStyle, allowHaptics: haptics.hapticsOnClick))
       .accessibilityElement()

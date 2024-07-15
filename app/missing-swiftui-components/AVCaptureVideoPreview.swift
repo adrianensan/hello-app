@@ -1,7 +1,7 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 import Combine
-import AVFoundation
+@preconcurrency import AVFoundation
 
 public class NativeCameraPreviewView: NativeView {
   
@@ -29,7 +29,8 @@ public class NativeCameraPreviewView: NativeView {
   }
 }
 
-public protocol CaptureModel: ObservableObject {
+@MainActor
+public protocol CaptureModel {
   var captureSession: AVCaptureSession { get async }
 }
 
@@ -38,7 +39,7 @@ public struct CameraPreviewView<Model: CaptureModel>: NativeViewRepresentable {
   public typealias UIViewType = NativeCameraPreviewView
   public typealias NSViewType = NativeCameraPreviewView
   
-  @ObservedObject var model: Model
+  var model: Model
   
   public init(model: Model) {
     self.model = model

@@ -17,7 +17,7 @@ public enum OSInfo {
 #elseif os(macOS)
   public static let platform: String = "macOS"
 #elseif os(iOS)
-  public static let platform: String = UIDevice.current.systemName
+  public static let platform: String = "iOS"//UIDevice.current.systemName
 #else
   public static let platform: String = "Linux"
 #endif

@@ -2,6 +2,7 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
 public struct HelloIOSAppIconView: Sendable {
   public var light: HelloAppIconView
   public var dark: HelloAppIconView?
@@ -50,6 +51,7 @@ public struct HelloIOSAppIconView: Sendable {
   }
 }
 
+@MainActor
 public struct HelloAppIconView: Sendable {
   public var layers: [AnyView]
   
@@ -88,6 +90,7 @@ public struct HelloAppIconView: Sendable {
   }
 }
 
+@MainActor
 public enum MacAppIconView: Sendable {
   case preMasked(HelloAppIconView)
   case unmasked(HelloAppIconView)
@@ -102,6 +105,7 @@ public enum MacAppIconView: Sendable {
   }
 }
 
+@MainActor
 public protocol AnyAppIconView: BaseAppIcon {
   var view: HelloAppIconView { get }
   

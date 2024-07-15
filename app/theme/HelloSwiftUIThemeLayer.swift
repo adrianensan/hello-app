@@ -2,18 +2,21 @@ import SwiftUI
 
 import HelloCore
 
-public struct HelloSwiftUIThemeLayer {
+public struct HelloSwiftUIThemeLayer: Sendable {
   
   let layer: HelloThemeLayer
   
+  @MainActor
   public var backgroundView: some View {
     layer.background.view(for: Rectangle(), isBaseLayer: true)
   }
   
+  @MainActor
   public func backgroundView(for shape: some InsettableShape, isBaseLayer: Bool = false) -> some View {
     layer.background.view(for: shape, isBaseLayer: isBaseLayer)
   }
   
+  @MainActor
   public func backgroundView(isBaseLayer: Bool = true) -> some View {
     layer.background.view(for: Rectangle(), isBaseLayer: isBaseLayer)
   }

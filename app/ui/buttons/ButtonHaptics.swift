@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public enum ButtonHaptics {
   
 #if os(iOS)
@@ -34,6 +35,7 @@ import CoreHaptics
 import WatchKit
 #endif
 
+@MainActor
 public class Haptics {
   
   public static let shared: Haptics = Haptics() +& { $0.prepareHaptics() }

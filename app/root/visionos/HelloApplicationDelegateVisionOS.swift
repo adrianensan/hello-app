@@ -10,7 +10,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     if !application.supportsMultipleScenes {
       let window = UIWindow()
-      let viewController = HelloRootViewController(window: window, wrappedView: helloApplication.view())
+      let viewController = HelloRootViewController(window: window, wrappedView: { helloApplication.rootView })
       window.rootViewController = viewController
       window.makeKeyAndVisible()
       self.window = window

@@ -1,6 +1,8 @@
 import Foundation
 
-public enum IPhoneModel: CustomStringConvertible, Equatable {
+import HelloCore
+
+public enum IPhoneModel: CustomStringConvertible, Equatable, Sendable {
 
   static let identifierPrefix: String = "iPhone"
 
@@ -61,7 +63,7 @@ public enum IPhoneModel: CustomStringConvertible, Equatable {
   }
 
   public static func inferFrom(modelNumber: String) -> IPhoneModel {
-    switch modelNumber.replacingOccurrences(of: IPhoneModel.identifierPrefix, with: "") {
+    switch modelNumber.deletingPrefix(IPhoneModel.identifierPrefix) {
     case "11,2": .xs
     case "11,4", "11,6": .xsMax
     case "11,8": .xr

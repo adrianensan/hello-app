@@ -4,6 +4,8 @@ public protocol HelloNumeric: CustomStringConvertible, Hashable, Numeric, Sendab
   init(_ source: some BinaryInteger)
   init(_ source: some BinaryFloatingPoint)
   
+  static func + (lhs: Self, rhs: Self) -> Self
+  static func - (lhs: Self, rhs: Self) -> Self
   static func / (lhs: Self, rhs: Self) -> Self
   static func /= (lhs: inout Self, rhs: Self)
 //  init(_ source: some BinaryFloatingPoint)

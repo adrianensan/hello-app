@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 public class HelloClock {
   public enum HelloClockState {
@@ -10,7 +11,7 @@ public class HelloClock {
   
   public var state: HelloClockState = .tik
   private var task: Task<Void, any Error>?
-  private var tikRate: Double
+  private let tikRate: Double
   
   public init(tikRate: Double) {
     self.tikRate = tikRate
@@ -18,6 +19,7 @@ public class HelloClock {
   
   public func start() {
     guard task == nil else { return }
+    let tikRate = tikRate
     task = Task {
       do {
         while true {

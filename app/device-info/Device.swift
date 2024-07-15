@@ -122,8 +122,10 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
   
   public var iconName: String {
     switch self {
-    case .iPhone: screenCornerRadius > 0 ? "iphone" : "iphone.homebutton"
-    case .iPad: screenCornerRadius > 0 ? "ipad" : "ipad.homebutton"
+    case .iPhone:
+      hasDynamicIsland ? "iphone.gen3" :
+      screenCornerRadius > 0 ? "iphone.gen2" : "iphone.gen1"
+    case .iPad: screenCornerRadius > 0 ? "ipad.gen1" : "ipad.gen2"
     case .appleWatch: "applewatch"
     case .appleTV: "appletv"
     case .mac: "laptopcomputer"

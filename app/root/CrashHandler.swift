@@ -78,7 +78,7 @@ public enum CrashHandler {
     }
   }
   
-  private static var originalExceptionHandler: (@convention(c) (NSException) -> Void)? = NSGetUncaughtExceptionHandler()
+  private static let originalExceptionHandler: (@convention(c) (NSException) -> Void)? = NSGetUncaughtExceptionHandler()
   
   private static let exceptionHandler: @convention(c) (NSException) -> Void = { exception in
     Log.fatal("Crash with \(exception.name.rawValue): \(exception.description)", context: "App")

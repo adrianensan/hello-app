@@ -2,17 +2,19 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
 var helloApplication: (any HelloApplication)! = nil
 
+@MainActor
 public struct HelloScene: Sendable {
   
   @available(visionOS 1.0, *)
-  public enum HelloImmersiveSceneType {
+  public enum HelloImmersiveSceneType: Sendable {
     case mixed
     case full
   }
   
-  public enum HelloSceneType {
+  public enum HelloSceneType: Sendable {
     case window
     #if os(visionOS)
     @available(visionOS 1.0, *)

@@ -5,7 +5,7 @@ import HelloCore
 
 @MainActor
 @Observable
-public class LoggerObservable: NSObject, LoggerSubscriber {
+public class LoggerObservable: NSObject, LoggerSubscriber, Sendable {
   
   public var lineCount: Int
   let logger: Logger
@@ -23,10 +23,13 @@ public class LoggerObservable: NSObject, LoggerSubscriber {
     }
   }
   
-  public func statementLogged() {
-    Task {
-      logStatements = await logger.logStatements
-      self.lineCount += 1
-    }
+  public func statementLogged(_ statement: LogStatement) {
+    logStatements.append(statement)
+    lineCount += 1
+  }
+  
+  public func refresh(_ statements: [LogStatement]) {
+    logStatements = statements
+    lineCount = statements.count
   }
 }

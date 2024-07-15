@@ -91,9 +91,12 @@ public actor StoreService {
   }
 }
 #else
+@MainActor
 public class StoreService {
   
-  public static var main: StoreService = StoreService() +& { $0.setup() }
+  public static let main = StoreService() +& { $0.setup() }
+  
+  private init() {}
   
   public var tipProducts: [String] = []
   public var tips: [UInt64: String] = [:]

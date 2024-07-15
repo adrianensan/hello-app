@@ -73,7 +73,8 @@ public struct HelloAPIResponse<Content: Decodable & Sendable>: Sendable {
 //  }
 //}
 
-public protocol HelloAPIClient: Actor {
+@HelloAPIActor
+public protocol HelloAPIClient {
   var session: URLSession { get }
   
   var userAgentString: String { get }
@@ -328,11 +329,11 @@ public extension HelloAPIClient {
   }
 }
 
-class HelloAPIUploadTaskDelegate: NSObject, URLSessionTaskDelegate {
+final class HelloAPIUploadTaskDelegate: NSObject, URLSessionTaskDelegate {
   
-  let progressUpdater: (Double) -> Bool
+  let progressUpdater: @Sendable (Double) -> Bool
   
-  init(progressUpdater: @escaping (Double) -> Bool) {
+  init(progressUpdater: @escaping @Sendable (Double) -> Bool) {
     self.progressUpdater = progressUpdater
   }
   

@@ -19,9 +19,8 @@ extension Device {
       }
     case .appleWatch(let model):
       switch model {
-      case .series3_38mm, .series3_42mm: return 0
-      case .series4_40mm, .series5_40mm, .series6_40mm, .seriesSE_40mm: return 28
-      case .series4_44mm, .series5_44mm, .series6_44mm, .seriesSE_44mm: return 31
+      case .series6_40mm, .seriesSE2_40mm: return 28
+      case .series6_44mm, .seriesSE2_44mm: return 31
       case .series7_41mm, .series8_41mm, .series9_41mm: return 37
       case .series7_45mm, .series8_45mm, .series9_45mm: return 38
       case .ultra1, .ultra2: return 38
@@ -29,6 +28,18 @@ extension Device {
       }
     case .simulator(let simulatedDevice): return simulatedDevice.screenCornerRadius
     default: return 0
+    }
+  }
+  
+  public var hasDynamicIsland: Bool {
+    switch self {
+    case .iPhone(let iPhoneModel):
+      switch iPhoneModel {
+      case ._14Pro, ._14ProMax, ._15, ._15Pro, ._15Plus, ._15ProMax: return true
+      default: return false
+      }
+    case .simulator(let simulatedDevice): return simulatedDevice.hasDynamicIsland
+    default: return false
     }
   }
 }

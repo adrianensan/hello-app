@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-public struct HelloSwiftUITheme {
+public struct HelloSwiftUITheme: Sendable {
   
   public enum HelloSwiftUIThemeLayerID: String, Sendable, Identifiable {
     case base
@@ -16,15 +16,20 @@ public struct HelloSwiftUITheme {
   
   public var theme: HelloTheme
   
+  @MainActor
   public var backgroundColor: Color { base.backgroundColor }
+  
+  @MainActor
   public var backgroundView: some View {
     theme.baseLayer.background.view(for: Rectangle())
   }
   
+  @MainActor
   public func backgroundView(for shape: some InsettableShape, isBaseLayer: Bool = true) -> some View {
     theme.baseLayer.background.view(for: shape, isBaseLayer: isBaseLayer)
   }
   
+  @MainActor
   public func backgroundView(isBaseLayer: Bool = true) -> some View {
     theme.baseLayer.background.view(for: Rectangle(), isBaseLayer: isBaseLayer)
   }

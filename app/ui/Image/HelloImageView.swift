@@ -35,12 +35,22 @@ public struct AnimatedHelloImageView: View {
   }
 }
 
+public struct HelloImageOption: Equatable, Sendable {
+  public var imageSource: HelloImageSource
+  public var variant: HelloImageVariant
+  
+  public init(imageSource: HelloImageSource, variant: HelloImageVariant) {
+    self.imageSource = imageSource
+    self.variant = variant
+  }
+}
+
 public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
   
-  private let model: HelloImageModel
+  private let imageOptions: [HelloImageModel]
   private let resizeMode: ContentMode
   private let custom: (@MainActor (NativeImage) -> CustomView)?
   private let fallback: @MainActor () -> Fallback
@@ -50,7 +60,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
                    resizeMode: ContentMode = .fit,
                    custom: (@MainActor (NativeImage) -> CustomView)?,
                    fallback: @MainActor @escaping () -> Fallback) {
-    model = .model(for: source, variant: variant)
+    imageOptions = [.model(for: source, variant: variant)]
     self.resizeMode = resizeMode
     self.custom = custom
     self.fallback = fallback
@@ -61,19 +71,41 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               resizeMode: ContentMode = .fit,
               @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
               fallback: @MainActor @escaping () -> Fallback) {
-    model = .model(for: source, variant: variant)
+    imageOptions = [.model(for: source, variant: variant)]
     self.resizeMode = resizeMode
     self.custom = custom
     self.fallback = fallback
   }
   
+  public init(options: [HelloImageOption], 
+              resizeMode: ContentMode = .fit,
+              custom: (@MainActor (NativeImage) -> CustomView)?,
+              fallback: @MainActor @escaping () -> Fallback) {
+    imageOptions = options.map { .model(for: $0.imageSource, variant: $0.variant) }
+    self.resizeMode = resizeMode
+    self.custom = custom
+    self.fallback = fallback
+  }
+  
+  private var model: HelloImageModel? {
+    imageOptions.first { $0.image != nil }
+  }
+  
+  private var image: NativeImage? {
+    model?.image
+  }
+  
+  private var frames: [AnimatedImageFrame]? {
+    model?.frames
+  }
+  
   public var body: some View {
     Group {
-      if isActive, let frames = model.frames {
+      if isActive, let frames {
         AnimatedHelloImageView(images: frames)
           .dimForTheme()
-      } else if let image = model.image {
-        if let custom {
+      } else if let image {
+        if let custom, let model {
           custom(image)
             .environment(model)
         } else {
@@ -125,49 +157,57 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
               custom: nil,
               fallback: { Color.clear })
   }
+  
+  public init(options: [HelloImageOption],
+              resizeMode: ContentMode = .fit) {
+    self.init(options: options,
+              resizeMode: resizeMode,
+              custom: nil,
+              fallback: { Color.clear })
+  }
 }
 
-public struct HelloFallbackImageView: View {
-  
-  public struct HelloImageOption: Equatable, Sendable {
-    public var imageSource: HelloImageSource
-    public var variant: HelloImageVariant
-    
-    public init(imageSource: HelloImageSource, variant: HelloImageVariant) {
-      self.imageSource = imageSource
-      self.variant = variant
-    }
-  }
-  
-  @Environment(\.isActive) private var isActive
-  
-  private let imageOptions: [HelloImageModel]
-  private let resizeMode: ContentMode
-  
-  public init(options: [HelloImageOption], resizeMode: ContentMode = .fit) {
-    imageOptions = options.map { .model(for: $0.imageSource, variant: $0.variant) }
-    self.resizeMode = resizeMode
-  }
-  
-  private var image: NativeImage? {
-    imageOptions.first { $0.image != nil }?.image
-  }
-  
-  private var frames: [AnimatedImageFrame]? {
-    imageOptions.first { $0.frames != nil }?.frames
-  }
-  
-  public var body: some View {
-    if isActive, let frames {
-      AnimatedHelloImageView(images: frames)
-        .dimForTheme()
-    } else if let image {
-      Image(nativeImage: image)
-        .resizable()
-        .aspectRatio(contentMode: resizeMode)
-        .dimForTheme()
-    } else {
-      Color.clear
-    }
-  }
-}
+//public struct HelloFallbackImageView: View {
+//  
+//  public struct HelloImageOption: Equatable, Sendable {
+//    public var imageSource: HelloImageSource
+//    public var variant: HelloImageVariant
+//    
+//    public init(imageSource: HelloImageSource, variant: HelloImageVariant) {
+//      self.imageSource = imageSource
+//      self.variant = variant
+//    }
+//  }
+//  
+//  @Environment(\.isActive) private var isActive
+//  
+//  private let imageOptions: [HelloImageModel]
+//  private let resizeMode: ContentMode
+//  
+//  public init(options: [HelloImageOption], resizeMode: ContentMode = .fit) {
+//    imageOptions = options.map { .model(for: $0.imageSource, variant: $0.variant) }
+//    self.resizeMode = resizeMode
+//  }
+//  
+//  private var image: NativeImage? {
+//    imageOptions.first { $0.image != nil }?.image
+//  }
+//  
+//  private var frames: [AnimatedImageFrame]? {
+//    imageOptions.first { $0.frames != nil }?.frames
+//  }
+//  
+//  public var body: some View {
+//    if isActive, let frames {
+//      AnimatedHelloImageView(images: frames)
+//        .dimForTheme()
+//    } else if let image {
+//      Image(nativeImage: image)
+//        .resizable()
+//        .aspectRatio(contentMode: resizeMode)
+//        .dimForTheme()
+//    } else {
+//      Color.clear
+//    }
+//  }
+//}

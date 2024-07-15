@@ -10,7 +10,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   var uiProperties: UIProperties
   var windowModel: HelloWindowModel
   
-  public init<T: View>(window: UIWindow? = nil, wrappedView: @escaping @autoclosure () -> T) {
+  public init<T: View>(window: UIWindow? = nil, wrappedView: @escaping @MainActor () -> T) {
     //    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()

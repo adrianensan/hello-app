@@ -15,7 +15,7 @@ public struct HelloAlertConfig {
       self.isDestructive = isDestructive
     }
     
-    public init(name: String, action: (() async -> Void)? = nil, isDestructive: Bool = false) {
+    public init(name: String, action: (@MainActor () async -> Void)? = nil, isDestructive: Bool = false) {
       self.name = name
       self.action = { Task { await action?() } }
       self.isDestructive = isDestructive

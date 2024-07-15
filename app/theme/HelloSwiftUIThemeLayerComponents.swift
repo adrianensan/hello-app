@@ -1,16 +1,16 @@
 import SwiftUI
 
-public struct HelloSwiftUIThemeBackground {
+public struct HelloSwiftUIThemeBackground: Sendable {
   public var color: Color
   public var style: AnyShapeStyle
 }
 
-public struct HelloSwiftUIThemeForeground {
+public struct HelloSwiftUIThemeForeground: Sendable {
   public var color: Color
   public var style: AnyShapeStyle
 }
 
-public struct HelloSwiftUIThemeForegroundLayers {
+public struct HelloSwiftUIThemeForegroundLayers: Sendable {
   public var primary: HelloSwiftUIThemeForeground
   public var secondary: HelloSwiftUIThemeForeground
   public var tertiary: HelloSwiftUIThemeForeground

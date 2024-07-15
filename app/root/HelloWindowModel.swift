@@ -2,6 +2,7 @@ import SwiftUI
 import Observation
 
 #if os(iOS)
+@MainActor
 public func globalDismissKeyboard() {
   UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }
@@ -24,11 +25,11 @@ public class HelloWindowModel {
   struct PopupWindow: Identifiable, Sendable {
     var viewID: String
     var instanceID: String
-    var view: () -> AnyView
+    var view: @MainActor () -> AnyView
     
     var id: String { instanceID }
     
-    init(instanceID: String = UUID().uuidString, viewID: String, view: @escaping () -> some View) {
+    init(instanceID: String = UUID().uuidString, viewID: String, view: @escaping @MainActor () -> some View) {
       self.instanceID = instanceID
       self.viewID = viewID
       self.view = { 
@@ -58,14 +59,16 @@ public class HelloWindowModel {
     popupViews.append(PopupWindow(viewID: alertConfig.id) { HelloAlert(config: alertConfig) })
   }
   
+  #if os(iOS)
   public func present(id: String = UUID().uuidString,
                       dragToDismissType: GestureType = .highPriority,
-                      sheet: @MainActor @autoclosure @escaping () -> some View) {
+                      sheet: @MainActor @escaping () -> some View) {
     guard !popupViews.contains(where: { $0.viewID == id }) else { return }
     blurBackgroundForPopup = false
     globalDismissKeyboard()
     popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, dragToDismissType: dragToDismissType, content: sheet) })
   }
+  #endif
   
   public func present(view: @MainActor @autoclosure @escaping () -> some View) {
     blurBackgroundForPopup = false

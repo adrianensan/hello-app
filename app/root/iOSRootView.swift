@@ -12,7 +12,7 @@ public struct HelloAppRootView<Content: View>: View {
   
   private var content: @MainActor () -> Content
   
-  public init(_ content: @MainActor @escaping () -> Content) {
+  public init(_ content: @escaping @MainActor () -> Content) {
     self.content = content
   }
   

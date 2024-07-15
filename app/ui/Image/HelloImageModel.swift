@@ -131,7 +131,7 @@ public class HelloImageModel {
           await loadFrames(from: resizedImageData)
         }
       } else {
-        loadTask = Task { [weak self] in
+        loadTask = Task {
           defer { loadTask = nil }
           var imageData = try await HelloImageDownloadManager.main.download(from: url)
           await Persistence.save(imageData, for: .tempDownload(url: url))
@@ -141,7 +141,6 @@ public class HelloImageModel {
             imageData = try await ImageProcessor.resize(imageData: imageData, maxSize: size)
           }
           await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
-          guard let self else { return }
           self.image = NativeImage(data: imageData)
           await loadFrames(from: imageData)
         }
@@ -156,12 +155,12 @@ public class HelloImageModel {
       } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
         loadTask = Task {
           defer { loadTask = nil }
-          favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
-          image = NativeImage(data: favicon)
+          let resizedFavicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
+          await Persistence.save(resizedFavicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
+          image = NativeImage(data: resizedFavicon)
         }
       } else {
-        loadTask = Task { [weak self] in
+        loadTask = Task {
           defer { loadTask = nil }
           var favicon = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
           
@@ -172,7 +171,6 @@ public class HelloImageModel {
             favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size))
           }
           await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
-          guard let self else { return }
           image = NativeImage(data: favicon)
         }
       }

@@ -4,6 +4,7 @@ import HelloCore
 
 public extension HelloBackground {
   
+  @MainActor
   @ViewBuilder
   func view(for shape: some InsettableShape, isBaseLayer: Bool = true) -> some View {
     switch self {

@@ -93,7 +93,7 @@ public struct NavigationPagerView: View {
             .padding(.horizontal, 8)
             .frame(height: model.config.navBarHeight)
             .padding(.top, {
-              #if os(iOS)
+              #if os(iOS) || os(visionOS)
               safeAreaInsets.top
               #elseif os(macOS)
               if safeAreaInsets.top > 0 {

@@ -11,9 +11,24 @@ public enum HelloPersistenceError: Error {
   case updatesCancelled
 }
 
+@globalActor final public actor HelloPersistenceActor: GlobalActor {
+  public static let shared: HelloPersistenceActor = HelloPersistenceActor()
+}
+
 extension UserDefaults: @unchecked Sendable {}
 
-public actor HelloPersistence {
+@HelloPersistenceActor
+public class HelloPersistence {
+  
+  public struct Listener<Property: PersistenceProperty> {
+    weak var object: AnyObject?
+    var callback: @Sendable (Property.Value) async -> Void
+    
+    init(object: AnyObject, callback: @escaping  @Sendable (Property.Value) async -> Void) {
+      self.object = object
+      self.callback = callback
+    }
+  }
   
   nonisolated public let keychain: KeychainHelper
   private var allowSaving: Bool = true
@@ -23,10 +38,11 @@ public actor HelloPersistence {
   }
   
   private var cache: [String: Any] = [:]
+  private var listeners: [String: [Any]] = [:]
   private var userDefaultsCache: [DefaultsPersistenceSuite: UserDefaults] = [:]
   private var baseURLs: [FilePersistenceLocation: URL] = [:]
   
-  fileprivate init(keychain: KeychainHelper) {
+  nonisolated fileprivate init(keychain: KeychainHelper) {
     self.keychain = keychain
   }
   
@@ -65,6 +81,18 @@ public actor HelloPersistence {
 //    }
   }
   
+  func listen<Property: PersistenceProperty>(for property: Property,
+                                             object: AnyObject,
+                                             action: @escaping @Sendable (Property.Value) async -> Void,
+                                             initial: Bool = true) async {
+    var propertyListeners = listeners[property.id] ?? []
+    propertyListeners.append(Listener<Property>(object: object, callback: action))
+    listeners[property.id] = propertyListeners
+    if initial {
+      await action(value(for: property))
+    }
+  }
+  
   private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) {
     Task { @MainActor in
       guard let object = Persistence.models[property.location.id]?.value else { return }
@@ -73,6 +101,21 @@ public actor HelloPersistence {
         return
       }
       await observable.value = value
+    }
+    
+    if var listeners = listeners[property.id] as? [Listener<Property>] {
+      var hasChanged = false
+      for (i, listener) in listeners.reversed().enumerated() {
+        if listener.object == nil {
+          listeners.remove(at: i)
+          hasChanged = true
+        } else {
+          Task { await listener.callback(value) }
+        }
+      }
+      if hasChanged {
+        self.listeners[property.id] = listeners
+      }
     }
   }
   
@@ -339,10 +382,13 @@ public actor HelloPersistence {
   }
 }
 
+@HelloPersistenceActor
 public enum Persistence {
   
+  @MainActor
   fileprivate static var models: [String: Weak<AnyObject>] = [:]
   
+  @MainActor
   static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
     if let weakModel = models[property.location.id],
        let model = weakModel.value as? PersistentObservable<Property> {
@@ -354,13 +400,13 @@ public enum Persistence {
     }
   }
   
-  public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup))
+  nonisolated public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup))
   
   public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
     await Property.persistence.save(value, for: property)
   }
   
-  public static func unsafeSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+  nonisolated public static func unsafeSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
     try? Property.persistence.saveInternal(value, for: property)
   }
   
@@ -368,7 +414,7 @@ public enum Persistence {
     await Property.persistence.value(for: property)
   }
   
-  public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+  nonisolated public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
     Property.persistence.storedValue(for: property)
   }
   
@@ -380,11 +426,18 @@ public enum Persistence {
     await Property.persistence.delete(property: property)
   }
   
+  public static func listen<Property: PersistenceProperty>(for property: Property,
+                                                           object: AnyObject,
+                                                           initial: Bool = true,
+                                                           action: @escaping @Sendable (Property.Value) async -> Void) async {
+    await Property.persistence.listen(for: property, object: object, action: action, initial: initial)
+  }
+  
   public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (consuming Property.Value) -> Property.Value) async {
     await Property.persistence.atomicUpdate(property, update: update)
   }
   
-  public static func size<Property: PersistenceProperty>(of property: Property) -> Int {
+  nonisolated public static func size<Property: PersistenceProperty>(of property: Property) -> Int {
     Property.persistence.size(of: property)
   }
   
@@ -392,19 +445,19 @@ public enum Persistence {
     await Property.persistence.isSet(property: property)
   }
   
-  public static func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
+  nonisolated public static func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     Property.persistence.initialIsSet(property: property)
   }
   
-  public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
+  nonisolated public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
     Property.persistence.fileURL(for: property)
   }
   
-  public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
+  nonisolated public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
     Property.persistence.rootURL(for: property)
   }
   
-  public static func wipeFiles(location: FilePersistenceLocation) throws {
+  nonisolated public static func wipeFiles(location: FilePersistenceLocation) throws {
     guard let url = location.url else { return }
     try FileManager.default.removeItem(at: url)
   }

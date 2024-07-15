@@ -1,5 +1,8 @@
 import Foundation
 
+extension SecAccessControl: @unchecked Sendable {}
+
+@HelloPersistenceActor
 public class KeychainHelper {
   
   public enum KeychainError: LocalizedError {
@@ -26,25 +29,13 @@ public class KeychainHelper {
   
   private let accessGroup: String?
   
-  private static var _bioSecAccessControl: SecAccessControl?
-  public static var bioSecAccessControl: SecAccessControl {
-    get throws {
-      if let _bioSecAccessControl {
-        return _bioSecAccessControl
-      } else {
-        guard let access = SecAccessControlCreateWithFlags(
-          nil,
-          kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-          .biometryCurrentSet,
-          nil)
-        else { throw HelloError("Failed to create Biometrics accesss control") }
-        _bioSecAccessControl = access
-        return access
-      }
-    }
-  }
+  public let bioSecAccessControl: SecAccessControl? = SecAccessControlCreateWithFlags(
+    nil,
+    kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+    .biometryCurrentSet,
+    nil)
   
-  private var baseAttributes: [CFString: Any] {
+  nonisolated private var baseAttributes: [CFString: Any] {
     var attributes: [CFString: Any] = [
       kSecAttrService: accessGroup ?? service,
       kSecClass: kSecClassGenericPassword
@@ -52,12 +43,12 @@ public class KeychainHelper {
     return attributes
   }
   
-  public init(service: String, group: String? = nil) {
+  nonisolated public init(service: String, group: String? = nil) {
     self.service = service
     accessGroup = group
   }
   
-  private func queryAttributes(for key: String) -> [CFString: Any] {
+  nonisolated private func queryAttributes(for key: String) -> [CFString: Any] {
     var query = baseAttributes
     query[kSecAttrAccount] = key
     return query
@@ -65,7 +56,7 @@ public class KeychainHelper {
   
   // MARK: Password
   
-  public func set(_ value: String, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
+  nonisolated public func set(_ value: String, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
     guard value != (try? string(for: key)) else { return }
     guard let data = value.data(using: .utf8) else {
       throw KeychainError.invalidValue
@@ -74,7 +65,7 @@ public class KeychainHelper {
     try set(data, for: key, appGroup: appGroup, isBiometricallyLocked: isBiometricallyLocked)
   }
   
-  public func set(_ data: Data, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
+  nonisolated public func set(_ data: Data, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
     #if os(iOS) || os(macOS) || os(watchOS)
     try? remove(for: key)
     
@@ -85,7 +76,7 @@ public class KeychainHelper {
     if appGroup, let accessGroup = accessGroup {
       query[kSecAttrAccessGroup] = accessGroup
     }
-    if isBiometricallyLocked, let accessControl = try? Self.bioSecAccessControl {
+    if isBiometricallyLocked, let accessControl = try? bioSecAccessControl {
       query[kSecAttrAccessControl] = accessControl
     } else {
       query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
@@ -113,7 +104,7 @@ public class KeychainHelper {
     #endif
   }
   
-  public func remove(for key: String) throws {
+  nonisolated public func remove(for key: String) throws {
     #if os(iOS) || os(macOS) || os(watchOS)
     let status = SecItemDelete(queryAttributes(for: key) as CFDictionary)
     guard status == errSecSuccess else {
@@ -126,7 +117,7 @@ public class KeychainHelper {
     #endif
   }
   
-  public func string(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> String {
+  nonisolated public func string(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> String {
     let data = try data(for: key, additionalAttributes: additionalAttributes)
     guard let string = String(data: data, encoding: .utf8) else {
       throw KeychainError.invalidValue
@@ -134,7 +125,7 @@ public class KeychainHelper {
     return string
   }
   
-  public func data(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> Data {
+  nonisolated public func data(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> Data {
     #if os(iOS) || os(macOS) || os(watchOS)
     var query = baseAttributes
     query[kSecAttrAccount] = key

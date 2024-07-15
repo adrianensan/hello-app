@@ -241,6 +241,7 @@ extension PersistenceProperty {
 //  }
 //}
 
+@MainActor
 @Observable
 class PersistentObservable<Property: PersistenceProperty> {
 
@@ -252,7 +253,11 @@ class PersistentObservable<Property: PersistenceProperty> {
   @ObservationIgnored private var listeners: [Weak<PersistentAsync<Property>>] = []
   @ObservationIgnored private var listenerToSkip: PersistentAsync<Property>?
 
-  @MainActor
+  init(_ property: Property) {
+    self.property = property
+    value = Property.persistence.storedValue(for: property)
+  }
+  
   func updateValue(to newValue: Property.Value, from listener: PersistentAsync<Property>? = nil) {
     listenerToSkip = listener
     value = newValue
@@ -276,40 +281,87 @@ class PersistentObservable<Property: PersistenceProperty> {
       }
     }
   }
-
-  init(_ property: Property) {
-    self.property = property
-    value = Property.persistence.storedValue(for: property)
-  }
 }
 
-@propertyWrapper
-@Observable
-public class PersistentAsync<Property: PersistenceProperty> {
+//@propertyWrapper
+//public struct PersistentNew<Property: PersistenceProperty> {
+//  
+//  private let persistenObservable: PersistentObservable<Property>
+//  
+//  private var value: Property.Value
+//  
+//  public init(_ property: Property) {
+//    persistenObservable = Persistence.model(for: property)
+//    value = persistenObservable.value
+////    Task { await persistenObservable.listen(self) }
+//  }
+//  
+//  fileprivate mutating func valueUpdated() {
+//    value = persistenObservable.value
+//  }
+//  
+//  public var wrappedValue: Property.Value {
+//    get { value }
+//    mutating set {
+//      value = newValue
+//      valueUpdated()
+////      Task { await persistenObservable.updateValue(to: value, from: self) }
+//    }
+//  }
+//}
 
-  private let persistenObservable: PersistentObservable<Property>
+//@propertyWrapper
+//@Observable
+//public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
+//
+//  private let persistenObservable: PersistentObservable<Property>
+//
+//  private var value: Property.Value
+//
+//  public var onUpdate: (() -> Void)?
+//
+//  public init(_ property: Property) {
+//    persistenObservable = Persistence.model(for: property)
+//    value = persistenObservable.value
+//    Task { await persistenObservable.listen(self) }
+//  }
+//  
+//  fileprivate func valueUpdated() {
+//    value = persistenObservable.value
+//    onUpdate?()
+//  }
+//
+//  public var wrappedValue: Property.Value {
+//    get { value }
+//    set {
+//      value = newValue
+//      Task { await persistenObservable.updateValue(to: value, from: self) }
+//    }
+//  }
+//}
 
-  private var value: Property.Value
-
-  public var onUpdate: (() -> Void)?
-
-  fileprivate func valueUpdated() {
-    value = persistenObservable.value
-    onUpdate?()
-  }
-
+public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
+  
+  private let property: Property
+  
   public init(_ property: Property) {
-    persistenObservable = Persistence.model(for: property)
-    value = persistenObservable.value
-    Task { await persistenObservable.listen(self) }
+    self.property = property
   }
-
-  public var wrappedValue: Property.Value {
-    get { value }
-    set {
-      value = newValue
-      Task { await persistenObservable.updateValue(to: value, from: self) }
-    }
+  
+  public var value: Property.Value { get async { await Persistence.model(for: property).value } }
+  
+  public func update(to newValue: Property.Value) async {
+    await Persistence.model(for: property).updateValue(to: newValue)
+  }
+  
+  public func onChange(_: @escaping (Property.Value) -> Void) async {
+    await Persistence.model(for: property).listen(self)
+  }
+  
+  fileprivate func valueUpdated() {
+    //    value = persistenObservable.value
+    //    onUpdate?()
+    //  }
   }
 }
 

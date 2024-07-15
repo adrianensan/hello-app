@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct AnyShape: Shape {
-  private var base: (CGRect) -> Path
+  private let base: @Sendable (CGRect) -> Path
   
   public init<S: Shape>(_ shape: S) {
     base = shape.path(in:)
@@ -14,14 +14,20 @@ public struct AnyShape: Shape {
 
 public struct AnyInsettableShape: InsettableShape {
   
-  private var base: (CGRect) -> Path
+  nonisolated private let base: @Sendable (CGRect) -> Path
   private var insetAmount: CGFloat = 0
   
   public init<S: InsettableShape>(_ shape: S) {
     base = shape.path(in:)
+    insetAmount = 0
   }
   
-  public func inset(by amount: CGFloat) -> AnyInsettableShape {
+  public init(path: @escaping @Sendable (CGRect) -> Path, insetAmount: CGFloat = 0) {
+    base = path
+    self.insetAmount = insetAmount
+  }
+  
+  nonisolated public func inset(by amount: CGFloat) -> AnyInsettableShape {
     var copy = self
     copy.insetAmount = amount
     return copy

@@ -1,6 +1,8 @@
 import Foundation
 
 public extension String {
+  static var uuid: String { UUID().uuidString }
+  
   subscript(_ i: Int) -> Character {
     self[index(for: i)]
   }
@@ -38,5 +40,39 @@ public extension String {
   
   mutating func deleteSuffix(_ suffix: String) {
     self = deletingSuffix(suffix)
+  }
+}
+
+public extension StringProtocol {
+  var url: URL? {
+    guard self.contains(".") else { return nil }
+    
+    let urlString = removingHTMLEntities
+    
+    return URL(string: urlString)
+  }
+  
+  var unwrappingCDATA: SubSequence {
+    guard self.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("<![CDATA["),
+          let cdataStartIndex = range(of: "<![CDATA[")?.upperBound,
+          let cdataEndIndex = range(of: "]]>")?.lowerBound else {
+      return self[...]
+    }
+    return self[cdataStartIndex..<cdataEndIndex]
+  }
+  
+  var removingHTTP: String {
+    var modified = String(self)
+    if hasPrefix("https://") {
+      modified = String(modified.dropFirst(8))
+    } else if hasPrefix("http://") {
+      modified = String(modified.dropFirst(7))
+    }
+    
+    if hasPrefix("www.") {
+      modified = String(modified.dropFirst(4))
+    }
+    
+    return modified
   }
 }

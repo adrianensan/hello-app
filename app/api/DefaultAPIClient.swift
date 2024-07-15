@@ -2,7 +2,8 @@ import Foundation
 
 import HelloCore
 
-public actor DefaultHelloAPIClient: HelloAPIClient {
+@HelloAPIActor
+public class DefaultHelloAPIClient: HelloAPIClient {
   
   public static let main = DefaultHelloAPIClient()
   

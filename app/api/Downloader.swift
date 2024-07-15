@@ -2,7 +2,46 @@ import Foundation
 
 import HelloCore
 
-public actor Downloader {
+@globalActor final public actor HelloAPIActor: GlobalActor {
+  public static let shared: HelloAPIActor = HelloAPIActor()
+}
+
+@HelloAPIActor
+public class Downloader {
+  
+  @HelloAPIActor
+  final class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDownloadDelegate {
+    
+    var continuation: CheckedContinuation<URL, any Error>?
+    let progressUpdater: @Sendable (Double) -> Void
+    
+    init(continuation: CheckedContinuation<URL, any Error>, progressUpdater: @escaping @Sendable (Double) -> Void) {
+      self.continuation = continuation
+      self.progressUpdater = progressUpdater
+    }
+    
+    nonisolated func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+      Task { await progressUpdater(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)) }
+    }
+    
+    nonisolated func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+      Task { await finished(url: location) }
+    }
+    
+    nonisolated func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+      Task { await failed(error: error ?? HelloError("Error")) }
+    }
+    
+    func finished(url: URL) {
+      continuation?.resume(returning: url)
+      continuation = nil
+    }
+    
+    func failed(error: any Error) {
+      continuation?.resume(throwing: error)
+      continuation = nil
+    }
+  }
   
   public static let main: Downloader = Downloader()
   
@@ -33,7 +72,7 @@ public actor Downloader {
     return try await download(from: url, downloadProgressUpdate: downloadProgressUpdate)
   }
   
-  public func download(from url: URL, downloadProgressUpdate: (@MainActor @Sendable (Double) -> Void)? = nil) async throws -> Data {
+  public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
     guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
@@ -73,33 +112,4 @@ public actor Downloader {
     Log.info("\(duration) \(urlString)", context: "Downloader")
     return data
   }
-}
-
-class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDownloadDelegate {
-  
-  var continuation: CheckedContinuation<URL, any Error>?
-  let progressUpdater: (Double) -> Void
-  
-  init(continuation: CheckedContinuation<URL, any Error>, progressUpdater: @escaping (Double) -> Void) {
-    self.continuation = continuation
-    self.progressUpdater = progressUpdater
-  }
-  
-  func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-    progressUpdater(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))
-  }
-  
-  func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-    continuation?.resume(returning: location)
-    continuation = nil
-  }
-  
-  func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-    continuation?.resume(throwing: error ?? HelloError("Error"))
-    continuation = nil
-  }
-  
-//  public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-//    progressUpdater(Double(dataTask.countOfBytesReceived) / Double(dataTask.countOfBytesExpectedToReceive))
-//  }
 }

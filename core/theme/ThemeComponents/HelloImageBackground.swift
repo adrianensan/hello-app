@@ -2,7 +2,7 @@ import Foundation
 
 public struct HelloImageBackground: Codable, Sendable, Hashable {
   
-  public enum Mode: Codable {
+  public enum Mode: Codable, Sendable {
     case fill
     case fillLengthwise
     case tile

@@ -14,7 +14,7 @@ public struct AppIconShape: InsettableShape {
   
   public init() {}
   
-  public func inset(by amount: CGFloat) -> AppIconShape {
+  nonisolated public func inset(by amount: CGFloat) -> AppIconShape {
     var copy = self
     copy.insetAmount = amount
     return copy
@@ -44,7 +44,7 @@ public struct MacAppIconShape: InsettableShape {
   
   public init() {}
   
-  public func inset(by amount: CGFloat) -> MacAppIconShape {
+  nonisolated public func inset(by amount: CGFloat) -> MacAppIconShape {
     var copy = self
     copy.insetAmount = amount
     return copy

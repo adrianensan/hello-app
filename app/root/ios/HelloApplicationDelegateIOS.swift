@@ -93,6 +93,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   }
 }
 
+@MainActor
 public class SceneDelegate: NSObject, UISceneDelegate {
   
   public var window: UIWindow?

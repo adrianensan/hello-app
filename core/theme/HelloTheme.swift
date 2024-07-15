@@ -117,7 +117,7 @@ public enum HelloThemeScheme: Codable, Sendable, Equatable {
   case dark
 }
 
-public struct HelloTheme: Codable, Hashable {
+public struct HelloTheme: Codable, Hashable, Sendable {
   public var id: String
   public var name: String
   

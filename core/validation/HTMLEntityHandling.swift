@@ -78,7 +78,7 @@ public extension StringProtocol {
   
   var removingHTMLEntities: String {
     var updatedString: [UInt8] = []
-    var trieNode: TrieNode<String> = htmlEntitiesTrie
+    var trieNode: Trie<String> = htmlEntitiesTrie
     var tempCharacters: [UInt8] = []
     let andVal = "&".utf8.first!
     for character in self.utf8 {

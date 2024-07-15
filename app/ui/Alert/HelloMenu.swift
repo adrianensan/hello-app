@@ -6,12 +6,12 @@ public struct HelloMenuItem: Identifiable {
   public var id: String = UUID().uuidString
   var name: String
   var icon: String
-  var action: () -> Void
+  var action: @MainActor () -> Void
   
   public init(id: String = UUID().uuidString, 
               name: String, 
               icon: String, 
-              action: @escaping () -> Void) {
+              action: @MainActor @escaping () -> Void) {
     self.id = id
     self.name = name
     self.icon = icon

@@ -16,8 +16,10 @@ public actor LinkFaviconURLDataParser {
   
   public static let main = LinkFaviconURLDataParser()
   
+  private init() {}
+  
   private var inProgress: Set<String> = []
-  @PersistentAsync(.failedFaviconFetches) private var failedFaviconFetches
+  private var failedFaviconFetches = Persistence.initialValue(.failedFaviconFetches)
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     if let failedFetch = failedFaviconFetches[helloURL.string] {
@@ -48,6 +50,7 @@ public actor LinkFaviconURLDataParser {
       }
     } catch {
       failedFaviconFetches[helloURL.string] = epochTime
+      Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
       throw error
     }
     let html: String?
@@ -117,6 +120,7 @@ public actor LinkFaviconURLDataParser {
     }
     
     failedFaviconFetches[helloURL.string] = epochTime
+    Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
     throw LinkPreviewDataParserError.previewDataNotFound
   }
   

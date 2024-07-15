@@ -13,7 +13,7 @@ public extension EnvironmentValues {
   @Entry var keyboardFrame: CGRect = .zero
   @Entry var isFullscreen: Bool = false
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
-  @Entry var helloDismiss: () -> Void = {}
+  @Entry var helloDismiss: @Sendable @MainActor () -> Void = {}
 }
 
 @MainActor
