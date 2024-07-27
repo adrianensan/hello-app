@@ -1,8 +1,8 @@
 import Foundation
 
-public struct Cookie {
+public struct Cookie: Sendable {
     
-  public enum SameSiteType {
+  public enum SameSiteType: Sendable {
     case strict
     case lax
     

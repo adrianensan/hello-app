@@ -8,6 +8,7 @@ public extension EnvironmentValues {
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
   @Entry var viewID: String? = nil
+  @Entry var pageID: String? = nil
   @Entry var windowFrame: CGRect = .zero
   @Entry var safeArea: EdgeInsets = EdgeInsets()
   @Entry var keyboardFrame: CGRect = .zero
@@ -15,6 +16,62 @@ public extension EnvironmentValues {
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
   @Entry var helloDismiss: @Sendable @MainActor () -> Void = {}
 }
+
+//struct OptionalEnvironmentKey<ObservableType: Observable>: EnvironmentKey {
+//  static let defaultValue: ObservableType? = nil
+//}
+
+extension EnvironmentValues: @unchecked Sendable {}
+
+//struct AllKey: EnvironmentKey {
+//  static let defaultValue: EnvironmentValues = .init()
+//}
+//
+//public extension EnvironmentValues {
+//  var all: EnvironmentValues {
+//    get { self }
+//    set { self = newValue }
+//  }
+//}
+
+struct AllKey: EnvironmentKey {
+  static let defaultValue: EnvironmentValues = .init()
+}
+
+fileprivate extension EnvironmentValues {
+  var all: EnvironmentValues {
+    get { self }
+    set { self = newValue }
+  }
+}
+
+fileprivate extension EnvironmentValues {
+  func optionalObject<ObservableType: Observable & AnyObject>(_ key: ObservableType.Type) -> ObservableType? {
+    self[key]
+  }
+}
+
+@propertyWrapper public struct OptionalEnvironment<ObservableType: Observable & AnyObject>: DynamicProperty {
+  
+  @Environment(\.all) private var environment
+  
+  public var wrappedValue: ObservableType?
+  
+  public init(_ key: ObservableType.Type) { }
+  
+  mutating public func update() {
+    wrappedValue = environment[ObservableType.self] as? ObservableType
+  }
+}
+
+//@frozen @propertyWrapper public struct OptionalEnvironment<Value> : DynamicProperty {
+//  
+//  @inlinable public init(_ keyPath: KeyPath<EnvironmentValues, Value>) {
+//
+//  }
+//  
+//  @inlinable public var wrappedValue: Value { get }
+//}
 
 @MainActor
 struct ActiveThemeObservationViewModifier: ViewModifier {

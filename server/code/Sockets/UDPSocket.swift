@@ -2,16 +2,17 @@ import Foundation
 
 import HelloCore
 
-public struct UDPPacket {
+public struct UDPPacket: Sendable {
   public var originAddress: NetworkAddress
   public var bytes: [UInt8]
 }
 
+@SocketActor
 public class UDPSocket: Socket {
   
   var port: UInt16
   
-  public init(socketFD: Int32, port: UInt16) throws {
+  nonisolated public init(socketFD: Int32, port: UInt16) throws {
     self.port = port
     try super.init(socketFD: socketFD)
   }
@@ -52,7 +53,7 @@ public class UDPSocket: Socket {
       do {
         return try rawRecieveData()
       } catch SocketError.cantReadYet {
-        try await SocketPool.main.waitUntilReadable(self)
+        try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
       }
       guard errorLoopCounter < 3 else { throw SocketError.errorLoop }
       errorLoopCounter += 1

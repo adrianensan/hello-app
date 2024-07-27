@@ -1,4 +1,4 @@
-public enum HTTPVersion: CustomStringConvertible {
+public enum HTTPVersion: CustomStringConvertible, Sendable {
   case http1_0
   case http1_1
   case http2_0

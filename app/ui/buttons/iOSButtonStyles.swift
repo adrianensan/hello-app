@@ -55,7 +55,6 @@ public extension ButtonStyle where Self == NoButtonStyle {
 }
 
 public struct ScaleButtonStyle: ButtonStyle {
-  
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
       .brightness(configuration.isPressed ? -0.05 : 0)
@@ -67,7 +66,6 @@ public struct ScaleButtonStyle: ButtonStyle {
 }
 
 public struct SubtleScaleButtonStyle: ButtonStyle {
-  
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
       .brightness(configuration.isPressed ? -0.04 : 0)
@@ -89,34 +87,6 @@ public struct SubtleButtonStyle: ButtonStyle {
   }
 }
 
-public struct HelloButtonStyle: ButtonStyle {
-  
-  @Environment(\.theme) private var theme
-  @Environment(\.contentShape) private var contentShape
-  
-  var clickStyle: HelloButtonClickStyle
-  var allowHaptics: Bool
-  
-  public func makeBody(configuration: Configuration) -> some View {
-    switch clickStyle {
-    case .scale:
-      configuration.label
-        .brightness(configuration.isPressed ? (theme.theme.isDark ? 1 : -1) * clickStyle.highlightAmount : 0)
-        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-        .scaleEffect(configuration.isPressed ? clickStyle.scaleAmount : 1)
-        .animation(.button, value: configuration.isPressed)
-        .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
-    case .highlight:
-      configuration.label
-        .brightness(configuration.isPressed ? (theme.theme.isDark ? 1 : -1) * clickStyle.highlightAmount : 0)
-      //        .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-      //        .animation(.button, value: configuration.isPressed)
-        .buttonHaptics(isPressed: allowHaptics ? configuration.isPressed : false)
-        .background(contentShape?.fill(Color(hue: 0, saturation: 0, brightness: (theme.theme.isDark ? 1 : 0), opacity: configuration.isPressed ? 0.1 : 0)))
-    }
-  }
-}
-
 public extension ButtonStyle where Self == ScaleButtonStyle {
   static func scale(haptics: ButtonHapticsLevel = .onClickAndAction) -> ScaleButtonStyle {
     ScaleButtonStyle()
@@ -129,10 +99,4 @@ public extension ButtonStyle where Self == SubtleScaleButtonStyle {
 
 public extension ButtonStyle where Self == SubtleButtonStyle {
   static var subtleScaleNoHaptics: SubtleButtonStyle { SubtleButtonStyle() }
-}
-
-public extension ButtonStyle where Self == HelloButtonStyle {
-  static func hello(clickStyle: HelloButtonClickStyle = .scale ,allowHaptics: Bool) -> HelloButtonStyle {
-    HelloButtonStyle(clickStyle: clickStyle, allowHaptics: allowHaptics)
-  }
 }

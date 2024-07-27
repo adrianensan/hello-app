@@ -21,17 +21,28 @@ struct NavigationPageBackswipe: ViewModifier {
       .animation(backDragGestureState == .zero ? .pageAnimation : .interactive, value: backDragGestureState)
       .nest {
 #if os(iOS)
-        $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 16 : .infinity, coordinateSpace: .global)
+        $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
           .updating($backDragGestureState) { drag, state, transaction in
-            if TouchesModel.main.hasScrolledDuringTouch || drag.translation.width <= 0 {
-              state = CGSize(width: 0, height: 0)
-              if backProgressModel.backSwipeAllowance == nil {
-                backProgressModel.backSwipeAllowance = false
-              }
-            } else if backProgressModel.backSwipeAllowance != false {
-              state = CGSize(width: drag.translation.width, height: 0)
-              backProgressModel.backSwipeAllowance = true
+            if backProgressModel.backSwipeAllowance == nil {
+              backProgressModel.backSwipeAllowance = 0.5 * drag.translation.width > abs(drag.translation.height)
             }
+            
+            if backProgressModel.backSwipeAllowance == true {
+              if drag.translation.width > 0 {
+                state = CGSize(width: drag.translation.width, height: 0)
+              } else {
+                state = CGSize(width: -sqrt(abs(drag.translation.width)), height: 0)
+              }
+            }
+//            if TouchesModel.main.hasScrolledDuringTouch || drag.translation.width <= 0 {
+//              state = CGSize(width: 0, height: 0)
+//              if backProgressModel.backSwipeAllowance == nil {
+//                backProgressModel.backSwipeAllowance = false
+//              }
+//            } else if backProgressModel.backSwipeAllowance != false {
+//              state = CGSize(width: drag.translation.width, height: 0)
+//              backProgressModel.backSwipeAllowance = true
+//            }
           }.onEnded { drag in
             if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
               pagerModel.popView()

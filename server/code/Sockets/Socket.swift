@@ -4,7 +4,7 @@ import CoreFoundation
 import HelloCore
 import OpenSSL
 
-enum SocketError: Error {
+enum SocketError: Error, Sendable {
   case initFail
   case reuseFail
   case bindFail
@@ -16,7 +16,7 @@ enum SocketError: Error {
   case failedToMakeNonBlocking
 }
 
-public enum SocketType {
+public enum SocketType: Sendable {
   case tcp
   case udp
   
@@ -33,6 +33,11 @@ public enum SocketType {
   }
 }
 
+@globalActor final public actor SocketActor: GlobalActor {
+  public static let shared: SocketActor = SocketActor()
+}
+
+@SocketActor
 public class Socket {
     
   #if os(Linux)
@@ -50,7 +55,7 @@ public class Socket {
   
   let socketFileDescriptor: Int32
   
-  init(socketFD: Int32) throws {
+  nonisolated init(socketFD: Int32) throws {
     Log.verbose("Opened on \(socketFD)", context: "Socket")
     socketFileDescriptor = socketFD
     guard fcntl(socketFileDescriptor, F_SETFL, fcntl(socketFileDescriptor, F_GETFL, 0) | O_NONBLOCK) == 0 else {
@@ -62,7 +67,7 @@ public class Socket {
     close(socketFileDescriptor)
   }
   
-  func bindForInbound(to port: UInt16) throws {
+  nonisolated func bindForInbound(to port: UInt16) throws {
     var value = 1
     guard setsockopt(socketFileDescriptor,
                      SOL_SOCKET,

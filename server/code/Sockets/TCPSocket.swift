@@ -4,8 +4,8 @@ import CoreFoundation
 import HelloCore
 import OpenSSL
 
+@SocketActor
 public class TCPSocket: Socket {
-  
   func sendDataPass(data: [UInt8]) throws -> Int {
     Log.verbose("Sending \(data.count) bytes to \(socketFileDescriptor)", context: "Socket")
     let bytesSent = send(socketFileDescriptor, data, data.count, Socket.socketSendFlags)
@@ -31,11 +31,11 @@ public class TCPSocket: Socket {
       } catch SocketError.cantWriteYet {
         guard errorLoopCounter < 3 else { throw SocketError.errorLoop }
         errorLoopCounter += 1
-        try await SocketPool.main.waitUntilWriteable(self)
+        try await SocketPool.main.waitUntilWriteable(socketFileDescriptor)
       } catch SocketError.cantReadYet {
         guard errorLoopCounter < 3 else { throw SocketError.errorLoop }
         errorLoopCounter += 1
-        try await SocketPool.main.waitUntilReadable(self)
+        try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
       }
     }
   }
@@ -56,7 +56,6 @@ public class TCPSocket: Socket {
   func peakDataBlock() async throws -> [UInt8] {
     var errorLoopCounter = 0
     while true {
-      Log.debug("Loop 14", context: "Loop")
       do {
         var recieveBuffer: [UInt8] = [UInt8](repeating: 0, count: Socket.bufferSize)
         let bytesRead = recv(socketFileDescriptor, &recieveBuffer, Socket.bufferSize, Int32(MSG_PEEK))
@@ -68,9 +67,9 @@ public class TCPSocket: Socket {
         }
         return [UInt8](recieveBuffer[..<bytesRead])
       } catch SocketError.cantReadYet {
-        try await SocketPool.main.waitUntilReadable(self)
+        try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
       } catch SocketError.cantWriteYet {
-        try await SocketPool.main.waitUntilWriteable(self)
+        try await SocketPool.main.waitUntilWriteable(socketFileDescriptor)
       }
       guard errorLoopCounter < 3 else { throw SocketError.errorLoop }
       errorLoopCounter += 1
@@ -80,17 +79,16 @@ public class TCPSocket: Socket {
   func recieveDataBlock() async throws -> [UInt8] {
     var errorLoopCounter = 0
     while true {
-      Log.debug("Loop 15", context: "Loop")
       do {
         return try rawRecieveData()
       } catch SocketError.cantReadYet {
-        try await SocketPool.main.waitUntilReadable(self)
+        try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
       } catch SocketError.cantWriteYet {
-        try await SocketPool.main.waitUntilWriteable(self)
+        try await SocketPool.main.waitUntilWriteable(socketFileDescriptor)
       }
       guard errorLoopCounter < 3 else { throw SocketError.errorLoop }
       if errorLoopCounter > 0 {
-        try await Task.sleep(nanoseconds: 1000000)
+        try await Task.sleep(seconds: 0.01)
       }
       errorLoopCounter += 1
     }

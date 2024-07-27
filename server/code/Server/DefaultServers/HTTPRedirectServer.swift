@@ -4,8 +4,8 @@ import HelloCore
 
 public actor HTTPToHTTPSRedirectServer: HTTPServer {
   
-  public var name: String { "\(host) Redirect" }
-  public var host: String
+  nonisolated public var name: String { "\(host) Redirect" }
+  nonisolated public let host: String
   
   init(host: String) {
     self.host = host
@@ -18,6 +18,7 @@ public actor HTTPToHTTPSRedirectServer: HTTPServer {
 
 public extension HTTPSServer {
   var httpToHttpsRedirectServer: HTTPServer {
-    HTTPToHTTPSRedirectServer(host: host)
+    let host = host
+    return HTTPToHTTPSRedirectServer(host: host)
   }
 }

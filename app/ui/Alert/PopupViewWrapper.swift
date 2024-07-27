@@ -85,8 +85,8 @@ public struct PopupViewWrapper<Content: View>: View {
       .animation(isVisible ? .dampSpring : .easeInOut(duration: 0.25), value: isVisible)
       .offset(adjustedPosition)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-      .background(Color.black
-        .opacity(isVisible ? 0.1 : 0)
+      .background(HelloBackgroundDimmingView()
+        .opacity(isVisible ? 1 : 0)
         .nest {
           #if os(tvOS)
           $0

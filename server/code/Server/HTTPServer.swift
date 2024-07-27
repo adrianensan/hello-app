@@ -10,8 +10,8 @@ public protocol HTTPServer: TCPServer {
 }
 
 public extension HTTPServer {
-  var port: UInt16 { 80 }
-  var type: SocketType { .tcp }
+  nonisolated var port: UInt16 { 80 }
+  nonisolated var type: SocketType { .tcp }
   var staticFilesRoot: URL? { nil }
   var endpoints: [HTTPEndpoint] { [] }
   
@@ -96,7 +96,7 @@ public extension HTTPServer {
   
   func handleConnection(connection: ClientConnection) async throws {
     guard accessControl.shouldAllowAccessTo(address: connection.clientAddress) else { return }
-    for try await request in connection.httpRequests {
+    for try await request in await connection.httpRequests {
       Log.verbose("Request from \(connection.clientAddress), \(request.url)", context: "HTTP")
       do {
         try await connection.send(response: try await handle(request: request))

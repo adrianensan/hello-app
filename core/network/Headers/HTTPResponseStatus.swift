@@ -1,4 +1,4 @@
-public enum HTTPResponseStatus: CustomStringConvertible {
+public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
   case `continue`
   case switchingProtocols
   case ok

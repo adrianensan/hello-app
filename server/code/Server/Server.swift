@@ -19,8 +19,8 @@ public enum AccessControl {
 
 public protocol ServerEndpoint {
   
-  associatedtype RequestBodyType: Codable = Data?
-  associatedtype ResponseBodyType: Codable = Data?
+  associatedtype RequestBodyType: Codable & Sendable = Data?
+  associatedtype ResponseBodyType: Codable & Sendable = Data?
   
   var method: HTTPMethod { get }
   var url: String { get }
@@ -65,7 +65,7 @@ public class APIHTTPEndpoint<Endpoint: APIEndpoint>: HTTPEndpoint {
           }
           response = try await handler(HTTPRequest(copying: httpRequest, body: string))
         default:
-          guard let decoded = try? Endpoint.RequestBodyType.decode(from: data) else {
+          guard let decoded = try? Endpoint.RequestBodyType.decodeJSON(from: data) else {
             return .badRequest
           }
           response = try await handler(HTTPRequest(copying: httpRequest, body: decoded))
@@ -90,7 +90,7 @@ public class APIHTTPEndpoint<Endpoint: APIEndpoint>: HTTPEndpoint {
           }
           return HTTPResponse(copying: response, body: stringData)
         default:
-          guard let bodyData = try? responseBody.data() else {
+          guard let bodyData = try? responseBody.jsonData else {
             return .badRequest
           }
           return HTTPResponse(copying: response, body: bodyData)
@@ -145,10 +145,10 @@ public struct HTTPError: Error {
 public typealias URLAccess = (url: String, accessControl: AccessControl, responseStatus: HTTPResponseStatus)
  
 public protocol Server: Actor {
-  var port: UInt16 { get }
-  var host: String { get }
-  var name: String { get }
-  var type: SocketType { get }
+  nonisolated var port: UInt16 { get }
+  nonisolated var host: String { get }
+  nonisolated var name: String { get }
+  nonisolated var type: SocketType { get }
   
   var accessControl: AccessControl { get }
   var urlAccessControl: [URLAccess] { get }

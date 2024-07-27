@@ -16,8 +16,8 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   public init(title: String? = nil,
               allowScroll: Bool = true,
               model: HelloScrollModel? = nil,
-              @ViewBuilder navBarContent: @escaping () -> NavBarContent,
-              @ViewBuilder content: @escaping () -> Content) {
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.title = title
     self.allowScroll = allowScroll
     self.content = content
@@ -80,7 +80,7 @@ public extension NavigationPage where NavBarContent == EmptyView {
   public init(title: String? = nil,
               allowScroll: Bool = true,
               model: HelloScrollModel? = nil,
-              @ViewBuilder content: @escaping () -> Content) {
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.init(title: title,
               allowScroll: allowScroll,
               model: model,

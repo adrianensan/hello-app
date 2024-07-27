@@ -49,7 +49,7 @@ public protocol HTTPSServer: SSLServer, HTTPServer {
 
 public extension HTTPSServer {
   
-  var port: UInt16 { 443 }
+  nonisolated var port: UInt16 { 443 }
   
   func setupSSL() throws {
     Log.info("Setting up SSL", context: "SSL")

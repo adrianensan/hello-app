@@ -83,7 +83,7 @@ extension HTTPResponse<Data?> {
   }
 }
 //
-public struct HTTPResponse<Body: Codable> {
+public struct HTTPResponse<Body: Codable & Sendable>: Sendable {
   
   public static var ok: HTTPResponse<Body> { HTTPResponse(status: .ok) }
   public static var notFound: HTTPResponse<Body> { HTTPResponse(status: .notFound) }

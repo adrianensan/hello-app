@@ -10,6 +10,7 @@ public struct FrameAnimation: View {
     case loop(numberOfLoops: Int)
   }
   
+  @MainActor
   private class NonObserved {
     var isAnimating: Bool = false
     var isActive: Bool = false
@@ -66,18 +67,20 @@ public struct FrameAnimation: View {
     nonObserved.fps = fps
   }
   
+  @MainActor
   public func animate() async throws {
     guard nonObserved.isActive && !nonObserved.isAnimating else { return }
     nonObserved.isAnimating = true
     defer { nonObserved.isAnimating = false }
-    try await Task.sleep(nanoseconds: UInt64(nonObserved.delay * 1_000_000_000))
+    let delay: CGFloat = nonObserved.delay
+    try await Task.sleep(seconds: delay)
     isHidden = false
     while nonObserved.frame < nonObserved.freezeFrame ?? lastFrame {
       nonObserved.frame += 1
       if let nextImage = nonObserved.frames[nonObserved.frame] {
         currentImageFrame = nextImage
       }
-      try await Task.sleep(nanoseconds: UInt64(1 / nonObserved.fps * 1_000_000_000))
+      try await Task.sleep(seconds: 1 / nonObserved.fps)
     }
     switch loopMode {
     case .playOnce: ()

@@ -1,4 +1,4 @@
-public enum Cache: CustomStringConvertible {
+public enum Cache: CustomStringConvertible, Sendable {
   case noCache
   case noStore
   

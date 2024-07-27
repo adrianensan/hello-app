@@ -18,7 +18,7 @@ public class BackProgressModel {
 public struct BackButton: View {
   
   @Environment(\.theme) private var theme
-  @Environment(PagerModel.self) var pagerModel
+  @Environment(PagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
   var rotationInterval: CGFloat = 0.6

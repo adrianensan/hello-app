@@ -9,6 +9,7 @@ enum SSLError: Error {
   case privateKeyFail
 }
 
+@SocketActor
 public class SSLClientConnection: ClientConnection {
   
   private let socket: TLSSocket
@@ -30,8 +31,8 @@ public class SSLClientConnection: ClientConnection {
       case 0: throw SSLError.initFail
       default:
         switch SSL_get_error(socket.sslSocket, result) {
-        case SSL_ERROR_WANT_READ: try await SocketPool.main.waitUntilReadable(socket)
-        case SSL_ERROR_WANT_WRITE: try await SocketPool.main.waitUntilWriteable(socket)
+        case SSL_ERROR_WANT_READ: try await SocketPool.main.waitUntilReadable(socket.socketFileDescriptor)
+        case SSL_ERROR_WANT_WRITE: try await SocketPool.main.waitUntilWriteable(socket.socketFileDescriptor)
         case SSL_ERROR_ZERO_RETURN: throw SocketError.closed
         default: throw SSLError.initFail
         }

@@ -6,13 +6,13 @@ public enum IPAddressError: Error {
   case invalidIPAddressType
 }
 
-protocol IPAddressConformable: Codable, Equatable, Hashable {
+protocol IPAddressConformable: Codable, Equatable, Hashable, Sendable {
   var type: IPVersion { get }
   var bytes: [UInt8] { get }
   var string: String { get }
 }
 
-public enum IPAddress: IPAddressConformable {
+public enum IPAddress: IPAddressConformable, Sendable {
   case ipv4(IPv4Address)
   case ipv6(IPv6Address)
   

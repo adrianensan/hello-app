@@ -38,6 +38,11 @@ class PoolCancelSignal {
   }
 }
 
+@globalActor final public actor SocketPoolActor: GlobalActor {
+  public static let shared: SocketPoolActor = SocketPoolActor()
+}
+
+@SocketPoolActor
 class SocketPoller {
   
   var cancelSocket = PoolCancelSignal()
@@ -45,9 +50,9 @@ class SocketPoller {
   var writeObservedSockets: Set<Int32> = []
   var stateUpdateListener: ([Int32: SocketState]) -> Void = { _ in }
   
-  init() {
-    Thread.detachNewThread {
-      self.pollEventLoop()
+  nonisolated init() {
+    Task {
+      await self.pollEventLoop()
     }
   }
   
@@ -63,7 +68,7 @@ class SocketPoller {
     cancelSocket.cancel()
   }
   
-  private func pollEventLoop() {
+  private func pollEventLoop() async {
     while true {
       var pollfdMap: [Int32: pollfd] = [:]
       for socket in ([cancelSocket.outputFD] + readObservedSockets) {
@@ -78,8 +83,8 @@ class SocketPoller {
         }
       }
       var pollfds = [pollfd](pollfdMap.values)
-      Log.verbose("waiting on \(pollfds.count - 1) sockets", context: "Poll")
-      poll(&pollfds, nfds_t(pollfds.count), -1)
+//      Log.verbose("waiting on \(pollfds.count - 1) sockets", context: "Poll")
+      poll(&pollfds, nfds_t(pollfds.count), 0)
       cancelSocket.reset()
       var socketStates: [Int32: SocketState] = [:]
       for pollSocket in pollfds where pollSocket.fd != cancelSocket.outputFD {
@@ -107,20 +112,26 @@ class SocketPoller {
       if socketStates.contains(where: { $0.value != .idle }) {
         let socketStates = socketStates
         self.stateUpdateListener(socketStates)
+        try? await Task.sleep(seconds: 0.02)
+      } else {
+        try? await Task.sleep(seconds: 0.5)
       }
     }
   }
 }
 
-actor SocketPool {
+@SocketPoolActor
+class SocketPool {
   
   static var main: SocketPool = SocketPool()
   
   var poller: SocketPoller = SocketPoller()
   
-  init() {
-    poller.stateUpdateListener = { states in
-      Task { await self.pollStateUpdate(states) }
+  nonisolated init() {
+    Task { @SocketPoolActor in
+      poller.stateUpdateListener = { states in
+        Task { await self.pollStateUpdate(states) }
+      }
     }
   }
   
@@ -154,16 +165,16 @@ actor SocketPool {
     }
   }
   
-  func waitUntilReadable(_ socket: Socket) async throws -> Void {
+  func waitUntilReadable(_ socket: Int32) async throws -> Void {
     try await withCheckedThrowingContinuation { continuation in
-      addReadListener(continuation, to: socket.socketFileDescriptor)
+      addReadListener(continuation, to: socket)
       poller.update(readObservedSockets: Set(readSocketListeners.keys))
     }
   }
   
-  func waitUntilWriteable(_ socket: Socket) async throws -> Void {
+  func waitUntilWriteable(_ socket: Int32) async throws -> Void {
     try await withCheckedThrowingContinuation { continuation in
-      addWriteListener(continuation, to: socket.socketFileDescriptor)
+      addWriteListener(continuation, to: socket)
       poller.update(writeObservedSockets: Set(writeSocketListeners.keys))
     }
   }

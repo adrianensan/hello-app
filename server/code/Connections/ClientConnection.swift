@@ -8,27 +8,32 @@ enum ConnectionError: Error {
   case failedToResolveHost
 }
 
-public class ClientConnection {
+@SocketActor
+public class ClientConnection: Sendable {
   
   private let socket: TCPSocket
-  public let clientAddress: NetworkAddress
+  nonisolated public let clientAddress: NetworkAddress
   
-  init(socket: TCPSocket, clientAddress: NetworkAddress) {
+  nonisolated init(socket: TCPSocket, clientAddress: NetworkAddress) {
     self.socket = socket
     self.clientAddress = clientAddress
   }
   
   func peakRequest() async throws -> HTTPRequest<Data?> {
     let recievedData = try await socket.peakDataBlock()
-    return try HTTPRequest<Data?>.parse(data: recievedData.filter{$0 != 13}, allowHeaderOnly: true, from: clientAddress)
+    return try HTTPRequest<Data?>.parse(data: recievedData.filter{ $0 != 13 }, allowHeaderOnly: true, from: clientAddress)
   }
   
   func getRequestedHost() async throws -> String {
+    #if DEBUG
+    "localhost"
+    #else
     let request = try await peakRequest()
     guard let host = request.host else {
       throw SocketError.closed
     }
     return host
+    #endif
   }
   
   func getRequest() async throws -> HTTPRequest<Data?> {

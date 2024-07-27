@@ -3,9 +3,11 @@ import Foundation
 
 @MainActor
 @Observable
-class TouchesModel {
+public class TouchesModel {
   
-  static let main = TouchesModel()
+  public static let main = TouchesModel()
+  
+  public var isTouching: Bool { !activeTouches.isEmpty }
   
   var activeTouches: [HelloTouch] = []
   

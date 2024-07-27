@@ -74,7 +74,7 @@ public protocol HelloApplication: AnyObject {
   static func load() -> Self
   
   /// Do any work needed before the application is created
-  func onLaunch() async
+  func onLaunch()
   func onTerminate()
   
   func onBecameActive() async
@@ -171,26 +171,28 @@ public extension HelloApplication {
 }
 
 extension HelloApplication {
-  func onLaunchInternal() async {
+  func onLaunchInternal() {
+    Task {
 #if DEBUG
-    await Persistence.save(true, for: .isDeveloper)
+      await Persistence.save(true, for: .isDeveloper)
 #endif
-    if AppInfo.isTestBuild {
-      await Persistence.save(true, for: .isTester)
-    }
-    if let currentAppVersion = AppVersion.current {
-      let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
-      if currentAppVersion != previousAppVersion {
-        await Persistence.save(currentAppVersion, for: .lastestVersionLaunched)
-        if let previousAppVersion {
-          await helloApplication.versionUpdated(from: previousAppVersion, to: currentAppVersion)
-        } else {
-          await helloApplication.onFirstLaunch()
+      if AppInfo.isTestBuild {
+        await Persistence.save(true, for: .isTester)
+      }
+      if let currentAppVersion = AppVersion.current {
+        let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
+        if currentAppVersion != previousAppVersion {
+          await Persistence.save(currentAppVersion, for: .lastestVersionLaunched)
+          if let previousAppVersion {
+            await helloApplication.versionUpdated(from: previousAppVersion, to: currentAppVersion)
+          } else {
+            await helloApplication.onFirstLaunch()
+          }
         }
       }
     }
     
-    await onLaunch()
+    onLaunch()
   }
   
   func onTerminateInternal() {

@@ -5,24 +5,24 @@ import HelloCore
 public struct PagerPage: Sendable, Identifiable {
   public var id: String
   public var name: String?
-  public var view: AnyView
+  public var view: @MainActor () -> AnyView
   public var options: PagerPageOptions
   
   @MainActor
   public init(id: String = UUID().uuidString,
               name: String? = nil,
-              view: some View,
+              view: @escaping @MainActor () -> some View,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
     self.name = name
-    self.view = AnyView(view.id(id))
+    self.view = { AnyView(view().id(id)) }
     self.options = options
   }
   
   @MainActor
   public init(id: String = UUID().uuidString,
               name: String? = nil,
-              view: AnyView,
+              view: @escaping @MainActor () -> AnyView,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
     self.name = name
@@ -71,20 +71,17 @@ public struct HelloPagerConfig: Sendable {
 }
 
 public struct PagerPageOptions: Sendable {
-  public var id: String = UUID().uuidString
   public var type: String?
   public var headerContentColorOverride: HelloColor?
   public var allowBackOverride: Bool?
   public var skipsWhenBack: Bool = false
   public var backAction: (@Sendable () -> Void)?
   
-  public init(id: String = UUID().uuidString, 
-                type: String? = nil, 
+  public init(type: String? = nil,
                 headerContentColorOverride: HelloColor? = nil, 
                 allowBackOverride: Bool? = nil, 
                 skipsWhenBack: Bool = false, 
                 backAction: (@Sendable () -> Void)? = nil) {
-    self.id = id
     self.type = type
     self.headerContentColorOverride = headerContentColorOverride
     self.allowBackOverride = allowBackOverride
@@ -96,6 +93,7 @@ public struct PagerPageOptions: Sendable {
 @MainActor
 @Observable
 public class PagerModel {
+  public let id: String
   public private(set) var backProgressModel = BackProgressModel()
   public private(set) var viewStack: [PagerPage] = []
   public private(set) var viewDepth: Int = 0
@@ -103,19 +101,24 @@ public class PagerModel {
   var config: HelloPagerConfig
   private var lastPage: String?
   
-  public init(config: HelloPagerConfig = HelloPagerConfig(), initialViewStack: [PagerPage]) {
+  private var pageScrollModels: [String: HelloScrollModel] = [:]
+  
+  public init(id: String = .uuid, config: HelloPagerConfig = HelloPagerConfig(), initialViewStack: [PagerPage]) {
+    self.id = id
     self.config = config
     viewStack = initialViewStack
     viewDepth = initialViewStack.count
   }
   
-  public init(config: HelloPagerConfig = HelloPagerConfig(), rootView: some View) {
+  public init(id: String = .uuid, config: HelloPagerConfig = HelloPagerConfig(), rootView: @escaping @MainActor () -> some View) {
+    self.id = id
     self.config = config
     viewStack = [PagerPage(view: rootView)]
     viewDepth = 1
   }
   
-  public init(config: HelloPagerConfig = HelloPagerConfig(), rootPage: PagerPage) {
+  public init(id: String = .uuid, config: HelloPagerConfig = HelloPagerConfig(), rootPage: PagerPage) {
+    self.id = id
     self.config = config
     viewStack = [rootPage]
     viewDepth = 1
@@ -137,13 +140,24 @@ public class PagerModel {
     activePage?.options.type
   }
   
-  public func push<Page: View>(view: Page, name: String? = nil, animated: Bool = true, withOptions options: PagerPageOptions = PagerPageOptions()) {
-    guard allowInteraction else { return }
+  public var activeScrollModel: HelloScrollModel? {
+    activePageID.flatMap { pageScrollModels[$0] }
+  }
+  
+  public var activePageScrollOffset: CGFloat {
+    activeScrollModel?.scrollOffset ?? 0
+  }
+  
+  public func push<Page: View>(view: @escaping @MainActor () -> Page,
+                               id: String = String(describing: Page.self),
+                               name: String? = nil, animated: Bool = true,
+                               withOptions options: PagerPageOptions = PagerPageOptions()) {
+    guard allowInteraction, !viewStack.contains(where: { $0.id == id }) else { return }
 //    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {
-        if lastPage == String(describing: view) {
+        if lastPage == id {
           viewDepth = viewStack.count
           return
         }
@@ -151,15 +165,15 @@ public class PagerModel {
       }
     }
     allowInteraction = false
-    lastPage = String(describing: view)
-    let newPage = PagerPage(id: options.id, name: name, view: view, options: options)
+    lastPage = id
+    let newPage = PagerPage(id: id, name: name, view: view, options: options)
     viewStack.append(newPage)
     if animated {
       Task {
-        try await Task.sleep(nanoseconds: 25_000_000)
+        try await Task.sleepForOneFrame()
         self.viewDepth = self.viewStack.count
         Task {
-          try await Task.sleep(nanoseconds: 240_000_000)
+          try await Task.sleep(seconds: 0.24)
           self.allowInteraction = true
         }
       }
@@ -174,9 +188,9 @@ public class PagerModel {
     viewDepth = newViewStack.count
   }
   
-  public func replaceView(with newView: some View, options: PagerPageOptions = PagerPageOptions()) {
+  public func replaceView(with newView: @escaping @MainActor () -> some View, options: PagerPageOptions = PagerPageOptions()) {
     _ = viewStack.popLast()
-    let newPage = PagerPage(id: options.id, view: newView, options: options)
+    let newPage = PagerPage(view: newView, options: options)
     viewStack.append(newPage)
   }
   
@@ -184,11 +198,10 @@ public class PagerModel {
     globalDismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
-      print(pagesToRemove)
-    }
-    if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {
-        _ = viewStack.popLast()
+        if let removedPage = viewStack.popLast() {
+          pageScrollModels[removedPage.id] = nil
+        }
       }
     }
     guard viewStack.count > 1 else { return }
@@ -217,5 +230,9 @@ public class PagerModel {
     guard var activePage = viewStack.last else { return }
     activePage.options.allowBackOverride = allowBack
     viewStack[viewStack.count - 1] = activePage
+  }
+  
+  public func set(scrollModel: HelloScrollModel, for pageID: String) {
+    pageScrollModels[pageID] = scrollModel
   }
 }

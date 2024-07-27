@@ -9,7 +9,7 @@ public func networkToHostByteOrder(_ port: UInt16) -> UInt16 {
   return CFByteOrderGetCurrent() == CFByteOrder(CFByteOrderLittleEndian.rawValue) ? CFSwapInt16(port) : port
 }
 
-public struct NetworkAddress: Hashable, Equatable, Codable, CustomStringConvertible {
+public struct NetworkAddress: Hashable, Equatable, Codable, CustomStringConvertible, Sendable {
   public var ipAddress: IPAddress
   public var port: UInt16
   

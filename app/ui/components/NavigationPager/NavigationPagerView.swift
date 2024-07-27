@@ -34,6 +34,9 @@ public struct NavigationPagerView: View {
   
   @Environment(\.theme) var theme
   @Environment(\.safeArea) var safeAreaInsets
+  #if os(iOS)
+  @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
+  #endif
   
   var model: PagerModel
   
@@ -56,12 +59,12 @@ public struct NavigationPagerView: View {
       ZStack(alignment: .leading) {
         HStack(spacing: 0) {
           ForEach(model.viewStack) { page in
-            page.view
+            page.view()
+              .environment(\.pageID, page.id)
 //              id(page.id)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-              .background(ClearClickableView().onTapGesture {
-                globalDismissKeyboard()
-              })
+              .background(ClearClickableView()
+                .onTapGesture { globalDismissKeyboard() })
 //              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))
               .allowsHitTesting(model.allowInteraction && model.activePageID == page.id && model.backProgressModel.backProgress == 0)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
@@ -119,5 +122,12 @@ public struct NavigationPagerView: View {
       .environment(\.helloPagerConfig, model.config)
       .environment(\.helloDismiss, { model.popView() })
       .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .onAppear {
+        #if os(iOS)
+        if let sheetModel {
+          sheetModel.pagerModel = model
+        }
+        #endif
+      }
   }
 }

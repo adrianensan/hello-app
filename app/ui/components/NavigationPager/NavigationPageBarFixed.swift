@@ -24,6 +24,7 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
           .compositingGroup()
           .blur(radius: 8 * (1 - scrollModel.scrollThresholdProgress))
           .opacity(scrollModel.hasScrolled ? 1 : scrollModel.scrollThresholdProgress)
+//          .animation(nil)
       ).padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)

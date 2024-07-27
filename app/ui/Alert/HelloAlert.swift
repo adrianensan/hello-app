@@ -144,8 +144,8 @@ public struct HelloAlert: View {
       .animation(animateIn ? .dampSpring : .easeInOut(duration: 0.2), value: animateIn)
       .onTapGesture {}
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(Color.black
-        .opacity(animateIn ? 0.4 : 0)
+      .background(HelloBackgroundDimmingView()
+        .opacity(animateIn ? 1 : 0)
         .onTapGesture { dismiss() }
         .animation(.easeInOut(duration: 0.2), value: animateIn))
       .allowsHitTesting(!isDismissed)

@@ -20,13 +20,14 @@ public struct HelloAppRootView<Content: View>: View {
     ZStack {
       content()
         .compositingGroup()
+//        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
         .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
         .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
       
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in
           popupView.view()
-            .id(popupView.instanceID)
+            .id(popupView.id)
             .zIndex(3 + 0.1 * Double((windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0)))
             .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                     removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
@@ -37,6 +38,7 @@ public struct HelloAppRootView<Content: View>: View {
       #if os(iOS)
       if showTouches {
         TouchesVisualizer()
+          .zIndex(10)
       }
       #endif
     }.environment(\.safeArea, uiProperties.safeAreaInsets)

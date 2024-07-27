@@ -36,11 +36,11 @@ public struct LogsNavigationPage: View {
                                           secondButton: .cancel()))
         }) {
           Image(systemName: "trash")
-            .font(.system(size: 22, weight: .medium, design: .rounded))
+            .font(.system(size: 20, weight: .regular, design: .rounded))
             .foregroundStyle(theme.foreground.primary.style)
             .frame(width: 44, height: 44)
             .clickable()
-        }.padding(.trailing, 16)
+        }.padding(.trailing, 48)
           .frame(maxWidth: .infinity, alignment: .trailing)
       }
     }) {

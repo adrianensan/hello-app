@@ -60,15 +60,16 @@ public class HelloWindowModel {
   }
   
   #if os(iOS)
-  public func present(id: String = UUID().uuidString,
-                      dragToDismissType: GestureType = .highPriority,
-                      sheet: @MainActor @escaping () -> some View) {
-    guard !popupViews.contains(where: { $0.viewID == id }) else { return }
-    blurBackgroundForPopup = false
-    globalDismissKeyboard()
-    popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, dragToDismissType: dragToDismissType, content: sheet) })
-  }
-  #endif
+  public func present<Content: View>(
+    id: String = String(describing: Content.self),
+    dragToDismissType: GestureType = .highPriority,
+    sheet: @MainActor @escaping () -> Content) {
+      guard !popupViews.contains(where: { $0.viewID == id }) else { return }
+      blurBackgroundForPopup = false
+      globalDismissKeyboard()
+      popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, dragToDismissType: dragToDismissType, content: sheet) })
+    }
+#endif
   
   public func present(view: @MainActor @autoclosure @escaping () -> some View) {
     blurBackgroundForPopup = false

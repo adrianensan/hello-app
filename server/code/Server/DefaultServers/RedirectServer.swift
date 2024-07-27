@@ -4,12 +4,11 @@ import HelloCore
 
 public actor HTTPSRedirectServer: HTTPSServer {
   
+  nonisolated public let targetHost: String
+  nonisolated public let host: String
+  nonisolated public var name: String { "\(host) Redirect" }
+  public let sslFiles: SSLFiles
   public var sslContext: OpaquePointer!
-  public var sslFiles: SSLFiles
-  
-  public var name: String { "\(host) Redirect" }
-  public var targetHost: String
-  public var host: String
   
   init(from host: String, to targetHost: String, sslFiles: SSLFiles) {
     self.targetHost = targetHost
@@ -18,15 +17,19 @@ public actor HTTPSRedirectServer: HTTPSServer {
   }
   
   public func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?> {
-    return .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #if DEBUG
+    .init(status: .temporaryRedirect, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #else
+    .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #endif
   }
 }
 
 public actor HTTPRedirectServer: HTTPServer {
   
-  public var name: String { "\(host) Redirect" }
-  public var targetHost: String
-  public var host: String
+  nonisolated public let targetHost: String
+  nonisolated public let host: String
+  nonisolated public var name: String { "\(host) Redirect" }
   
   init(from host: String, to targetHost: String) {
     self.targetHost = targetHost
@@ -34,24 +37,32 @@ public actor HTTPRedirectServer: HTTPServer {
   }
   
   public func handle(request: HTTPRequest<Data?>) async throws -> HTTPResponse<Data?> {
-    return .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #if DEBUG
+    .init(status: .temporaryRedirect, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #else
+    .init(status: .movedPermanently, customeHeaders: ["Location: https://\(self.targetHost + request.url)"])
+    #endif
   }
 }
 
 public extension HTTPServer {
   func redirectServer(from originHost: String, with sslFiles: SSLFiles) -> some HTTPSServer {
-    HTTPSRedirectServer(from: originHost, to: host, sslFiles: sslFiles)
+    let host = host
+    return HTTPSRedirectServer(from: originHost, to: host, sslFiles: sslFiles)
   }
   
   func redirectServer(from originHost: String) -> some HTTPServer {
-    HTTPRedirectServer(from: originHost, to: host)
+    let host = host
+    return HTTPRedirectServer(from: originHost, to: host)
   }
   
   func wwwRedirectServer() -> some HTTPServer {
-    HTTPRedirectServer(from: "www.\(host)", to: host)
+    let host = host
+    return HTTPRedirectServer(from: "www.\(host)", to: host)
   }
   
   func wwwRedirectServer(with sslFiles: SSLFiles) -> some HTTPSServer {
-    HTTPSRedirectServer(from: "www.\(host)", to: host, sslFiles: sslFiles)
+    let host = host
+    return HTTPSRedirectServer(from: "www.\(host)", to: host, sslFiles: sslFiles)
   }
 }

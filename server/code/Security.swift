@@ -2,7 +2,8 @@ import Foundation
 
 import HelloCore
 
-public struct Security {
+@RouterActor
+public enum Security {
   public static var isEnabled: Bool = false
   public static var maxConnectionPerClient: Int = 20
   private static var hasStarted: Bool = false
@@ -42,7 +43,7 @@ public struct Security {
     Task {
       while true {
         Log.debug("Loop 20", context: "Loop")
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        try? await Task.sleep(seconds: 1)
         for (client, reputation) in clientReputation {
           clientReputation[client] = max(0.1, min(1, reputation + 0.5 * reputation))
           if clientReputation[client] == 1 && openConnections[client] ?? 0 == 0 {

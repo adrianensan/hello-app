@@ -3,13 +3,14 @@ import CoreFoundation
 
 import HelloCore
 
+@SocketActor
 class ServerSocket: Socket {
     
-  static let acceptBacklog: Int32 = 20
+  nonisolated static let acceptBacklog: Int32 = 20
   
   let usingTLS: Bool
   
-  init(port: UInt16, usingTLS: Bool) throws {
+  nonisolated init(port: UInt16, usingTLS: Bool) throws {
     self.usingTLS = usingTLS
     let listeningSocket = socket(AF_INET, SocketType.tcp.systemValue, 0)
     
@@ -43,7 +44,7 @@ class ServerSocket: Socket {
       guard newConnectionFD > 0 else {
         switch errno {
         case EAGAIN, EWOULDBLOCK:
-          try await SocketPool.main.waitUntilReadable(self)
+          try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
           Log.verbose("Ready to accept", context: "Router")
           continue
         default:

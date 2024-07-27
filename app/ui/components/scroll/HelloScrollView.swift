@@ -150,7 +150,9 @@ public class HelloScrollModel {
 
 public struct HelloScrollView<Content: View>: View {
   
+  @Environment(\.pageID) private var pageID
   @Environment(\.theme) private var theme
+  @OptionalEnvironment(PagerModel.self) private var pagerModel
   
   @State private var model: HelloScrollModel
   
@@ -167,15 +169,24 @@ public struct HelloScrollView<Content: View>: View {
   
   public var body: some View {
     ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
+      PositionReaderView(onPositionChange: { scrollOffset in
+        model.update(offset: scrollOffset.y)
+      }, coordinateSpace: .named(model.coordinateSpaceName))
       content()
-    }.scrollPosition($model.swiftuiScrollPosition)
-      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
-        -geometry.contentOffset.y - geometry.contentInsets.top
-      }, action: { _, newScrollOffset in
-        model.update(offset: newScrollOffset)
-      })
+    }
+    .scrollPosition($model.swiftuiScrollPosition)
+//      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
+//        -geometry.contentOffset.y - geometry.contentInsets.top
+//      }, action: { _, newScrollOffset in
+//        model.update(offset: newScrollOffset)
+//      })
       .coordinateSpace(name: model.coordinateSpaceName)
       .insetBySafeArea()
       .environment(model)
+      .onAppear {
+        if let pageID {
+          pagerModel?.set(scrollModel: model, for: pageID)
+        }
+      }
   }
 }

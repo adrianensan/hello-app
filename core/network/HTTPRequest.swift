@@ -13,7 +13,7 @@ public struct HelloUserAgent {
   public var deviceName: String
 }
 
-public struct HTTPRequest<Body: Codable>: HTTPRequestConformable {
+public struct HTTPRequest<Body: Codable & Sendable>: HTTPRequestConformable {
   
   public var clientAddress: NetworkAddress
   
@@ -62,7 +62,7 @@ public struct HTTPRequest<Body: Codable>: HTTPRequestConformable {
   }
 }
 
-public protocol HTTPRequestConformable<RequestBodyType> {
+public protocol HTTPRequestConformable<RequestBodyType>: Sendable {
   
   associatedtype RequestBodyType: Codable = Data?
   

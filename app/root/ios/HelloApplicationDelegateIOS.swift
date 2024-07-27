@@ -33,9 +33,7 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
 //      window.makeKeyAndVisible()
 //      self.window = window
 //    }
-    Task {
-      await helloApplication.onLaunchInternal()
-    }
+    helloApplication.onLaunchInternal()
     
 //    Hello.cloudSyncHelper.syncAll()
 //    if StoreService.main.tipProducts.isEmpty {

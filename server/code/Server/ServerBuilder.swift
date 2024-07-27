@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SSLFiles {
+public struct SSLFiles: Sendable {
   let certificate: String
   let privateKey: String
   

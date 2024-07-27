@@ -7,7 +7,12 @@ enum RouterError: Error {
   case invalidSerevrType
 }
 
-actor Router {
+@globalActor final public actor RouterActor: GlobalActor {
+  public static let shared: RouterActor = RouterActor()
+}
+
+@RouterActor
+class Router {
 
   static var udpServers: [UInt16: [any UDPServer]] = [:]
   static var tcpRoutingTable: [String: any TCPServer] = [:]
@@ -89,9 +94,9 @@ actor Router {
   }
 
   static func remove(server: some Server) async throws {
-    let host: String = await server.host
-    let port: UInt16 = await server.port
-    let socketType: SocketType = await server.type
+    let host: String = server.host
+    let port: UInt16 = server.port
+    let socketType: SocketType = server.type
     
     switch socketType {
     case .tcp:
@@ -104,14 +109,14 @@ actor Router {
   }
   
   static func add(server: some Server) async throws {
-    let socketType: SocketType = await server.type
+    let socketType: SocketType = server.type
     #if DEBUG
     let host: String = "localhost"
     let port: UInt16 = 8019 + UInt16(tcpRoutingTable.count + udpServers.count)
     let usingTLS: Bool = false
     #else
-    let host: String = await server.host
-    let port: UInt16 = await server.port
+    let host: String = server.host
+    let port: UInt16 = server.port
     let usingTLS: Bool = server is HTTPSServer
     #endif
     Security.startSecurityMonitor()
@@ -122,7 +127,7 @@ actor Router {
       }
       try listenForTCPConnection(on: port, usingTLS: usingTLS)
       if tcpRoutingTable["\(host):\(port):"] == nil {
-        Log.info("\(host):\(port):TCP - \(await server.name)", context: "Init")
+        Log.info("\(host):\(port) TCP - \(server.name)", context: "Init")
         tcpRoutingTable["\(host):\(port)"] = tcpServer
       } else {
         Log.warning("Duplicate server for \(host):\(port), skipping", context: "Init")
@@ -136,7 +141,7 @@ actor Router {
         await udpServer.socketUpdated(to: socket)
       }
       if udpServers[port] == nil {
-        Log.info("\(host):\(port):UDP - \(await server.name)", context: "Init")
+        Log.info("\(host):\(port):UDP - \(server.name)", context: "Init")
         udpServers[port] = (udpServers[port] ?? []) + [udpServer]
       } else {
         Log.warning("Duplicate server for \(host):\(port), skipping", context: "Init")

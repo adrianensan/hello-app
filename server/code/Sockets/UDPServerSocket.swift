@@ -3,9 +3,10 @@ import CoreFoundation
 
 import HelloCore
 
+@SocketActor
 class UDPServerSocket: UDPSocket {
   
-  init(port: UInt16) throws {
+  nonisolated init(port: UInt16) throws {
     let listeningSocket = socket(AF_INET, SocketType.udp.systemValue, 0)
     
     guard listeningSocket >= 0 else {

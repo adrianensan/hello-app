@@ -15,6 +15,7 @@ struct TouchesVisualizer: View {
             .frame(width: 44, height: 44)
             .frame(width: 1, height: 1)
             .offset(x: touch.location.x, y: touch.location.y)
+            .allowsHitTesting(false)
         }
       }
     }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

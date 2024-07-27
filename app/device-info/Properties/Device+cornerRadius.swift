@@ -9,7 +9,8 @@ extension Device {
       case ._11, .xr: return 41.5
       case ._12mini, ._13mini: return 44
       case ._12, ._12Pro, ._13, ._13Pro, ._14, ._14Pro, ._15, ._15Pro: return 47
-      case ._12ProMax, ._13ProMax, ._14Plus, ._14ProMax, ._15Plus, ._15ProMax: return 53
+      case ._12ProMax, ._13ProMax, ._14Plus, ._14ProMax, ._15Plus: return 53
+      case ._15ProMax: return 55
       default: return 0
       }
     case .iPad(let iPadModel):
