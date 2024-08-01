@@ -82,12 +82,12 @@ public struct HelloSheet<Content: View>: View {
       .disabled(yDrag != 0)
       .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
       .padding(.bottom, 60)
-      .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: false))
+      .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: false)
+        .onTapGesture { globalDismissKeyboard() })
       .padding(.bottom, -60)
       .coordinateSpace(.sheet)
       .overlay {
         HelloCloseButton { dismiss() }
-          .frame(width: 60, height: 60)
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
       }
       .compositingGroup()

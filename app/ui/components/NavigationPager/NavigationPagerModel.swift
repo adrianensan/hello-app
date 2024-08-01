@@ -150,7 +150,8 @@ public class PagerModel {
   
   public func push<Page: View>(view: @escaping @MainActor () -> Page,
                                id: String = String(describing: Page.self),
-                               name: String? = nil, animated: Bool = true,
+                               name: String? = nil,
+                               animated: Bool = true,
                                withOptions options: PagerPageOptions = PagerPageOptions()) {
     guard allowInteraction, !viewStack.contains(where: { $0.id == id }) else { return }
 //    dismissKeyboard()
@@ -171,7 +172,9 @@ public class PagerModel {
     if animated {
       Task {
         try await Task.sleepForOneFrame()
-        self.viewDepth = self.viewStack.count
+        withAnimation(.pageAnimation) {
+          self.viewDepth = self.viewStack.count
+        }
         Task {
           try await Task.sleep(seconds: 0.24)
           self.allowInteraction = true
@@ -213,7 +216,13 @@ public class PagerModel {
       }
     }
     viewStack[viewStack.count - 1].options.backAction?()
-    viewDepth = viewStack.count - backPageCount
+    if animated {
+      withAnimation(.pageAnimation) {
+        viewDepth = viewStack.count - backPageCount
+      }
+    } else {
+      viewDepth = viewStack.count - backPageCount
+    }
     Task {
       try await Task.sleepForOneFrame()
       _ = viewStack.popLast()

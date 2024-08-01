@@ -157,11 +157,11 @@ public struct HelloScrollView<Content: View>: View {
   @State private var model: HelloScrollModel
   
   private let allowScroll: Bool
-  private var content: () -> Content
+  private var content: @MainActor () -> Content
   
   public init(allowScroll: Bool = true,
               model: HelloScrollModel? = nil,
-              @ViewBuilder content: @escaping () -> Content) {
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.allowScroll = allowScroll
     self.content = content
     _model = State(wrappedValue: model ?? HelloScrollModel())

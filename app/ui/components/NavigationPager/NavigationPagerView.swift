@@ -63,6 +63,7 @@ public struct NavigationPagerView: View {
               .environment(\.pageID, page.id)
 //              id(page.id)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+              .clipped()
               .background(ClearClickableView()
                 .onTapGesture { globalDismissKeyboard() })
 //              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))

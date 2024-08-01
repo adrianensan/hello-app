@@ -17,7 +17,7 @@ struct NavigationPageBackswipe: ViewModifier {
     content
       .compositingGroup()
       .offset(x: -CGFloat(pagerModel.viewDepth - 1) * pageSpacing + backDragGestureState.width)
-      .animation(.pageAnimation, value: pagerModel.viewDepth)
+//      .animation(.pageAnimation, value: pagerModel.viewDepth)
       .animation(backDragGestureState == .zero ? .pageAnimation : .interactive, value: backDragGestureState)
       .nest {
 #if os(iOS)

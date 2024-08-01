@@ -96,7 +96,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
       .ignoresSafeArea()))
     Self.instances[id] = self
 //    view.backgroundColor = .black
-//    disableKeyboardOffset()
+    disableKeyboardOffset()
     
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(brightnessDidChange),
@@ -109,32 +109,32 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     fatalError("Unavailable")
   }
   
-//  func disableKeyboardOffset() {
-//    guard let viewClass = object_getClass(view) else { return }
-//    
-//    let viewSubclassName = String("HelloRootUIHostingView")
-//    guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
-//    guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
-//    
-//    if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
-//      let safeAreaInsets: @convention(block) () -> UIEdgeInsets = { .zero }
-//      class_addMethod(viewSubclass,
-//                      #selector(getter: UIView.safeAreaInsets),
-//                      imp_implementationWithBlock(safeAreaInsets),
-//                      method_getTypeEncoding(method))
-//    }
-//    
-//    if let method = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
-//      let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
-//      class_addMethod(viewSubclass,
-//                      NSSelectorFromString("keyboardWillShowWithNotification:"),
-//                      imp_implementationWithBlock(keyboardWillShow),
-//                      method_getTypeEncoding(method))
-//    }
-//    
-//    objc_registerClassPair(viewSubclass)
-//    object_setClass(view, viewSubclass)
-//  }
+  func disableKeyboardOffset() {
+    guard let viewClass = object_getClass(view) else { return }
+    
+    let viewSubclassName = String("HelloRootUIHostingView")
+    guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
+    guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
+    
+    if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
+      let safeAreaInsets: @convention(block) () -> UIEdgeInsets = { .zero }
+      class_addMethod(viewSubclass,
+                      #selector(getter: UIView.safeAreaInsets),
+                      imp_implementationWithBlock(safeAreaInsets),
+                      method_getTypeEncoding(method))
+    }
+    
+    if let method = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
+      let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
+      class_addMethod(viewSubclass,
+                      NSSelectorFromString("keyboardWillShowWithNotification:"),
+                      imp_implementationWithBlock(keyboardWillShow),
+                      method_getTypeEncoding(method))
+    }
+    
+    objc_registerClassPair(viewSubclass)
+    object_setClass(view, viewSubclass)
+  }
   
   func updateSize() {
     let size = view.bounds.size

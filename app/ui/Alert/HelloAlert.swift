@@ -28,9 +28,13 @@ public struct HelloAlertConfig {
     public static func cancel(action: (() -> Void)? = nil) -> HelloAlertViewItem {
       HelloAlertViewItem(name: "Cancel", action: action, isDestructive: false)
     }
+    
+    public static var ok: HelloAlertViewItem { ok() }
+    
+    public static var cancel: HelloAlertViewItem { cancel() }
   }
   
-  var id: String = UUID().uuidString
+  var id: String = .uuid
   var title: String
   var message: String?
   var firstButton: HelloAlertViewItem

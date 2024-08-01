@@ -1,0 +1,35 @@
+import SwiftUI
+
+import HelloCore
+import HelloApp
+
+public struct AppStoreReviewSettingsItem: View {
+  
+  @Environment(\.openURL) private var openURL
+  
+  private let appStoreReviewURL: URL
+  
+  public init(url: URL) {
+    self.appStoreReviewURL = url
+  }
+  
+  public var body: some View {
+    HelloButton(clickStyle: .highlight, haptics: .click, action: {
+      openURL(appStoreReviewURL)
+    }) {
+      HelloSectionItem {
+        HStack(spacing: 4) {
+          Image(systemName: "heart")
+            .font(.system(size: 20, weight: .regular, design: .rounded))
+            .frame(width: 32, height: 32)
+          Text("Review in App Store")
+            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .fixedSize()
+          Spacer(minLength: 16)
+          Image(systemName: "arrow.up.forward.app")
+            .font(.system(size: 16, weight: .regular, design: .rounded))
+        }
+      }
+    }
+  }
+}
