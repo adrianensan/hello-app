@@ -457,7 +457,14 @@ public enum Persistence {
     Property.persistence.rootURL(for: property)
   }
   
-  nonisolated public static func wipeFiles(location: FilePersistenceLocation) throws {
+  nonisolated public static func wipeFiles(in location: FilePersistenceLocation) throws {
+    guard let url = location.url else { return }
+    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
+      try FileManager.default.removeItem(at: fileURL)
+    }
+  }
+  
+  nonisolated public static func delete(location: FilePersistenceLocation) throws {
     guard let url = location.url else { return }
     try FileManager.default.removeItem(at: url)
   }

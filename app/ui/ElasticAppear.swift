@@ -1,6 +1,7 @@
 import SwiftUI
 
 public extension View {
+  
   func elasticAppear(orderPosition: Double, isPresented: Bool, yOffset: CGFloat = 100) -> some View {
     compositingGroup()
       .blur(radius: isPresented ? 0 : 8)

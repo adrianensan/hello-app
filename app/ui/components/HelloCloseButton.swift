@@ -6,6 +6,7 @@ import HelloCore
 public struct HelloCloseButton: View {
   
   @Environment(\.theme) private var helloTheme
+  @Environment(\.dismissProgress) private var manualDismissProgress
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   
   private let segmentLength: CGFloat = 22
@@ -15,7 +16,7 @@ public struct HelloCloseButton: View {
     self.onDismiss = onDismiss
   }
   
-  private var dismissProgress: CGFloat { sheetModel?.dismissProgress ?? 0 }
+  private var dismissProgress: CGFloat { manualDismissProgress ?? sheetModel?.dismissProgress ?? 0 }
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: { onDismiss() }) {

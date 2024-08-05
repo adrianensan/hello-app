@@ -2,7 +2,7 @@ import Foundation
 
 public extension HelloTheme {
   static var dark: HelloTheme {
-    dark(accent: .semanticColor(.accent))
+    dark(accent: .color(color: .darkThemeBlueAccent))
   }
   
   static func dark(accent: HelloFill) -> HelloTheme {
@@ -29,7 +29,7 @@ public extension HelloTheme {
   }
   
   static var black: HelloTheme {
-    black(accent: .semanticColor(.accent))
+    black(accent: .color(color: .darkThemeBlueAccent))
   }
   
   static func black(accent: HelloFill) -> HelloTheme {

@@ -149,7 +149,7 @@ public struct HelloAlert: View {
       .onTapGesture {}
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(HelloBackgroundDimmingView()
-        .opacity(animateIn ? 1 : 0)
+        .opacity(animateIn ? 0.5 : 0)
         .onTapGesture { dismiss() }
         .animation(.easeInOut(duration: 0.2), value: animateIn))
       .allowsHitTesting(!isDismissed)

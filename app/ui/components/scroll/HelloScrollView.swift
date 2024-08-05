@@ -45,6 +45,8 @@ public class HelloScrollModel {
     self.showScrollIndicator = showScrollIndicator
   }
   
+  public var scrollEnabled: Bool = true
+  
   #if os(iOS)
   public var isScreenTouched: Bool { !TouchesModel.main.activeTouches.isEmpty }
   #else
@@ -173,7 +175,7 @@ public struct HelloScrollView<Content: View>: View {
         model.update(offset: scrollOffset.y)
       }, coordinateSpace: .named(model.coordinateSpaceName))
       content()
-    }
+    }.scrollDisabled(!model.scrollEnabled)
     .scrollPosition($model.swiftuiScrollPosition)
 //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
 //        -geometry.contentOffset.y - geometry.contentInsets.top

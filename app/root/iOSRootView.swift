@@ -21,8 +21,9 @@ public struct HelloAppRootView<Content: View>: View {
       content()
         .compositingGroup()
 //        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
-        .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
+//        .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
         .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
+        .allowsHitTesting(windowModel.popupViews.isEmpty)
       
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in

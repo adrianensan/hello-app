@@ -7,6 +7,7 @@ public extension EnvironmentValues {
   @Entry var contentShape: AnyInsettableShape? = nil
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
+  @Entry var dismissProgress: CGFloat?
   @Entry var viewID: String? = nil
   @Entry var pageID: String? = nil
   @Entry var windowFrame: CGRect = .zero

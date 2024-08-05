@@ -6,6 +6,8 @@ public struct HelloBackgroundDimmingView: View {
   
   @Environment(\.colorScheme) private var colorScheme
   
+  public init() {}
+  
   private var fadeAmount: CGFloat {
     switch colorScheme {
     case .dark: 0.8

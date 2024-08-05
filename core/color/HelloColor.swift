@@ -249,6 +249,9 @@ public extension HelloColor {
   static var darkerGrey: HelloColor { HelloColor(r: 0.26, g: 0.26, b: 0.26) }
   
   static var neonGreen: HelloColor { HelloColor(r: 0.1, g: 0.8, b: 0.1) }
+  
+  static var darkThemeBlueAccent: HelloColor { HelloColor(r: 0.23, g: 0.51, b: 0.97) }
+  static var lightThemeBlueAccent: HelloColor { HelloColor(r: 0.2, g: 0.47, b: 0.96) }
 }
 
 public struct HelloDynamicColor: Sendable {

@@ -42,12 +42,20 @@ public extension BaseAppIcon {
   }
 }
 
-public struct AppIconCollection<AppIcon: BaseAppIcon> {
+public struct AppIconCollection<AppIcon: BaseAppIcon>: Identifiable, Sendable {
   
-  public enum AppIconCollectionLayout: Equatable {
+  public enum AppIconCollectionLayout: Equatable, Sendable {
     case grid
     case gridWithLabels
     case list
+    
+    public var showLabel: Bool {
+      switch self {
+      case .grid: false
+      case .gridWithLabels: true
+      case .list: true
+      }
+    }
   }
   
   public var id: String

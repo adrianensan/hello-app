@@ -7,6 +7,7 @@ public struct PagerPage: Sendable, Identifiable {
   public var name: String?
   public var view: @MainActor () -> AnyView
   public var options: PagerPageOptions
+  var viewID: String = .uuid
   
   @MainActor
   public init(id: String = UUID().uuidString,
@@ -148,11 +149,11 @@ public class PagerModel {
     activeScrollModel?.scrollOffset ?? 0
   }
   
-  public func push<Page: View>(view: @escaping @MainActor () -> Page,
-                               id: String = String(describing: Page.self),
+  public func push<Page: View>(id: String = String(describing: Page.self),
                                name: String? = nil,
                                animated: Bool = true,
-                               withOptions options: PagerPageOptions = PagerPageOptions()) {
+                               withOptions options: PagerPageOptions = PagerPageOptions(),
+                               view: @escaping @MainActor () -> Page) {
     guard allowInteraction, !viewStack.contains(where: { $0.id == id }) else { return }
 //    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth

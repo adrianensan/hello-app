@@ -4,14 +4,24 @@ import HelloCore
 
 public struct HelloToggle: View {
   
-  @Environment(\.theme) var theme
+  @Environment(\.theme) private var theme
   
-  var isSelected: Bool
-  var action: () -> Void
+  private var isSelected: Bool
+  private var action: @MainActor () -> Void
   
-  public init(isSelected: Bool, action: @escaping () -> Void) {
+  public init(isSelected: Bool, action: @escaping @MainActor () -> Void) {
     self.isSelected = isSelected
     self.action = action
+  }
+  
+  public init<PersistentPropertyy: PersistenceProperty>(_ property: Persistent<PersistentPropertyy>) where PersistentPropertyy.Value == Bool {
+    self.isSelected = property.wrappedValue
+    self.action = { property.wrappedValue.toggle() }
+  }
+  
+  public init(isSelected: Binding<Bool>) {
+    self.isSelected = isSelected.wrappedValue
+    self.action = { isSelected.wrappedValue.toggle() }
   }
   
   public var body: some View {

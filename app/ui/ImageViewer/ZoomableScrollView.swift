@@ -23,14 +23,17 @@ struct ZoomScrollView<Content: View>: UIViewRepresentable {
     lazy var heightConstraint: NSLayoutConstraint = hostingController.view.heightAnchor.constraint(equalToConstant: 0)
     
     private var onDismiss: (CGPoint) -> Void
+    private var onDismissProgress: (CGFloat) -> Void
     private var onMaxDismissReached: (CGPoint) -> Void
     private var dismissOffset: CGPoint?
     
     init(hostingController: UIHostingController<Content>,
          onDismiss: @escaping (CGPoint) -> Void,
+         onDismissProgress: @escaping (CGFloat) -> Void,
          onMaxDismissReached: @escaping (CGPoint) -> Void) {
       self.hostingController = hostingController
       self.onDismiss = onDismiss
+      self.onDismissProgress = onDismissProgress
       self.onMaxDismissReached = onMaxDismissReached
       super.init()
       widthConstraint.isActive = true
@@ -53,11 +56,13 @@ struct ZoomScrollView<Content: View>: UIViewRepresentable {
           scrollView.contentOffset = dismissOffset
           onMaxDismissReached(dismissOffset)
 //        }
+      } else if scrollView.zoomScale == 1 {
+        onDismissProgress(min(1, max(0, -scrollView.contentOffset.y) / 100))
       }
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-      if scrollView.zoomScale == 1 && velocity.magnitude > 1 {
+      if scrollView.zoomScale == 1 && (velocity.magnitude > 1 || scrollView.contentOffset.y < -120) {
         dismissOffset = scrollView.contentOffset
         onDismiss(velocity)
       }
@@ -69,14 +74,17 @@ struct ZoomScrollView<Content: View>: UIViewRepresentable {
   private var contentSize: CGSize
   private var content: Content
   private var onDismiss: (CGPoint) -> Void
+  private var onDismissProgress: (CGFloat) -> Void
   private var onMaxDismissReached: (CGPoint) -> Void
   
   init(size: CGSize,
        onDismiss: @escaping (CGPoint) -> Void,
+       onDismissProgress: @escaping (CGFloat) -> Void,
        onMaxDismissReached: @escaping (CGPoint) -> Void,
        @ViewBuilder content: () -> Content) {
     self.contentSize = size
     self.onDismiss = onDismiss
+    self.onDismissProgress = onDismissProgress
     self.onMaxDismissReached = onMaxDismissReached
     self.content = content()
   }
@@ -109,6 +117,7 @@ struct ZoomScrollView<Content: View>: UIViewRepresentable {
   func makeCoordinator() -> ZoomScrollViewCoordinator {
     ZoomScrollViewCoordinator(hostingController: UIHostingController(rootView: content),
                               onDismiss: onDismiss,
+                              onDismissProgress: onDismissProgress,
                               onMaxDismissReached: onMaxDismissReached)
   }
   

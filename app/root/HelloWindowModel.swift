@@ -26,10 +26,14 @@ public class HelloWindowModel {
     var viewID: String
     var instanceID: String
     var view: @MainActor () -> AnyView
+    var onDismiss: (@MainActor () -> Void)?
     
     var id: String { instanceID }
     
-    init(instanceID: String = UUID().uuidString, viewID: String, view: @escaping @MainActor () -> some View) {
+    init(instanceID: String = UUID().uuidString,
+         viewID: String,
+         view: @escaping @MainActor () -> some View,
+         onDismiss: (@MainActor () -> Void)? = nil) {
       self.instanceID = instanceID
       self.viewID = viewID
       self.view = { 
@@ -37,20 +41,18 @@ public class HelloWindowModel {
           .id(instanceID)
           .environment(\.viewID, viewID))
       }
+      self.onDismiss = onDismiss
     }
   }
   
   var blurBackgroundForPopup: Bool = true
   var popupViews: [PopupWindow] = []
   
-  public func showPopup<Content: View>(blurBackground: Bool = true, _ view: Content) {
+  public func showPopup<Content: View>(blurBackground: Bool = false,
+                                       onDismiss: (@MainActor () -> Void)? = nil,
+                                       _ view: @escaping @MainActor () -> Content) {
     blurBackgroundForPopup = blurBackground
-    popupViews.append(PopupWindow(viewID: String(describing: Content.self)) { view })
-  }
-  
-  public func dismissPopup() {
-    guard !popupViews.isEmpty else { return }
-    popupViews.popLast()
+    popupViews.append(PopupWindow(viewID: String(describing: Content.self), view: view, onDismiss: onDismiss))
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
@@ -77,13 +79,23 @@ public class HelloWindowModel {
     popupViews.append(PopupWindow(viewID: String(describing: view.self)) { view() })
   }
   
+  public func dismissPopup() {
+    guard !popupViews.isEmpty else { return }
+    popupViews.last?.onDismiss?()
+    popupViews.popLast()
+  }
+  
   public func dismiss(id: String) {
     guard !popupViews.isEmpty else { return }
+    popupViews
+      .filter { $0.viewID == id }
+      .forEach { $0.onDismiss?() }
     popupViews = popupViews.filter { $0.viewID != id }
   }
   
   public func dismissAllPopups() {
     guard !popupViews.isEmpty else { return }
+    popupViews.forEach { $0.onDismiss?() }
     popupViews = []
   }
 }

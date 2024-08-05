@@ -1,9 +1,9 @@
 import SwiftUI
 
 public extension View {
-  func readGeometry(onChange: @escaping (GeometryProxy) -> Void) -> some View {
+  func readGeometry(onChange: @escaping @MainActor (GeometryProxy) -> Void) -> some View {
     background(GeometryReader { geometry -> Color in
-      onChange(geometry)
+      Task { onChange(geometry) }
       return Color.clear
     })
   }

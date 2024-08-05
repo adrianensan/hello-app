@@ -5,20 +5,45 @@ import HelloCore
 
 public struct ImageViewer: View {
   
+  @MainActor
+  @Observable
+  class ImageViewModel {
+    var dismissProgress: CGFloat?
+  }
+  
+  public struct ImageViewerCloseButton: View {
+    
+    @Environment(ImageViewModel.self) private var imageViewModel
+    var onDismiss: @MainActor () -> Void
+    
+    public var body: some View {
+      HelloCloseButton(onDismiss: onDismiss)
+        .environment(\.dismissProgress, imageViewModel.dismissProgress)
+    }
+  }
+  
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeAreaInsets
+  @Environment(\.contentShape) private var contentShape
   @Environment(HelloWindowModel.self) private var windowModel
   
+  @State private var model = ImageViewModel()
   @State private var dismissVelocity: CGPoint?
-  
-  private var image: NativeImage
-  private var originalFrameSaved: CGRect?
+
   @State private var originalFrame: CGRect?
   
-  public init(image: NativeImage, originalFrame: CGRect?) {
-    self.image = image
+  private let imageOptions: [HelloImageOption]
+  private var originalFrameSaved: CGRect?
+  private var cornerRadius: CGFloat
+  
+  public init(options: [HelloImageOption],
+              resizeMode: ContentMode = .fit,
+              originalFrame: CGRect?,
+              cornerRadius: CGFloat) {
+    imageOptions = options
     self.originalFrameSaved = originalFrame
     self._originalFrame = State(initialValue: originalFrame)
+    self.cornerRadius = cornerRadius
   }
   
   var isDissmising: Bool {
@@ -27,27 +52,30 @@ public struct ImageViewer: View {
   
   public var body: some View {
     ZStack {
-      ZoomScrollView(size: windowFrame.size,
-                     onDismiss: { velocity in
-        guard !isDissmising else { return }
-        Task {
-          if originalFrameSaved == nil {
-            dismissVelocity = velocity
-            windowModel.dismissPopup()
-          }
-        }
-      }, onMaxDismissReached: { offset in
-        guard !isDissmising else { return }
-        if let originalFrameSaved {
+      ZoomScrollView(
+        size: windowFrame.size,
+        onDismiss: { velocity in
+          guard !isDissmising else { return }
           Task {
-            originalFrame = originalFrameSaved + offset
-            windowModel.dismissPopup()
+            if originalFrameSaved == nil {
+              dismissVelocity = velocity
+              windowModel.dismissPopup()
+            }
           }
-        }
-      }) {
-        Image(nativeImage: image)
-          .resizable()
-          .aspectRatio(contentMode: .fit)
+        },
+        onDismissProgress: { model.dismissProgress = $0 },
+        onMaxDismissReached: { offset in
+          guard !isDissmising else { return }
+          model.dismissProgress = 1
+          if let originalFrameSaved {
+            Task {
+              originalFrame = originalFrameSaved + offset
+              windowModel.dismissPopup()
+            }
+          }
+        }) {
+          HelloImageView(options: imageOptions)
+            .clipShape(RoundedRectangle(cornerRadius: originalFrame == nil ? 0 : cornerRadius, style: .continuous))
           .frame(width: originalFrame?.width, height: originalFrame?.height)
           .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
           .frame(width: windowFrame.size.width, height: windowFrame.size.height,
@@ -57,25 +85,22 @@ public struct ImageViewer: View {
           .animation(.linear(duration: 1), value: dismissVelocity)
           .animation(.dampSpring, value: originalFrame)
       }
-      HelloButton(action: {
+      ImageViewerCloseButton(onDismiss: {
         if let originalFrameSaved {
           originalFrame = originalFrameSaved
         } else {
           dismissVelocity = CGPoint(x: 0, y: -4)
         }
-        windowModel.dismissPopup()
-      }) {
-        Image(systemName: "xmark")
-          .font(.system(size: 20, weight: .bold, design: .rounded))
-          .foregroundColor(.white)
-          .shadow(color: .black.opacity(0.2), radius: 8)
-          .frame(width: 44, height: 44)
-          .clickable()
-      }.padding(8)
+        Task {
+          try await Task.sleepForOneFrame()
+          windowModel.dismissPopup()
+        }
+      }).padding(8)
         .padding(.top, safeAreaInsets.top)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
         .opacity(!isDissmising ? 1 : 0)
         .animation(.easeInOut(duration: 0.36), value: isDissmising)
+        .environment(model)
     }.background(Color.black
       .opacity(!isDissmising ? 1 : 0)
       .animation(.easeInOut(duration: 0.36), value: isDissmising))

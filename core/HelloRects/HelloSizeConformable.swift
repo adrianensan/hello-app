@@ -84,13 +84,15 @@ public extension HelloSizeConformable where NumberType: BinaryInteger {
   var floatSize: FloatSize { FloatSize(width: Float(width), height: Float(height)) }
   var size3D: SIMD3<Float> { SIMD3(x: Float(width), y: Float(height), z: 0) }
   
-  var diagonal: Double { doubleSize.diagonal }
+  var diagonal: Double { magnitude }
+  var magnitude: Double { doubleSize.diagonal }
   
   var center: HelloPoint<Double> { doubleSize.center }
 }
 
 public extension HelloSizeConformable where NumberType: BinaryFloatingPoint {
-  var diagonal: Double { sqrt(Double(width * width + height * height)) }
+  var magnitude: Double { sqrt(Double(width * width + height * height)) }
+  var diagonal: Double { magnitude }
 }
 
 public extension HelloSizeConformable where Self == CGSize {

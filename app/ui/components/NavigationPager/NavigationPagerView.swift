@@ -61,7 +61,7 @@ public struct NavigationPagerView: View {
           ForEach(model.viewStack) { page in
             page.view()
               .environment(\.pageID, page.id)
-//              id(page.id)
+              .id(page.viewID)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
               .clipped()
               .background(ClearClickableView()

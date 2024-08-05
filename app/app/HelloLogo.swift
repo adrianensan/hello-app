@@ -70,7 +70,6 @@ public struct HelloLogo: View {
           .offset(y: 0.45 * strokeSize)
       }.compositingGroup()
       .frame(width: size, height: size)
-      .offset(x: 0.45 * strokeSize)
       .frame(width: sideLength, height: sideLength)
       .rotationEffect(.degrees(30))
       .offset(x: 0.2 * size, y: 0.2 * size)

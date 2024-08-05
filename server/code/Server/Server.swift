@@ -49,8 +49,7 @@ public protocol ServerEndpoint {
 public class APIHTTPEndpoint<Endpoint: APIEndpoint>: HTTPEndpoint {
   
   public init(_ apiEndpoint: Endpoint.Type, handler: @escaping (HTTPRequest<Endpoint.RequestBodyType>) async throws -> HTTPResponse<Endpoint.ResponseType>) {
-    // TODO: THIS IS BROKEN
-    super.init(method: .get, url: "") { httpRequest in
+    super.init(method: apiEndpoint.method, url: apiEndpoint.path) { httpRequest in
       let response: HTTPResponse<Endpoint.ResponseType>
       if let data = httpRequest.body {
         switch Endpoint.RequestBodyType.self {
