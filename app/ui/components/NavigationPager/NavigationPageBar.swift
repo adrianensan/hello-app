@@ -4,10 +4,9 @@ public struct NavigationPageBar<NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config
-  @Environment(HelloScrollModel.self) private var scrollModel
   
   let title: String?
-  let navBarContent: () -> NavBarContent
+  @ViewBuilder let navBarContent: @MainActor () -> NavBarContent
   
   var titleHeight: CGFloat {
     config.belowNavBarPadding > 0 ? 44 : config.navBarHeight
@@ -17,7 +16,6 @@ public struct NavigationPageBar<NavBarContent: View>: View {
     ZStack(alignment: .top) {
       if let title {
         NavigationPageTitle(title: title)
-          .environment(scrollModel)
           .frame(height: titleHeight)
           .padding(.top, config.belowNavBarPadding)
       }

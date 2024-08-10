@@ -7,7 +7,7 @@ public struct NavigationPageBarScrolling<NavBarContent: View>: View {
   @Environment(HelloScrollModel.self) private var scrollModel
   
   let title: String?
-  let navBarContent: () -> NavBarContent
+  @ViewBuilder let navBarContent: @MainActor () -> NavBarContent
   
   public var body: some View {
     NavigationPageBar(title: title, navBarContent: navBarContent)

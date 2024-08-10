@@ -93,19 +93,21 @@ public class HelloPersistence {
     }
   }
   
-  private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property) {
-    Task { @MainActor in
-      guard let object = Persistence.models[property.location.id]?.value else { return }
-      guard let observable = object as? PersistentObservable<Property> else {
-        Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
-        return
+  private func updated<Property: PersistenceProperty>(value: Property.Value, for property: Property, skipModelUpdate: Bool) {
+    if !skipModelUpdate {
+      Task { @MainActor in
+        guard let object = Persistence.models[property.location.id]?.value else { return }
+        guard let observable = object as? PersistentObservable<Property> else {
+          Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
+          return
+        }
+        await observable.value = value
       }
-      await observable.value = value
     }
     
     if var listeners = listeners[property.id] as? [Listener<Property>] {
       var hasChanged = false
-      for (i, listener) in listeners.reversed().enumerated() {
+      for (i, listener) in listeners.enumerated().reversed() {
         if listener.object == nil {
           listeners.remove(at: i)
           hasChanged = true
@@ -172,9 +174,7 @@ public class HelloPersistence {
       if property.allowCache {
         cache[property.location.id] = property.cleanup(value: value)
       }
-      if !skipModelUpdate {
-        updated(value: value, for: property)
-      }
+      updated(value: value, for: property, skipModelUpdate: skipModelUpdate)
     } catch {
       Log.error("Failed to save value for \(property.self). Error: \(error.localizedDescription)", context: "Persistence")
     }
@@ -265,7 +265,7 @@ public class HelloPersistence {
     case .keychain(let key, let appGroup, let isBiometricallyLocked): try? keychain.remove(for: key)
     case .memory: break
     }
-    updated(value: property.defaultValue, for: property)
+    updated(value: property.defaultValue, for: property, skipModelUpdate: false)
   }
   
   public func nuke(stopSaving: Bool = true) {
@@ -414,7 +414,7 @@ public enum Persistence {
     await Property.persistence.value(for: property)
   }
   
-  nonisolated public static func initialValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+  nonisolated public static func unsafeValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
     Property.persistence.storedValue(for: property)
   }
   

@@ -1,0 +1,49 @@
+import SwiftUI
+
+fileprivate struct HelloEnumeratedCollectionElement<Element: Sendable>: Identifiable, Sendable {
+  var index: Int
+  var element: Element
+  var isLast: Bool
+  
+  init(index: Int, element: Element) {
+    self.index = index
+    self.element = element
+    self.isLast = false
+  }
+  
+  var id: Int { index }
+}
+
+fileprivate extension Collection where Element: Sendable {
+  func enumeratedIdentifiable() -> [HelloEnumeratedCollectionElement<Element>] {
+    var enumeratedList = enumerated().map {
+      HelloEnumeratedCollectionElement(index: $0.offset, element: $0.element)
+    }
+    if !enumeratedList.isEmpty {
+      enumeratedList[enumeratedList.endIndex - 1].isLast = true
+    }
+    return enumeratedList
+  }
+}
+
+public struct HelloForEach<Element, Content: View>: View where Element: Sendable & Identifiable {
+  
+  public var data: [Element]
+  @ViewBuilder public var content: @MainActor (Int, Element, Bool) -> Content
+  
+  public init(_ data: [Element], @ViewBuilder content: @escaping @MainActor (Int, Element) -> Content) {
+    self.data = data
+    self.content = { index, element, _ in content(index, element) }
+  }
+  
+  public init(_ data: [Element], @ViewBuilder content: @escaping @MainActor (Int, Element, Bool) -> Content) {
+    self.data = data
+    self.content = content
+  }
+  
+  public var body: some View {
+    ForEach(data.enumeratedIdentifiable()) { element in
+      content(element.index, element.element, element.isLast)
+    }
+  }
+}

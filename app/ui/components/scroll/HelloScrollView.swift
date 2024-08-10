@@ -32,7 +32,7 @@ public class HelloScrollModel {
   public var scrollThreshold: CGFloat?
   var defaultScrollThreshold: CGFloat = 0
   
-  var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
+  public var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
   
   fileprivate let coordinateSpaceName: String = UUID().uuidString
   @ObservationIgnored fileprivate var readyForDismiss: Bool = true
@@ -176,16 +176,16 @@ public struct HelloScrollView<Content: View>: View {
       }, coordinateSpace: .named(model.coordinateSpaceName))
       content()
     }.scrollDisabled(!model.scrollEnabled)
-    .scrollPosition($model.swiftuiScrollPosition)
-//      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
-//        -geometry.contentOffset.y - geometry.contentInsets.top
-//      }, action: { _, newScrollOffset in
-//        model.update(offset: newScrollOffset)
-//      })
+      .scrollPosition($model.swiftuiScrollPosition)
+    //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
+    //        -geometry.contentOffset.y - geometry.contentInsets.top
+    //      }, action: { _, newScrollOffset in
+    //        model.update(offset: newScrollOffset)
+    //      })
       .coordinateSpace(name: model.coordinateSpaceName)
       .insetBySafeArea()
       .environment(model)
-      .onAppear {
+      .onChange(of: pageID, initial: true) {
         if let pageID {
           pagerModel?.set(scrollModel: model, for: pageID)
         }

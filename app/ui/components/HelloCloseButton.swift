@@ -7,6 +7,7 @@ public struct HelloCloseButton: View {
   
   @Environment(\.theme) private var helloTheme
   @Environment(\.dismissProgress) private var manualDismissProgress
+  @Environment(\.needsBlur) private var needsBlur
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   
   private let segmentLength: CGFloat = 22
@@ -40,6 +41,12 @@ public struct HelloCloseButton: View {
       }.foregroundStyle(helloTheme.floating.foreground.primary.color)
         .frame(width: 44, height: 44)
         .offset(y: dismissProgress * 10)
+        .background(
+          Capsule(style: .continuous)
+            .fill(.thinMaterial)
+            .blur(radius: needsBlur ? 0 : 16 * (1 - min(1, (Double(sheetModel?.backProgress ?? 0) / 0.4))))
+            .opacity(needsBlur ? 1 : min(1, (Double(sheetModel?.backProgress ?? 0) / 0.2)))
+        )
         .frame(width: 60, height: 60)
         .clickable()
 //        .background {
@@ -54,7 +61,6 @@ public struct HelloCloseButton: View {
           //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
 //        }
       
-//        .background(helloTheme.floating.backgroundView(for: Capsule(style: .continuous)))
 //        .animation(.interactive, value: dismissProgress)
     }
   }

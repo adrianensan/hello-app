@@ -97,9 +97,12 @@ public class HelloImageModel {
   public private(set) var frames: [AnimatedImageFrame]?
   private var loadTask: Task<Void, any Error>?
   public let imageSource: HelloImageSource
+  public let variant: HelloImageVariant
+  public var option: HelloImageOption { HelloImageOption(imageSource: imageSource, variant: variant) }
   
   private init(imageSource: HelloImageSource, variant: HelloImageVariant) {
     self.imageSource = imageSource
+    self.variant = variant
     loadTask = nil
     switch imageSource {
     case .asset(let named):
@@ -119,10 +122,10 @@ public class HelloImageModel {
       image = nativeImage
       Task { await loadFrames(from: data) }
     case .remoteURL(let url):
-      if let cachedImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
+      if let cachedImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
         image = NativeImage(data: cachedImageData)
         Task { await loadFrames(from: cachedImageData) }
-      } else if let cachedOriginalImageData = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) ?? Persistence.initialValue(.tempDownload(url: url)) {
+      } else if let cachedOriginalImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) ?? Persistence.unsafeValue(.tempDownload(url: url)) {
         loadTask = Task {
           defer { loadTask = nil }
           let resizedImageData = try await ImageProcessor.resize(imageData: cachedOriginalImageData, maxSize: variant.size)
@@ -150,9 +153,9 @@ public class HelloImageModel {
       guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
       helloURL.scheme = .https
       let url = helloURL.root.string
-      if let cachedFavicon = Persistence.initialValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
+      if let cachedFavicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
         image = NativeImage(data: cachedFavicon)
-      } else if var favicon = Persistence.initialValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
+      } else if var favicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
         loadTask = Task {
           defer { loadTask = nil }
           let resizedFavicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))

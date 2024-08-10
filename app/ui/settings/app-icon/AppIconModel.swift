@@ -10,7 +10,7 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
   
   @ObservationIgnored @Persistent(.activeAppIcon) var activeAppIcon
   
-  init() {
+  public init() {
     refresh()
   }
   

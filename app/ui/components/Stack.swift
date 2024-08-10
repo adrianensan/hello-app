@@ -8,13 +8,13 @@ public struct Stack<Content: View>: View {
   var alignment: Alignment
   var spacing: CGFloat
   var isReversed: Bool
-  var content: () -> Content
+  @ViewBuilder var content: @MainActor () -> Content
   
   public init(orientation: Orientation,
               alignment: Alignment = .center,
               spacing: CGFloat = 0,
               isReversed: Bool = false,
-              @ViewBuilder content: @escaping () -> Content) {
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.orientation = orientation
     self.alignment = alignment
     self.spacing = spacing

@@ -26,7 +26,8 @@ public class HelloSheetModel {
   public private(set) var dragToDismissType: GestureType
   @ObservationIgnored var dragCanDismiss: Bool?
   
-  var shouldScrollInsteadOfDismiss: Bool { (pagerModel?.activePageScrollOffset ?? 0) < 0 }
+  var shouldScrollInsteadOfDismiss: Bool { (pagerModel?.activePageScrollOffset ?? 0) < -1 }
+  var backProgress: CGFloat { pagerModel?.backProgressModel.backProgress ?? 0 }
   
   public init(dragToDismissType: GestureType = .highPriority) {
     self.dragToDismissType = dragToDismissType
@@ -44,17 +45,16 @@ public struct HelloSheet<Content: View>: View {
   @Environment(\.safeArea) private var safeArea
   @Environment(\.theme) private var theme
   @Environment(\.colorScheme) private var colorScheme
+  @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var isVisible: Bool
   @State private var model: HelloSheetModel
   @GestureState private var drag: CGFloat?
   
-  private var id: String
   private var content: () -> Content
   
-  public init(id: String, dragToDismissType: GestureType = .highPriority, content: @MainActor @escaping () -> Content) {
-    self.id = id
+  public init(dragToDismissType: GestureType = .highPriority, content: @MainActor @escaping () -> Content) {
     self._isVisible = State(initialValue: false)
     let sheetModel = HelloSheetModel(dragToDismissType: dragToDismissType)
     self._model = State(initialValue: sheetModel)
@@ -73,7 +73,7 @@ public struct HelloSheet<Content: View>: View {
   func dismiss() {
     isVisible = false
     Task {
-      windowModel.dismiss(id: id)
+      windowModel.dismiss(id: viewID)
     }
   }  
 
@@ -113,7 +113,7 @@ public struct HelloSheet<Content: View>: View {
       .gesture(type: model.dragToDismissType, DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
         .updating($drag) { drag, state, transaction in
           if model.dragCanDismiss == nil {
-            model.dragCanDismiss = !model.shouldScrollInsteadOfDismiss && 0.5 * drag.translation.height > abs(drag.translation.width)
+            model.dragCanDismiss = !model.shouldScrollInsteadOfDismiss && 0.8 * drag.translation.height > abs(drag.translation.width)
           }
           
           if model.dragCanDismiss == true {

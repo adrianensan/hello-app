@@ -16,7 +16,7 @@ public struct PagerPage: Sendable, Identifiable {
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
     self.name = name
-    self.view = { AnyView(view().id(id)) }
+    self.view = { AnyView(view()) }
     self.options = options
   }
   
@@ -50,6 +50,8 @@ public struct HelloPagerConfig: Sendable {
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
   public var navBarStyle: NavigationPageNavigationBarStyle
+  public var navBarTrailingPadding: CGFloat
+  public var navBarFadeTransitionMultiplier: CGFloat
   public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
   public var backGestureType: GestureType
@@ -58,6 +60,8 @@ public struct HelloPagerConfig: Sendable {
               horizontalPagePadding: CGFloat = 16,
               belowNavBarPadding: CGFloat = 0,
               navBarStyle: NavigationPageNavigationBarStyle = .fixed,
+              navBarTrailingPadding: CGFloat = 0,
+              navBarFadeTransitionMultiplier: CGFloat = 1,
               overrideNavBarTitleScrollsDown: Bool? = nil,
               allowsBack: Bool = true,
               backGestureType: GestureType = .highPriority) {
@@ -65,6 +69,8 @@ public struct HelloPagerConfig: Sendable {
     self.horizontalPagePadding = horizontalPagePadding
     self.belowNavBarPadding = belowNavBarPadding
     self.navBarStyle = navBarStyle
+    self.navBarTrailingPadding = navBarTrailingPadding
+    self.navBarFadeTransitionMultiplier = navBarFadeTransitionMultiplier
     self.overrideNavBarTitleScrollsDown = overrideNavBarTitleScrollsDown
     self.allowsBack = allowsBack
     self.backGestureType = backGestureType

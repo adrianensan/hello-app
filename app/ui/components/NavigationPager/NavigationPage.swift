@@ -10,8 +10,8 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   
   private var title: String?
   private var allowScroll: Bool
-  private var content: () -> Content
-  private var navBarContent: () -> NavBarContent
+  @ViewBuilder private var content: @MainActor () -> Content
+  @ViewBuilder private var navBarContent: @MainActor () -> NavBarContent
   
   public init(title: String? = nil,
               allowScroll: Bool = true,
@@ -45,12 +45,14 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         content: {
           #if os(iOS)
           if navBarStyle == .scrollsWithContent {
-            NavigationPageBarScrolling(title: title, navBarContent: navBarContent)
+            NavigationPageBarScrolling(title: title, navBarContent: {
+              navBarContent().padding(.trailing, config.navBarTrailingPadding)
+            })
           }
           #endif
           
           content()
-            .padding(.top, max(-scrollModel.effectiveScrollThreshold - 2, 0))
+            .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0))
             .padding(.horizontal, config.horizontalPagePadding)
             .frame(maxWidth: .infinity)
             .background(ClearClickableView().onTapGesture {
@@ -61,7 +63,9 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
           Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)
         }
       
-      NavigationPageBarFixed(title: title, navBarContent: navBarContent)
+      NavigationPageBarFixed(title: title, navBarContent: {
+        navBarContent().padding(.trailing, config.navBarTrailingPadding)
+      })
     }.onChange(of: isSmallSize || title == nil, initial: true) {
       #if os(iOS)
       scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? -2 : -82

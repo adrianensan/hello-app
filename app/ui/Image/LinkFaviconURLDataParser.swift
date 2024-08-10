@@ -19,7 +19,7 @@ public actor LinkFaviconURLDataParser {
   private init() {}
   
   private var inProgress: Set<String> = []
-  private var failedFaviconFetches = Persistence.initialValue(.failedFaviconFetches)
+  private var failedFaviconFetches = Persistence.unsafeValue(.failedFaviconFetches)
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
     if let failedFetch = failedFaviconFetches[helloURL.string] {

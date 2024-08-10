@@ -20,7 +20,7 @@ public actor Logger: Sendable {
   public init(ephemeral: Bool = false) {
     self.isEphemeral = ephemeral
     if !ephemeral {
-      self.logStatements = Persistence.initialValue(.logs)
+      self.logStatements = Persistence.unsafeValue(.logs)
     } else {
       logStatements = []
     }
@@ -44,10 +44,14 @@ public actor Logger: Sendable {
     }
   }
   
-  public func terminate() async throws {
-    try await log(LogStatement(level: .meta, message: "", context: "-----Terminate-----"))
-    try await flush(force: true)
-    isEphemeral = true
+  nonisolated public func unsafeSyncLog(_ logStatement: LogStatement) throws {
+    var logStatements = Persistence.unsafeValue(.logs)
+    logStatements.append(logStatement)
+    Persistence.unsafeSave(logStatements, for: .logs)
+  }
+  
+  nonisolated public func terminate() throws {
+    try unsafeSyncLog(LogStatement(level: .meta, message: "", context: "-----Terminate-----"))
   }
   
   public func clear() async throws {

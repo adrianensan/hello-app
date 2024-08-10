@@ -1,5 +1,7 @@
 import SwiftUI
 
+import HelloCore
+
 public struct NavigationPageBarFixed<NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
@@ -8,13 +10,14 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
   @Environment(HelloScrollModel.self) private var scrollModel
   
   let title: String?
-  let navBarContent: () -> NavBarContent
+  let navBarContent: @MainActor () -> NavBarContent
   
   public var body: some View {
     NavigationPageBar(title: title, navBarContent: navBarContent)
       .frame(maxWidth: .infinity)
       .padding(.top, safeAreaInsets.top)
-      .padding(.bottom, 0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
+      .padding(.bottom, config.navBarFadeTransitionMultiplier * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
+      .padding(.top, 16)
       .background(
         ZStack {
           Rectangle().fill(.ultraThinMaterial)
@@ -22,10 +25,12 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
         }.compositingGroup()
           .shadow(color: .black.opacity(0.12), radius: 24)
           .compositingGroup()
-          .blur(radius: 8 * (1 - scrollModel.scrollThresholdProgress))
+          .blur(radius: interpolate(.linear, from: 8, to: 0, progress: scrollModel.scrollThresholdProgress))
           .opacity(scrollModel.hasScrolled ? 1 : scrollModel.scrollThresholdProgress)
+          .allowsHitTesting(scrollModel.hasScrolled)
 //          .animation(nil)
-      ).padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
+      ).padding(.top, -16)
+    //.padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
   }

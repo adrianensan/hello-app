@@ -18,13 +18,18 @@ public struct ImageViewer: View {
     
     public var body: some View {
       HelloCloseButton(onDismiss: onDismiss)
+        .offset(y: 20 * (imageViewModel.dismissProgress ?? 0))
         .environment(\.dismissProgress, imageViewModel.dismissProgress)
+        .environment(\.theme, .init(theme: .black))
+        .environment(\.colorScheme, .dark)
+        .environment(\.needsBlur, true)
     }
   }
   
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.contentShape) private var contentShape
+  @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var model = ImageViewModel()
@@ -59,18 +64,20 @@ public struct ImageViewer: View {
           Task {
             if originalFrameSaved == nil {
               dismissVelocity = velocity
-              windowModel.dismissPopup()
+              windowModel.dismiss(id: viewID)
             }
           }
         },
         onDismissProgress: { model.dismissProgress = $0 },
         onMaxDismissReached: { offset in
           guard !isDissmising else { return }
-          model.dismissProgress = 1
+          if model.dismissProgress ?? 0 > 0 {
+            model.dismissProgress = 1
+          }
           if let originalFrameSaved {
             Task {
               originalFrame = originalFrameSaved + offset
-              windowModel.dismissPopup()
+              windowModel.dismiss(id: viewID)
             }
           }
         }) {
@@ -93,7 +100,7 @@ public struct ImageViewer: View {
         }
         Task {
           try await Task.sleepForOneFrame()
-          windowModel.dismissPopup()
+          windowModel.dismiss(id: viewID)
         }
       }).padding(8)
         .padding(.top, safeAreaInsets.top)

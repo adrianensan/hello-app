@@ -1,6 +1,8 @@
 import SwiftUI
 import Observation
 
+import HelloCore
+
 #if os(iOS)
 @MainActor
 public func globalDismissKeyboard() {
@@ -23,24 +25,17 @@ public class HelloWindowModel {
   #endif
   
   struct PopupWindow: Identifiable, Sendable {
-    var viewID: String
-    var instanceID: String
+    var id: String
+    var uniqueInstanceID: String
     var view: @MainActor () -> AnyView
     var onDismiss: (@MainActor () -> Void)?
     
-    var id: String { instanceID }
-    
-    init(instanceID: String = UUID().uuidString,
-         viewID: String,
+    init(viewID: String,
          view: @escaping @MainActor () -> some View,
          onDismiss: (@MainActor () -> Void)? = nil) {
-      self.instanceID = instanceID
-      self.viewID = viewID
-      self.view = { 
-        AnyView(view()
-          .id(instanceID)
-          .environment(\.viewID, viewID))
-      }
+      self.uniqueInstanceID = .uuid
+      self.id = viewID
+      self.view = { AnyView(view()) }
       self.onDismiss = onDismiss
     }
   }
@@ -62,21 +57,24 @@ public class HelloWindowModel {
   }
   
   #if os(iOS)
-  public func present<Content: View>(
+  public func presentSheet<Content: View>(
     id: String = String(describing: Content.self),
     dragToDismissType: GestureType = .highPriority,
     sheet: @MainActor @escaping () -> Content) {
-      guard !popupViews.contains(where: { $0.viewID == id }) else { return }
+      present(id: id) { HelloSheet(dragToDismissType: dragToDismissType, content: sheet) }
+    }
+  #endif
+  
+  public func present<Content: View>(
+    id: String = String(describing: Content.self),
+    view: @MainActor @escaping () -> Content) {
+      guard !popupViews.contains(where: { $0.id == id }) else {
+        Log.warning("Trying to present duplicate view")
+        return
+      }
       blurBackgroundForPopup = false
       globalDismissKeyboard()
-      popupViews.append(PopupWindow(viewID: id) { HelloSheet(id: id, dragToDismissType: dragToDismissType, content: sheet) })
-    }
-#endif
-  
-  public func present(view: @MainActor @autoclosure @escaping () -> some View) {
-    blurBackgroundForPopup = false
-    globalDismissKeyboard()
-    popupViews.append(PopupWindow(viewID: String(describing: view.self)) { view() })
+      popupViews.append(PopupWindow(viewID: id, view: view))
   }
   
   public func dismissPopup() {
@@ -85,12 +83,23 @@ public class HelloWindowModel {
     popupViews.popLast()
   }
   
-  public func dismiss(id: String) {
+  public func dismiss(id: String?) {
     guard !popupViews.isEmpty else { return }
     popupViews
-      .filter { $0.viewID == id }
+      .filter { $0.id == id }
       .forEach { $0.onDismiss?() }
-    popupViews = popupViews.filter { $0.viewID != id }
+    popupViews = popupViews.filter { $0.id != id }
+  }
+  
+  public func dismiss(above targetID: String) {
+    guard !popupViews.isEmpty else { return }
+    while popupViews.last?.id != nil && popupViews.last?.id != targetID {
+      popupViews.popLast()
+    }
+  }
+  
+  public func isPresenting(_ id: String) -> Bool {
+    popupViews.contains { $0.id == id }
   }
   
   public func dismissAllPopups() {

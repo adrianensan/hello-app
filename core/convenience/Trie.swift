@@ -24,7 +24,7 @@ public struct Trie<T: Codable & Hashable & Sendable>: Sendable {
 //  }
   
   public private(set) var value: Set<T> = []
-  public private(set)  var map: [UInt8: Trie] = [:]
+  public private(set) var map: [UInt8: Trie] = [:]
   
   public init(value: T? = nil) {
     if let value {
@@ -54,36 +54,14 @@ public struct Trie<T: Codable & Hashable & Sendable>: Sendable {
   public init(valueAndKeys: [(T, [String])]) {
     for (value, keys) in valueAndKeys {
       for key in keys {
-        var currentNode: Trie<T> = self
-        for character in key.utf8 {
-          if let node = currentNode.map[character] {
-            currentNode = node
-            continue
-          } else {
-            let newNode = Trie<T>()
-            currentNode.map[character] = newNode
-            currentNode = newNode
-          }
-        }
-        currentNode.value.insert(value)
+        add(value: value, for: key)
       }
     }
   }
   
   public init(valuesMap: [String: T]) {
     for (key, value) in valuesMap {
-      var currentNode: Trie<T> = self
-      for character in key.utf8 {
-        if let node = currentNode.map[character] {
-          currentNode = node
-          continue
-        } else {
-          let newNode = Trie<T>()
-          currentNode.map[character] = newNode
-          currentNode = newNode
-        }
-      }
-      currentNode.value.insert(value)
+      add(value: value, for: key)
     }
   }
   

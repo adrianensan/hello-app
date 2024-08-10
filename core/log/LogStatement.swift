@@ -1,7 +1,7 @@
 import Foundation
 
-public struct LogStatement: Codable, Identifiable, Sendable {
-  public var id: String = UUID().uuidString
+public struct LogStatement: Codable, Hashable, Identifiable, Sendable {
+  public var id: String = .uuid
   public var level: LogLevel
   public var timeStamp: TimeInterval
   public var message: String

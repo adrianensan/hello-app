@@ -7,7 +7,7 @@ public enum GestureType: Hashable, Sendable {
 }
 
 public extension View {
-  func nest(@ViewBuilder transform: (Self) -> some View) -> some View {
+  func nest(@ViewBuilder transform: @MainActor (Self) -> some View) -> some View {
     transform(self)
   }
   
@@ -32,26 +32,38 @@ public extension Animation {
 
 public struct NavigationPagerView: View {
   
-  @Environment(\.theme) var theme
-  @Environment(\.safeArea) var safeAreaInsets
+  @Environment(\.theme) private var theme
+  @Environment(\.safeArea) private var safeAreaInsets
   #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   #endif
   
-  var model: PagerModel
+  @State private var model: PagerModel
   
   @State var viewDepth: CGFloat = 0  
   
   public init(model: PagerModel) {
-    self.model = model
+    _model = State(initialValue: model)
   }
   
-  var previousPageOptions: PagerPageOptions {
+  public init(rootView: @escaping @MainActor () -> some View) {
+    _model = State(initialValue: PagerModel(rootView: rootView))
+  }
+  
+  private var previousPageOptions: PagerPageOptions {
     model.viewStack[max(0, model.viewDepth - 2)].options
   }
   
-  var currentPageOptions: PagerPageOptions {
+  private var currentPageOptions: PagerPageOptions {
     model.activePage?.options ?? PagerPageOptions()
+  }
+  
+  private var config: HelloPagerConfig {
+    var config = model.config
+    if sheetModel != nil {
+      config.navBarTrailingPadding = 44
+    }
+    return config
   }
   
   public var body: some View {
@@ -120,7 +132,7 @@ public struct NavigationPagerView: View {
 //        .clipShape(Rectangle())
     }.environment(model)
       .environment(model.backProgressModel)
-      .environment(\.helloPagerConfig, model.config)
+      .environment(\.helloPagerConfig, config)
       .environment(\.helloDismiss, { model.popView() })
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .onAppear {

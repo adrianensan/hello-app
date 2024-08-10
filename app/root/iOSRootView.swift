@@ -23,16 +23,20 @@ public struct HelloAppRootView<Content: View>: View {
 //        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
 //        .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
         .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
+        .disabled(!windowModel.popupViews.isEmpty)
         .allowsHitTesting(windowModel.popupViews.isEmpty)
       
       if !windowModel.popupViews.isEmpty {
         ForEach(windowModel.popupViews) { popupView in
+          let layer = windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0
           popupView.view()
-            .id(popupView.id)
-            .zIndex(3 + 0.1 * Double((windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0)))
+            .id(popupView.uniqueInstanceID)
+            .environment(\.viewID, popupView.id)
+            .zIndex(3 + 0.1 * Double(layer))
             .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                     removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
-            .allowsHitTesting(windowModel.popupViews.contains(where: { $0.id == popupView.id }))
+            .disabled(windowModel.popupViews.last?.id != popupView.id)
+            .allowsHitTesting(windowModel.popupViews.last?.id == popupView.id)
         }
       }
       

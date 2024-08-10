@@ -116,7 +116,7 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .readGeometry { nonObserved.position = $0.frame(in: .global).top }
+      .readFrame { nonObserved.position = $0.top }
       .onTapGesture {
         if trigger == .onClick {
           showTooltip()

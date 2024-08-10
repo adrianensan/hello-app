@@ -80,16 +80,16 @@ public enum CrashHandler {
   
   private static let originalExceptionHandler: (@convention(c) (NSException) -> Void)? = NSGetUncaughtExceptionHandler()
   
-  private static let exceptionHandler: @convention(c) (NSException) -> Void = { exception in
-    Log.fatal("Crash with \(exception.name.rawValue): \(exception.description)", context: "App")
+  private static let exceptionHandler: @convention(c) @Sendable (NSException) -> Void = { exception in
+    Log.crash("Crash with \(exception.name.rawValue): \(exception.description)", context: "App")
+    restore()
     Task {
       try await Log.logger.flush(force: true)
-      restore()
       exception.raise()
     }
   }
   
-  private static let signalHandler: @convention(c) (Int32) -> Void = { signal in
+  private static let signalHandler: @convention(c) @Sendable (Int32) -> Void = { signal in
     
     //    var stack = Thread.callStackSymbols
     //    stack.removeFirst(2)
@@ -102,14 +102,15 @@ public enum CrashHandler {
     //                           reason:reason,
     //                           appinfo:appinfo,
     //                           callStack:callStack)
+    let stackTrace = Thread.callStackSymbols.reduce("") { $0 + "\n" + $1 }
     if let signal = Signal(signal) {
-      Log.fatal("Crash with signal \(signal.name) (\(signal.description))", context: "App")
+      Log.crash("Signal \(signal.name) (\(signal.description))\(stackTrace)")
     } else {
-      Log.fatal("Crash with signal \(signal)", context: "App")
+      Log.crash("Signal \(signal)\(stackTrace)")
     }
+    restore()
     Task {
       try await Log.logger.flush(force: true)
-      restore()
       kill(getpid(), signal)
     }
   }

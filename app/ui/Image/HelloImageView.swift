@@ -2,6 +2,55 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
+fileprivate struct ViewableImageModifier: ViewModifier {
+  
+  private class NonObserved {
+    var imageFrame: CGRect?
+  }
+  
+  @Environment(HelloWindowModel.self) private var windowModel
+  
+  @State private var isViewing = false
+  @State private var nonObserved = NonObserved()
+  
+  private let imageOptions: [HelloImageOption]
+  private let cornerRadius: CGFloat
+  
+  init(imageOptions: [HelloImageOption], cornerRadius: CGFloat?) {
+    self.imageOptions = imageOptions
+    self.cornerRadius = cornerRadius ?? 0
+  }
+  
+  func body(content: Content) -> some View {
+    content
+      .opacity(isViewing ? 0 : 1)
+      .animation(nil, value: isViewing)
+      .readFrame { nonObserved.imageFrame = $0 }
+      .simultaneousGesture(TapGesture()
+        .onEnded { _ in
+          var fullImageOptions: [HelloImageOption] = []
+          for imageOption in imageOptions {
+            if imageOption.variant != .original {
+              fullImageOptions.append(HelloImageOption(imageSource: imageOption.imageSource, variant: .original))
+            }
+            fullImageOptions.append(imageOption)
+          }
+          
+          windowModel.showPopup(onDismiss: {
+            Task {
+              try? await Task.sleep(seconds: 0.4)
+              isViewing = false
+            }
+          }) {
+            ImageViewer(options: fullImageOptions, originalFrame: nonObserved.imageFrame, cornerRadius: cornerRadius)
+          }
+          isViewing = true
+          ButtonHaptics.buttonFeedback()
+        })
+  }
+}
+
 public struct AnimatedHelloImageView: View {
   
   @Environment(\.theme) private var theme
@@ -51,16 +100,22 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   @Environment(\.isActive) private var isActive
   
   private let imageOptions: [HelloImageModel]
+  private let viewable: Bool
+  private let cornerRadius: CGFloat?
   private let resizeMode: ContentMode
   private let custom: (@MainActor (NativeImage) -> CustomView)?
   private let fallback: @MainActor () -> Fallback
   
   fileprivate init(_ source: HelloImageSource,
                    variant: HelloImageVariant = .original,
+                   viewable: Bool = false,
+                   cornerRadius: CGFloat? = nil,
                    resizeMode: ContentMode = .fit,
                    custom: (@MainActor (NativeImage) -> CustomView)?,
                    fallback: @MainActor @escaping () -> Fallback) {
     imageOptions = [.model(for: source, variant: variant)]
+    self.viewable = viewable
+    self.cornerRadius = cornerRadius
     self.resizeMode = resizeMode
     self.custom = custom
     self.fallback = fallback
@@ -68,20 +123,28 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   public init(_ source: HelloImageSource,
               variant: HelloImageVariant = .original,
+              viewable: Bool = false,
+              cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
               @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
               fallback: @MainActor @escaping () -> Fallback) {
     imageOptions = [.model(for: source, variant: variant)]
+    self.viewable = viewable
+    self.cornerRadius = cornerRadius
     self.resizeMode = resizeMode
     self.custom = custom
     self.fallback = fallback
   }
   
-  public init(options: [HelloImageOption], 
+  public init(options: [HelloImageOption],
+              viewable: Bool = false,
+              cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
               custom: (@MainActor (NativeImage) -> CustomView)?,
               fallback: @MainActor @escaping () -> Fallback) {
     imageOptions = options.map { .model(for: $0.imageSource, variant: $0.variant) }
+    self.viewable = viewable
+    self.cornerRadius = cornerRadius
     self.resizeMode = resizeMode
     self.custom = custom
     self.fallback = fallback
@@ -117,6 +180,16 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       } else {
         fallback()
       }
+    }.nest {
+      if let cornerRadius {
+        $0.clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+          .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 1))
+      } else {
+        $0
+      }
+    }.if(viewable) {
+      $0.modifier(ViewableImageModifier(imageOptions: imageOptions.map { $0.option }, cornerRadius: cornerRadius))
     }
   }
 }
@@ -124,10 +197,14 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
 public extension HelloImageView where Fallback == Color {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       viewable: Bool = false,
+       cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
        @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView) {
     self.init(source,
               variant: variant,
+              viewable: viewable,
+              cornerRadius: cornerRadius,
               resizeMode: resizeMode,
               custom: custom,
               fallback: { Color.clear })
@@ -137,10 +214,14 @@ public extension HelloImageView where Fallback == Color {
 public extension HelloImageView where CustomView == EmptyView {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       viewable: Bool = false,
+       cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
        fallback: @MainActor @escaping () -> Fallback) {
     self.init(source,
               variant: variant,
+              viewable: viewable,
+              cornerRadius: cornerRadius,
               resizeMode: resizeMode,
               custom: nil,
               fallback: fallback)
@@ -150,17 +231,25 @@ public extension HelloImageView where CustomView == EmptyView {
 public extension HelloImageView where CustomView == EmptyView, Fallback == Color {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       viewable: Bool = false,
+       cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit) {
     self.init(source,
               variant: variant,
+              viewable: viewable,
+              cornerRadius: cornerRadius,
               resizeMode: resizeMode,
               custom: nil,
               fallback: { Color.clear })
   }
   
   public init(options: [HelloImageOption],
+              viewable: Bool = false,
+              cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit) {
     self.init(options: options,
+              viewable: viewable,
+              cornerRadius: cornerRadius,
               resizeMode: resizeMode,
               custom: nil,
               fallback: { Color.clear })

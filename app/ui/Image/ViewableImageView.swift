@@ -52,13 +52,9 @@ public struct ViewableImageView: View {
     HelloImageView(options: imageOptions, resizeMode: resizeMode)
       .opacity(isOpened ? 0 : 1)
       .animation(nil, value: isOpened)
-      .readGeometry {
-        let frame = $0.frame(in: .global)
-        nonObserved.imageFrame = frame
-      }
-      .simultaneousGesture(TapGesture()
+      .readFrame { nonObserved.imageFrame = $0 }
+      .simultaneousGesture(allowViewing ? TapGesture()
         .onEnded{ _ in
-          guard allowViewing else { return }
           var fullImageOptions: [HelloImageOption] = []
           for imageOption in imageOptions {
             if imageOption.variant != .original {
@@ -77,7 +73,7 @@ public struct ViewableImageView: View {
           }
           isOpened = true
           ButtonHaptics.buttonFeedback()
-        })
+        } : nil)
 //      .onChange(of: windowModel.popupView == nil) {
 //        if $0 && isOpened {
 //          isOpened = false

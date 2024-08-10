@@ -60,18 +60,18 @@ public struct BackButton: View {
       
       let effectiveBackProgress: CGFloat = pagerModel.viewDepth > 1 && pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
       VStack(alignment: .leading, spacing: 0) {
-        ForEach(Array(pagerModel.viewStack.dropLast().enumerated()), id: \.element.id) { index, page in
+        HelloForEach(pagerModel.viewStack.dropLast()) { index, page in
           let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) - effectiveBackProgress
           Text(page.name ?? "Back")
             .font(.system(size: 14, weight: .semibold, design: .rounded))
             .foregroundStyle(theme.floating.foreground.primary.style)
             .fixedSize()
-            .frame(height: 15)
+            .frame(height: 14)
             .opacity(1 - 0.6 * abs(distance))
-            .scaleEffect(1 - 0.2 * abs(distance), anchor: .leading)
+            .scaleEffect(1 - 0.3 * abs(distance), anchor: .leading)
         }
-      }.frame(height: 15, alignment: .bottom)
-        .offset(y: 15 * effectiveBackProgress)
+      }.frame(height: 14, alignment: .bottom)
+        .offset(y: 14 * effectiveBackProgress)
         .padding(.trailing, 12)
         .animation(.pageAnimation, value: pagerModel.viewStack.count)
         .animation(.pageAnimation, value: pagerModel.viewDepth)

@@ -4,6 +4,8 @@ import HelloCore
 
 struct LoggerLineView: View {
   
+  @Environment(\.theme) private var theme
+  
   let logStatement: LogStatement
   
   @State private var isExpanded: Bool = false
@@ -22,6 +24,13 @@ struct LoggerLineView: View {
     case .error, .fatal, .wtf: return .red
     case .debug: return .secondary.opacity(0.6)
     default: return .secondary
+    }
+  }
+  
+  var logColor: Color {
+    switch logStatement.level {
+    case .info, .meta, .warning, .error, .fatal, .wtf: theme.foreground.primary.color
+    case .debug, .verbose: theme.foreground.tertiary.color
     }
   }
   
@@ -74,8 +83,8 @@ struct LoggerLineView: View {
       #if os(iOS) || os(macOS)
       (Text("\(logStatement.context)").bold() + Text("\(logStatement.context.isEmpty ? "" : " ")\(logStatement.message)"))
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
-        .foregroundColor(.primary)
-        .textSelection(.enabled)
+        .foregroundStyle(logColor)
+//        .textSelection(.enabled)
         .lineLimit(isExpanded ? nil : 1)
         .fixedSize(horizontal: false, vertical: isExpanded)
       #else
@@ -85,6 +94,7 @@ struct LoggerLineView: View {
         .fixedSize(horizontal: false, vertical: true)
       #endif
     }.frame(height: isExpanded ? nil : 16)
+      .frame(minHeight: 16)
       .clickable()
       .onTapGesture { isExpanded.toggle() }
   }
