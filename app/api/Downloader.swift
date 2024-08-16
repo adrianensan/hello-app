@@ -12,10 +12,10 @@ public class Downloader {
   @HelloAPIActor
   final class HelloAPIDownloadTaskDelegate: NSObject, URLSessionDownloadDelegate {
     
-    var continuation: CheckedContinuation<URL, any Error>?
+    var continuation: CheckedContinuation<(URL, URLResponse), any Error>?
     let progressUpdater: @Sendable (Double) -> Void
     
-    init(continuation: CheckedContinuation<URL, any Error>, progressUpdater: @escaping @Sendable (Double) -> Void) {
+    init(continuation: CheckedContinuation<(URL, URLResponse), any Error>, progressUpdater: @escaping @Sendable (Double) -> Void) {
       self.continuation = continuation
       self.progressUpdater = progressUpdater
     }
@@ -25,15 +25,19 @@ public class Downloader {
     }
     
     nonisolated func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-      Task { await finished(url: location) }
+      if let urlResponse = downloadTask.response {
+        Task { await finished(url: location, urlResponse: urlResponse) }
+      } else {
+        Task { await failed(error: HelloError("No response")) }
+      }
     }
     
     nonisolated func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
       Task { await failed(error: error ?? HelloError("Error")) }
     }
     
-    func finished(url: URL) {
-      continuation?.resume(returning: url)
+    func finished(url: URL, urlResponse: URLResponse) {
+      continuation?.resume(returning: (url, urlResponse))
       continuation = nil
     }
     
@@ -43,7 +47,7 @@ public class Downloader {
     }
   }
   
-  public static let main: Downloader = Downloader()
+  public static let main = Downloader()
   
   private var _session: URLSession?
   private var session: URLSession {
@@ -79,42 +83,37 @@ public class Downloader {
     let requestStartTime = epochTime
     var urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
+    let urlResponse: URLResponse
     let data: Data
     do {
       let dataURL: URL
       if let downloadProgressUpdate {
-        dataURL = try await withCheckedThrowingContinuation { continuation in
+        (dataURL, urlResponse) = try await withCheckedThrowingContinuation { continuation in
           let task = session.downloadTask(with: URLRequest(url: url))
           task.delegate = HelloAPIDownloadTaskDelegate(continuation: continuation, progressUpdater: downloadProgressUpdate)
           task.resume()
-          //        (asyncBytes, urlResponse) = try await session.bytes(from: url)
-          //        let length = (urlResponse.expectedContentLength)
-          //        var dataProgress = Data()
-          //        dataProgress.reserveCapacity(Int(length))
-          //
-          //        for try await byte in asyncBytes {
-          //          dataProgress.append(byte)
-          //          //        let progress = Double(dataProgress.count) / Double(length)
-          //          //        if dataProgress.count % 1_000_000 == 0 {
-          //          //          Task { @MainActor in downloadProgressUpdate?(progress) }
-          //          //        }
-          //        }
-          //        data = dataProgress
         }
       } else {
-        let (url, urlResponse) = try await session.download(from: url)
-        dataURL = url
+        (dataURL, urlResponse) = try await session.download(from: url)
       }
       data = try Data(contentsOf: dataURL)
+      try? FileManager.default.removeItem(at: dataURL)
     } catch {
-      let requestDuration = epochTime - requestStartTime
-      Log.error("\(String(format: "(%.2fs)", requestDuration)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
+      Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
       throw error
     }
-    let requestDuration = epochTime - requestStartTime
-    let duration = String(format: "(%.2fs)", requestDuration)
+    let duration = String(format: "(%.2fs)", epochTime - requestStartTime)
+    guard let httpResponse = urlResponse as? HTTPURLResponse else {
+      Log.error("\(duration) \(urlString) failed, no HTTP response", context: "Downloader")
+      throw APIError.fail
+    }
+    let responseStatus = HTTPResponseStatus.from(code: httpResponse.statusCode)
+    guard responseStatus.isSuccess else {
+      Log.error("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")
+      throw APIError.fail
+    }
     
-    Log.info("\(duration) \(urlString)", context: "Downloader")
+    Log.info("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")
     return data
   }
 }

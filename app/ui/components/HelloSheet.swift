@@ -20,6 +20,7 @@ public extension NamedCoordinateSpace {
 public class HelloSheetModel {
   var pagerModel: PagerModel?
   var dismissDrag: CGFloat = 0
+  var isVisible: Bool = false
   
   public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
   
@@ -37,6 +38,11 @@ public class HelloSheetModel {
     guard self.dragToDismissType != dragToDismissType else { return }
     self.dragToDismissType = dragToDismissType
   }
+  
+  public func dismiss() {
+    guard isVisible else { return }
+    isVisible = false
+  }
 }
 
 public struct HelloSheet<Content: View>: View {
@@ -48,14 +54,12 @@ public struct HelloSheet<Content: View>: View {
   @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
-  @State private var isVisible: Bool
   @State private var model: HelloSheetModel
   @GestureState private var drag: CGFloat?
   
   private var content: () -> Content
   
   public init(dragToDismissType: GestureType = .highPriority, content: @MainActor @escaping () -> Content) {
-    self._isVisible = State(initialValue: false)
     let sheetModel = HelloSheetModel(dragToDismissType: dragToDismissType)
     self._model = State(initialValue: sheetModel)
     self._drag = GestureState(initialValue: 0, reset: { _, _ in
@@ -73,13 +77,6 @@ public struct HelloSheet<Content: View>: View {
       model.dismissDrag
     }
   }
-  
-  func dismiss() {
-    isVisible = false
-    Task {
-      windowModel.dismiss(id: viewID)
-    }
-  }  
 
   public var body: some View {
     content()
@@ -91,29 +88,29 @@ public struct HelloSheet<Content: View>: View {
       .padding(.bottom, -60)
       .coordinateSpace(.sheet)
       .overlay {
-        HelloCloseButton { dismiss() }
+        HelloCloseButton { model.dismiss() }
           .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
       }
       .compositingGroup()
-      .frame(height: isVisible ? nil : 1, alignment: .top)
+      .frame(height: model.isVisible ? nil : 1, alignment: .top)
       .padding(.top, safeArea.top + 8)
-      .animation(.dampSpring, value: isVisible)
-      .offset(y: isVisible ? yDrag : 0)
+      .animation(.dampSpring, value: model.isVisible)
+      .offset(y: model.isVisible ? yDrag : 0)
       .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       .background(HelloBackgroundDimmingView()
-        .opacity(isVisible ? 1 : 0)
+        .opacity(model.isVisible ? 1 : 0)
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
           .updating($drag) { value, state, transaction in
             model.dismissDrag = value.translation.height
           }.onEnded { gesture in
             if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
-              dismiss()
+              model.dismiss()
             } else {
               model.dismissDrag = 0
             }
           })
-        .animation(.easeInOut(duration: 0.2), value: isVisible))
+        .animation(.easeInOut(duration: 0.2), value: model.isVisible))
       .gesture(type: model.dragToDismissType, DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
         .updating($drag) { drag, state, transaction in
           if model.dragCanDismiss == nil {
@@ -126,7 +123,7 @@ public struct HelloSheet<Content: View>: View {
         }.onEnded { gesture in
           if model.dragCanDismiss == true &&
               (gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200) {
-            dismiss()
+            model.dismiss()
           } else {
             if model.dismissDrag != 0 {
               model.dismissDrag = 0
@@ -134,14 +131,21 @@ public struct HelloSheet<Content: View>: View {
           }
           model.dragCanDismiss = nil
         })
-      .allowsHitTesting(isVisible)
+      .allowsHitTesting(model.isVisible)
       .task {
         try? await Task.sleepForOneFrame()
-        isVisible = true
+        model.isVisible = true
       }.transformEnvironment(\.safeArea) { $0.top = 0 }
       .environment(model)
-      .environment(\.helloDismiss, { dismiss() })
-      .environment(\.hasAppeared, isVisible)
+      .environment(\.helloDismiss, { model.dismiss() })
+      .environment(\.hasAppeared, model.isVisible)
+      .onChange(of: model.isVisible) {
+        if !model.isVisible {
+          Task {
+            windowModel.dismiss(id: viewID)
+          }
+        }
+      }
   }
 }
 #endif

@@ -1,4 +1,4 @@
-public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
+public enum HTTPResponseStatus: CustomStringConvertible, Equatable, Sendable {
   case `continue`
   case switchingProtocols
   case ok
@@ -15,6 +15,7 @@ public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
   case notModified
   case useProxy
   case temporaryRedirect
+  case permanentRedirect
   case badRequest
   case unauthorized
   case paymentRequired
@@ -62,6 +63,7 @@ public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
     case                  .notModified: 304
     case                     .useProxy: 305
     case            .temporaryRedirect: 307
+    case            .permanentRedirect: 308
     case                   .badRequest: 400
     case                 .unauthorized: 401
     case              .paymentRequired: 402
@@ -111,6 +113,7 @@ public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
     case                  .notModified: "Not Modified"
     case                     .useProxy: "Use Proxy"
     case            .temporaryRedirect: "Temporary Redirect"
+    case            .permanentRedirect: "Permanent Redirect"
     case                   .badRequest: "Bad Request"
     case                 .unauthorized: "Unauthorized"
     case              .paymentRequired: "Payment Required"
@@ -165,6 +168,7 @@ public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
     case 304: .notModified
     case 305: .useProxy
     case 307: .temporaryRedirect
+    case 308: .permanentRedirect
     case 400: .badRequest
     case 401: .unauthorized
     case 402: .paymentRequired
@@ -197,7 +201,7 @@ public enum HTTPResponseStatus: CustomStringConvertible, Sendable {
   }
   
   public var isSuccess: Bool {
-    statusCode < 300
+    statusCode < 400
   }
   
   public var description: String { "\(statusCode) \(statusDescription)" }

@@ -14,7 +14,7 @@ public enum Log {
   
   nonisolated(unsafe) private static var ephemeral: Bool = false
   #if DEBUG
-  nonisolated(unsafe) private static var logLevel: LogLevel = .debug
+  nonisolated(unsafe) private static var logLevel: LogLevel = .info
   #else
   nonisolated(unsafe) private static var logLevel: LogLevel = .info
   #endif

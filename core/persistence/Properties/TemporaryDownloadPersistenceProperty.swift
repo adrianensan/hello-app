@@ -6,7 +6,7 @@ public struct TemporaryDownloadPersistenceProperty: PersistenceProperty {
   
   public var defaultValue: Data? { nil }
   
-  public var location: PersistenceType { .file(location: .temporary, path: "downloads/\(url.fileSafeString)") }
+  public var location: PersistenceType { .file(location: .temporary, path: "image-downloads/\(url.fileSafeString)") }
   
   public var allowCache: Bool { false }
 }

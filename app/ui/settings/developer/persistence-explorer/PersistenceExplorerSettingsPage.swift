@@ -62,6 +62,8 @@ struct PersistenceExplorerSettingsPage: View {
       }
     }.onChange(of: fileModel.sorting, initial: true) {
       sortedFiles = fileModel.sort(files: snapshot.files)
+    }.onChange(of: fileModel.deletedFiles) {
+      sortedFiles = fileModel.sort(files: snapshot.files)
     }
   }
 }

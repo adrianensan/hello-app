@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 @propertyWrapper
-public struct NonObservedState<Value> {
+public struct NonObservedState<Value>: DynamicProperty {
   
   private class Model {
     var value: Value

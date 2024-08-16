@@ -48,4 +48,17 @@ public extension View {
       return Color.clear
     })
   }
+  
+  func readFrame(in coordinateSpace: some CoordinateSpaceProtocol = .global,
+                 to binding: Binding<CGRect>,
+                 onChange: (@MainActor () -> Void)?) -> some View {
+    background(GeometryReader { geometry in
+      let frame = geometry.frame(in: coordinateSpace)
+      Task {
+        binding.wrappedValue = frame
+        onChange?()
+      }
+      return Color.clear
+    })
+  }
 }

@@ -10,6 +10,7 @@ struct PersistenceExplorerFileSheet: View {
   @Environment(\.theme) private var theme
   @Environment(\.helloDismiss) private var helloDismiss
   @Environment(HelloWindowModel.self) private var windowModel
+  @Environment(PersistenceExplorerFileModel.self) private var fileModel
   
   var file: PersistenceFileSnapshot
   
@@ -32,7 +33,7 @@ struct PersistenceExplorerFileSheet: View {
               secondButton: .init(
                 name: "Delete",
                 action: {
-                  try? FileManager.default.removeItem(at: file.url)
+                  fileModel.delete(file: file.url)
                   helloDismiss()
                 },
                 isDestructive: true)))

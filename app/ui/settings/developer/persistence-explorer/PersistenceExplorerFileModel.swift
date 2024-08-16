@@ -34,6 +34,7 @@ class PersistenceExplorerFileModel {
   var files: PersistenceFolderSnapshot
   
   var sorting: PersistenceExplorerFileSorting = .alphabetical
+  private(set) var deletedFiles: Set<URL> = []
   
   init(files: PersistenceFolderSnapshot) {
     self.files = files
@@ -42,19 +43,34 @@ class PersistenceExplorerFileModel {
   func sort(files: [PersistenceFileSnapshotType]) -> [PersistenceFileSnapshotType] {
     switch sorting {
     case .alphabetical:
-      files.sorted {
-        switch ($0, $1) {
-        case (.folder, .file): true
-        case (.file, .folder): false
-        default: $0.name.lowercased() < $1.name.lowercased()
+      files
+        .filter { !deletedFiles.contains($0.url) }
+        .sorted {
+          switch ($0, $1) {
+          case (.folder, .file): true
+          case (.file, .folder): false
+          default: $0.name.lowercased() < $1.name.lowercased()
+          }
         }
-      }
     case .size:
-      files.sorted { $0.size > $1.size }
+      files
+        .filter { !deletedFiles.contains($0.url) }
+        .sorted { $0.size > $1.size }
     case .dateCreated:
-      files.sorted { $0.dateCreated ?? .distantPast > $1.dateCreated ?? .distantPast }
+      files
+        .filter { !deletedFiles.contains($0.url) }
+        .sorted { $0.dateCreated ?? .distantPast > $1.dateCreated ?? .distantPast }
     case .dateUpdated:
-      files.sorted { $0.dateModified ?? .distantPast > $1.dateModified ?? .distantPast }
+      files
+        .filter { !deletedFiles.contains($0.url) }
+        .sorted { $0.dateModified ?? .distantPast > $1.dateModified ?? .distantPast }
+    }
+  }
+  
+  func delete(file url: URL) {
+    try? FileManager.default.removeItem(at: url)
+    if !deletedFiles.contains(url) {
+      deletedFiles.insert(url)
     }
   }
 }
