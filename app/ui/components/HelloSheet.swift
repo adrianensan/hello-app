@@ -58,7 +58,11 @@ public struct HelloSheet<Content: View>: View {
     self._isVisible = State(initialValue: false)
     let sheetModel = HelloSheetModel(dragToDismissType: dragToDismissType)
     self._model = State(initialValue: sheetModel)
-    self._drag = GestureState(initialValue: 0, reset: { _, _ in sheetModel.dismissDrag = 0 })
+    self._drag = GestureState(initialValue: 0, reset: { _, _ in
+      if sheetModel.dismissDrag != 0 {
+        sheetModel.dismissDrag = 0
+      }
+    })
     self.content = content
   }
   
@@ -124,14 +128,15 @@ public struct HelloSheet<Content: View>: View {
               (gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200) {
             dismiss()
           } else {
-            model.dismissDrag = 0
+            if model.dismissDrag != 0 {
+              model.dismissDrag = 0
+            }
           }
           model.dragCanDismiss = nil
         })
       .allowsHitTesting(isVisible)
       .task {
         try? await Task.sleepForOneFrame()
-        guard !isVisible else { return }
         isVisible = true
       }.transformEnvironment(\.safeArea) { $0.top = 0 }
       .environment(model)

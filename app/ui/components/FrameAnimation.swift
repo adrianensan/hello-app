@@ -10,7 +10,6 @@ public struct FrameAnimation: View {
     case loop(numberOfLoops: Int)
   }
   
-  @MainActor
   private class NonObserved {
     var isAnimating: Bool = false
     var isActive: Bool = false

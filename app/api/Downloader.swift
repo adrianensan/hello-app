@@ -79,26 +79,31 @@ public class Downloader {
     let requestStartTime = epochTime
     var urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
-    let (data, urlResponse): (Data, URLResponse)
+    let data: Data
     do {
-      let dataURL = try await withCheckedThrowingContinuation { continuation in
-        let asyncBytes: URLSession.AsyncBytes
-        let task = session.downloadTask(with: URLRequest(url: url))
-        task.delegate = HelloAPIDownloadTaskDelegate(continuation: continuation, progressUpdater: downloadProgressUpdate ?? { _ in })
-        task.resume()
-//        (asyncBytes, urlResponse) = try await session.bytes(from: url)
-//        let length = (urlResponse.expectedContentLength)
-//        var dataProgress = Data()
-//        dataProgress.reserveCapacity(Int(length))
-//        
-//        for try await byte in asyncBytes {
-//          dataProgress.append(byte)
-//          //        let progress = Double(dataProgress.count) / Double(length)
-//          //        if dataProgress.count % 1_000_000 == 0 {
-//          //          Task { @MainActor in downloadProgressUpdate?(progress) }
-//          //        }
-//        }
-//        data = dataProgress
+      let dataURL: URL
+      if let downloadProgressUpdate {
+        dataURL = try await withCheckedThrowingContinuation { continuation in
+          let task = session.downloadTask(with: URLRequest(url: url))
+          task.delegate = HelloAPIDownloadTaskDelegate(continuation: continuation, progressUpdater: downloadProgressUpdate)
+          task.resume()
+          //        (asyncBytes, urlResponse) = try await session.bytes(from: url)
+          //        let length = (urlResponse.expectedContentLength)
+          //        var dataProgress = Data()
+          //        dataProgress.reserveCapacity(Int(length))
+          //
+          //        for try await byte in asyncBytes {
+          //          dataProgress.append(byte)
+          //          //        let progress = Double(dataProgress.count) / Double(length)
+          //          //        if dataProgress.count % 1_000_000 == 0 {
+          //          //          Task { @MainActor in downloadProgressUpdate?(progress) }
+          //          //        }
+          //        }
+          //        data = dataProgress
+        }
+      } else {
+        let (url, urlResponse) = try await session.download(from: url)
+        dataURL = url
       }
       data = try Data(contentsOf: dataURL)
     } catch {

@@ -4,33 +4,33 @@ import HelloCore
 
 struct ClickableViewModifier: ViewModifier {
   
-  @Persistent(.showDebugBorders) private var showDebugBorders
+  private var debugModel: DebugModel = .main
   
   func body(content: Content) -> some View {
-    if showDebugBorders {
+    if debugModel.showBorders {
       content
-        .overlay(ClearClickableView())
+        .overlay(Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1))
     } else {
       content
-        .background(ClearClickableView())
+        .background(Color.clear.contentShape(.interaction, .rect))
     }
   }
 }
 
 public struct ClearClickableView: View {
   
-  @Persistent(.showDebugBorders) private var showDebugBorders
+  private var debugModel: DebugModel = .main
   
   public init() {}
   
   public var body: some View {
-    if showDebugBorders {
-      Color.clear.contentShape(.interaction, Rectangle())
+    if debugModel.showBorders {
+      Color.clear.contentShape(.interaction, .rect)
         .overlay {
           Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1)
         }
     } else {
-      Color.clear.contentShape(.interaction, Rectangle())
+      Color.clear.contentShape(.interaction, .rect)
     }
   }
 }

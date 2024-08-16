@@ -123,7 +123,6 @@ public extension HelloApplication {
   
   private static func setup() {
     guard helloApplication == nil else { return }
-    _ = Log.logger
     CrashHandler.setup()
     helloApplication = load()
   }
@@ -193,10 +192,11 @@ extension HelloApplication {
     }
     
     onLaunch()
+    _ = Log.logger
   }
   
   func onTerminateInternal() {
-    try? Persistence.wipeFiles(in: .temporary)
+//    try? Persistence.wipeFiles(in: .temporary)
     Log.terminate()
     onTerminate()
   }

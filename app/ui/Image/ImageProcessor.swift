@@ -1,10 +1,10 @@
 import SwiftUI
 
+import HelloCore
+
 #if canImport(CoreImage)
 import UniformTypeIdentifiers
 import CoreImage
-
-import HelloCore
 
 #if os(macOS)
 extension NSImage: @unchecked Sendable {}
@@ -70,24 +70,99 @@ public class ImageProcessor {
   }
   
   public static func resize(imageData: Data, maxSize: Int, format: HelloImageFormat = .heic) throws -> Data {
-    guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else {
+    let maxSize = CGFloat(maxSize)
+    guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil),
+          let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
+    else {
+      Log.error("Failed to create source", context: "Image Resize")
       throw HelloImageError.failedToCreateDestination
     }
     
-    let mutableData = NSMutableData()
-    guard let destination = CGImageDestinationCreateWithData(mutableData, format.utType.identifier as CFString, 1, nil) else {
+    var size = CGSize(width: image.width, height: image.height)
+    
+    if size.width > maxSize && size.width >= size.height {
+      let scale = maxSize / size.width
+      size.width *= scale
+      size.height *= scale
+    } else if size.height > maxSize && size.height >= size.width {
+      let scale = maxSize / size.height
+      size.width *= scale
+      size.height *= scale
+    }
+    
+    let intSize = IntSize(width: Int(size.width), height: Int(size.height))
+    
+    let context = CGContext(data: nil,
+                            width: intSize.width,
+                            height: intSize.height,
+                            bitsPerComponent: image.bitsPerComponent,
+                            bytesPerRow: 0,
+                            space: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: image.bitmapInfo.rawValue)
+    context?.interpolationQuality = .default
+    context?.draw(image, in: CGRect(origin: .zero, size: size))
+    
+    guard let scaledImage = context?.makeImage() else {
+      Log.error("Failed to create image", context: "Image Resize")
       throw HelloImageError.failedToCreateDestination
     }
     
-    CGImageDestinationAddImageFromSource(destination, imageSource, 0, [
-      kCGImageSourceCreateThumbnailWithTransform: true,
-      kCGImageSourceCreateThumbnailFromImageAlways: true,
-      kCGImageSourceThumbnailMaxPixelSize: maxSize,
-      kCGImageDestinationLossyCompressionQuality: 0.5,
-    ] as CFDictionary)
-    guard CGImageDestinationFinalize(destination), !mutableData.isEmpty else { throw HelloImageError.failedToResize }
-    return mutableData as Data
+    guard let data = scaledImage.data else {
+      Log.error("Failed to create data", context: "Image Resize")
+      throw HelloImageError.failedToCreateDestination
+    }
+    
+    return data
   }
+  
+//  public static func resize(imageData: Data, maxSize: Int, format: HelloImageFormat = .heic) throws -> Data {
+//    guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else {
+//      Log.error("Failed to create source", context: "Image Resize")
+//      throw HelloImageError.failedToCreateDestination
+//    }
+//    
+//    guard let image = CGImageSourceCreateThumbnailAtIndex(
+//      imageSource,
+//      0,
+//      [kCGImageSourceCreateThumbnailFromImageIfAbsent: true,
+//       kCGImageSourceCreateThumbnailWithTransform: true,
+//       kCGImageSourceShouldCacheImmediately: true,
+//       kCGImageSourceThumbnailMaxPixelSize: max(maxSize, maxSize)] as CFDictionary)
+//    else {
+//      Log.error("Failed", context: "Image Resize")
+//      throw HelloImageError.failedToResize
+//    }
+//    guard let data = image.data else {
+//      Log.error("Failed Data", context: "Image Resize")
+//      throw HelloImageError.failedToResize
+//    }
+//    return data
+//    
+//    let mutableData = NSMutableData()
+//    guard let destination = CGImageDestinationCreateWithData(
+//      mutableData,
+//      format.utType.identifier as CFString,
+//      1,
+//      [:] as CFDictionary)
+//    else {
+//      Log.error("Failed to create destination", context: "Image Resize")
+//      throw HelloImageError.failedToCreateDestination
+//    }
+//    
+//    
+////    CGImageDestinationCopyImageSource(destination, imageSource, <#T##options: CFDictionary?##CFDictionary?#>, <#T##err: UnsafeMutablePointer<Unmanaged<CFError>?>?##UnsafeMutablePointer<Unmanaged<CFError>?>?#>)
+//    CGImageDestinationAddImageFromSource(destination, imageSource, 0, [
+//      kCGImageSourceCreateThumbnailWithTransform: true,
+//      kCGImageSourceCreateThumbnailFromImageAlways: true,
+//      kCGImageSourceThumbnailMaxPixelSize: maxSize,
+//      kCGImageDestinationLossyCompressionQuality: 0.5,
+//    ] as CFDictionary)
+//    guard CGImageDestinationFinalize(destination), !mutableData.isEmpty else {
+//      Log.error("Failed to finalize destination", context: "Image Resize")
+//      throw HelloImageError.failedToResize
+//    }
+//    return mutableData as Data
+//  }
   
   public static func processImageData(imageData: Data, maxSize: CGFloat, allowTransparency: Bool = true) async -> Data {
 #if os(iOS) || os(tvOS) || os(visionOS)

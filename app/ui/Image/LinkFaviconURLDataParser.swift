@@ -19,16 +19,8 @@ public actor LinkFaviconURLDataParser {
   private init() {}
   
   private var inProgress: Set<String> = []
-  private var failedFaviconFetches = Persistence.unsafeValue(.failedFaviconFetches)
   
   func getFavicon(for helloURL: HelloURL) async throws -> Data {
-    if let failedFetch = failedFaviconFetches[helloURL.string] {
-      guard epochTime - failedFetch > 60 * 60 * 24 else {
-        Log.verbose("Skipping favicon fetch for \(helloURL.string) due to previous failure")
-        throw LinkPreviewDataParserError.skip
-      }
-      failedFaviconFetches[helloURL.string] = nil
-    }
     var helloURL = helloURL
     helloURL.scheme = .https
     var effectiveHelloURL = helloURL
@@ -38,20 +30,14 @@ public actor LinkFaviconURLDataParser {
     
     let pageData: Data
     do {
-      do {
-        pageData = try await Downloader.main.download(from: effectiveHelloURL.root.string)
-      } catch {
-        if !effectiveHelloURL.host.starts(with: "www.") {
-          effectiveHelloURL.host = "www.\(effectiveHelloURL.host)"
-          pageData = try await Downloader.main.download(from: effectiveHelloURL.root.string)
-        } else {
-          throw error
-        }
-      }
+      pageData = try await HelloImageDownloadManager.main.download(from: effectiveHelloURL.root.string)
     } catch {
-      failedFaviconFetches[helloURL.string] = epochTime
-      Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
-      throw error
+      if !effectiveHelloURL.host.starts(with: "www.") {
+        effectiveHelloURL.host = "www.\(effectiveHelloURL.host)"
+        pageData = try await HelloImageDownloadManager.main.download(from: effectiveHelloURL.root.string)
+      } else {
+        throw error
+      }
     }
     let html: String?
     do {
@@ -119,8 +105,15 @@ public actor LinkFaviconURLDataParser {
       return imageData
     }
     
-    failedFaviconFetches[helloURL.string] = epochTime
-    Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
+    let urlString = helloURL.string
+    Task {
+      await Persistence.atomicUpdate(for: .failedFaviconFetches) {
+        var copy = $0
+        copy[urlString] = epochTime
+        return copy
+      }
+    }
+      
     throw LinkPreviewDataParserError.previewDataNotFound
   }
   

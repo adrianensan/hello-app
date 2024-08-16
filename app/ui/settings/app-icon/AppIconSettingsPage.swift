@@ -22,6 +22,7 @@ struct AppIconSettingsPage<AppIcon: IOSAppIcon>: View {
                 }.buttonStyle(.scale(haptics: .onAction))
               }
             }.padding(16)
+              .background(theme.surface.backgroundView(for: .rect, isBaseLayer: true))
           }
         }
       }

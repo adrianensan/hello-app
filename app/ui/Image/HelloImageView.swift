@@ -5,14 +5,10 @@ import HelloCore
 @MainActor
 fileprivate struct ViewableImageModifier: ViewModifier {
   
-  private class NonObserved {
-    var imageFrame: CGRect?
-  }
-  
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var isViewing = false
-  @State private var nonObserved = NonObserved()
+  @NonObservedState private var globalFrame: CGRect?
   
   private let imageOptions: [HelloImageOption]
   private let cornerRadius: CGFloat
@@ -26,7 +22,7 @@ fileprivate struct ViewableImageModifier: ViewModifier {
     content
       .opacity(isViewing ? 0 : 1)
       .animation(nil, value: isViewing)
-      .readFrame { nonObserved.imageFrame = $0 }
+      .readFrame(to: $globalFrame)
       .simultaneousGesture(TapGesture()
         .onEnded { _ in
           var fullImageOptions: [HelloImageOption] = []
@@ -37,14 +33,16 @@ fileprivate struct ViewableImageModifier: ViewModifier {
             fullImageOptions.append(imageOption)
           }
           
+          #if os(iOS)
           windowModel.showPopup(onDismiss: {
             Task {
               try? await Task.sleep(seconds: 0.4)
               isViewing = false
             }
           }) {
-            ImageViewer(options: fullImageOptions, originalFrame: nonObserved.imageFrame, cornerRadius: cornerRadius)
+            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadius: cornerRadius)
           }
+          #endif
           isViewing = true
           ButtonHaptics.buttonFeedback()
         })

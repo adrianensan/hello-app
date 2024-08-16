@@ -17,8 +17,16 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
           ShowDebugBordersSettingsItem()
         }
         
-        HelloSection {
+        HelloSection(title: "DIAGNOSTICS") {
+          if let snapshot = try? Persistence.snapshot() {
+            PersistenceExplorerSettingsRow(snapshot: snapshot)
+          }
           LogsSettingsItem()
+        }
+        
+        HelloSection(title: "RESET") {
+          ClearCacheSettingsItem()
+          DeleteEverythingSettingsItem()
         }
         
         additionalContent()

@@ -97,6 +97,11 @@ public struct PagerPageOptions: Sendable {
   }
 }
 
+public struct HelloPageConfig<Content: View>: Sendable {
+  var id: String
+  var view: @MainActor () -> Content
+}
+
 @MainActor
 @Observable
 public class PagerModel {

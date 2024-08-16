@@ -15,6 +15,8 @@ struct NavigationPageBackswipe: ViewModifier {
   
   func body(content: Content) -> some View {
     content
+      .allowsHitTesting(pagerModel.allowInteraction && backProgressModel.backProgress == 0)
+      .disabled(backProgressModel.backProgress != 0)
       .compositingGroup()
       .offset(x: -CGFloat(pagerModel.viewDepth - 1) * pageSpacing + backDragGestureState.width)
 //      .animation(.pageAnimation, value: pagerModel.viewDepth)
@@ -50,7 +52,9 @@ struct NavigationPageBackswipe: ViewModifier {
             }
             backProgressModel.backSwipeAllowance = nil
             Task {
-              backProgressModel.backProgress = 0
+              if backProgressModel.backProgress != 0 {
+                backProgressModel.backProgress = 0
+              }
             }
           })
 #else

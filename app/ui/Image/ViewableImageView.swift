@@ -4,15 +4,11 @@ import SwiftUI
 import HelloCore
 
 public struct ViewableImageView: View {
-  
-  private class NonObserved {
-    var imageFrame: CGRect?
-  }
 
   @Environment(\.theme) private var theme
   @Environment(HelloWindowModel.self) private var windowModel
 
-  @State private var nonObserved = NonObserved()
+  @NonObservedState private var globalFrame: CGRect?
   @State private var isOpened = false
   
   private let imageOptions: [HelloImageOption]
@@ -52,7 +48,7 @@ public struct ViewableImageView: View {
     HelloImageView(options: imageOptions, resizeMode: resizeMode)
       .opacity(isOpened ? 0 : 1)
       .animation(nil, value: isOpened)
-      .readFrame { nonObserved.imageFrame = $0 }
+      .readFrame(to: $globalFrame)
       .simultaneousGesture(allowViewing ? TapGesture()
         .onEnded{ _ in
           var fullImageOptions: [HelloImageOption] = []
@@ -69,7 +65,7 @@ public struct ViewableImageView: View {
               isOpened = false
             }
           }) {
-            ImageViewer(options: fullImageOptions, originalFrame: nonObserved.imageFrame, cornerRadius: cornerRadius)
+            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadius: cornerRadius)
           }
           isOpened = true
           ButtonHaptics.buttonFeedback()

@@ -25,6 +25,18 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
     _scrollModel = State(initialValue: model ?? HelloScrollModel())
   }
   
+  public init(title: String? = nil,
+              allowScroll: Bool = true,
+              showScrollIndicators: Bool,
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.title = title
+    self.allowScroll = allowScroll
+    self.content = content
+    self.navBarContent = navBarContent
+    _scrollModel = State(initialValue: HelloScrollModel(showScrollIndicator: showScrollIndicators))
+  }
+  
   private var navBarStyle: NavigationPageNavigationBarStyle {
     config.navBarStyle ?? (isSmallSize ? .scrollsWithContent : .fixed)
   }
@@ -55,13 +67,12 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
             .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0))
             .padding(.horizontal, config.horizontalPagePadding)
             .frame(maxWidth: .infinity)
-            .background(ClearClickableView().onTapGesture {
-              globalDismissKeyboard()
-            })
 //            .background(ClearClickableView())
         }).safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)
-        }
+        }.background(ClearClickableView().onTapGesture {
+          globalDismissKeyboard()
+        })
       
       NavigationPageBarFixed(title: title, navBarContent: {
         navBarContent().padding(.trailing, config.navBarTrailingPadding)
@@ -88,6 +99,17 @@ public extension NavigationPage where NavBarContent == EmptyView {
     self.init(title: title,
               allowScroll: allowScroll,
               model: model,
+              navBarContent: { EmptyView() },
+              content: content)
+  }
+  
+  public init(title: String? = nil,
+              allowScroll: Bool = true,
+              showScrollIndicators: Bool,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(title: title,
+              allowScroll: allowScroll,
+              model: HelloScrollModel(showScrollIndicator: showScrollIndicators),
               navBarContent: { EmptyView() },
               content: content)
   }

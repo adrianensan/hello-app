@@ -7,19 +7,19 @@ import Foundation
 public enum Log {
   
   #if DEBUG
-  nonisolated(unsafe) public static var shouldPrintStatements: Bool = true
+  nonisolated(unsafe) private static var shouldPrintStatements: Bool = true
   #else
-  nonisolated(unsafe) public static var shouldPrintStatements: Bool = false
+  nonisolated(unsafe) private static var shouldPrintStatements: Bool = false
   #endif
   
-  nonisolated(unsafe) public static var ephemeral: Bool = false
+  nonisolated(unsafe) private static var ephemeral: Bool = false
   #if DEBUG
-  nonisolated(unsafe) public static var logLevel: LogLevel = .debug
+  nonisolated(unsafe) private static var logLevel: LogLevel = .debug
   #else
-  nonisolated(unsafe) public static var logLevel: LogLevel = .info
+  nonisolated(unsafe) private static var logLevel: LogLevel = .info
   #endif
   
-  nonisolated public static let logger: Logger = Logger(ephemeral: ephemeral)
+  nonisolated package static let logger: Logger = Logger(ephemeral: ephemeral)
   
   nonisolated private static func log(level: LogLevel, message: String, context: String) {
     guard shouldPrintStatements || level >= logLevel else { return }
@@ -30,6 +30,25 @@ public enum Log {
 
     if level >= logLevel {
       Task { try await logger.log(logStatement) }
+    }
+  }
+  
+  @MainActor
+  public static func configure(
+    logLevel: LogLevel? = nil,
+    shouldPrintStatements: Bool?,
+    ephemeral: Bool = false
+  ) {
+    if let logLevel {
+      Self.logLevel = logLevel
+    }
+    if let shouldPrintStatements {
+      Self.shouldPrintStatements = shouldPrintStatements
+    }
+    Self.ephemeral = ephemeral
+    let now: Date = .now
+    if logger.dateStarted > now {
+      Log.error("Attempted to configure after logger was initialized", context: "Log")
     }
   }
   

@@ -60,9 +60,11 @@ public struct NavigationPagerView: View {
   
   private var config: HelloPagerConfig {
     var config = model.config
+    #if os(iOS)
     if sheetModel != nil {
       config.navBarTrailingPadding = 44
     }
+    #endif
     return config
   }
   
@@ -79,7 +81,7 @@ public struct NavigationPagerView: View {
               .background(ClearClickableView()
                 .onTapGesture { globalDismissKeyboard() })
 //              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))
-              .allowsHitTesting(model.allowInteraction && model.activePageID == page.id && model.backProgressModel.backProgress == 0)
+              .allowsHitTesting(model.activePageID == page.id)
               .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                       removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             theme.foreground.primary.color
@@ -89,7 +91,6 @@ public struct NavigationPagerView: View {
 //              .padding(.horizontal, 27)
           }
         }.frame(width: geometry.size.width, height: geometry.size.height, alignment: .leading)
-          .disabled(model.backProgressModel.backProgress != 0)
 //          .background(ClearClickableView().onTapGesture {
 //            globalDismissKeyboard()
 //          })

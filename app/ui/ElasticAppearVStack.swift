@@ -4,6 +4,8 @@ import HelloCore
 
 public struct ElasticAppearContent<Content: View>: View {
   
+  @Environment(\.hasAppeared) private var hasAppeared
+  
   @ViewBuilder private var content: @MainActor () -> Content
   
   @State private var isVisible: Bool = false
@@ -20,11 +22,14 @@ public struct ElasticAppearContent<Content: View>: View {
         .compositingGroup()
         .offset(y: isVisible ? 0 : 160)
         .opacity(isVisible ? 1 : 0)
-        .animation(.pageAnimation
-          .delay(isVisible ? i * 0.06 : 0), value: isVisible)
-    }.task {
-      try? await Task.sleepForABit()
-      isVisible = true
+        .animation(.dampSpring.delay(i * 0.04), value: isVisible)
+    }.onChange(of: hasAppeared, initial: true) {
+      if hasAppeared {
+        Task {
+          try? await Task.sleepForABit()
+          isVisible = true
+        }
+      }
     }
   }
 }

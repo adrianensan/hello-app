@@ -5,20 +5,17 @@ import HelloCore
 
 public struct LogsNavigationPage: View {
   
-  class NonObservedStorage {
-    var isFollowingNew: Bool = true
-    var bottomY: CGFloat = 0
-    var lastTopY: CGFloat = 0
-    var lastBottomY: CGFloat = 0
-  }
-  
   @Environment(\.theme) var theme
   @Environment(\.helloPagerConfig) var helloPagerConfig
   @Environment(HelloWindowModel.self) var windowModel
   
   @State var loggerObservable = LoggerObservable(logger: Log.logger)
   @State var scrollModel = HelloScrollModel(showScrollIndicator: true)
-  @State var nonObserved = NonObservedStorage()
+  
+  @NonObservedState private var isFollowingNew: Bool = true
+  @NonObservedState private var bottomY: CGFloat = 0
+  @NonObservedState private var lastTopY: CGFloat = 0
+  @NonObservedState private var lastBottomY: CGFloat = 0
   
   public init() {}
   
@@ -48,10 +45,10 @@ public struct LogsNavigationPage: View {
           .frame(width: 1, height: 1)
           .readFrame {
             let minY = $0.minY
-            if minY > nonObserved.lastTopY && nonObserved.lastBottomY > nonObserved.bottomY {
-              nonObserved.isFollowingNew = false
+            if minY > lastTopY && lastBottomY > bottomY {
+              isFollowingNew = false
             }
-            nonObserved.lastTopY = minY
+            lastTopY = minY
           }
         LazyVStack(alignment: .leading, spacing: 4) {
           ForEach(loggerObservable.logStatements) { logStatement in
@@ -62,16 +59,16 @@ public struct LogsNavigationPage: View {
           .frame(width: 1, height: 1)
           .readFrame {
             let minY = $0.minY
-            if minY < nonObserved.bottomY {
-              nonObserved.isFollowingNew = true
+            if minY < bottomY {
+              isFollowingNew = true
             }
-            nonObserved.lastBottomY = minY
+            lastBottomY = minY
           }
       }
     }.transformEnvironment(\.helloPagerConfig) {
       $0.horizontalPagePadding = 8
     }.onChange(of: loggerObservable.logStatements.count) { _ in
-      if nonObserved.isFollowingNew {
+      if isFollowingNew {
         Task {
           try await Task.sleepForOneFrame()
           scrollModel.scroll(to: .bottom, animated: false)

@@ -11,16 +11,28 @@ public actor HelloImageDownloadManager {
   
   public static let main = HelloImageDownloadManager()
   
-  let maxConcurrentDownloads: Int = 8
+  private let maxConcurrentDownloads: Int = 8
   
   private var pendingDownloadsStack: [PendingDownload] = []
   private var pendingDownloadsTasks: [String: Task<Data, any Error>] = [:]
   private var currentlyDownloading: Set<String> = []
   
+  private var failedFaviconFetches = Persistence.unsafeValue(.failedFaviconFetches)
+  
+  private init() {
+    
+  }
+  
   public func download(from url: String) async throws -> Data {
     if let existingTask = pendingDownloadsTasks[url] {
       return try await existingTask.value
     } else {
+      if let failedFetch = failedFaviconFetches[url] {
+        guard epochTime - failedFetch > 60 * 60 * 24 else {
+          Log.verbose("Skipping image download for \(url) due to previous failure")
+          throw HelloError("Skipped")
+        }
+      }
 //      pendingDownloadsStack
 //        .filter { $0.url == url }
 //        .forEach { $0.startContinuation.resume(throwing: HelloError("Duplicate download request")) }
@@ -36,6 +48,8 @@ public actor HelloImageDownloadManager {
           let data = try await Downloader.main.download(from: url)
           return data
         } catch {
+          failedFaviconFetches[url] = epochTime
+          Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
 //          Log.warning("Failed to download \(url)", context: "ImageDownloader")
           throw error
         }

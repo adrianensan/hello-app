@@ -51,7 +51,7 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable {
   }
 }
 
-public enum FilePersistenceLocation: Hashable, Sendable {
+public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
   case document
   case applicationSupport
   case appGroup
@@ -74,6 +74,17 @@ public enum FilePersistenceLocation: Hashable, Sendable {
     case .appGroup: "appgroup"
     case .temporary: "temporary"
     case .cache: "cache"
+    case .custom(let url): url
+    }
+  }
+  
+  public var name: String {
+    switch self {
+    case .document: "Documents"
+    case .applicationSupport: "Application Support"
+    case .appGroup: "App Group"
+    case .temporary: "Temporary"
+    case .cache: "Cache"
     case .custom(let url): url
     }
   }
@@ -367,8 +378,7 @@ public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
 
 @MainActor
 @propertyWrapper
-@Observable
-public class Persistent<Property: PersistenceProperty> {
+public struct Persistent<Property: PersistenceProperty> {
   
   private let persistenObservable: PersistentObservable<Property>
   
@@ -378,6 +388,6 @@ public class Persistent<Property: PersistenceProperty> {
   
   public var wrappedValue: Property.Value {
     get { persistenObservable.value }
-    set { persistenObservable.updateValue(to: newValue) }
+    nonmutating set { persistenObservable.updateValue(to: newValue) }
   }
 }

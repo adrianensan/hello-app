@@ -22,13 +22,11 @@ public struct HelloSectionItem<Content: View>: View {
       .foregroundStyle(theme.surface.foreground.primary.style)
       .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
       .background(theme.surface.backgroundColor)
-      .overlay {
-        theme.surface.foreground.primary.color.opacity(0.1)
-          .padding(.leading, leadingPadding ? 52 : 0)
-          .frame(height: 1)
-          .offset(y: -1)
-          .frame(maxHeight: .infinity, alignment: .top)
-      }
+      .overlay(theme.surface.foreground.primary.color.opacity(0.1)
+        .padding(.leading, leadingPadding ? 52 : 0)
+        .frame(height: 1)
+        .offset(y: -1)
+        .frame(maxHeight: .infinity, alignment: .top))
   }
 }
 
@@ -77,7 +75,7 @@ public struct HelloSection<Content: View>: View {
       
       VStack(alignment: .leading, spacing: 0) {
         content()
-      }.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
+      }//.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
         .clipShape(.rect(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
           .stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))

@@ -69,6 +69,7 @@ public struct AnimatedImageFrame: Sendable, Hashable {
 public class HelloImageModel {
   
   public static var useAppGroup: Bool = false
+  public static var keepThumbnailsInMemory: Bool = false
   
   private static var models: [String: HelloImageModel] = [:]
   private static var weakModels: [String: Weak<HelloImageModel>] = [:]
@@ -83,7 +84,7 @@ public class HelloImageModel {
       case .original:
         weakModels[id] = Weak(value: model)
       case .thumbnail(let size):
-        if size <= 300 {
+        if size <= 300 && keepThumbnailsInMemory {
           models[id] = model
         } else {
           weakModels[id] = Weak(value: model)

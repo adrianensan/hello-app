@@ -15,9 +15,9 @@ public struct HelloAlertConfig {
       self.isDestructive = isDestructive
     }
     
-    public init(name: String, action: (@MainActor () async -> Void)? = nil, isDestructive: Bool = false) {
+    public init(name: String, action: (@MainActor () async throws -> Void)? = nil, isDestructive: Bool = false) {
       self.name = name
-      self.action = { Task { await action?() } }
+      self.action = { Task { try await action?() } }
       self.isDestructive = isDestructive
     }
     
@@ -136,9 +136,8 @@ public struct HelloAlert: View {
         }
       }
     }.frame(width: 280)
-      .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-      .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous),
-                                       isBaseLayer: false))
+      .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+      .background(theme.floating.backgroundView(for: RoundedRectangle(cornerRadius: 16, style: .continuous)))
 //      .background(theme.background)
 //      .componentBackground(color: theme.rowBackground, RoundedRectangle(cornerRadius: 12, style: .continuous))
       .compositingGroup()

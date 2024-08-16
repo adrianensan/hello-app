@@ -16,7 +16,7 @@ public extension EnvironmentValues {
   @Entry var keyboardFrame: CGRect = .zero
   @Entry var isFullscreen: Bool = false
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
-  @Entry var helloDismiss: @Sendable @MainActor () -> Void = {}
+  @Entry var helloDismiss: @MainActor () -> Void = {}
 }
 
 //struct OptionalEnvironmentKey<ObservableType: Observable>: EnvironmentKey {

@@ -87,13 +87,9 @@ public enum TooltipTrigger: Equatable, Sendable {
 @MainActor
 fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   
-  class NonObserved {
-    var position: CGPoint = .zero
-  }
-  
   @Environment(HelloWindowModel.self) private var windowModel
   
-  @State private var nonObserved = NonObserved()
+  @NonObservedState private var globalPosition: CGPoint = .zero
   @State private var id = UUID().uuidString
   
   var trigger: TooltipTrigger
@@ -102,8 +98,8 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   func showTooltip() {
     guard let windowFrame = windowModel.window?.frame else { return }
     var position = windowFrame.origin
-    position.x += nonObserved.position.x
-    position.y += windowFrame.height - nonObserved.position.y
+    position.x += globalPosition.x
+    position.y += windowFrame.height - globalPosition.y
     let tooltipWindow = HelloTooltipWindow(id: id,
                                            anchor: WindowAnchor(point: position, alignment: .bottom),
                                            content: HelloTooltipView { content() })
@@ -116,7 +112,7 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .readFrame { nonObserved.position = $0.top }
+      .readFrame { globalPosition = $0.top }
       .onTapGesture {
         if trigger == .onClick {
           showTooltip()

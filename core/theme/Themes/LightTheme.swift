@@ -1,11 +1,11 @@
 public extension HelloTheme {
   
   static var light: HelloTheme {
-    light(accent: .color(color: .lightThemeBlueAccent))
+    light(accent: .color(color: .retroApple.blue))
   }
   
   static var warmLight: HelloTheme {
-    warmLight(accent: .color(color: .lightThemeBlueAccent))
+    warmLight(accent: .color(color: .retroApple.blue))
   }
   
   static func light(accent: HelloFill) -> HelloTheme {

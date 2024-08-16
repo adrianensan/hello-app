@@ -12,6 +12,6 @@ public extension Task where Success == Never, Failure == Never {
   }
   
   static func sleepForABit() async throws {
-    try await Task.sleep(nanoseconds: 100_000_000)
+    try await Task.sleep(nanoseconds: 120_000_000)
   }
 }

@@ -16,6 +16,20 @@ public func globalDismissKeyboard() {
 
 #if !os(macOS)
 
+public struct HelloSheetConfig<Content: View> {
+  var id: String
+  var dragToDismissType: GestureType = .highPriority
+  var view: @MainActor () -> Content
+  
+  public init(id: String,
+              dragToDismissType: GestureType = .highPriority,
+              view: @escaping @MainActor () -> Content) {
+    self.id = id
+    self.dragToDismissType = dragToDismissType
+    self.view = view
+  }
+}
+
 @MainActor
 @Observable
 public class HelloWindowModel {
@@ -58,11 +72,14 @@ public class HelloWindowModel {
   
   #if os(iOS)
   public func presentSheet<Content: View>(
-    id: String = String(describing: Content.self),
     dragToDismissType: GestureType = .highPriority,
     sheet: @MainActor @escaping () -> Content) {
-      present(id: id) { HelloSheet(dragToDismissType: dragToDismissType, content: sheet) }
+      present(sheet: HelloSheetConfig(id: String(describing: Content.self), dragToDismissType: dragToDismissType, view: sheet))
     }
+  
+  public func present(sheet: HelloSheetConfig<some View>) {
+    present(id: sheet.id) { HelloSheet(dragToDismissType: sheet.dragToDismissType, content: sheet.view) }
+  }
   #endif
   
   public func present<Content: View>(

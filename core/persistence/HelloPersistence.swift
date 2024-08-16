@@ -469,7 +469,7 @@ public enum Persistence {
     try FileManager.default.removeItem(at: url)
   }
   
-  public static func nuke() {
+  static package func nuke() {
     for filePersistenceLocation in FilePersistenceLocation.allCases {
       if let url = filePersistenceLocation.url {
         try? FileManager.default.removeItem(at: url)
@@ -482,5 +482,73 @@ public enum Persistence {
         }
       }
     }
+  }
+  
+  nonisolated package static func snapshot() throws -> PersistenceSnapshot {
+    var fileSnapshots: [PersistenceFileSnapshotType] = []
+    for fileLocation in FilePersistenceLocation.allCases {
+      if let url = fileLocation.url, url.hasDirectoryPath {
+        let children = try snapshot(of: url)
+        fileSnapshots.append(.folder(PersistenceFolderSnapshot(
+          name: fileLocation.name,
+          size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+          url: url,
+          files: children)))
+      }
+    }
+    return PersistenceSnapshot(files: PersistenceFolderSnapshot(
+      name: "Root",
+      size: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+      url: URL(filePath: "/"),
+      files: fileSnapshots))
+  }
+  
+  nonisolated private static func snapshot(of url: URL) throws -> [PersistenceFileSnapshotType] {
+    var snapshots: [PersistenceFileSnapshotType] = []
+    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
+      let name = fileURL.lastPathComponent
+      if fileURL.isDirectory {
+        let children = try snapshot(of: fileURL)
+        snapshots.append(.folder(PersistenceFolderSnapshot(
+          name: name,
+          size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+          url: fileURL,
+          files: children)))
+      } else {
+        snapshots.append(.file(PersistenceFileSnapshot(
+          name: name,
+          size: DataSize(bytes: fileURL.regularFileAllocatedSize()),
+          dateCreated: fileURL.dateCreated,
+          dateModified: fileURL.dateModified,
+          url: fileURL)))
+      }
+    }
+    return snapshots
+  }
+}
+
+public extension URL {
+  public var isDirectory: Bool {
+    (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+  }
+  
+  public var dateCreated: Date? {
+    (try? resourceValues(forKeys: [.creationDateKey]))?.creationDate
+  }
+  
+  public var dateModified: Date? {
+    (try? resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+  }
+  
+  public func regularFileAllocatedSize() -> Int {
+    guard let resourceValues = try? self.resourceValues(forKeys: [
+      .isRegularFileKey,
+      .totalFileSizeKey,
+      .fileAllocatedSizeKey,
+      .totalFileAllocatedSizeKey,
+    ]),
+          resourceValues.isRegularFile == true else { return 0 }
+    
+    return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
   }
 }

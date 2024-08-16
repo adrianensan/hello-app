@@ -9,6 +9,7 @@ public protocol LoggerSubscriber: AnyObject, Sendable {
 public actor Logger: Sendable {
   
   public static let shared = Logger()
+  public let dateStarted: Date = .now
   
   public private(set) var logStatements: [LogStatement]
   public weak var subscriber: (any LoggerSubscriber)?
@@ -80,8 +81,8 @@ public actor Logger: Sendable {
       diff = epochTime - lastLoggedTime
     }
     isFlushPending = false
-    let oldestAllowed = epochTime - 60 * 60 * 24 * 2
-    let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }))
+    let oldestAllowed = epochTime - 60 * 60 * 24
+    let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }).suffix(1000))
     if logStatements.first?.id != filteredLogStatements.first?.id {
       await subscriber?.refresh(filteredLogStatements)
       logStatements = filteredLogStatements

@@ -18,6 +18,7 @@ struct ShowDebugBordersSettingsItem: View {
         Spacer(minLength: 0)
         HelloToggle(isSelected: showDebugBorders) {
           showDebugBorders.toggle()
+          DebugModel.main.showBorders = showDebugBorders
         }
       }
     }
