@@ -55,18 +55,20 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         allowScroll: allowScroll,
         model: scrollModel,
         content: {
-          #if os(iOS)
-          if navBarStyle == .scrollsWithContent {
-            NavigationPageBarScrolling(title: title, navBarContent: {
-              navBarContent().padding(.trailing, config.navBarTrailingPadding)
-            })
+          VStack(spacing: 0) {
+#if os(iOS)
+            if navBarStyle == .scrollsWithContent {
+              NavigationPageBarScrolling(title: title, navBarContent: {
+                navBarContent().padding(.trailing, config.navBarTrailingPadding)
+              })
+            }
+#endif
+            
+            content()
+              .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0))
+              .padding(.horizontal, config.horizontalPagePadding)
+              .frame(maxWidth: .infinity)
           }
-          #endif
-          
-          content()
-            .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0))
-            .padding(.horizontal, config.horizontalPagePadding)
-            .frame(maxWidth: .infinity)
 //            .background(ClearClickableView())
         }).safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)

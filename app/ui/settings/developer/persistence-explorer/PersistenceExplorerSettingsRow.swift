@@ -9,17 +9,15 @@ public struct PersistenceExplorerSettingsRow: View {
   
   @Environment(PagerModel.self) private var pagerModel
   
-  @State var model: PersistenceExplorerFileModel
-  
-  init(snapshot: PersistenceSnapshot) {
-    _model = State(initialValue: PersistenceExplorerFileModel(files: snapshot.files))
-  }
+  @State private var model = PersistenceExplorerFileModel()
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
-      pagerModel.push(id: model.files.id, name: "Root") {
-        PersistenceExplorerSettingsPage(snapshot: model.files)
-          .environment(model)
+      if let files = model.files {
+        pagerModel.push(id: files.id, name: "Root") {
+          PersistenceExplorerSettingsPage()
+            .environment(model)
+        }
       }
     }) {
       HelloSectionItem {
@@ -31,8 +29,10 @@ public struct PersistenceExplorerSettingsRow: View {
           Text("Persistence Explorer")
             .font(.system(size: 16, weight: .regular, design: .rounded))
           Spacer(minLength: 0)
-          Text(model.files.size.string())
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+          if let files = model.files {
+            Text(files.size.string())
+              .font(.system(size: 16, weight: .regular, design: .rounded))
+          }
           Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular, design: .rounded))
         }

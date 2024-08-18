@@ -16,10 +16,10 @@ public extension String {
   }
   
   var fileSafeString: String {
-    var filtered = String(filter { !"/\\:".contains($0) })
+    var filtered = String(filter { !#"/\:%"'"#.contains($0) })
     filtered = filtered.components(separatedBy: "?")[0]
-    if filtered.count > 254 {
-      filtered = String(filtered.dropFirst(filtered.count - 255))
+    if filtered.count > 250 {
+      filtered = String(filtered.dropFirst(filtered.count - 251))
     }
     return filtered
   }
@@ -74,5 +74,9 @@ public extension StringProtocol {
     }
     
     return modified
+  }
+  
+  var sortableName: String {
+    lowercased().deletingPrefix("the").trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }

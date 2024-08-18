@@ -1,0 +1,58 @@
+#if os(iOS)
+import SwiftUI
+
+import HelloCore
+import HelloApp
+
+@MainActor
+struct PersistenceExplorerUserDefaultsSuitePage: View {
+  
+  @Environment(\.theme) private var theme
+  @Environment(HelloWindowModel.self) private var windowModel
+  @Environment(PersistenceExplorerFileModel.self) private var fileModel
+  
+  private var snapshot: UserDefaultsSnapshot
+  
+  @State private var sortedAppEntries: [UserDefaultsEntry] = []
+  @State private var sortedSystemEntries: [UserDefaultsEntry] = []
+  @NonObservedState private var sortButtonFrame: CGRect = .zero
+  
+  init(snapshot: UserDefaultsSnapshot) {
+    self.snapshot = snapshot
+  }
+  
+  public var body: some View {
+    NavigationPage(showScrollIndicators: true) {
+      VStack(spacing: 32) {
+        VStack(spacing: 8) {
+          Text(snapshot.suite.name)
+            .font(.system(size: 20, weight: .medium, design: .rounded))
+            .foregroundStyle(theme.foreground.primary.style)
+            .fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(.center)
+          Text("\(snapshot.objects.count) Objects")
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .foregroundStyle(theme.foreground.tertiary.style)
+        }
+        HelloSection(title: "App") {
+          ForEach(sortedAppEntries) { entry in
+            PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+          }
+        }
+        
+        HelloSection(title: "System") {
+          ForEach(sortedSystemEntries) { entry in
+            PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+          }
+        }
+      }
+    }.onAppear {
+      sortedAppEntries = fileModel.sort(userDefaultsEntries: snapshot.objects.filter { !$0.isSystem })
+      sortedSystemEntries = fileModel.sort(userDefaultsEntries: snapshot.objects.filter { $0.isSystem })
+    }.onChange(of: fileModel.deletedUserDefaults) {
+      sortedAppEntries = fileModel.sort(userDefaultsEntries: snapshot.objects.filter { !$0.isSystem })
+      sortedSystemEntries = fileModel.sort(userDefaultsEntries: snapshot.objects.filter { $0.isSystem })
+    }
+  }
+}
+#endif

@@ -10,9 +10,9 @@ public struct CachedRmoteImagePersistenceProperty: PersistenceProperty {
   
   public var location: PersistenceType {
     if useAppGroup {
-      .file(location: .appGroup, path: "cache/remote-images/\(variant.id)/\(url.fileSafeString)")
+      .file(location: .appGroup, path: "cache/remote-images/\(variant.id)/\(url.fileSafeString)\(variant != .original ? ".heic" : "")")
     } else {
-      .file(location: .cache, path: "cache-images/\(variant.id)/\(url.fileSafeString)")
+      .file(location: .cache, path: "cache-images/\(variant.id)/\(url.fileSafeString)\(variant != .original ? ".heic" : "")")
     }
   }
   

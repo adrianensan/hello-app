@@ -464,6 +464,21 @@ public enum Persistence {
     }
   }
   
+  nonisolated public static func wipeUnusedFiles(in location: FilePersistenceLocation) throws {
+    guard let url = location.url else { return }
+    try wipeUnusedFiles(in: url)
+  }
+  
+  nonisolated public static func wipeUnusedFiles(in url: URL) throws {
+    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
+      if fileURL.isDirectory {
+        try? wipeUnusedFiles(in: fileURL)
+      } else if fileURL.dateAccessed ?? .distantPast < .now.addingTimeInterval(-2 * 24 * 60 * 60) {
+        try? FileManager.default.removeItem(at: fileURL)
+      }
+    }
+  }
+  
   nonisolated public static func delete(location: FilePersistenceLocation) throws {
     guard let url = location.url else { return }
     try FileManager.default.removeItem(at: url)
@@ -484,46 +499,61 @@ public enum Persistence {
     }
   }
   
-  nonisolated package static func snapshot() throws -> PersistenceSnapshot {
-    var fileSnapshots: [PersistenceFileSnapshotType] = []
-    for fileLocation in FilePersistenceLocation.allCases {
-      if let url = fileLocation.url, url.hasDirectoryPath {
-        let children = try snapshot(of: url)
-        fileSnapshots.append(.folder(PersistenceFolderSnapshot(
-          name: fileLocation.name,
-          size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
-          url: url,
-          files: children)))
+  public static func snapshot(of fileURL: URL, overrideName: String? = nil) throws -> PersistenceFileSnapshotType {
+    let name = fileURL.lastPathComponent
+    guard FileManager.default.fileExists(atPath: fileURL.path) else { throw HelloError("No file") }
+    if fileURL.isDirectory {
+      var children: [PersistenceFileSnapshotType] = []
+      for fileURL in try FileManager.default.contentsOfDirectory(at: fileURL, includingPropertiesForKeys: nil) {
+        children.append(try snapshot(of: fileURL))
+      }
+      return .folder(PersistenceFolderSnapshot(
+        name: overrideName ?? name,
+        size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+        url: fileURL,
+        files: children))
+    } else {
+      return .file(PersistenceFileSnapshot(
+        name: name,
+        size: DataSize(bytes: fileURL.regularFileAllocatedSize()),
+        dateCreated: fileURL.dateCreated,
+        dateModified: fileURL.dateModified,
+        url: fileURL))
+    }
+  }
+  
+  package static func snapshot() throws -> PersistenceSnapshot {
+    var userDefaultsSnapshot: [UserDefaultsSnapshot] = []
+    for defaults in DefaultsPersistenceSuite.allCases {
+      if let userDefaults = defaults.userDefaults {
+        userDefaultsSnapshot.append(
+          UserDefaultsSnapshot(
+            suite: defaults,
+            objects: userDefaults.dictionaryRepresentation().map { (key, value) in
+              UserDefaultsEntry(
+                suite: defaults,
+                key: key,
+                object: UserDefaultsObjectSnapshot.infer(from: value),
+                isSystem:
+                  PersistenceSnapshotGenerator.systemUserDefaultKeyPrefixes.contains { prefix in key.starts(with: prefix) } ||
+                  PersistenceSnapshotGenerator.systemUserDefaultKeys.contains(key))
+            }
+          ))
       }
     }
-    return PersistenceSnapshot(files: PersistenceFolderSnapshot(
+    
+    var fileSnapshots: [PersistenceFileSnapshotType] = []
+    for fileLocation in FilePersistenceLocation.allCases.sorted(by: { $0.name < $1.name }) {
+      if let url = fileLocation.url,
+         let folderSnapshot = try? snapshot(of: url, overrideName: fileLocation.name){
+        fileSnapshots.append(folderSnapshot)
+      }
+    }
+    return PersistenceSnapshot(userDefaults: userDefaultsSnapshot, files: PersistenceFolderSnapshot(
       name: "Root",
       size: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.size },
       url: URL(filePath: "/"),
       files: fileSnapshots))
-  }
-  
-  nonisolated private static func snapshot(of url: URL) throws -> [PersistenceFileSnapshotType] {
-    var snapshots: [PersistenceFileSnapshotType] = []
-    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
-      let name = fileURL.lastPathComponent
-      if fileURL.isDirectory {
-        let children = try snapshot(of: fileURL)
-        snapshots.append(.folder(PersistenceFolderSnapshot(
-          name: name,
-          size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
-          url: fileURL,
-          files: children)))
-      } else {
-        snapshots.append(.file(PersistenceFileSnapshot(
-          name: name,
-          size: DataSize(bytes: fileURL.regularFileAllocatedSize()),
-          dateCreated: fileURL.dateCreated,
-          dateModified: fileURL.dateModified,
-          url: fileURL)))
-      }
-    }
-    return snapshots
   }
 }
 
@@ -538,6 +568,10 @@ public extension URL {
   
   public var dateModified: Date? {
     (try? resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+  }
+  
+  public var dateAccessed: Date? {
+    (try? resourceValues(forKeys: [.contentAccessDateKey]))?.contentAccessDate
   }
   
   public func regularFileAllocatedSize() -> Int {

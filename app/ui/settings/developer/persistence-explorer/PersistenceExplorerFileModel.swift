@@ -31,13 +31,21 @@ public enum PersistenceExplorerFileSorting: Sendable, CaseIterable {
 @Observable
 class PersistenceExplorerFileModel {
   
-  var files: PersistenceFolderSnapshot
+  var files: PersistenceFolderSnapshot?
+  var userDefaults: [UserDefaultsSnapshot] = []
   
   var sorting: PersistenceExplorerFileSorting = .alphabetical
   private(set) var deletedFiles: Set<URL> = []
+  private(set) var deletedUserDefaults: Set<UserDefaultsEntry> = []
   
-  init(files: PersistenceFolderSnapshot) {
-    self.files = files
+  init() {
+    Task { try await refreshSnapshot() }
+  }
+  
+  func sort(userDefaultsEntries: [UserDefaultsEntry]) -> [UserDefaultsEntry] {
+    userDefaultsEntries
+      .filter { !deletedUserDefaults.contains($0) }
+      .sorted { $0.key.sortableName < $1.key.sortableName }
   }
   
   func sort(files: [PersistenceFileSnapshotType]) -> [PersistenceFileSnapshotType] {
@@ -49,7 +57,7 @@ class PersistenceExplorerFileModel {
           switch ($0, $1) {
           case (.folder, .file): true
           case (.file, .folder): false
-          default: $0.name.lowercased() < $1.name.lowercased()
+          default: $0.name.sortableName < $1.name.sortableName
           }
         }
     case .size:
@@ -72,5 +80,18 @@ class PersistenceExplorerFileModel {
     if !deletedFiles.contains(url) {
       deletedFiles.insert(url)
     }
+  }
+  
+  func delete(userDefaultsObject: UserDefaultsEntry) {
+    userDefaultsObject.suite.userDefaults?.removeObject(forKey: userDefaultsObject.key)
+    if !deletedUserDefaults.contains(userDefaultsObject) {
+      deletedUserDefaults.insert(userDefaultsObject)
+    }
+  }
+  
+  private func refreshSnapshot() async throws {
+    let snapshot = try await Persistence.snapshot()
+    files = snapshot.files
+    userDefaults = snapshot.userDefaults
   }
 }

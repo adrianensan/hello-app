@@ -176,7 +176,7 @@ public struct HelloScrollView<Content: View>: View {
       }, coordinateSpace: .named(model.coordinateSpaceName))
       content()
     }.scrollDisabled(!model.scrollEnabled)
-      .scrollPosition($model.swiftuiScrollPosition)
+      .modifier(HelloScrollPositionViewModifier())
     //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
     //        -geometry.contentOffset.y - geometry.contentInsets.top
     //      }, action: { _, newScrollOffset in

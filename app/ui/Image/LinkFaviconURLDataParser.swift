@@ -107,7 +107,7 @@ public actor LinkFaviconURLDataParser {
     
     let urlString = helloURL.string
     Task {
-      await Persistence.atomicUpdate(for: .failedFaviconFetches) {
+      await Persistence.atomicUpdate(for: .failedImageDownloads) {
         var copy = $0
         copy[urlString] = epochTime
         return copy

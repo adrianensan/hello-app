@@ -1,14 +1,14 @@
 import Foundation
 
-public struct FailedFaviconFetchesPersistenceProperty: PersistenceProperty {
+public struct FailedImageDownloadsPersistenceProperty: PersistenceProperty {
   
   public var defaultValue: [String: TimeInterval] { [:] }
   
-  public var location: PersistenceType { .defaults(key: "failedFaviconFetches") }
+  public var location: PersistenceType { .file(location: .cache, path: "failed-image-downloads.json") }
 }
 
-public extension PersistenceProperty where Self == FailedFaviconFetchesPersistenceProperty {
-  static var failedFaviconFetches: FailedFaviconFetchesPersistenceProperty {
-    FailedFaviconFetchesPersistenceProperty()
+public extension PersistenceProperty where Self == FailedImageDownloadsPersistenceProperty {
+  static var failedImageDownloads: FailedImageDownloadsPersistenceProperty {
+    FailedImageDownloadsPersistenceProperty()
   }
 }

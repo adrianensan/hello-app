@@ -52,8 +52,9 @@ public enum Log {
     }
   }
   
+  @MainActor
   public static func terminate() {
-    try? logger.terminate()
+    logger.terminate()
   }
   
   public static func verbose(_ message: String, context: String = "") {
@@ -89,7 +90,7 @@ public enum Log {
   }
   
   public static func crash(_ message: String, context: String = "") {
-    try? logger.unsafeSyncLog(LogStatement(level: .fatal, message: message, context: "Crash"))
+    try? logger.nonMainUnsafeSyncLog(LogStatement(level: .fatal, message: message, context: "Crash"))
     log(level: .fatal, message: message, context: "Crash")
   }
 }

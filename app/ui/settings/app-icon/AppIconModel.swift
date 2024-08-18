@@ -15,6 +15,7 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
   }
   
   private func refresh() {
+    #if os(iOS)
     let currentIcon = AppIcon.infer(from: UIApplication.shared.alternateIconName)
     if self.currentIcon != currentIcon {
       self.currentIcon = currentIcon
@@ -22,11 +23,13 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
     if activeAppIcon != UIApplication.shared.alternateIconName {
       activeAppIcon = UIApplication.shared.alternateIconName
     }
+    #endif
   }
   
   func set(icon: AppIcon) {
     guard currentIcon != icon else { return }
     currentIcon = icon
+    #if os(iOS)
     UIApplication.shared.setAlternateIconName(icon.systemName) { error in
       guard error == nil else {
         self.refresh()
@@ -34,5 +37,6 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
       }
       self.refresh()
     }
+    #endif
   }
 }

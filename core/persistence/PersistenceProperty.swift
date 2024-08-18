@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-public enum DefaultsPersistenceSuite: Hashable, Sendable {
+public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
   case standard
   case appGroup
   case hello
@@ -12,6 +12,15 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable {
     case .standard: "standard"
     case .appGroup: "appGroup"
     case .hello: "hello"
+    case .custom(let suite): suite
+    }
+  }
+  
+  public var name: String {
+    switch self {
+    case .standard: "Standard"
+    case .appGroup: "App Group"
+    case .hello: "Hello"
     case .custom(let suite): suite
     }
   }

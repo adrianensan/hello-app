@@ -90,6 +90,22 @@ public class Haptics {
     }
   }
   
+  public func feedback(intensity: Float) {
+    do {
+      let event = CHHapticEvent(
+        eventType: .hapticTransient,
+        parameters: [
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 1)],
+        relativeTime: 0)
+      let pattern = try CHHapticPattern(events: [event], parameters: [])
+      let player = try engine?.makePlayer(with: pattern)
+      try player?.start(atTime: CHHapticTimeImmediate)
+    } catch {
+      print("Failed to play pattern: \(error.localizedDescription).")
+    }
+  }
+  
   public func invalidMove() {
     // make sure that the device supports haptics
     guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }

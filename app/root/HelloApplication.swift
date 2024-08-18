@@ -196,7 +196,8 @@ extension HelloApplication {
   }
   
   func onTerminateInternal() {
-    try? Persistence.wipeFiles(in: .temporary)
+    try? Persistence.wipeUnusedFiles(in: .temporary)
+    try? Persistence.wipeUnusedFiles(in: .cache)
     Log.terminate()
     onTerminate()
   }

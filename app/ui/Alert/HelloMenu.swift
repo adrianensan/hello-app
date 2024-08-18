@@ -42,6 +42,7 @@ public struct HelloMenuItem: Identifiable {
     self.shareString = string
   }
   
+  #if os(iOS)
   public static func copy(string: String) -> HelloMenuItem {
     HelloMenuItem(name: "Copy", icon: "doc.on.doc", action: { UIPasteboard.general.string = string })
   }
@@ -66,6 +67,7 @@ public struct HelloMenuItem: Identifiable {
   public static func share(url: URL) -> HelloMenuItem {
     HelloMenuItem(id: "share-\(String.uuid)", name: "Share", icon: "square.and.arrow.up", url: url)
   }
+  #endif
 }
 
 public struct HelloMenuRow: View {
@@ -76,14 +78,14 @@ public struct HelloMenuRow: View {
   
   public var body: some View {
     HStack(spacing: 0) {
+      Image(systemName: item.icon)
+        .frame(width: 32)
       Text(item.name)
         .lineLimit(1)
-      Spacer(minLength: 4)
-      Image(systemName: item.icon)
-        .frame(width: 18)
+      Spacer(minLength: 0)
     }.font(.system(size: 14, weight: .medium, design: .rounded))
       .foregroundColor(theme.foreground.primary.color)
-      .padding(.horizontal, 12)
+      .padding(.horizontal, 4)
       .frame(width: 240, height: 44)
       .clickable()
       .overlay {

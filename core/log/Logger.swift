@@ -6,7 +6,8 @@ public protocol LoggerSubscriber: AnyObject, Sendable {
   func refresh(_: [LogStatement])
 }
 
-public actor Logger: Sendable {
+@MainActor
+public class Logger: Sendable {
   
   public static let shared = Logger()
   public let dateStarted: Date = .now
@@ -18,7 +19,7 @@ public actor Logger: Sendable {
   private var isFlushPending: Bool = true
   private var isEphemeral: Bool = false
   
-  public init(ephemeral: Bool = false) {
+  nonisolated public init(ephemeral: Bool = false) {
     self.isEphemeral = ephemeral
     if !ephemeral {
       self.logStatements = Persistence.unsafeValue(.logs)
@@ -45,14 +46,19 @@ public actor Logger: Sendable {
     }
   }
   
-  nonisolated public func unsafeSyncLog(_ logStatement: LogStatement) throws {
+  nonisolated public func nonMainUnsafeSyncLog(_ logStatement: LogStatement) throws {
     var logStatements = Persistence.unsafeValue(.logs)
     logStatements.append(logStatement)
     Persistence.unsafeSave(logStatements, for: .logs)
   }
   
-  nonisolated public func terminate() throws {
-    try unsafeSyncLog(LogStatement(level: .meta, message: "", context: "-----Terminate-----"))
+  public func unsafeSyncLog(_ logStatement: LogStatement) {
+    logStatements.append(logStatement)
+    unsafeSyncFlush()
+  }
+  
+  public func terminate() {
+    unsafeSyncLog(LogStatement(level: .meta, message: "", context: "-----Terminate-----"))
   }
   
   public func clear() async throws {
@@ -70,7 +76,7 @@ public actor Logger: Sendable {
   
   public func flush(force: Bool = false) async throws {
     guard !force else {
-      await flushReal()
+      await flushReal(logStatements: logStatements)
       isFlushPending = false
       return
     }
@@ -87,10 +93,16 @@ public actor Logger: Sendable {
       await subscriber?.refresh(filteredLogStatements)
       logStatements = filteredLogStatements
     }
-    await flushReal()
+    await flushReal(logStatements: logStatements)
   }
   
-  private func flushReal() async {
-    await Persistence.save(logStatements, for: .logs)
+  nonisolated private func flushReal(logStatements: [LogStatement]) async {
+    await Task.detached {
+      await Persistence.save(logStatements, for: .logs)
+    }.value
+  }
+  
+  private func unsafeSyncFlush() {
+    Persistence.unsafeSave(logStatements, for: .logs)
   }
 }

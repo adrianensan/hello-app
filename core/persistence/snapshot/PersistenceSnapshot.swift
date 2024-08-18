@@ -1,42 +1,42 @@
 import Foundation
 
-package enum PersistenceFileSnapshotType: Identifiable, Sendable {
+public enum PersistenceFileSnapshotType: Identifiable, Sendable {
   case file(PersistenceFileSnapshot)
   case folder(PersistenceFolderSnapshot)
   
-  package var id: String {
+  public var id: String {
     url.absoluteString
   }
   
-  package var name: String {
+  public var name: String {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.name
     case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.name
     }
   }
   
-  package var size: DataSize {
+  public var size: DataSize {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.size
     case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.size
     }
   }
   
-  package var url: URL {
+  public var url: URL {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.url
     case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.url
     }
   }
   
-  package var dateCreated: Date? {
+  public var dateCreated: Date? {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.dateCreated
     case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.dateCreated
     }
   }
   
-  package var dateModified: Date? {
+  public var dateModified: Date? {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.dateModified
     case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.dateModified
@@ -44,7 +44,87 @@ package enum PersistenceFileSnapshotType: Identifiable, Sendable {
   }
 }
 
-package struct PersistenceFolderSnapshot: Identifiable, Sendable {
+public enum UserDefaultsObjectSnapshot: Hashable, Sendable {
+  case string(String)
+  case boolean(Bool)
+  case int(Int)
+  case double(Double)
+  case data(Data)
+  case stringArray([String])
+  case unknown
+  
+  public var iconName: String {
+    switch self {
+    case .string: "textformat.size.smaller"
+    case .boolean: "switch.2"
+    case .int: "number"
+    case .double: "number"
+    case .data: "externaldrive"
+    case .stringArray: "externaldrive"
+    case .unknown: "questionmark.app"
+    }
+  }
+  
+  public var previewString: String {
+    switch self {
+    case .string(let string): string.count < 6 ? #""\#(string)""# : "String(\(string.count))"
+    case .boolean(let bool): "\(bool ? "TRUE" : "FALSE")"
+    case .int(let int): "\(int)"
+    case .double(let double): String(format: "%.2f", double)
+    case .data(let data): "\(DataSize(bytes: data.count).string())"
+    case .stringArray(let stringArray): "[String](\(stringArray.count))"
+    case .unknown: "Unknown"
+    }
+  }
+  
+  public var string: String {
+    switch self {
+    case .string(let string): string
+    case .boolean(let bool): previewString
+    case .int(let int): previewString
+    case .double(let double): previewString
+    case .data(let data): previewString
+    case .stringArray(let stringArray): previewString
+    case .unknown: previewString
+    }
+  }
+  
+  public static func infer(from object: Any) -> UserDefaultsObjectSnapshot {
+    if let stringArray = object as? [String] {
+      .stringArray(stringArray)
+    } else if let bool = object as? Bool {
+      .boolean(bool)
+    } else if let int = object as? Int {
+      .int(int)
+    } else if let double = object as? Double {
+      .double(double)
+    } else if let string = object as? String {
+      .string(string)
+    } else if let data = object as? Data {
+      .data(data)
+    } else {
+      .unknown
+    }
+  }
+}
+
+public struct UserDefaultsEntry: Identifiable, Hashable, Sendable {
+  public var suite: DefaultsPersistenceSuite
+  public var key: String
+  public var object: UserDefaultsObjectSnapshot
+  public var isSystem: Bool
+  
+  public var id: String { key }
+}
+
+public struct UserDefaultsSnapshot: Identifiable, Sendable {
+  public var suite: DefaultsPersistenceSuite
+  public var objects: [UserDefaultsEntry]
+  
+  public var id: String { suite.id }
+}
+
+public struct PersistenceFolderSnapshot: Identifiable, Sendable {
   package var name: String
   package var size: DataSize
   package var dateCreated: Date?
@@ -52,23 +132,25 @@ package struct PersistenceFolderSnapshot: Identifiable, Sendable {
   package var url: URL
   package var files: [PersistenceFileSnapshotType]
   
-  package var id: String { url.absoluteString }
+  public var id: String { url.absoluteString }
 }
 
-package struct PersistenceFileSnapshot: Identifiable, Sendable {
+public struct PersistenceFileSnapshot: Identifiable, Sendable {
   package var name: String
   package var size: DataSize
   package var dateCreated: Date?
   package var dateModified: Date?
   package var url: URL
   
-  package var id: String { url.absoluteString }
+  public var id: String { url.absoluteString }
 }
 
-package struct PersistenceSnapshot: Sendable {
+public struct PersistenceSnapshot: Sendable {
   package var files: PersistenceFolderSnapshot
+  package var userDefaults: [UserDefaultsSnapshot]
   
-  init(files: PersistenceFolderSnapshot) {
+  init(userDefaults: [UserDefaultsSnapshot], files: PersistenceFolderSnapshot) {
+    self.userDefaults = userDefaults
     self.files = files
   }
 }

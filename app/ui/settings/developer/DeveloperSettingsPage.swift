@@ -18,9 +18,7 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
         }
         
         HelloSection(title: "DIAGNOSTICS") {
-          if let snapshot = try? Persistence.snapshot() {
-            PersistenceExplorerSettingsRow(snapshot: snapshot)
-          }
+          PersistenceExplorerSettingsRow()
           LogsSettingsItem()
         }
         

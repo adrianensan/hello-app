@@ -22,11 +22,13 @@ public struct DataSize: Comparable, Sendable {
   
   public func string(matchingLevelOf other: DataSize? = nil) -> String {
     if gb >= 1 || (other?.gb ?? 0) >= 1 {
-      return String(format: "%.2f GB", gb).replacingOccurrences(of: "0.", with: ".")
+      String(format: "%.2f GB", gb)
     } else if mb >= 0.1 || (other?.mb ?? 0) >= 0.1 {
-      return String(format: "%.1f MB", mb)
+      String(format: "%.1f MB", mb)
+    } else if kb >= 0.1 || (other?.kb ?? 0) >= 0.1 {
+      String(format: "%.1f KB", kb)
     } else {
-      return String(format: "%.1f KB", kb)
+      "\(bytes) Bytes"
     }
   }
   

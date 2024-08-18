@@ -1,5 +1,57 @@
 import Foundation
 
+public extension TimeInterval {
+  public var durationString: String {
+    if abs(self) >= 60 * 60 {
+      hhmmssString
+    } else {
+      mmssString
+    }
+  }
+  
+  public func durationString(matchingFormatOf otherDuration: TimeInterval) -> String {
+    if abs(otherDuration) >= 60 * 60 {
+      hhmmssString
+    } else {
+      mmssString
+    }
+  }
+  
+  public var hhmmssString: String {
+    var durationString = self < 0 ? "-" : ""
+    
+    let durationMagnitude = abs(self)
+    let hours: Int = Int(floor(durationMagnitude / 60 / 60))
+    durationString += "\(hours):"
+    
+    let minutes: Int = Int(floor(durationMagnitude / 60)) % 60
+    durationString += "\(String(format: "%02d", minutes)):"
+    
+    let seconds: Int = Int(durationMagnitude) % 60
+    durationString += "\(String(format: "%02d", seconds))"
+    
+    return durationString
+  }
+  
+  public var mmssString: String {
+    var durationString = self < 0 ? "-" : ""
+    
+    let durationMagnitude = abs(self)
+    
+    let minutes: Int = Int(floor(durationMagnitude / 60)) % 60
+    if durationString.isEmpty {
+      durationString = "\(minutes):"
+    } else {
+      durationString += "\(String(format: "%02d", minutes)):"
+    }
+    
+    let seconds: Int = Int(durationMagnitude) % 60
+    durationString += "\(String(format: "%02d", seconds))"
+    
+    return durationString
+  }
+}
+
 public extension Date {
   public var relativeDateString: String {
     if Calendar.current.isDateInToday(self) {
@@ -52,5 +104,9 @@ public extension Date {
   public var absoluteDateAndTimeString: String {
     let formatter = DateFormatter() +& { $0.dateFormat = "hh:mm a MMM d, yyyy" }
     return formatter.string(from: self)
+  }
+  
+  public var yearString: String {
+    (DateFormatter() +& { $0.dateFormat = "yyyy" }).string(from: self)
   }
 }

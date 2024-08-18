@@ -173,6 +173,7 @@ public struct HelloButton<Content: View>: View {
       .onHover { isHovered = $0 }
       .accessibilityElement()
       .accessibilityAddTraits(.isButton)
+      .environment(model)
     #else
     Button(action: {
       guard !model.hasClicked else { return }

@@ -17,7 +17,7 @@ public actor HelloImageDownloadManager {
   private var pendingDownloadsTasks: [String: Task<Data, any Error>] = [:]
   private var currentlyDownloading: Set<String> = []
   
-  private var failedFaviconFetches = Persistence.unsafeValue(.failedFaviconFetches)
+  private var failedImageDownloads = Persistence.unsafeValue(.failedImageDownloads)
   
   private init() {
     
@@ -27,7 +27,7 @@ public actor HelloImageDownloadManager {
     if let existingTask = pendingDownloadsTasks[url] {
       return try await existingTask.value
     } else {
-      if let failedFetch = failedFaviconFetches[url] {
+      if let failedFetch = failedImageDownloads[url] {
         guard epochTime - failedFetch > 60 * 60 * 24 else {
           Log.verbose("Skipping image download for \(url) due to previous failure")
           throw HelloError("Skipped")
@@ -45,11 +45,10 @@ public actor HelloImageDownloadManager {
           //      pendingDownloadsStack.insert(PendingDownload(url: url, continuation: continuation), at: 0)
         }
         do {
-          let data = try await Downloader.main.download(from: url)
-          return data
+          return try await Downloader.main.download(from: url)
         } catch {
-          failedFaviconFetches[url] = epochTime
-          Task { await Persistence.save(failedFaviconFetches, for: .failedFaviconFetches) }
+          failedImageDownloads[url] = epochTime
+          Task { await Persistence.save(failedImageDownloads, for: .failedImageDownloads) }
 //          Log.warning("Failed to download \(url)", context: "ImageDownloader")
           throw error
         }

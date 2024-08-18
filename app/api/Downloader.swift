@@ -49,9 +49,7 @@ public class Downloader {
   
   public static let main = Downloader()
   
-  private var _session: URLSession?
-  private var session: URLSession {
-    _session ?? URLSession(
+  private let session: URLSession = URLSession(
       configuration: URLSessionConfiguration.default +& {
         $0.allowsCellularAccess = true
         $0.timeoutIntervalForRequest = 100
@@ -60,12 +58,10 @@ public class Downloader {
         $0.tlsMaximumSupportedProtocolVersion = .TLSv13
         $0.allowsExpensiveNetworkAccess = true
         $0.allowsConstrainedNetworkAccess = true
-        $0.httpAdditionalHeaders = ["User-Agent": "\(AppInfo.displayName) iOS v\(AppVersion.current?.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
+        $0.httpAdditionalHeaders = ["User-Agent": "\(AppInfo.displayName) v\(AppVersion.current?.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
       },
       delegate: nil,
-      delegateQueue: nil
-    ) +& { _session = $0 }
-  }
+      delegateQueue: nil)
   
   private var downloadingURLs: Set<URL> = []
   
