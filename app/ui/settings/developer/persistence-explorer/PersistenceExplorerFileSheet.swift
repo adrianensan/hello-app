@@ -4,7 +4,6 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-@MainActor
 struct PersistenceExplorerFileSheet: View {
   
   @Environment(\.theme) private var theme

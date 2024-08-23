@@ -5,19 +5,18 @@ import HelloCore
 
 @MainActor
 @Observable
-public class LoggerObservable: NSObject, LoggerSubscriber, Sendable {
+public class LoggerModel: LoggerSubscriber, Sendable {
   
   let logger: Logger
   public var logStatements: [LogStatement] = []
   
   public init(logger: Logger) {
     self.logger = logger
-    super.init()
-    
-    Task {
-      await logger.subscribe(self)
-      logStatements = await logger.logStatements
-    }
+    logStatements = logger.logStatements
+  }
+  
+  public func setup() {
+    logger.subscribe(self)
   }
   
   public func statementLogged(_ statement: LogStatement) {

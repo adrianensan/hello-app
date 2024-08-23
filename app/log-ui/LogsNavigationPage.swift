@@ -6,11 +6,12 @@ import HelloCore
 public struct LogsNavigationPage: View {
   
   @Environment(\.theme) var theme
+  @Environment(\.safeArea) var safeArea
   @Environment(\.helloPagerConfig) var helloPagerConfig
   @Environment(HelloWindowModel.self) var windowModel
   
-  @State var loggerObservable = LoggerObservable(logger: Log.logger)
-  @State var scrollModel = HelloScrollModel(showScrollIndicator: true)
+  @State private var loggerModel = LoggerModel(logger: Log.logger)
+  @State private var scrollModel = HelloScrollModel(showScrollIndicator: true)
   
   @NonObservedState private var isFollowingNew: Bool = true
   @NonObservedState private var bottomY: CGFloat = 0
@@ -45,13 +46,13 @@ public struct LogsNavigationPage: View {
           .frame(width: 1, height: 1)
           .readFrame {
             let minY = $0.minY
-            if minY > lastTopY && lastBottomY > bottomY {
+            if minY > lastTopY && lastBottomY > bottomY && isFollowingNew {
               isFollowingNew = false
             }
             lastTopY = minY
           }
         LazyVStack(alignment: .leading, spacing: 4) {
-          ForEach(loggerObservable.logStatements) { logStatement in
+          ForEach(loggerModel.logStatements) { logStatement in
             LoggerLineView(logStatement: logStatement)
           }
         }
@@ -59,29 +60,29 @@ public struct LogsNavigationPage: View {
           .frame(width: 1, height: 1)
           .readFrame {
             let minY = $0.minY
-            if minY < bottomY {
+            if minY < bottomY && !isFollowingNew {
               isFollowingNew = true
             }
             lastBottomY = minY
           }
       }
-    }.transformEnvironment(\.helloPagerConfig) {
-      $0.horizontalPagePadding = 8
-    }.onChange(of: loggerObservable.logStatements.count) { _ in
-      if isFollowingNew {
+    }.readFrame { bottomY = $0.maxY - safeArea.bottom + 20 }
+      .transformEnvironment(\.helloPagerConfig) {
+        $0.horizontalPagePadding = 8
+      }.onChange(of: loggerModel.logStatements.count) { _ in
+        if isFollowingNew {
+          Task {
+            try await Task.sleepForOneFrame()
+            scrollModel.scroll(to: .bottom, animated: false)
+          }
+        }
+      }.onAppear {
+        loggerModel.setup()
         Task {
           try await Task.sleepForOneFrame()
           scrollModel.scroll(to: .bottom, animated: false)
         }
       }
-    }.onAppear {
-      Task {
-        try await Task.sleepForOneFrame()
-        scrollModel.scroll(to: .bottom, animated: false)
-        try await Task.sleep(seconds: 0.1)
-        scrollModel.scroll(to: .bottom, animated: false)
-      }
-    }
   }
 }
 #endif

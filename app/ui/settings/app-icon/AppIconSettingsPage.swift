@@ -1,9 +1,7 @@
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
-@MainActor
 struct AppIconSettingsPage<AppIcon: IOSAppIcon>: View {
   
   @Environment(\.theme) private var theme
@@ -14,7 +12,7 @@ struct AppIconSettingsPage<AppIcon: IOSAppIcon>: View {
     NavigationPage(title: "App Icon") {
       VStack(alignment: .leading, spacing: 16) {
         ForEach(AppIcon.collections) { collection in
-          HelloSection(title: collection.name) {
+          HelloSection(title: collection.name?.uppercased()) {
             LazyVGrid(columns: [.init(.adaptive(minimum: 60, maximum: 160), spacing: 24)], spacing: 16) {
               ForEach(collection.icons) { icon in
                 HelloButton(haptics: .action, action: { appIconModel.set(icon: icon) }) {

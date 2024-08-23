@@ -1,7 +1,20 @@
 import Foundation
 
 public extension TimeInterval {
-  public var durationString: String {
+  
+  static var secondsInDay: TimeInterval {
+    24 * secondsInHour
+  }
+  
+  static var secondsInHour: TimeInterval {
+    60 * secondsInMinute
+  }
+  
+  static var secondsInMinute: TimeInterval {
+    60
+  }
+  
+  var durationString: String {
     if abs(self) >= 60 * 60 {
       hhmmssString
     } else {
@@ -9,7 +22,7 @@ public extension TimeInterval {
     }
   }
   
-  public func durationString(matchingFormatOf otherDuration: TimeInterval) -> String {
+  func durationString(matchingFormatOf otherDuration: TimeInterval) -> String {
     if abs(otherDuration) >= 60 * 60 {
       hhmmssString
     } else {
@@ -17,7 +30,7 @@ public extension TimeInterval {
     }
   }
   
-  public var hhmmssString: String {
+  var hhmmssString: String {
     var durationString = self < 0 ? "-" : ""
     
     let durationMagnitude = abs(self)
@@ -33,7 +46,7 @@ public extension TimeInterval {
     return durationString
   }
   
-  public var mmssString: String {
+  var mmssString: String {
     var durationString = self < 0 ? "-" : ""
     
     let durationMagnitude = abs(self)
@@ -53,7 +66,7 @@ public extension TimeInterval {
 }
 
 public extension Date {
-  public var relativeDateString: String {
+  var relativeDateString: String {
     if Calendar.current.isDateInToday(self) {
       return "Today"
     } else if Calendar.current.isDateInYesterday(self) {
@@ -66,7 +79,7 @@ public extension Date {
     }
   }
   
-  public var relativeDateWithGranularRecentString: String {
+  var relativeDateWithGranularRecentString: String {
     let dateDiff = epochTime - self.timeIntervalSince1970
     if dateDiff < 60 {
       return "Now"
@@ -81,7 +94,7 @@ public extension Date {
     }
   }
   
-  public var relativeDateWithGranularRecentShortString: String {
+  var relativeDateWithGranularRecentShortString: String {
     let dateDiff = epochTime - self.timeIntervalSince1970
     if dateDiff < 60 {
       return "Now"
@@ -96,17 +109,17 @@ public extension Date {
     }
   }
   
-  public var absoluteDateString: String {
+  var absoluteDateString: String {
     let formatter = DateFormatter() +& { $0.dateFormat = "MMM d, yyyy" }
     return formatter.string(from: self)
   }
   
-  public var absoluteDateAndTimeString: String {
+  var absoluteDateAndTimeString: String {
     let formatter = DateFormatter() +& { $0.dateFormat = "hh:mm a MMM d, yyyy" }
     return formatter.string(from: self)
   }
   
-  public var yearString: String {
+  var yearString: String {
     (DateFormatter() +& { $0.dateFormat = "yyyy" }).string(from: self)
   }
 }

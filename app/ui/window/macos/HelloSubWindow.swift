@@ -49,7 +49,7 @@ open class HelloSubWindow: HelloWindow {
   
   override public var autoCloseBehaviour: HelloWindow.AutoCloseBehaviour { autoCloseBehaviourOption }
   
-  public init(id: String = UUID().uuidString,
+  public init(id: String = .uuid,
               anchor: WindowAnchor,
               autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onFocusLost,
               parentWindow: HelloWindow? = nil,

@@ -1,6 +1,5 @@
 import SwiftUI
 
-@MainActor
 struct HelloBackgroundViewModifier: ViewModifier {
   
   @Environment(\.theme) private var theme

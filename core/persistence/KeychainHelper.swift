@@ -1,6 +1,6 @@
 import Foundation
 
-extension SecAccessControl: @unchecked Sendable {}
+extension SecAccessControl: @unchecked @retroactive Sendable {}
 
 @HelloPersistenceActor
 public class KeychainHelper {
@@ -76,7 +76,7 @@ public class KeychainHelper {
     if appGroup, let accessGroup = accessGroup {
       query[kSecAttrAccessGroup] = accessGroup
     }
-    if isBiometricallyLocked, let accessControl = try? bioSecAccessControl {
+    if isBiometricallyLocked, let accessControl = bioSecAccessControl {
       query[kSecAttrAccessControl] = accessControl
     } else {
       query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
@@ -86,10 +86,10 @@ public class KeychainHelper {
     guard status == errSecSuccess else {
       switch status {
       case errSecDuplicateItem:
-        let updateStatus = SecItemUpdate(queryAttributes(for: key) as CFDictionary, [
-          kSecValueData: data,
-          kSecUseDataProtectionKeychain: true
-        ] as [CFString : Any] as CFDictionary)
+        let updateStatus = SecItemUpdate(queryAttributes(for: key) as CFDictionary,
+                                         [kSecValueData: data,
+                                          kSecUseDataProtectionKeychain: true
+                                         ] as [CFString : Any] as CFDictionary)
         guard status == errSecSuccess else {
           switch status {
           default: throw KeychainError.other(error: status)

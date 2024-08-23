@@ -39,7 +39,7 @@ public class Logger: Sendable {
     logStatements.append(logStatement)
     guard !isEphemeral else { return }
     self.lastLoggedTime = epochTime
-    Task { await self.subscriber?.statementLogged(logStatement) }
+    self.subscriber?.statementLogged(logStatement)
     if !self.isFlushPending {
       self.isFlushPending = true
       try await flush(force: false)
@@ -63,14 +63,14 @@ public class Logger: Sendable {
   
   public func clear() async throws {
     logStatements = []
-    Task { await subscriber?.refresh([]) }
+    subscriber?.refresh([])
     if !isFlushPending {
       isFlushPending = true
       try await flush(force: false)
     }
   }
   
-  public func subscribe(_ subscriber: any LoggerSubscriber) {
+  public func subscribe(_ subscriber: some LoggerSubscriber) {
     self.subscriber = subscriber
   }
   
@@ -90,7 +90,7 @@ public class Logger: Sendable {
     let oldestAllowed = epochTime - 60 * 60 * 24
     let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }).suffix(1000))
     if logStatements.first?.id != filteredLogStatements.first?.id {
-      await subscriber?.refresh(filteredLogStatements)
+      subscriber?.refresh(filteredLogStatements)
       logStatements = filteredLogStatements
     }
     await flushReal(logStatements: logStatements)

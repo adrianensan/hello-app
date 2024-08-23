@@ -4,14 +4,14 @@ import Observation
 public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
   case standard
   case appGroup
-  case hello
+  case helloShared
   case custom(String)
   
   public var id: String {
     switch self {
     case .standard: "standard"
     case .appGroup: "appGroup"
-    case .hello: "hello"
+    case .helloShared: "hello"
     case .custom(let suite): suite
     }
   }
@@ -20,7 +20,7 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
     switch self {
     case .standard: "Standard"
     case .appGroup: "App Group"
-    case .hello: "Hello"
+    case .helloShared: "Hello"
     case .custom(let suite): suite
     }
   }
@@ -28,7 +28,7 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
   public static var allCases: [DefaultsPersistenceSuite] { [
     .standard,
     .appGroup,
-    .hello,
+    .helloShared,
   ]}
   
   public var userDefaults: UserDefaults? {
@@ -37,14 +37,14 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
       return .standard
     case .appGroup:
       if let appGroupDefaults = UserDefaults(suiteName: AppInfo.appGroup) {
-        return  appGroupDefaults
+        return appGroupDefaults
       } else {
         Log.fatal("Failed to create UserDefaults for app group, please ensure \(AppInfo.appGroup) is added as an App Group", context: "Persistence")
         return nil
       }
-    case .hello:
-      if let helloDefaults = UserDefaults(suiteName: "com.adrianensan.hello") {
-        return  helloDefaults
+    case .helloShared:
+      if let helloDefaults = UserDefaults(suiteName: AppInfo.helloGroup) {
+        return helloDefaults
       } else {
         Log.fatal("Failed to create UserDefaults for share Hello, please ensure com.adrianensan.hello is added as an App Group", context: "Persistence")
         return nil
@@ -64,6 +64,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
   case document
   case applicationSupport
   case appGroup
+  case helloShared
   case temporary
   case cache
   case custom(String)
@@ -72,6 +73,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     .document,
     .applicationSupport,
     .appGroup,
+    .helloShared,
     .temporary,
     .cache
   ]}
@@ -80,7 +82,8 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     switch self {
     case .document: "document"
     case .applicationSupport: "support"
-    case .appGroup: "appgroup"
+    case .appGroup: "app-group"
+    case .helloShared: "hello-shared"
     case .temporary: "temporary"
     case .cache: "cache"
     case .custom(let url): url
@@ -92,6 +95,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     case .document: "Documents"
     case .applicationSupport: "Application Support"
     case .appGroup: "App Group"
+    case .helloShared: "Hello"
     case .temporary: "Temporary"
     case .cache: "Cache"
     case .custom(let url): url
@@ -106,6 +110,8 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
       .applicationSupportDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .appGroup:
       FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.appGroup)
+    case .helloShared:
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.helloGroup)
     case .temporary:
       .temporaryDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .cache:
@@ -119,7 +125,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
 public enum PersistenceType: Sendable {
   
   case defaults(suite: DefaultsPersistenceSuite = .standard, key: String)
-  case file(location: FilePersistenceLocation = .document, path: String)
+  case file(location: FilePersistenceLocation, path: String)
   case keychain(key: String, appGroup: Bool, isBiometricallyLocked: Bool = false)
   case memory(key: String)
   

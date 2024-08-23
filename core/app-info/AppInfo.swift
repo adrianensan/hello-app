@@ -6,7 +6,7 @@ public enum AppInfo {
   public static let version: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
   public static let build: String = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
   public static let name: String = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "?"
-  public static let displayName: String = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? name ?? "?"
+  public static let displayName: String = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? name
   public static let copyright: String = Bundle.main.infoDictionary?["NSHumanReadableCopyright"] as? String ?? "?"
   
   #if DEBUG || targetEnvironment(simulator)
@@ -24,4 +24,6 @@ public enum AppInfo {
   public static var appGroup: String { "group.\(rootBundleID)" }
   #endif
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
+  
+  public static var helloGroup: String { "group.adrianensan.hello" }
 }

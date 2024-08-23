@@ -1,7 +1,7 @@
 import Foundation
 
 public extension IconScale {
-  static var watchOSIconScales: [IconScale] = [
+  static let watchOSIconScales: [IconScale] = [
     IconScale(size: 24, scaleFactor: 2, purpose: .watch, role: .notificationCenter, subtype: .watch38mm),
     IconScale(size: 27.5, scaleFactor: 2, purpose: .watch, role: .notificationCenter, subtype: .watch42mm),
     IconScale(size: 29, scaleFactor: 2, purpose: .watch, role: .companionSettings),

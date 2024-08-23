@@ -21,6 +21,7 @@ public class HelloSheetModel {
   var pagerModel: PagerModel?
   var dismissDrag: CGFloat = 0
   var isVisible: Bool = false
+  var sheetSize: CGSize = .zero
   
   public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
   
@@ -74,7 +75,7 @@ public struct HelloSheet<Content: View>: View {
       .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: false)
         .onTapGesture { globalDismissKeyboard() })
       .padding(.bottom, -60)
-      .padding(.top, safeArea.top + 8)
+      .padding(.top, safeArea.top + 16)
       .handleSheetDismissDrag()
       .transformEnvironment(\.safeArea) { $0.top = 0 }
       .environment(model)

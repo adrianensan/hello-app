@@ -60,7 +60,7 @@ public struct GlitchIconView: View {
   }
   
   struct GlitchSegment: Identifiable {
-    var id: String = UUID().uuidString
+    var id: String = .uuid
     var height: CGFloat
     var offset: CGFloat
   }

@@ -1,7 +1,6 @@
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
 public struct AppIconOptionView<AppIcon: IOSAppIcon>: View {
   

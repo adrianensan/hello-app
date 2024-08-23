@@ -6,7 +6,7 @@ import HelloCore
 class HelloAppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ notification: Notification) {
     NSApplication.shared.registerForRemoteNotifications()
-    Task { await helloApplication.onLaunchInternal() }
+    helloApplication.onLaunchInternal()
   }
   
   func applicationDidBecomeActive(_ notification: Notification) {

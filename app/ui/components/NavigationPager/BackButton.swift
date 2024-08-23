@@ -58,10 +58,10 @@ public struct BackButton: View {
         .frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
         .padding(.leading, -4)
       
-      let effectiveBackProgress: CGFloat = pagerModel.viewDepth > 1 && pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
+      let effectiveBackProgress: CGFloat = pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
       VStack(alignment: .leading, spacing: 0) {
-        HelloForEach(pagerModel.viewStack.dropLast()) { index, page in
-          let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) - effectiveBackProgress
+        HelloForEach(pagerModel.viewStack.dropLast(), reversed: true) { index, page in
+          let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) + (pagerModel.viewDepth > 1 ? effectiveBackProgress : 0)
           Text(page.name ?? "Back")
             .font(.system(size: 14, weight: .semibold, design: .rounded))
             .foregroundStyle(theme.floating.foreground.primary.style)
@@ -69,9 +69,10 @@ public struct BackButton: View {
             .frame(height: 14)
             .opacity(1 - 0.6 * abs(distance))
             .scaleEffect(1 - 0.3 * abs(distance), anchor: .leading)
+            .offset(x: pagerModel.viewStack.count - 2 == index ? 40 * effectiveBackProgress : 0)
         }
-      }.frame(height: 14, alignment: .bottom)
-        .offset(y: 14 * effectiveBackProgress)
+      }.frame(height: pagerModel.viewDepth > 2 ? 24 : 14, alignment: .top)
+//        .offset(y: -14 * effectiveBackProgress)
         .padding(.trailing, 12)
         .animation(.pageAnimation, value: pagerModel.viewStack.count)
         .animation(.pageAnimation, value: pagerModel.viewDepth)

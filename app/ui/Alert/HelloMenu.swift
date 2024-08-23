@@ -6,6 +6,7 @@ public struct HelloMenuItem: Identifiable {
   public var id: String
   var name: String
   var icon: String
+  var isSelected: Bool
   var action: @MainActor () async throws -> Void
   var shareURL: URL?
   var shareString: String?
@@ -13,10 +14,12 @@ public struct HelloMenuItem: Identifiable {
   public init(id: String = .uuid,
               name: String,
               icon: String,
+              isSelected: Bool = false,
               action: @MainActor @escaping () async throws -> Void) {
     self.id = id
     self.name = name
     self.icon = icon
+    self.isSelected = isSelected
     self.action = action
   }
   
@@ -27,6 +30,7 @@ public struct HelloMenuItem: Identifiable {
     self.id = id
     self.name = name
     self.icon = icon
+    self.isSelected = false
     self.action = {}
     self.shareURL = url
   }
@@ -38,11 +42,12 @@ public struct HelloMenuItem: Identifiable {
     self.id = id
     self.name = name
     self.icon = icon
+    self.isSelected = false
     self.action = {}
     self.shareString = string
   }
   
-  #if os(iOS)
+#if os(iOS)
   public static func copy(string: String) -> HelloMenuItem {
     HelloMenuItem(name: "Copy", icon: "doc.on.doc", action: { UIPasteboard.general.string = string })
   }
@@ -67,7 +72,7 @@ public struct HelloMenuItem: Identifiable {
   public static func share(url: URL) -> HelloMenuItem {
     HelloMenuItem(id: "share-\(String.uuid)", name: "Share", icon: "square.and.arrow.up", url: url)
   }
-  #endif
+#endif
 }
 
 public struct HelloMenuRow: View {
@@ -83,6 +88,10 @@ public struct HelloMenuRow: View {
       Text(item.name)
         .lineLimit(1)
       Spacer(minLength: 0)
+      if item.isSelected {
+        Image(systemName: "checkmark")
+          .frame(width: 32)
+      }
     }.font(.system(size: 14, weight: .medium, design: .rounded))
       .foregroundColor(theme.foreground.primary.color)
       .padding(.horizontal, 4)
@@ -101,9 +110,9 @@ public struct HelloMenu: View {
   
   @Environment(\.theme) private var theme
   
-  var position: CGPoint
-  var anchor: Alignment = .topTrailing
-  var items: [HelloMenuItem]
+  private var position: CGPoint
+  private var anchor: Alignment = .topTrailing
+  private var items: [HelloMenuItem]
   
   public init(position: CGPoint,
               anchor: Alignment = .topTrailing,

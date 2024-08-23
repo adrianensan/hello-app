@@ -1,7 +1,5 @@
 import SwiftUI
 
-import HelloApp
-
 public struct AppIconView<AppIcon: IOSAppIcon>: View {
   
   @Environment(\.theme) var theme

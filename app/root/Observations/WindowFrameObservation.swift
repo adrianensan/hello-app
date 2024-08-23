@@ -2,7 +2,6 @@ import SwiftUI
 
 import HelloCore
 
-@MainActor
 struct WindowFrameObservationViewModifier: ViewModifier {
   
   @Environment(HelloWindowModel.self) private var windowModel

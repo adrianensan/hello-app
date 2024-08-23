@@ -131,7 +131,6 @@ public extension NativeImage {
   }
   
   var needsTint: Bool {
-    var size = size
     var color: HelloColor?
     guard let pixelReader = ImagePixelReader.reader(for: self) else { return false }
     return stride(from: 0.0, to: 1.0, by: 0.1).allSatisfy { x in

@@ -116,9 +116,7 @@ public extension HelloApplication {
   static func manualStart() {
     guard helloApplication == nil else { return }
     setup()
-    Task {
-      await helloApplication.onLaunchInternal()
-    }
+    helloApplication.onLaunchInternal()
   }
   
   private static func setup() {
@@ -178,6 +176,7 @@ extension HelloApplication {
       if AppInfo.isTestBuild {
         await Persistence.save(true, for: .isTester)
       }
+      Log.verbose("Device ID: \(await Persistence.value(.deviceID))")
       if let currentAppVersion = AppVersion.current {
         let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
         if currentAppVersion != previousAppVersion {
@@ -196,8 +195,8 @@ extension HelloApplication {
   }
   
   func onTerminateInternal() {
-    try? Persistence.wipeUnusedFiles(in: .temporary)
-    try? Persistence.wipeUnusedFiles(in: .cache)
+    try? Persistence.wipeFiles(in: .temporary, notAccessedWithin: .secondsInDay)
+    Persistence.unsafeSave(.now, for: .lastestDateLaunched)
     Log.terminate()
     onTerminate()
   }

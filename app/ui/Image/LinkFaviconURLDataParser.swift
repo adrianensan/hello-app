@@ -1,7 +1,6 @@
 import Foundation
 
 import HelloCore
-import HelloApp
 
 public actor LinkFaviconURLDataParser {
   
@@ -39,12 +38,9 @@ public actor LinkFaviconURLDataParser {
         throw error
       }
     }
-    let html: String?
-    do {
-      html = try String(data: pageData, encoding: .utf8)
-    } catch {
-      Log.error(error.localizedDescription)
-      throw error
+    let html = String(data: pageData, encoding: .utf8)
+    if html == nil {
+      Log.verbose("Failed to parse html")
     }
     
     if let html {

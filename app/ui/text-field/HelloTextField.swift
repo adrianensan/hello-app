@@ -1,8 +1,6 @@
 #if os(macOS)
 import SwiftUI
 
-import HelloApp
-
 public struct HelloTextField<FocusValue: Hashable>: View {
   
   @Environment(\.theme) private var theme

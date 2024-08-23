@@ -23,7 +23,7 @@ public extension EnvironmentValues {
 //  static let defaultValue: ObservableType? = nil
 //}
 
-extension EnvironmentValues: @unchecked Sendable {}
+extension EnvironmentValues: @unchecked @retroactive Sendable {}
 
 //struct AllKey: EnvironmentKey {
 //  static let defaultValue: EnvironmentValues = .init()
@@ -62,7 +62,7 @@ fileprivate extension EnvironmentValues {
   public init(_ key: ObservableType.Type) { }
   
   mutating public func update() {
-    wrappedValue = environment[ObservableType.self] as? ObservableType
+    wrappedValue = environment[ObservableType.self]
   }
 }
 
@@ -75,7 +75,6 @@ fileprivate extension EnvironmentValues {
 //  @inlinable public var wrappedValue: Value { get }
 //}
 
-@MainActor
 struct ActiveThemeObservationViewModifier: ViewModifier {
   
   @Environment(\.colorScheme) private var colorScheme: ColorScheme

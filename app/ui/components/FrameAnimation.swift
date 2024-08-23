@@ -128,17 +128,17 @@ public struct FrameAnimation: View {
           }
         }
         Task { try await animate() }
-      }.onChange(of: resetSignal) { _ in
+      }.onChange(of: resetSignal) {
         nonObserved.loopIteration = 0
         nonObserved.freezeFrame = nil
         Task { try await animate() }
-      }.onChange(of: repeatBehaviour) { newii in
-        loopMode = newii
+      }.onChange(of: repeatBehaviour) {
+        loopMode = repeatBehaviour
         nonObserved.loopIteration = 0
         Task { try await animate() }
-      }.onChange(of: delay) { delay in
+      }.onChange(of: delay) {
         nonObserved.delay = delay
-      }.onChange(of: fps) { fps in
+      }.onChange(of: fps) {
         nonObserved.fps = fps
       }.onDisappear {
         nonObserved.isActive = false

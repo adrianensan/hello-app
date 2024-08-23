@@ -58,6 +58,7 @@ public struct HelloAlert: View {
   
   @State private var animateIn: Bool = false
   @State private var isDismissed: Bool = false
+  @State private var timeAppeared: TimeInterval = epochTime
   
   private var config: HelloAlertConfig
   
@@ -116,7 +117,7 @@ public struct HelloAlert: View {
             .frame(maxWidth: .infinity)
             .clickable()
 //            .background(theme.rowBackground.swiftuiColor)
-        }
+        }.environment(\.contentShape, AnyInsettableShape(.rect))
         
         if let secondButton = config.secondButton {
           theme.foreground.primary.color.opacity(0.1)
@@ -132,7 +133,7 @@ public struct HelloAlert: View {
               .frame(maxWidth: .infinity)
               .clickable()
 //              .background(theme.rowBackground.swiftuiColor)
-          }.buttonStyle(.highlight)
+          }.environment(\.contentShape, AnyInsettableShape(.rect))
         }
       }
     }.frame(width: 280)
@@ -149,7 +150,10 @@ public struct HelloAlert: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(HelloBackgroundDimmingView()
         .opacity(animateIn ? 0.5 : 0)
-        .onTapGesture { dismiss() }
+        .onTapGesture {
+          guard epochTime - timeAppeared > 1 else { return }
+          dismiss()
+        }
         .animation(.easeInOut(duration: 0.2), value: animateIn))
       .allowsHitTesting(!isDismissed)
       .onAppear { animateIn = true }

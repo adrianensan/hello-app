@@ -8,10 +8,10 @@ public class Page {
     for line in originalString.components(separatedBy: .newlines) {
       if line.trimWhitespace.starts(with: keyword) {
         let requestFile = line.trimWhitespace.replacingOccurrences(of: keyword, with: "")
-        if requestFile.starts(with: "/"), let fileString = try? String(contentsOfFile: (staticRoot ?? "") + requestFile) {
+        if requestFile.starts(with: "/"), let fileString = try? String(contentsOfFile: (staticRoot ?? "") + requestFile, encoding: .utf8) {
           string += replaceIncludes(in: fileString, from: directory, staticRoot: staticRoot, depth: depth + 1)
         }
-        else if let fileString = try? String(contentsOfFile: directory + requestFile) {
+        else if let fileString = try? String(contentsOfFile: directory + requestFile, encoding: .utf8) {
           string += replaceIncludes(in: fileString, from: directory, staticRoot: staticRoot, depth: depth + 1)
         }
       }
@@ -24,7 +24,7 @@ public class Page {
   
   public init?(staticRoot: String, filePath: String) {
     let filePath = staticRoot + filePath
-    guard let fileString = try? String(contentsOfFile: filePath) else { return nil }
+    guard let fileString = try? String(contentsOfFile: filePath, encoding: .utf8) else { return nil }
     let directory = String(filePath[...(filePath.lastIndex(of: "/") ?? filePath.endIndex)])
     
     rawPage = Page.replaceIncludes(in: fileString, from: directory, staticRoot: staticRoot)

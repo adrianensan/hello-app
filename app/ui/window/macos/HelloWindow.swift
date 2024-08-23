@@ -283,7 +283,7 @@ open class HelloWindow: HelloDefaultWindow {
   public static var defaultTopSafeArea: CGFloat?
   
   public let id: String
-  public let uniqueID: String = UUID().uuidString
+  public let uniqueID: String = .uuid
   public let nsWindow: NSWindow
   internal var onCloseSupplementary: (() -> Void)?
   var isMouseInWindow: Bool = false
@@ -321,7 +321,7 @@ open class HelloWindow: HelloDefaultWindow {
   private weak var parentWindow: HelloWindow?
   
   public init<Content: View>(view: Content,
-                             id: String = UUID().uuidString,
+                             id: String = .uuid,
                              parentWindow: HelloWindow? = nil,
                              size: Size = .resizable(initialSize: CGSize(width: 400, height: 300)),
                              windowFlags: NSWindow.StyleMask = [.closable, .titled, .fullSizeContentView, .miniaturizable],
@@ -611,7 +611,7 @@ open class HelloWindow: HelloDefaultWindow {
     nativeSubWindow.makeKeyAndOrderFront(self)
   }
   
-  public func show(subView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onFocusLost) {
+  public func show(subView: some View, at point: CGPoint, alignment: Alignment, id: String = .uuid, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onFocusLost) {
     show(subWindow: HelloSubWindow(id: id,
                                    anchor: .init(point: point, alignment: alignment),
                                    autoCloseBehaviour: autoCloseBehaviour,
@@ -620,7 +620,7 @@ open class HelloWindow: HelloDefaultWindow {
                                    content: subView))
   }
   
-  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = UUID().uuidString, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onHoverLost) {
+  public func show(temporarySubView: some View, at point: CGPoint, alignment: Alignment, id: String = .uuid, autoCloseBehaviour: HelloWindow.AutoCloseBehaviour = .onHoverLost) {
     show(temporaryWindow: HelloSubWindow(id: id,
                                          anchor: .init(point: point, alignment: alignment),
                                          autoCloseBehaviour: autoCloseBehaviour,

@@ -15,7 +15,7 @@ public enum HelloPersistenceError: Error {
   public static let shared: HelloPersistenceActor = HelloPersistenceActor()
 }
 
-extension UserDefaults: @unchecked Sendable {}
+extension UserDefaults: @unchecked @retroactive Sendable {}
 
 @HelloPersistenceActor
 public class HelloPersistence {
@@ -48,7 +48,7 @@ public class HelloPersistence {
   
   nonisolated private func userDefaults(for suite: DefaultsPersistenceSuite) -> UserDefaults {
     guard let defaults = suite.userDefaults else {
-      Log.error("Failed to get defaults for \(suite.id)", context: "Persistence")
+      Log.fatal("Failed to get defaults suite for \(suite.id)", context: "Persistence")
       return .standard
     }
     return defaults
@@ -101,7 +101,7 @@ public class HelloPersistence {
           Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
           return
         }
-        await observable.value = value
+        observable.value = value
       }
     }
     
@@ -143,13 +143,13 @@ public class HelloPersistence {
             value as? Double? ??
             value as? Data?,
            value == nil {
-          userDefaults(for: suite).removeObject(forKey: key)
+          userDefault.removeObject(forKey: key)
           return
         }
-        userDefaults(for: suite).set(value, forKey: key)
+        userDefault.set(value, forKey: key)
       default:
         let data = try value.jsonData
-        userDefaults(for: suite).set(data, forKey: key)
+        userDefault.set(data, forKey: key)
       }
     case .file(let location, let path):
       try save(value, to: fileURL(for: location, subPath: path))
@@ -303,10 +303,10 @@ public class HelloPersistence {
     }
   }
   
-  nonisolated public func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
+  nonisolated public func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
     switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
-    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
+    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).path)
     case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
     case .memory: false
     }
@@ -353,7 +353,7 @@ public class HelloPersistence {
   nonisolated private func value<Property: PersistenceProperty>(at url: URL, for property: Property) -> Property.Value {
     switch Property.Value.self {
     case is String.Type, is String?.Type:
-      return (try? String(contentsOf: url) as? Property.Value) ?? property.defaultValue
+      return (try? String(contentsOf: url, encoding: .utf8) as? Property.Value) ?? property.defaultValue
     default:
       guard let data = try? Data(contentsOf: url) else {
         return property.defaultValue
@@ -402,16 +402,16 @@ public enum Persistence {
   
   nonisolated public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup))
   
-  public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) async {
-    await Property.persistence.save(value, for: property)
+  public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+    Property.persistence.save(value, for: property)
   }
   
   nonisolated public static func unsafeSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
     try? Property.persistence.saveInternal(value, for: property)
   }
   
-  public static func value<Property: PersistenceProperty>(_ property: Property) async -> Property.Value {
-    await Property.persistence.value(for: property)
+  public static func value<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+    Property.persistence.value(for: property)
   }
   
   nonisolated public static func unsafeValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
@@ -422,8 +422,8 @@ public enum Persistence {
 //    await Property.Key.persistence.value(for: property)
 //  }
   
-  public static func delete<Property: PersistenceProperty>(_ property: Property) async {
-    await Property.persistence.delete(property: property)
+  public static func delete<Property: PersistenceProperty>(_ property: Property) {
+    Property.persistence.delete(property: property)
   }
   
   public static func listen<Property: PersistenceProperty>(for property: Property,
@@ -433,20 +433,20 @@ public enum Persistence {
     await Property.persistence.listen(for: property, object: object, action: action, initial: initial)
   }
   
-  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (consuming Property.Value) -> Property.Value) async {
-    await Property.persistence.atomicUpdate(property, update: update)
+  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (consuming Property.Value) -> Property.Value) {
+    Property.persistence.atomicUpdate(property, update: update)
   }
   
   nonisolated public static func size<Property: PersistenceProperty>(of property: Property) -> Int {
     Property.persistence.size(of: property)
   }
   
-  public static func isSet<Property: PersistenceProperty>(property: Property) async -> Bool {
-    await Property.persistence.isSet(property: property)
+  public static func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
+    Property.persistence.isSet(property: property)
   }
   
-  nonisolated public static func initialIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    Property.persistence.initialIsSet(property: property)
+  nonisolated public static func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
+    Property.persistence.unsafeIsSet(property: property)
   }
   
   nonisolated public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
@@ -464,16 +464,16 @@ public enum Persistence {
     }
   }
   
-  nonisolated public static func wipeUnusedFiles(in location: FilePersistenceLocation) throws {
+  nonisolated public static func wipeFiles(in location: FilePersistenceLocation, notAccessedWithin timeInterval: TimeInterval) throws {
     guard let url = location.url else { return }
-    try wipeUnusedFiles(in: url)
+    try wipeFiles(in: url, notAccessedWithin: timeInterval)
   }
   
-  nonisolated public static func wipeUnusedFiles(in url: URL) throws {
+  nonisolated public static func wipeFiles(in url: URL, notAccessedWithin timeInterval: TimeInterval) throws {
     for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
       if fileURL.isDirectory {
-        try? wipeUnusedFiles(in: fileURL)
-      } else if fileURL.dateAccessed ?? .distantPast < .now.addingTimeInterval(-2 * 24 * 60 * 60) {
+        try? wipeFiles(in: fileURL, notAccessedWithin: timeInterval)
+      } else if fileURL.dateAccessed ?? .distantPast < .now.addingTimeInterval(-timeInterval) {
         try? FileManager.default.removeItem(at: fileURL)
       }
     }
@@ -558,23 +558,23 @@ public enum Persistence {
 }
 
 public extension URL {
-  public var isDirectory: Bool {
+  var isDirectory: Bool {
     (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
   }
   
-  public var dateCreated: Date? {
+  var dateCreated: Date? {
     (try? resourceValues(forKeys: [.creationDateKey]))?.creationDate
   }
   
-  public var dateModified: Date? {
+  var dateModified: Date? {
     (try? resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
   }
   
-  public var dateAccessed: Date? {
+  var dateAccessed: Date? {
     (try? resourceValues(forKeys: [.contentAccessDateKey]))?.contentAccessDate
   }
   
-  public func regularFileAllocatedSize() -> Int {
+  func regularFileAllocatedSize() -> Int {
     guard let resourceValues = try? self.resourceValues(forKeys: [
       .isRegularFileKey,
       .totalFileSizeKey,

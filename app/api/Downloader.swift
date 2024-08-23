@@ -1,6 +1,18 @@
 import Foundation
+//import CFNetwork
 
 import HelloCore
+
+public enum HelloDownloadError: Error {
+  case duplicate
+  case noInternet
+  case noHTTPResponse
+  case noFile
+  case httpError(code: HTTPResponseStatus)
+  case nsURLError(code: Int)
+  case cfNetworkError(code: Int)
+  case other(any Error)
+}
 
 @globalActor final public actor HelloAPIActor: GlobalActor {
   public static let shared: HelloAPIActor = HelloAPIActor()
@@ -21,7 +33,7 @@ public class Downloader {
     }
     
     nonisolated func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-      Task { await progressUpdater(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)) }
+      Task { progressUpdater(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)) }
     }
     
     nonisolated func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -72,12 +84,12 @@ public class Downloader {
     return try await download(from: url, downloadProgressUpdate: downloadProgressUpdate)
   }
   
-  public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
-    guard !downloadingURLs.contains(url) else { throw APIError.duplicate }
+  public func download(from url: URL, downloadProgressUpdate: (@Sendable (Double) -> Void)? = nil) async throws(HelloDownloadError) -> Data {
+    guard !downloadingURLs.contains(url) else { throw .duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
     let requestStartTime = epochTime
-    var urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
+    let urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
     
     let urlResponse: URLResponse
     let data: Data
@@ -95,18 +107,43 @@ public class Downloader {
       data = try Data(contentsOf: dataURL)
       try? FileManager.default.removeItem(at: dataURL)
     } catch {
+      let nsError = error as NSError
+      switch nsError.domain {
+      case NSURLErrorDomain:
+        switch nsError.code {
+        case NSURLErrorNotConnectedToInternet:
+          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) No Network Connection - \(urlString)", context: "Downloader")
+          throw .noInternet
+        case NSURLErrorNetworkConnectionLost:
+          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) Network Connection Lost - \(urlString)", context: "Downloader")
+          throw .noInternet
+        default:
+          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with url error \(nsError.code): \(error.localizedDescription)", context: "Downloader")
+          throw .nsURLError(code: nsError.code)
+        }
+      case String(kCFErrorDomainCFNetwork):
+        switch nsError.code {
+        case -1100: // kCFURLErrorFileDoesNotExist:
+          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) TMP Download File Not Found - \(urlString)", context: "Downloader")
+          throw .noFile
+        default:
+          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with cf error \(nsError.code): \(error.localizedDescription)", context: "Downloader")
+          throw .cfNetworkError(code: nsError.code)
+        }
+      default: ()
+      }
       Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
-      throw error
+      throw .other(error)
     }
     let duration = String(format: "(%.2fs)", epochTime - requestStartTime)
     guard let httpResponse = urlResponse as? HTTPURLResponse else {
       Log.error("\(duration) \(urlString) failed, no HTTP response", context: "Downloader")
-      throw APIError.fail
+      throw .noHTTPResponse
     }
     let responseStatus = HTTPResponseStatus.from(code: httpResponse.statusCode)
     guard responseStatus.isSuccess else {
       Log.error("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")
-      throw APIError.fail
+      throw .httpError(code: responseStatus)
     }
     
     Log.info("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")

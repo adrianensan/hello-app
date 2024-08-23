@@ -22,7 +22,7 @@ public extension Alignment {
     return UnitPoint(x: x, y: y)
   }
   
-  public var point: CGPoint {
+  var point: CGPoint {
     CGPoint(x: unitPoint.x, y: unitPoint.y)
   }
 }
@@ -103,7 +103,7 @@ public struct PopupViewWrapper<Content: View>: View {
         guard !isVisible else { return }
         isVisible = true
       }.onChange(of: isVisible) {
-        if !$0 {
+        if !isVisible {
           if let viewID {
             windowModel.dismiss(id: viewID)
           } else {

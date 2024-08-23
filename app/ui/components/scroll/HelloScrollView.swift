@@ -34,7 +34,7 @@ public class HelloScrollModel {
   
   public var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
   
-  fileprivate let coordinateSpaceName: String = UUID().uuidString
+  fileprivate let coordinateSpaceName: String = .uuid
   @ObservationIgnored fileprivate var readyForDismiss: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
@@ -46,6 +46,7 @@ public class HelloScrollModel {
   }
   
   public var scrollEnabled: Bool = true
+  public var scrollBottomOffset: CGFloat = 0
   
   #if os(iOS)
   public var isScreenTouched: Bool { !TouchesModel.main.activeTouches.isEmpty }
@@ -171,10 +172,12 @@ public struct HelloScrollView<Content: View>: View {
   
   public var body: some View {
     ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
-      PositionReaderView(onPositionChange: { scrollOffset in
-        model.update(offset: scrollOffset.y)
-      }, coordinateSpace: .named(model.coordinateSpaceName))
-      content()
+      VStack(spacing: 0) {
+        PositionReaderView(onPositionChange: { scrollOffset in
+          model.update(offset: scrollOffset.y)
+        }, coordinateSpace: .named(model.coordinateSpaceName))
+        content()
+      }
     }.scrollDisabled(!model.scrollEnabled)
       .modifier(HelloScrollPositionViewModifier())
     //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in

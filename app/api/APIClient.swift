@@ -278,7 +278,7 @@ public extension HelloAPIClient {
       Log.error(error.localizedDescription, context: "API")
       throw error
     }
-    let (stream, urlSession) = try await session.bytes(for: request)
+    let (stream, urlResponse) = try await session.bytes(for: request)
     return AsyncThrowingStream(Endpoint.ResponseType.self) { continuation in
       Task {
         do {

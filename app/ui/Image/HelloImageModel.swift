@@ -156,10 +156,10 @@ public class HelloImageModel {
       let url = helloURL.root.string
       if let cachedFavicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
         image = NativeImage(data: cachedFavicon)
-      } else if var favicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
+      } else if let favicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
         loadTask = Task {
           defer { loadTask = nil }
-          let resizedFavicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(variant.size))
+          let resizedFavicon = try await ImageProcessor.resize(imageData: favicon, maxSize: variant.size)
           await Persistence.save(resizedFavicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           image = NativeImage(data: resizedFavicon)
         }
@@ -172,7 +172,7 @@ public class HelloImageModel {
           switch variant {
           case .original: ()
           case .thumbnail(let size):
-            favicon = try await ImageProcessor.processImageData(imageData: favicon, maxSize: CGFloat(size))
+            favicon = try await ImageProcessor.resize(imageData: favicon, maxSize: size)
           }
           await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           image = NativeImage(data: favicon)
@@ -186,6 +186,10 @@ public class HelloImageModel {
     case .data(let data):
       image = NativeImage(data: data)
     }
+  }
+  
+  public func load() {
+    
   }
   
   public var asyncImage: NativeImage? {

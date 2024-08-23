@@ -1,20 +1,22 @@
-import XCTest
-@testable import HelloCore
-@testable import HelloApp
+import Foundation
+import Testing
 
-final class HelloAppTests: XCTestCase {
+import HelloCore
+
+@MainActor
+final class HelloAppTests {
   
   @Persistent(.test) private var test
   @Persistent(.testInt) private var testInt
   @Persistent(.testInt) private var testInt2
   
+//  override func setUp() async throws {
+//    await Persistence.delete(.test)
+//    await Persistence.delete(.testInt)
+//    try await Task.sleepForOneFrame()
+//  }
   
-  override func setUp() async throws {
-    await Persistence.delete(.test)
-    await Persistence.delete(.testInt)
-    try await Task.sleepForOneFrame()
-  }
-  
+  @Test
   func testPersistenceThreadSafe() async throws {
     await withTaskGroup(of: Void.self) { taskGroup in
       for _ in 0..<10000 {
@@ -35,20 +37,23 @@ final class HelloAppTests: XCTestCase {
       }
     }
     let result = await Persistence.value(.testInt)
-    XCTAssertEqual(result, 10000)
+    guard result == 10000 else {
+      throw HelloError("\(result) should be 10000")
+    }
   }
   
+  @Test
   func testPersistentWrapper() async throws {
     await withTaskGroup(of: Void.self) { taskGroup in
       for _ in 0..<100000 {
         Task {
           self.test = "test3"
         }
-        taskGroup.addTask {
+        taskGroup.addTask { @MainActor in
           _ = self.test
           self.test = "test"
         }
-        taskGroup.addTask {
+        taskGroup.addTask { @MainActor in
           self.test = "test1"
           _ = self.test
         }
@@ -58,6 +63,7 @@ final class HelloAppTests: XCTestCase {
 //    XCTAssertEqual(test, "test")
   }
   
+  @Test
   func testPersistentWrapper2() async throws {
     await withTaskGroup(of: Void.self) { taskGroup in
       for _ in 0..<100 {
@@ -72,8 +78,34 @@ final class HelloAppTests: XCTestCase {
     }
     try await Task.sleep(seconds: 1)
     let result = await Persistence.value(.testInt)
-    XCTAssertEqual(result, 100)
-    XCTAssertEqual(self.testInt, 100)
-    XCTAssertEqual(self.testInt2, 100)
+    guard result == 100 && testInt == 100 && testInt2 == 100 else {
+      throw HelloError("Fail")
+    }
+  }
+}
+
+fileprivate struct TestIntPersistor: PersistenceProperty {
+  
+  var defaultValue: Int { 0 }
+  
+  var location: PersistenceType { .memory(key: "testInt") }
+}
+
+fileprivate extension PersistenceProperty where Self == TestIntPersistor {
+  static var testInt: TestIntPersistor {
+    TestIntPersistor()
+  }
+}
+
+fileprivate struct TestPersistor: PersistenceProperty {
+  
+  var defaultValue: String? { nil }
+  
+  var location: PersistenceType { .memory(key: "testString") }
+}
+
+fileprivate extension PersistenceProperty where Self == TestPersistor {
+  static var test: TestPersistor {
+    TestPersistor()
   }
 }

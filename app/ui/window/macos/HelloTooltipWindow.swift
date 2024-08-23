@@ -23,7 +23,7 @@ public class HelloTooltipWindow: HelloWindow {
     return target
   }
   
-  public init(id: String = UUID().uuidString, anchor: WindowAnchor, content: @autoclosure () -> some View) {
+  public init(id: String = .uuid, anchor: WindowAnchor, content: @autoclosure () -> some View) {
     self.anchor = anchor
     super.init(view: content(),
                id: id,
@@ -55,7 +55,6 @@ public class HelloTooltipWindow: HelloWindow {
   }
 }
 
-@MainActor
 struct HelloTooltipView<Content: View>: View {
   
   @Environment(\.theme) var theme
@@ -90,7 +89,7 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   @Environment(HelloWindowModel.self) private var windowModel
   
   @NonObservedState private var globalPosition: CGPoint = .zero
-  @State private var id = UUID().uuidString
+  @State private var id: String = .uuid
   
   var trigger: TooltipTrigger
   var content: () -> TooltipContent

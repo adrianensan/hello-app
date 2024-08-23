@@ -2,15 +2,15 @@ import SwiftUI
 
 struct DrawingGroupRedraw<Value: Equatable>: ViewModifier {
   
-  @State var id: String = UUID().uuidString
+  @State var id: String = .uuid
   var value: Value
   
   func body(content: Content) -> some View {
     content
       .id(id)
       .drawingGroup()
-      .onChange(of: value) { _ in
-        id = UUID().uuidString
+      .onChange(of: value) {
+        id = .uuid
       }
   }
 }

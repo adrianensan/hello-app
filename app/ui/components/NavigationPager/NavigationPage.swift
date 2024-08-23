@@ -65,7 +65,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
 #endif
             
             content()
-              .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0))
+              .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0) + (scrollModel.scrollThreshold == nil && scrollModel.effectiveScrollThreshold < 0 ? 8 : 0))
               .padding(.horizontal, config.horizontalPagePadding)
               .frame(maxWidth: .infinity)
           }
@@ -79,9 +79,9 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       NavigationPageBarFixed(title: title, navBarContent: {
         navBarContent().padding(.trailing, config.navBarTrailingPadding)
       })
-    }.onChange(of: isSmallSize || title == nil, initial: true) {
+    }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil, initial: true) {
       #if os(iOS)
-      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? -2 : -82
+      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 0 : -82
       #else
       scrollModel.defaultScrollThreshold = 0
       #endif
@@ -94,10 +94,10 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
 }
 
 public extension NavigationPage where NavBarContent == EmptyView {
-  public init(title: String? = nil,
-              allowScroll: Bool = true,
-              model: HelloScrollModel? = nil,
-              @ViewBuilder content: @escaping @MainActor () -> Content) {
+  init(title: String? = nil,
+       allowScroll: Bool = true,
+       model: HelloScrollModel? = nil,
+       @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.init(title: title,
               allowScroll: allowScroll,
               model: model,
@@ -105,10 +105,10 @@ public extension NavigationPage where NavBarContent == EmptyView {
               content: content)
   }
   
-  public init(title: String? = nil,
-              allowScroll: Bool = true,
-              showScrollIndicators: Bool,
-              @ViewBuilder content: @escaping @MainActor () -> Content) {
+  init(title: String? = nil,
+       allowScroll: Bool = true,
+       showScrollIndicators: Bool,
+       @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.init(title: title,
               allowScroll: allowScroll,
               model: HelloScrollModel(showScrollIndicator: showScrollIndicators),

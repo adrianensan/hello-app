@@ -19,7 +19,7 @@ public class PagerViewModel: ObservableObject {
     if let view = view as? AnyView {
       realViewStack.append(view)
     } else {
-      realViewStack.append(AnyView(view.id(UUID().uuidString)))
+      realViewStack.append(AnyView(view))
     }
     commitViewStackUpdate()
     if animated {
@@ -33,11 +33,11 @@ public class PagerViewModel: ObservableObject {
   }
   
   public func replaceView(with newView: some View) {
-    realViewStack.popLast()
+    _ = realViewStack.popLast()
     if let view = newView as? AnyView {
       realViewStack.append(view)
     } else {
-      realViewStack.append(AnyView(newView.id(UUID().uuidString)))
+      realViewStack.append(AnyView(newView))
     }
     commitViewStackUpdate()
   }

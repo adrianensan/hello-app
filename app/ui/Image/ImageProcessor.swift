@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 import CoreImage
 
 #if os(macOS)
-extension NSImage: @unchecked Sendable {}
+extension NSImage: @unchecked @retroactive Sendable {}
 
 public extension NSImage {
   var cgImage: CGImage? {

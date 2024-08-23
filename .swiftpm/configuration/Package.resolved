@@ -1,0 +1,15 @@
+{
+  "originHash" : "e245c126fe63c3a9d2d527d9cbbb8fb97cdabf80149be72e40e22df832f6e0da",
+  "pins" : [
+    {
+      "identity" : "openssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adrianensan/openssl",
+      "state" : {
+        "branch" : "main",
+        "revision" : "9691c19f7c26ad947a87453681615bd2f01f7725"
+      }
+    }
+  ],
+  "version" : 3
+}

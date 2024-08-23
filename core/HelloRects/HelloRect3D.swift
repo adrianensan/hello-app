@@ -88,26 +88,26 @@ public protocol HelloRect3DConformable {
 
 public extension HelloRect3DConformable {
   
-  public var x: NumberType { origin.x }
-  public var y: NumberType { origin.y }
-  public var z: NumberType { origin.z }
-  public var width: NumberType { size.width }
-  public var height: NumberType { size.height }
-  public var depth: NumberType { size.depth }
+  var x: NumberType { origin.x }
+  var y: NumberType { origin.y }
+  var z: NumberType { origin.z }
+  var width: NumberType { size.width }
+  var height: NumberType { size.height }
+  var depth: NumberType { size.depth }
   
-  public var minX: NumberType { origin.x - width / 2 }
-  public var minY: NumberType { origin.y - height / 2 }
-  public var minZ: NumberType { origin.z - depth / 2 }
+  var minX: NumberType { origin.x - width / 2 }
+  var minY: NumberType { origin.y - height / 2 }
+  var minZ: NumberType { origin.z - depth / 2 }
   
-  public var maxX: NumberType { origin.x + width / 2 }
-  public var maxY: NumberType { origin.y + height / 2 }
-  public var maxZ: NumberType { origin.z + depth / 2 }
+  var maxX: NumberType { origin.x + width / 2 }
+  var maxY: NumberType { origin.y + height / 2 }
+  var maxZ: NumberType { origin.z + depth / 2 }
   
-  public var minPoint: HelloPoint3D<NumberType> {
+  var minPoint: HelloPoint3D<NumberType> {
     HelloPoint3D(x: minX, y: minY, z: minZ)
   }
   
-  public var maxPoint: HelloPoint3D<NumberType> {
+  var maxPoint: HelloPoint3D<NumberType> {
     HelloPoint3D(x: maxX, y: maxY, z: maxZ)
   }
 }

@@ -64,7 +64,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
     windowModel.window = window
-    let id = UUID().uuidString
+    let id = HelloUUID().string
 //      .onPreferenceChange(StatusBarStyleKey.self) { style in
 //        guard let viewController = Self.instances[id],
 //              viewController.statusBarStyle != style else { return }

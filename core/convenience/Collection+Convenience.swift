@@ -14,19 +14,29 @@ public extension Collection {
   
   // Efficient first element of compactMap
   func firstCompactMap<Result>(_ transform: @escaping (Element) throws -> Result?) rethrows -> Result? {
-    self.lazy.compactMap { try? transform($0) }.first { $0 != nil }
+    self.lazy.compactMap { try? transform($0) }.first
   }
 }
 
-public extension Collection where Element: Hashable {
+public extension Collection where Element: Identifiable {
   func removingDuplicates() -> [Element] {
-    var addedDict = [Element: Bool]()
+    var addedDict = [Element.ID: Bool]()
     
     return filter {
-      addedDict.updateValue(true, forKey: $0) == nil
+      addedDict.updateValue(true, forKey: $0.id) == nil
     }
   }
 }
+
+//public extension Collection where Element: Hashable {
+//  func removingDuplicates() -> [Element] {
+//    var addedDict = [Element: Bool]()
+//    
+//    return filter {
+//      addedDict.updateValue(true, forKey: $0) == nil
+//    }
+//  }
+//}
 
 public extension Collection where Element: Numeric {
   func sum() -> Element {
@@ -34,7 +44,7 @@ public extension Collection where Element: Numeric {
   }
 }
 
-public extension Array where Element: Hashable {
+public extension Array where Element: Identifiable {
   mutating func removeDuplicates() {
     self = self.removingDuplicates()
   }

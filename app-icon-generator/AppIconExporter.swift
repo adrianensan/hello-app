@@ -131,8 +131,6 @@ public class AppIconExporter {
       let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).appiconset")
       try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
       
-      var contents = AppIconAssetsContents.iOS(name: icon.imageName)
-      
       try await save(view: icon.iOSView.light.flattenedView, size: CGSize(width: 1024, height: 1024),
                      to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "light")),
                      allowOpacity: false)

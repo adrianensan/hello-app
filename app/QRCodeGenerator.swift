@@ -2,7 +2,6 @@
 import CoreImage
 
 import HelloCore
-import HelloApp
 
 public enum QRCodeGenerator {
   public static func generate(from string: String) throws -> NativeImage {

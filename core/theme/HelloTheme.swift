@@ -70,7 +70,7 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
               textSecondary: foregroundSecondary,
               textTertiary: foregroundTertiary,
               textQuaternary: foregroundQuaternary,
-              font: builder?.font ?? underLayer.font ?? .rounded,
+              font: builder?.font ?? underLayer.font,
               accent: builder?.accent ?? underLayer.accent,
               disabled: .color(color: .white),
               error: builder?.error ?? underLayer.error)
@@ -141,8 +141,8 @@ public struct HelloTheme: Codable, Hashable, Sendable {
       let background = baseLayer?.background ?? (scheme == .light ? HelloTheme.light.baseLayer.background : HelloTheme.dark.baseLayer.background)
       let foregroundPrimary = baseLayer?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.96))
       let foregroundSecondary = baseLayer?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.8))
-      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.64))
-      let foregroundQuaternary = baseLayer?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.48))
+      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.6))
+      let foregroundQuaternary = baseLayer?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.4))
       self.baseLayer = HelloThemeLayer(background: background,
                                        textPrimary: foregroundPrimary,
                                        textSecondary: foregroundSecondary,

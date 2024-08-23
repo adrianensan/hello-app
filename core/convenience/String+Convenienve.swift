@@ -1,7 +1,7 @@
 import Foundation
 
 public extension String {
-  static var uuid: String { UUID().uuidString }
+  static var uuid: String { HelloUUID().string }
   
   subscript(_ i: Int) -> Character {
     self[index(for: i)]
@@ -41,6 +41,10 @@ public extension String {
   mutating func deleteSuffix(_ suffix: String) {
     self = deletingSuffix(suffix)
   }
+}
+
+extension String: @retroactive Identifiable {
+  public var id: String { self }
 }
 
 public extension StringProtocol {

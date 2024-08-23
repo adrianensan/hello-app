@@ -2,7 +2,7 @@ import Foundation
 
 import HelloCore
 
-extension NSException: @unchecked Sendable {}
+extension NSException: @unchecked @retroactive Sendable {}
 
 public enum CrashHandler {
   

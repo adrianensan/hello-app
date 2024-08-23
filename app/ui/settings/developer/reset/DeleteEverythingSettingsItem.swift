@@ -20,12 +20,17 @@ struct DeleteEverythingSettingsItem: View {
           action: {
             windowModel.show(alert: HelloAlertConfig(
               title: "Are you sure",
-              message: "This can not be undone, all files will be deleted..",
+              message: "This can not be undone, all files will be deleted. The app will close immediately",
               firstButton: .cancel,
               secondButton: .init(
                 name: "Delete",
                 action: {
                   try await Persistence.nuke()
+                  UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+                  Task {
+                    try await Task.sleep(seconds: 1)
+                    exit(0)
+                  }
                 },
                 isDestructive: true)))
           },

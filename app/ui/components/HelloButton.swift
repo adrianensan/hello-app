@@ -39,13 +39,8 @@ public struct HelloButtonStyle: ButtonStyle {
         model.hasPressed = false
       }
     }.onChange(of: model.forceVisualPress) {
-      if model.forceVisualPress {
-        isPressed = true
-        Task {
-          try await Task.sleepForOneFrame()
-          model.forceVisualPress = false
-          isPressed = false
-        }
+      if isPressed != model.forceVisualPress {
+        isPressed = model.forceVisualPress
       }
     }.onChange(of: isEnabled) {
       if !isEnabled && isPressed {
@@ -139,10 +134,11 @@ public struct HelloButton<Content: View>: View {
   @State private var isHovered: Bool = false
   #endif
   
+  @State private var model: HelloButtonModel
+  
   private var clickStyle: HelloButtonClickStyle
   private var action: @MainActor () async throws -> Void
   private var content: @MainActor () -> Content
-  @State private var model: HelloButtonModel
   
   public init(clickStyle: HelloButtonClickStyle = .scale,
               haptics: HapticsType = .click,
@@ -180,6 +176,10 @@ public struct HelloButton<Content: View>: View {
       model.hasClicked = true
       Task {
         try? await Task.sleepForOneFrame()
+        if model.forceVisualPress {
+          model.forceVisualPress = false
+          try? await Task.sleepForOneFrame()
+        }
         try await action()
         model.hasPressed = false
         model.hasClicked = false

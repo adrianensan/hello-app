@@ -2,8 +2,6 @@ import Foundation
 import CryptoKit
 import CommonCrypto
 
-import HelloCore
-
 public struct EncryptedData: Codable, Sendable {
   var data: Data
   var salt: Data

@@ -46,10 +46,11 @@ public actor HelloImageDownloadManager {
         }
         do {
           return try await Downloader.main.download(from: url)
+        } catch HelloDownloadError.noInternet {
+          throw HelloDownloadError.noInternet
         } catch {
           failedImageDownloads[url] = epochTime
           Task { await Persistence.save(failedImageDownloads, for: .failedImageDownloads) }
-//          Log.warning("Failed to download \(url)", context: "ImageDownloader")
           throw error
         }
       }

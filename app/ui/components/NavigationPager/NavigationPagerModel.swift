@@ -10,7 +10,7 @@ public struct PagerPage: Sendable, Identifiable {
   var viewID: String = .uuid
   
   @MainActor
-  public init(id: String = UUID().uuidString,
+  public init(id: String = .uuid,
               name: String? = nil,
               view: @escaping @MainActor () -> some View,
               options: PagerPageOptions = PagerPageOptions()) {
@@ -21,7 +21,7 @@ public struct PagerPage: Sendable, Identifiable {
   }
   
   @MainActor
-  public init(id: String = UUID().uuidString,
+  public init(id: String = .uuid,
               name: String? = nil,
               view: @escaping @MainActor () -> AnyView,
               options: PagerPageOptions = PagerPageOptions()) {

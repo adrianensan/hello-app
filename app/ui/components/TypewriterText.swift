@@ -26,11 +26,11 @@ public struct TypewriterText: View {
     .opacity(appear || appearedText.isEmpty ? 1 : 0)
     .onChange(of: text) {
       appearedText = ""
-      hiddenText = $0
+      hiddenText = text
       timer.upstream.connect().cancel()
       timer = Timer.publish(every: 0.016, tolerance: 0.01, on: .main, in: .common).autoconnect()
     }.onChange(of: appear) {
-      if $0 {
+      if appear {
         appearedText = ""
         hiddenText = text
         timer = Timer.publish(every: 0.016, tolerance: 0.01, on: .main, in: .common).autoconnect()

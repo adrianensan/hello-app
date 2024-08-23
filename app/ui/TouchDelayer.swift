@@ -38,7 +38,7 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
   
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .onChange(of: configuration.isPressed, perform: handleIsPressed)
+      .onChange(of: configuration.isPressed) { handleIsPressed(isPressed: configuration.isPressed) }
   }
 
   @MainActor

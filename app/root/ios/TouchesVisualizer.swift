@@ -1,7 +1,6 @@
 #if os(iOS)
 import SwiftUI
 
-@MainActor
 struct TouchesVisualizer: View {
   
   let model: TouchesModel = .main

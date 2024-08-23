@@ -2,7 +2,7 @@ import SwiftUI
 
 public extension View {
   @ViewBuilder
-  public func `if`(_ condition: Bool, @ViewBuilder view: @MainActor (Self) -> some View) -> some View {
+  func `if`(_ condition: Bool, @ViewBuilder view: @MainActor (Self) -> some View) -> some View {
     if condition {
       view(self)
     } else {

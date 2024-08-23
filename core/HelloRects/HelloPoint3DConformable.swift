@@ -88,7 +88,7 @@ public extension HelloPoint3DConformable where NumberType: FloatingPoint {
 }
 
 public extension HelloPoint3DConformable where NumberType: BinaryFloatingPoint {
-  public var simdFloat: SIMD3<Float> {
+  var simdFloat: SIMD3<Float> {
     SIMD3(x: Float(x), y: Float(y), z: Float(z))
   }
 }

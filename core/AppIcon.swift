@@ -63,7 +63,7 @@ public struct AppIconCollection<AppIcon: BaseAppIcon>: Identifiable, Sendable {
   public var icons: [AppIcon]
   public var layout: AppIconCollectionLayout
   
-  public init(id: String = UUID().uuidString,
+  public init(id: String = .uuid,
               name: String? = nil,
               icons: [AppIcon],
               layout: AppIconCollectionLayout) {

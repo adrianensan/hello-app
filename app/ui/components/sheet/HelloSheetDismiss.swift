@@ -1,7 +1,6 @@
 #if os (iOS)
 import SwiftUI
 
-@MainActor
 struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   @Environment(\.viewID) private var viewID
@@ -20,11 +19,16 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   func body(content: Content) -> some View {
     content
+      .readSize {
+        guard model.sheetSize != $0 else { return }
+        model.sheetSize = $0
+      }
+      .opacity(model.sheetSize != .zero ? 1 : 0)
       .disabled(yDrag != 0)
       .compositingGroup()
-      .frame(height: model.isVisible ? nil : 1, alignment: .top)
+//      .frame(height: model.isVisible ? nil : 1, alignment: .top)
       .animation(.dampSpring, value: model.isVisible)
-      .offset(y: model.isVisible ? yDrag : 0)
+      .offset(y: model.isVisible ? yDrag : model.sheetSize.height + 8)
       .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
       .background(HelloBackgroundDimmingView()
@@ -73,9 +77,12 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
             windowModel.dismiss(id: viewID)
           }
         }
-      }.task {
-        try? await Task.sleepForOneFrame()
-        model.isVisible = true
+      }.onChange(of: model.sheetSize != .zero) {
+        guard model.sheetSize != .zero && !model.isVisible else { return }
+        Task {
+          try? await Task.sleepForOneFrame()
+          model.isVisible = true
+        }
       }
   }
 }

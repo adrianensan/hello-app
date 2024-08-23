@@ -33,6 +33,14 @@ public extension HelloURLScheme {
   static var otp: HelloURLScheme {
     HelloURLScheme("otpauth", defaultPort: 443)
   }
+  
+  static var rss: HelloURLScheme {
+    HelloURLScheme("rss", defaultPort: 443)
+  }
+  
+  static var feed: HelloURLScheme {
+    HelloURLScheme("feed", defaultPort: 443)
+  }
 }
 
 public struct HelloURL: Codable, Sendable {

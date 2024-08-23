@@ -15,7 +15,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
     windowModel.window = window
-    let id = UUID().uuidString
+    let id = HelloUUID().string
     let observedView = AnyView(HelloAppRootView(wrappedView)
       .environment(uiProperties)
       .environment(windowModel)

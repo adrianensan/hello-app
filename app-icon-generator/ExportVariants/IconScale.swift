@@ -1,21 +1,21 @@
 import Foundation
 
-public struct IconScale: Equatable {
+public struct IconScale: Equatable, Sendable {
   
-  public enum Purpose: String {
+  public enum Purpose: String, Sendable {
     case iphone, ipad, mac, watch, vision, universal
     case iosMarketing = "ios-marketing"
     case watchMarketing = "watch-marketing"
   }
   
-  public enum Role: String {
+  public enum Role: String, Sendable {
     case appLauncher
     case quickLook
     case notificationCenter
     case companionSettings
   }
   
-  public enum SubType: String {
+  public enum SubType: String, Sendable {
     case watch38mm = "38mm"
     case watch40mm = "40mm"
     case watch41mm = "41mm"
@@ -24,7 +24,7 @@ public struct IconScale: Equatable {
     case watch45mm = "45mm"
   }
   
-  public enum Platform: String {
+  public enum Platform: String, Sendable {
     case ios
   }
   

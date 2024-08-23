@@ -97,21 +97,22 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
   
-  private let imageOptions: [HelloImageModel]
+  @State private var imageModels: [HelloImageModel] = []
+  private var imageOptions: [HelloImageOption]
   private let viewable: Bool
   private let cornerRadius: CGFloat?
   private let resizeMode: ContentMode
   private let custom: (@MainActor (NativeImage) -> CustomView)?
   private let fallback: @MainActor () -> Fallback
   
-  fileprivate init(_ source: HelloImageSource,
-                   variant: HelloImageVariant = .original,
-                   viewable: Bool = false,
-                   cornerRadius: CGFloat? = nil,
-                   resizeMode: ContentMode = .fit,
-                   custom: (@MainActor (NativeImage) -> CustomView)?,
-                   fallback: @MainActor @escaping () -> Fallback) {
-    imageOptions = [.model(for: source, variant: variant)]
+  public init(options: [HelloImageOption],
+              viewable: Bool = false,
+              cornerRadius: CGFloat? = nil,
+              resizeMode: ContentMode = .fit,
+              custom: (@MainActor (NativeImage) -> CustomView)?,
+              fallback: @MainActor @escaping () -> Fallback) {
+    imageOptions = options
+    //    imageModels = imageOptions.map { .model(for: $0.imageSource, variant: $0.variant) }
     self.viewable = viewable
     self.cornerRadius = cornerRadius
     self.resizeMode = resizeMode
@@ -126,30 +127,29 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               resizeMode: ContentMode = .fit,
               @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
               fallback: @MainActor @escaping () -> Fallback) {
-    imageOptions = [.model(for: source, variant: variant)]
-    self.viewable = viewable
-    self.cornerRadius = cornerRadius
-    self.resizeMode = resizeMode
-    self.custom = custom
-    self.fallback = fallback
+    self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
+              viewable: viewable,
+              cornerRadius: cornerRadius,
+              resizeMode: resizeMode,
+              custom: custom,
+              fallback: fallback)
   }
   
-  public init(options: [HelloImageOption],
-              viewable: Bool = false,
-              cornerRadius: CGFloat? = nil,
-              resizeMode: ContentMode = .fit,
-              custom: (@MainActor (NativeImage) -> CustomView)?,
-              fallback: @MainActor @escaping () -> Fallback) {
-    imageOptions = options.map { .model(for: $0.imageSource, variant: $0.variant) }
-    self.viewable = viewable
-    self.cornerRadius = cornerRadius
-    self.resizeMode = resizeMode
-    self.custom = custom
-    self.fallback = fallback
+  fileprivate init(_ source: HelloImageSource,
+                   variant: HelloImageVariant = .original,
+                   viewable: Bool = false,
+                   cornerRadius: CGFloat? = nil,
+                   resizeMode: ContentMode,
+                   custom: (@MainActor (NativeImage) -> CustomView)?,
+                   fallback: @MainActor @escaping () -> Fallback) {
+    self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
+              viewable: viewable,
+              cornerRadius: cornerRadius,
+              resizeMode: resizeMode, custom: custom, fallback: fallback)
   }
   
   private var model: HelloImageModel? {
-    imageOptions.first { $0.image != nil }
+    imageModels.first { $0.image != nil }
   }
   
   private var image: NativeImage? {
@@ -182,12 +182,22 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       if let cornerRadius {
         $0.clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
           .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 1))
+            .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 0.5))
       } else {
         $0
       }
     }.if(viewable) {
-      $0.modifier(ViewableImageModifier(imageOptions: imageOptions.map { $0.option }, cornerRadius: cornerRadius))
+      $0.modifier(ViewableImageModifier(imageOptions: imageOptions, cornerRadius: cornerRadius))
+    }
+    .onChange(of: imageOptions, initial: true) {
+      var imageModels: [HelloImageModel] = []
+      for imageOption in imageOptions {
+        imageModels.append(.model(for: imageOption.imageSource, variant: imageOption.variant) )
+        if imageModels.last?.image != nil {
+          break
+        }
+      }
+      self.imageModels = imageModels
     }
   }
 }
@@ -241,10 +251,10 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
               fallback: { Color.clear })
   }
   
-  public init(options: [HelloImageOption],
-              viewable: Bool = false,
-              cornerRadius: CGFloat? = nil,
-              resizeMode: ContentMode = .fit) {
+  init(options: [HelloImageOption],
+       viewable: Bool = false,
+       cornerRadius: CGFloat? = nil,
+       resizeMode: ContentMode = .fit) {
     self.init(options: options,
               viewable: viewable,
               cornerRadius: cornerRadius,

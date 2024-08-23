@@ -2,9 +2,11 @@ import Foundation
 
 public struct DeviceIDPersistenceProperty: PersistenceProperty {
   
-  public var defaultValue: String { UUID().uuidString }
+  public var defaultValue: String { .uuid }
   
-  public var location: PersistenceType { .defaults(key: "deviceID") }
+  public var location: PersistenceType { .defaults(suite: .helloShared, key: "deviceID") }
+  
+  public var persistDefaultValue: Bool { true }
 }
 
 public extension PersistenceProperty where Self == DeviceIDPersistenceProperty {

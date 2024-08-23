@@ -143,7 +143,7 @@ public extension HelloRectConformable {
     return clippedRect
   }
   
-  public func padded(by padding: NumberType) -> Self {
+  func padded(by padding: NumberType) -> Self {
     var paddedRect = self
     paddedRect.origin.x += padding
     paddedRect.origin.y += padding

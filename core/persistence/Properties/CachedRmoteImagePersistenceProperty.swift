@@ -2,6 +2,10 @@ import Foundation
 
 public struct CachedRmoteImagePersistenceProperty: PersistenceProperty {
   
+  public static func rootURL(for variant: HelloImageVariant) -> URL? {
+    CachedRmoteImagePersistenceProperty.cacheRemoteIamge(url: "temp.heic", variant: variant).fileURL?.deletingLastPathComponent()
+  }
+  
   public let url: String
   public let variant: HelloImageVariant
   public let useAppGroup: Bool

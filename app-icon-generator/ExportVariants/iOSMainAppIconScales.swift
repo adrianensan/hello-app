@@ -1,7 +1,7 @@
 import Foundation
 
 public extension IconScale {
-  static var iOSMainIconScales: [IconScale] = [
+  static let iOSMainIconScales: [IconScale] = [
     IconScale(size: 20, scaleFactor: 1, purpose: .ipad),
     IconScale(size: 20, scaleFactor: 2, purpose: .ipad),
     IconScale(size: 20, scaleFactor: 2, purpose: .iphone),

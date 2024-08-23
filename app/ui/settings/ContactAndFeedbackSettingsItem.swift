@@ -1,13 +1,17 @@
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
 public struct ContactAndFeedbackSettingsItem: View {
   
   @Environment(\.openURL) private var openURL
   
-  private let mailLink = URL(string: "mailto:adrianensan@me.com?subject=\(AppInfo.displayName)%20Feedback\(("\n\n---DEBUG-INFO---\n" + Device.current.description + ", " + OSInfo.description).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed).map { "&body=\($0)" } ?? "")")
+  private let mailLink = URL(string: """
+    mailto:adrianensan@me.com?subject=\(AppInfo.displayName) Feedback&body=
+    
+    ---DEBUG-INFO---
+    \(Device.current.description), \(OSInfo.description)
+    """)
   
   public init() {}
   

@@ -2,7 +2,6 @@
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
 @MainActor
 public class HelloNSTextView: NSTextView, NSTextViewDelegate {

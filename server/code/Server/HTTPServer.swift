@@ -88,7 +88,7 @@ public extension HTTPServer {
   
   func getHTMLForStatus(for status: HTTPResponseStatus) -> String {
     guard let staticFilesRoot,
-          let customHTML = try? String(contentsOf: staticFilesRoot.appendingPathComponent("\(status.statusCode).html")) else {
+          let customHTML = try? String(contentsOf: staticFilesRoot.appendingPathComponent("\(status.statusCode).html"), encoding: .utf8) else {
       return htmlPage403
     }
     return customHTML

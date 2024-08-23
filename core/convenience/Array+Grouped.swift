@@ -33,7 +33,7 @@ public extension Array {
 }
 
 public extension Collection where Element: Equatable {
-  func remove(_ element: Element) {
+  func removing(_ element: Element) -> [Element] {
     filter { $0 != element }
   }
 }

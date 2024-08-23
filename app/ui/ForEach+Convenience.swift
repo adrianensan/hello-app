@@ -29,20 +29,23 @@ fileprivate extension Collection where Element: Sendable {
 public struct HelloForEach<Element, Content: View>: View where Element: Sendable & Identifiable {
   
   public var data: [Element]
+  public var reversed: Bool
   @ViewBuilder public var content: @MainActor (Int, Element, Bool) -> Content
   
-  public init(_ data: [Element], @ViewBuilder content: @escaping @MainActor (Int, Element) -> Content) {
+  public init(_ data: [Element], reversed: Bool = false, @ViewBuilder content: @escaping @MainActor (Int, Element) -> Content) {
     self.data = data
+    self.reversed = reversed
     self.content = { index, element, _ in content(index, element) }
   }
   
-  public init(_ data: [Element], @ViewBuilder content: @escaping @MainActor (Int, Element, Bool) -> Content) {
+  public init(_ data: [Element], reversed: Bool = false, @ViewBuilder content: @escaping @MainActor (Int, Element, Bool) -> Content) {
     self.data = data
+    self.reversed = reversed
     self.content = content
   }
   
   public var body: some View {
-    ForEach(data.enumeratedIdentifiable()) { element in
+    ForEach(reversed ? data.enumeratedIdentifiable().reversed() : data.enumeratedIdentifiable()) { element in
       content(element.index, element.element, element.isLast)
     }
   }

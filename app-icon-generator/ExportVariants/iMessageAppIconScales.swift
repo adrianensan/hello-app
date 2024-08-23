@@ -1,7 +1,7 @@
 import Foundation
 
 public extension IconScale {
-  static var iMessageIconScales: [IconScale] = [
+  static let iMessageIconScales: [IconScale] = [
     IconScale(size: 29, scaleFactor: 2, purpose: .iphone),
     IconScale(size: 29, scaleFactor: 3, purpose: .iphone),
     IconScale(size: CGSize(width: 60, height: 45), scaleFactor: 2, purpose: .iphone),

@@ -1,6 +1,5 @@
 import SwiftUI
 
-@MainActor
 struct NavigationPageBackswipe: ViewModifier {
   
   @Environment(PagerModel.self) private var pagerModel
@@ -61,7 +60,7 @@ struct NavigationPageBackswipe: ViewModifier {
         $0
 #endif
       }.onChange(of: backDragGestureState) {
-        let progress = min(1, max(0, $0.width / 200))
+        let progress = min(1, max(0, backDragGestureState.width / 200))
         if backProgressModel.backProgress != progress {
           backProgressModel.backProgress = progress
         }
