@@ -7,7 +7,12 @@ struct ApplyThemeViewModifier: ViewModifier {
   
   func body(content: Content) -> some View {
     content
+      .fontDesign(theme.base.fontDesign)
+      .font(theme.font(size: 16, weight: .regular))
+      .foregroundStyle(theme.foreground.primary.style)
+      .backgroundStyle(theme.backgroundColor)
       .environment(\.hasAppliedTheme, ["crt-light", "crt-dark"].contains(theme.theme.id))
+      .environment(\.colorScheme, theme.theme.scheme == .dark ? .dark : .light)
       .overlay {
         if !hasAppliedTheme {
           switch theme.theme.id {

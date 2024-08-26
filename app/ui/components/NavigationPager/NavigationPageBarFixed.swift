@@ -18,8 +18,9 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
       .padding(.top, safeAreaInsets.top)
       .padding(.bottom, config.navBarFadeTransitionMultiplier * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .padding(.top, 16)
+      .padding(.horizontal, 2)
       .background(
-        theme.header.backgroundView
+        theme.header.backgroundView(isBaseLayer: false)
           .compositingGroup()
           .shadow(color: .black.opacity(0.12), radius: 24)
           .compositingGroup()
@@ -28,6 +29,7 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
           .allowsHitTesting(scrollModel.hasScrolled)
 //          .animation(nil)
       ).padding(.top, -16)
+      .padding(.horizontal, -2)
     //.padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)

@@ -22,7 +22,7 @@ public struct AppIconOptionView<AppIcon: IOSAppIcon>: View {
       
       if showLabel {
         Text(icon.displayName)
-          .font(.system(size: 11, weight: .medium, design: .rounded))
+          .font(.system(size: 11, weight: .medium))
           .foregroundColor(isSelected ? .white : theme.surface.foreground.primary.color)
           .fixedSize()
           .padding(.horizontal, 8)

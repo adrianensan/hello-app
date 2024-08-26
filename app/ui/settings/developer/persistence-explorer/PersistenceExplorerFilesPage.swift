@@ -34,7 +34,7 @@ struct PersistenceExplorerFilesPage: View {
         }
       }) {
         Image(systemName: "arrow.up.arrow.down")
-          .font(.system(size: 20, weight: .regular, design: .rounded))
+          .font(.system(size: 20, weight: .regular))
           .foregroundStyle(theme.foreground.primary.style)
           .frame(width: 44, height: 44)
           .clickable()
@@ -44,12 +44,12 @@ struct PersistenceExplorerFilesPage: View {
       VStack(spacing: 32) {
         VStack(spacing: 8) {
           Text(snapshot.name)
-            .font(.system(size: 20, weight: .medium, design: .rounded))
+            .font(.system(size: 20, weight: .medium))
             .foregroundStyle(theme.foreground.primary.style)
             .fixedSize(horizontal: false, vertical: true)
             .multilineTextAlignment(.center)
           Text("\(sortedFiles.count) Files")
-            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .font(.system(size: 16, weight: .medium))
             .foregroundStyle(theme.foreground.tertiary.style)
         }
         HelloSection {

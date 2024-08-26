@@ -89,13 +89,13 @@ public struct HelloAlert: View {
     VStack(spacing: 0) {
       VStack(spacing: 6) {
         Text(config.title)
-          .font(.system(size: 17, weight: .medium, design: .rounded))
+          .font(.system(size: 17, weight: .medium))
           .foregroundColor(theme.foreground.primary.color)
           .fixedSize(horizontal: false, vertical: true)
         
         if let message = config.message {
           Text(message)
-            .font(.system(size: 13, weight: .regular, design: .rounded))
+            .font(.system(size: 13, weight: .regular))
             .foregroundStyle(theme.foreground.primary.style)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -111,7 +111,7 @@ public struct HelloAlert: View {
           dismiss()
         }) {
           Text(config.firstButton.name)
-            .font(.system(size: 17, weight: .semibold, design: .rounded))
+            .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(config.firstButton.isDestructive ? theme.error.style : theme.accent.style)
             .frame(height: 44)
             .frame(maxWidth: .infinity)
@@ -127,7 +127,7 @@ public struct HelloAlert: View {
             dismiss()
           }) {
             Text(secondButton.name)
-              .font(.system(size: 17, weight: .semibold, design: .rounded))
+              .font(.system(size: 17, weight: .semibold))
               .foregroundStyle(secondButton.isDestructive ? theme.error.style : theme.accent.style)
               .frame(height: 44)
               .frame(maxWidth: .infinity)

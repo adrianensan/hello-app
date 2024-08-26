@@ -96,10 +96,7 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
     content
       .applyTheme()
       .environment(\.theme, activeSwiftUITheme)
-      .environment(\.colorScheme, activeTheme.scheme == .dark ? .dark : .light)
 //      .preferredColorScheme(activeTheme.isDark ? .dark : .light)
-      .foregroundStyle(activeSwiftUITheme.foreground.primary.style)
-      .backgroundStyle(activeSwiftUITheme.backgroundColor)
       .animation(.easeInOut(duration: 0.2), value: activeTheme.id)
   }
 }

@@ -76,6 +76,10 @@ public struct HelloSwiftUITheme: Sendable {
     theme.baseLayer.font.font(size: size, weight: weight)
   }
   
+  public var fontDesign: Font.Design? {
+    theme.baseLayer.font.fontDesign
+  }
+  
   public init(theme: HelloTheme) {
     self.theme = theme
     base = HelloSwiftUIThemeLayer(theme: theme.baseLayer)

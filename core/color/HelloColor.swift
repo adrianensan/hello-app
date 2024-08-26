@@ -182,6 +182,12 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
                colorSpace: colorSpace)
   }
   
+  public func flattenAlpha(background: HelloColor = .black) -> HelloColor {
+    var modifiedColor = withFakeAlpha(a, background: background)
+    modifiedColor.a = 1
+    return modifiedColor
+  }
+  
   public func darken(by darkenAmount: Double) -> HelloColor {
     HelloColor(r: r * darkenAmount,
                g: g * darkenAmount,

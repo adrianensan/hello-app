@@ -26,7 +26,7 @@ public struct HelloSwiftUIThemeLayer: Sendable {
   }
   
   public var backgroundOutline: Color {
-    layer.background.borderColor?.swiftuiColor ?? .clear
+    layer.background.borderColor?.flattenAlpha(background: layer.background.mainColor).swiftuiColor ?? .clear
   }
   
   public var backgroundColor: Color
@@ -36,6 +36,10 @@ public struct HelloSwiftUIThemeLayer: Sendable {
   
   public func font(size: CGFloat, weight: Font.Weight) -> Font {
     layer.font.font(size: size, weight: weight)
+  }
+  
+  public var fontDesign: Font.Design? {
+    layer.font.fontDesign
   }
   
   public init(theme: HelloThemeLayer) {

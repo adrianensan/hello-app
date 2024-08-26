@@ -67,7 +67,7 @@ public struct HelloSection<Content: View>: View {
     VStack(alignment: .leading, spacing: 4) {
       if let title {
         Text(title)
-          .font(.system(size: 13, weight: .regular, design: .rounded))
+          .font(.system(size: 13, weight: .regular))
           .foregroundStyle(theme.foreground.tertiary.style)
           .fixedSize()
           .padding(.horizontal, 4)
@@ -78,7 +78,7 @@ public struct HelloSection<Content: View>: View {
       }//.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
         .clipShape(.rect(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .stroke(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
+          .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
         .frame(maxWidth: 520)
     }.frame(maxWidth: 520)
   }

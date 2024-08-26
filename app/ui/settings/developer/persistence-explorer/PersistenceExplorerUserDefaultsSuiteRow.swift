@@ -23,20 +23,20 @@ struct PersistenceExplorerUserDefaultsRow: View {
       HelloSectionItem {
         HStack(spacing: 4) {
           Image(systemName: "cylinder.split.1x2")
-            .font(.system(size: 20, weight: .regular, design: .rounded))
+            .font(.system(size: 20, weight: .regular))
             .frame(width: 30)
             .padding(.trailing, 2)
           Text(userDefaults.suite.name)
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
             .truncationMode(.middle)
           
           Spacer(minLength: 0)
           Text("\(userDefaults.objects.count) Objects")
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
           Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
         }
       }.frame(height: 56)
     }

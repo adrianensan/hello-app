@@ -269,44 +269,53 @@ extension PersistenceProperty {
 
 @MainActor
 @Observable
-class PersistentObservable<Property: PersistenceProperty> {
+public class PersistentObservable<Property: PersistenceProperty> {
 
   private let property: Property
-  var value: Property.Value {
-    didSet { notifyListeners() }
+  public private(set) var _value: Property.Value
+  public var value: Property.Value {
+    get { _value }
+    set {
+      _value = newValue
+      Task { await Property.persistence.save(value, for: property, skipModelUpdate: true) }
+    }
   }
+//  {
+//    didSet { notifyListeners() }
+//  }
 
-  @ObservationIgnored private var listeners: [Weak<PersistentAsync<Property>>] = []
-  @ObservationIgnored private var listenerToSkip: PersistentAsync<Property>?
+//  @ObservationIgnored private var listeners: [Weak<PersistentAsync<Property>>] = []
+//  @ObservationIgnored private var listenerToSkip: PersistentAsync<Property>?
 
   init(_ property: Property) {
     self.property = property
-    value = Property.persistence.storedValue(for: property)
+    _value = Property.persistence.storedValue(for: property)
   }
   
-  func updateValue(to newValue: Property.Value, from listener: PersistentAsync<Property>? = nil) {
-    listenerToSkip = listener
-    value = newValue
-    listenerToSkip = nil
+//  func updateValue(to newValue: Property.Value, from listener: PersistentAsync<Property>? = nil) {
+  func updateValue(to newValue: Property.Value) {
+//    listenerToSkip = listener
+    _value = newValue
+//    listenerToSkip = nil
     Task { await Property.persistence.save(value, for: property, skipModelUpdate: true) }
   }
 
-  @MainActor
-  func listen(_ listener: PersistentAsync<Property>) {
-    listeners.append(Weak(value: listener))
-  }
+//  @MainActor
+//  func listen(_ listener: PersistentAsync<Property>) {
+//    listeners.append(Weak(value: listener))
+//  }
 
-  private func notifyListeners() {
-    for (i, weakListener) in listeners.enumerated().reversed() {
-      if let listener = weakListener.value {
-        if listener !== listenerToSkip {
-          listener.valueUpdated()
-        }
-      } else {
-        listeners.remove(at: i)
-      }
-    }
-  }
+//  private func notifyListeners() {
+//    for (i, weakListener) in listeners.enumerated().reversed() {
+//      if let listener = weakListener.value {
+//        if listener !== listenerToSkip {
+//          listener.valueUpdated()
+//        }
+//      } else {
+//        listeners.remove(at: i)
+//      }
+//    }
+//  }
 }
 
 //@propertyWrapper
@@ -366,30 +375,30 @@ class PersistentObservable<Property: PersistenceProperty> {
 //  }
 //}
 
-public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
-  
-  private let property: Property
-  
-  public init(_ property: Property) {
-    self.property = property
-  }
-  
-  public var value: Property.Value { get async { await Persistence.model(for: property).value } }
-  
-  public func update(to newValue: Property.Value) async {
-    await Persistence.model(for: property).updateValue(to: newValue)
-  }
-  
-  public func onChange(_: @escaping (Property.Value) -> Void) async {
-    await Persistence.model(for: property).listen(self)
-  }
-  
-  fileprivate func valueUpdated() {
-    //    value = persistenObservable.value
-    //    onUpdate?()
-    //  }
-  }
-}
+//public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
+//  
+//  private let property: Property
+//  
+//  public init(_ property: Property) {
+//    self.property = property
+//  }
+//  
+//  public var value: Property.Value { get async { await Persistence.model(for: property).value } }
+//  
+//  public func update(to newValue: Property.Value) async {
+//    await Persistence.model(for: property).updateValue(to: newValue)
+//  }
+//  
+//  public func onChange(_: @escaping (Property.Value) -> Void) async {
+//    await Persistence.model(for: property).listen(self)
+//  }
+//  
+//  fileprivate func valueUpdated() {
+//    //    value = persistenObservable.value
+//    //    onUpdate?()
+//    //  }
+//  }
+//}
 
 @MainActor
 @propertyWrapper

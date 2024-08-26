@@ -21,17 +21,17 @@ struct PersistenceExplorerUserDefaultsObjectRow: View {
       HelloSectionItem {
         HStack(spacing: 4) {
           Image(systemName: entry.object.iconName)
-            .font(.system(size: 20, weight: .regular, design: .rounded))
+            .font(.system(size: 20, weight: .regular))
             .frame(width: 30)
             .padding(.trailing, 2)
           Text(entry.key)
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
             .truncationMode(.middle)
           
           Spacer(minLength: 0)
           Text("\(entry.object.previewString)")
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
         }
       }.frame(height: 56)

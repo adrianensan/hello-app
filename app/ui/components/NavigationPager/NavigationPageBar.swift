@@ -21,7 +21,7 @@ public struct NavigationPageBar<NavBarContent: View>: View {
       }
       navBarContent()
         .frame(height: config.navBarHeight)
-    }.font(.system(size: 20, weight: .semibold, design: .rounded))
+    }.font(.system(size: 20, weight: .semibold))
       .foregroundColor(theme.header.foreground.primary.color)
       .padding(.horizontal, config.horizontalPagePadding)
 //      .padding(.top, config.belowNavBarPadding)

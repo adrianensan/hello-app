@@ -92,7 +92,7 @@ public struct HelloMenuRow: View {
         Image(systemName: "checkmark")
           .frame(width: 32)
       }
-    }.font(.system(size: 14, weight: .medium, design: .rounded))
+    }.font(.system(size: 14, weight: .medium))
       .foregroundColor(theme.foreground.primary.color)
       .padding(.horizontal, 4)
       .frame(width: 240, height: 44)

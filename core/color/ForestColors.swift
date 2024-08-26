@@ -9,4 +9,6 @@ public extension HelloColor.forest {
   static var green2: HelloColor { HelloColor(r: 0.21, g: 0.38, b: 0.24) }
   static var green3: HelloColor { HelloColor(r: 0.35, g: 0.55, b: 0.29) }
   static var green4: HelloColor { HelloColor(r: 0.58, g: 0.75, b: 0.42) }
+  
+  static var yellow: HelloColor { HelloColor(r: 0.8, g: 0.9, b: 0.72) }
 }

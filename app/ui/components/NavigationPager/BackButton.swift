@@ -63,7 +63,7 @@ public struct BackButton: View {
         HelloForEach(pagerModel.viewStack.dropLast(), reversed: true) { index, page in
           let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) + (pagerModel.viewDepth > 1 ? effectiveBackProgress : 0)
           Text(page.name ?? "Back")
-            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .font(.system(size: 14, weight: .semibold))
             .fixedSize()
             .frame(height: 14)
             .opacity(1 - 0.6 * abs(distance))

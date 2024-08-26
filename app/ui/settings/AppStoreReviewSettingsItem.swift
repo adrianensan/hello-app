@@ -22,14 +22,14 @@ public struct AppStoreReviewSettingsItem: View {
         HelloSectionItem {
           HStack(spacing: 4) {
             Image(systemName: "heart")
-              .font(.system(size: 20, weight: .regular, design: .rounded))
+              .font(.system(size: 20, weight: .regular))
               .frame(width: 32, height: 32)
             Text("Review in App Store")
-              .font(.system(size: 16, weight: .regular, design: .rounded))
+              .font(.system(size: 16, weight: .regular))
               .fixedSize()
             Spacer(minLength: 16)
             Image(systemName: "arrow.up.forward.app")
-              .font(.system(size: 16, weight: .regular, design: .rounded))
+              .font(.system(size: 16, weight: .regular))
           }
         }
       }

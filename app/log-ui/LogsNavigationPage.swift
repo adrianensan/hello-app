@@ -34,7 +34,7 @@ public struct LogsNavigationPage: View {
                                           secondButton: .cancel()))
         }) {
           Image(systemName: "trash")
-            .font(.system(size: 20, weight: .regular, design: .rounded))
+            .font(.system(size: 20, weight: .regular))
             .foregroundStyle(theme.foreground.primary.style)
             .frame(width: 44, height: 44)
             .clickable()

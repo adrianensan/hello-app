@@ -41,7 +41,7 @@ struct PersistenceExplorerFileRow: View {
                 Image(systemName: "folder.fill")
                 if !folder.files.isEmpty {
                   Text(String(folder.files.count))
-                    .font(.system(size: 9, weight: .black, design: .rounded))
+                    .font(.system(size: 9, weight: .black))
                     .monospaced()
                     .foregroundStyle(theme.surface.backgroundColor)
                     .fixedSize()
@@ -50,21 +50,21 @@ struct PersistenceExplorerFileRow: View {
                 }
               }
             }
-          }.font(.system(size: 20, weight: .regular, design: .rounded))
+          }.font(.system(size: 20, weight: .regular))
             .frame(width: 30)
             .padding(.trailing, 2)
           Text(file.name)
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
             .truncationMode(.middle)
           
           Spacer(minLength: 0)
           Text(file.size.string())
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
           if case .folder = file {
             Image(systemName: "chevron.right")
-              .font(.system(size: 16, weight: .regular, design: .rounded))
+              .font(.system(size: 16, weight: .regular))
           }
         }
       }.frame(height: 56)

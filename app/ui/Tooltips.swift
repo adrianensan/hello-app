@@ -38,7 +38,7 @@
 //  var body: some View {
 //    BaseTooltipView {
 //      Text(string)
-//        .font(.system(size: 14, weight: .regular, design: .rounded))
+//        .font(.system(size: 14, weight: .regular))
 //        .foregroundColor(theme.text.primaryColor)
 //        .multilineTextAlignment(.center)
 //        .fixedSize()

@@ -19,17 +19,18 @@ public struct AppIconSettingsRow<AppIcon: IOSAppIcon>: View {
       HelloSectionItem {
         HStack(spacing: 4) {
           Image(systemName: "app")
-            .font(.system(size: 20, weight: .regular, design: .rounded))
+            .font(.system(size: 20, weight: .regular))
             .frame(width: 32, height: 32)
           
           Text("App Icon")
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
           Spacer(minLength: 0)
           appIconModel.currentIcon.view.flattenedView
+            .dimForTheme()
             .frame(width: 32, height: 32)
             .clipShape(AppIconShape())
           Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular, design: .rounded))
+            .font(.system(size: 16, weight: .regular))
         }
       }
     }

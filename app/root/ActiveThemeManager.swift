@@ -15,8 +15,9 @@ public class ActiveThemeManager {
   public private(set) var isDark: Bool = true
   public private(set) var isLowBrightness: Bool = UIScreen.main.brightness < 0.08
   
-  @ObservationIgnored @Persistent(.themeMode) private var themeMode
-  @ObservationIgnored @Persistent(.accentColor) private var accentColor
+  private var themeMode = Persistence.model(for: .themeMode)
+  private var accentColor = Persistence.model(for: .accentColor)
+  private var useBarelyVisibleThemeWhenDark = Persistence.model(for: .useBarelyVisibleThemeWhenDark)
   
   private init() {
     Task {
@@ -42,7 +43,7 @@ public class ActiveThemeManager {
   
   public func activeTheme(isDark: Bool) -> HelloTheme {
     var isDark = isDark
-    switch themeMode {
+    switch themeMode.value {
     case .auto: ()
     case .alwaysLight:
       isDark = false
@@ -53,8 +54,8 @@ public class ActiveThemeManager {
       self.isDark = isDark
     }
     if isDark {
-      if isLowBrightness {
-        return .superBlack(accent: accentColor)
+      if useBarelyVisibleThemeWhenDark.value && isLowBrightness {
+        return .superBlack(accent: accentColor.value)
       } else {
         return darkTheme
       }

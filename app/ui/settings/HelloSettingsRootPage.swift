@@ -36,10 +36,10 @@ public struct HelloSettingsRootPage<Content: View>: View {
           
           VStack(spacing: 0) {
             Text("App Version: \(AppInfo.version)\(AppInfo.isTestBuild ? " (\(AppInfo.build))" : "")")
-              .font(.system(size: 15, weight: .bold, design: .rounded))
+              .font(.system(size: 15, weight: .bold))
             
             Text(Device.current.description + ", " + OSInfo.description)
-              .font(.system(size: 11, weight: .regular, design: .rounded))
+              .font(.system(size: 11, weight: .regular))
               .padding(.bottom, 6)
             
             HelloLogo()
@@ -74,7 +74,7 @@ public struct HelloSettingsRootPage<Content: View>: View {
               }
             
             Text("© 2024 Adrian Ensan")
-              .font(.system(size: 11, weight: .regular, design: .rounded))
+              .font(.system(size: 11, weight: .regular))
               .fixedSize()
             
           }.foregroundStyle(theme.foreground.tertiary.style)

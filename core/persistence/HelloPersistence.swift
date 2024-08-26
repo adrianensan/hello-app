@@ -389,7 +389,7 @@ public enum Persistence {
   fileprivate static var models: [String: Weak<AnyObject>] = [:]
   
   @MainActor
-  static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
+  public static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
     if let weakModel = models[property.location.id],
        let model = weakModel.value as? PersistentObservable<Property> {
       return model
@@ -549,6 +549,7 @@ public enum Persistence {
         fileSnapshots.append(folderSnapshot)
       }
     }
+    
     return PersistenceSnapshot(userDefaults: userDefaultsSnapshot, files: PersistenceFolderSnapshot(
       name: "Root",
       size: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.size },

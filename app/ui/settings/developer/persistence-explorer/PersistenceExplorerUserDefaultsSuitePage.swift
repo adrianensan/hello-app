@@ -25,12 +25,12 @@ struct PersistenceExplorerUserDefaultsSuitePage: View {
       VStack(spacing: 32) {
         VStack(spacing: 8) {
           Text(snapshot.suite.name)
-            .font(.system(size: 20, weight: .medium, design: .rounded))
+            .font(.system(size: 20, weight: .medium))
             .foregroundStyle(theme.foreground.primary.style)
             .fixedSize(horizontal: false, vertical: true)
             .multilineTextAlignment(.center)
           Text("\(snapshot.objects.count) Objects")
-            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .font(.system(size: 16, weight: .medium))
             .foregroundStyle(theme.foreground.tertiary.style)
         }
         HelloSection(title: "App") {

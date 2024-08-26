@@ -68,7 +68,7 @@ struct LoggerLineView: View {
   var body: some View {
     HStack(alignment: .top, spacing: 2) {
       Image(systemName: logStatement.level.icon)
-        .font(.system(size: iconSize, weight: .bold, design: .rounded))
+        .font(.system(size: iconSize, weight: .bold, design: .monospaced))
         .foregroundColor(symbolColor)
         .frame(width: iconSize, height: iconSize + 2)
       
@@ -94,6 +94,7 @@ struct LoggerLineView: View {
         .fixedSize(horizontal: false, vertical: true)
       #endif
     }.frame(height: isExpanded ? nil : 16)
+      .fontDesign(.monospaced)
       .frame(minHeight: 16)
       .clickable()
       .onTapGesture { isExpanded.toggle() }
