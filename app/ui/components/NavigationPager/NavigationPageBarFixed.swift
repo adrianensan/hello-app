@@ -19,10 +19,8 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
       .padding(.bottom, config.navBarFadeTransitionMultiplier * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .padding(.top, 16)
       .background(
-        ZStack {
-          Rectangle().fill(.ultraThinMaterial)
-          theme.header.backgroundColor.opacity(0.8)
-        }.compositingGroup()
+        theme.header.backgroundView
+          .compositingGroup()
           .shadow(color: .black.opacity(0.12), radius: 24)
           .compositingGroup()
           .blur(radius: interpolate(.linear, from: 8, to: 0, progress: scrollModel.scrollThresholdProgress))

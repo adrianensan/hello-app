@@ -43,6 +43,7 @@ public class HelloSheetModel {
   public func dismiss() {
     guard isVisible else { return }
     isVisible = false
+    ButtonHaptics.buttonFeedback()
   }
 }
 

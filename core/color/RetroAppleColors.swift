@@ -18,4 +18,9 @@ public extension HelloColor.retroApple {
     [.retroApple.green, .retroApple.yellow, .retroApple.orange,
      .retroApple.red, .retroApple.purple, .retroApple.blue]
   }
+  
+  static var allAccentOptions: [HelloColor] {
+    [.retroApple.blue, .retroApple.green, .retroApple.yellow, .retroApple.orange,
+     .retroApple.red, .retroApple.purple]
+  }
 }

@@ -23,4 +23,13 @@ public enum HelloBackground: Codable, Sendable, Hashable {
     case .image: nil
     }
   }
+  
+  public var borderWidth: CGFloat? {
+    switch self {
+    case .color(_, let border): border?.width
+    case .gradient: nil
+    case .blur(_, _, let border): border?.width
+    case .image: nil
+    }
+  }
 }

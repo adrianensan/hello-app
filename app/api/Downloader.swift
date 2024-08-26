@@ -62,7 +62,7 @@ public class Downloader {
   public static let main = Downloader()
   
   private let session: URLSession = URLSession(
-      configuration: URLSessionConfiguration.default +& {
+    configuration: URLSessionConfiguration.ephemeral +& {
         $0.allowsCellularAccess = true
         $0.timeoutIntervalForRequest = 100
         $0.waitsForConnectivity = false

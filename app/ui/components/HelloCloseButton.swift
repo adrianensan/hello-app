@@ -5,7 +5,7 @@ import HelloCore
 
 public struct HelloCloseButton: View {
   
-  @Environment(\.theme) private var helloTheme
+  @Environment(\.theme) private var theme
   @Environment(\.dismissProgress) private var manualDismissProgress
   @Environment(\.needsBlur) private var needsBlur
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
@@ -20,7 +20,7 @@ public struct HelloCloseButton: View {
   private var dismissProgress: CGFloat { manualDismissProgress ?? sheetModel?.dismissProgress ?? 0 }
   
   public var body: some View {
-    HelloButton(clickStyle: .highlight, haptics: .click, action: { onDismiss() }) {
+    HelloButton(clickStyle: .highlight, haptics: .none, action: { onDismiss() }) {
       ZStack {
         Capsule(style: .continuous)
           .fill()
@@ -38,7 +38,8 @@ public struct HelloCloseButton: View {
           .fill()
           .frame(width: 3, height: dismissProgress * 22)
           .frame(width: 1, height: 1, alignment: .bottom)
-      }.foregroundStyle(helloTheme.floating.foreground.primary.color)
+      }//.foregroundStyle(theme.accent.style)
+        .foregroundStyle(theme.header.foreground.primary.color)
         .frame(width: 44, height: 44)
         .offset(y: dismissProgress * 10)
         .background(

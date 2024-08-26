@@ -34,6 +34,10 @@ public struct HelloSwiftUITheme: Sendable {
     theme.baseLayer.background.view(for: Rectangle(), isBaseLayer: isBaseLayer)
   }
   
+  public var backgroundOutline: Color {
+    theme.baseLayer.background.borderColor?.swiftuiColor ?? .clear
+  }
+  
   public var textPrimaryColor: Color { foreground.primary.color }
   public var textSecondaryColor: Color { foreground.secondary.color }
   public var textTertiaryColor: Color { foreground.tertiary.color }

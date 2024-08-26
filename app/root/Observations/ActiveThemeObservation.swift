@@ -7,6 +7,7 @@ public extension EnvironmentValues {
   @Entry var contentShape: AnyInsettableShape? = nil
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
+  @Entry var hasAppliedTheme: Bool = false
   @Entry var dismissProgress: CGFloat?
   @Entry var needsBlur: Bool = false
   @Entry var viewID: String? = nil
@@ -77,24 +78,29 @@ fileprivate extension EnvironmentValues {
 
 struct ActiveThemeObservationViewModifier: ViewModifier {
   
-  @Environment(\.colorScheme) private var colorScheme: ColorScheme
+  @Environment(\.colorScheme) private var colorScheme
   
   private var themeManager: ActiveThemeManager = .main
   
-  private var currentTheme: HelloTheme {
-    colorScheme == .dark
-    ? themeManager.darkTheme
-    : themeManager.lightTheme
+  private var activeTheme: HelloTheme {
+    themeManager.activeTheme(isDark: colorScheme == .dark)
+  }
+  
+  private var activeSwiftUITheme: HelloSwiftUITheme {
+    HelloSwiftUITheme(theme: activeTheme)
   }
   
   @State private var isActive: Bool = false
   
   func body(content: Content) -> some View {
     content
-      .environment(\.theme, HelloSwiftUITheme(theme: currentTheme))
-      .foregroundStyle(currentTheme.baseLayer.foregroundPrimary.mainColor.swiftuiColor)
-      .backgroundStyle(currentTheme.baseLayer.background.mainColor.swiftuiColor)
-      .animation(.easeInOut(duration: 0.2), value: currentTheme.id)
+      .applyTheme()
+      .environment(\.theme, activeSwiftUITheme)
+      .environment(\.colorScheme, activeTheme.scheme == .dark ? .dark : .light)
+//      .preferredColorScheme(activeTheme.isDark ? .dark : .light)
+      .foregroundStyle(activeSwiftUITheme.foreground.primary.style)
+      .backgroundStyle(activeSwiftUITheme.backgroundColor)
+      .animation(.easeInOut(duration: 0.2), value: activeTheme.id)
   }
 }
 

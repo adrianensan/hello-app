@@ -101,11 +101,11 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
   }
   
   public var isDark: Bool {
-    brightness < 0.7
+    withFakeAlpha(a, background: .black).brightness < 0.7
   }
   
   public var isDim: Bool {
-    brightness < 0.4
+    withFakeAlpha(a, background: .black).brightness < 0.4
   }
   
   public var isGreyscale: Bool {
@@ -174,7 +174,7 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
     return HelloColor(h: h, s: s, b: b, a: a, colorSpace: colorSpace)
   }
   
-  public func withFakeAlpha(_ alpha: Double, background: HelloColor) -> HelloColor {
+  public func withFakeAlpha(_ alpha: Double, background: HelloColor = .black) -> HelloColor {
     HelloColor(r: r * alpha + background.r * (1 - alpha),
                g: g * alpha + background.g * (1 - alpha),
                b: b * alpha + background.b * (1 - alpha),

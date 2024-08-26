@@ -21,6 +21,14 @@ public struct HelloSwiftUIThemeLayer: Sendable {
     layer.background.view(for: Rectangle(), isBaseLayer: isBaseLayer)
   }
   
+  public var backgroundOutlineWidth: CGFloat {
+    layer.background.borderWidth ?? 0
+  }
+  
+  public var backgroundOutline: Color {
+    layer.background.borderColor?.swiftuiColor ?? .clear
+  }
+  
   public var backgroundColor: Color
   public var foreground: HelloSwiftUIThemeForegroundLayers
   public var accent: HelloSwiftUIThemeForeground

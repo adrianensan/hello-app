@@ -64,7 +64,6 @@ public struct BackButton: View {
           let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) + (pagerModel.viewDepth > 1 ? effectiveBackProgress : 0)
           Text(page.name ?? "Back")
             .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .foregroundStyle(theme.floating.foreground.primary.style)
             .fixedSize()
             .frame(height: 14)
             .opacity(1 - 0.6 * abs(distance))
@@ -76,7 +75,9 @@ public struct BackButton: View {
         .padding(.trailing, 12)
         .animation(.pageAnimation, value: pagerModel.viewStack.count)
         .animation(.pageAnimation, value: pagerModel.viewDepth)
-    }.background {
+    }.foregroundStyle(theme.header.foreground.primary.style)
+//      .foregroundStyle(theme.accent.style)
+      .background {
       ZStack {
         Capsule(style: .continuous)
           .fill(.thinMaterial)

@@ -61,10 +61,10 @@ public struct HelloThemeLayer: Codable, Sendable, Hashable {
         background = .color(color: .white.opacity(0.2))
       }
     }
-    let foregroundPrimary = builder?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.96))
-    let foregroundSecondary = builder?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.8))
-    let foregroundTertiary = builder?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.64))
-    let foregroundQuaternary = builder?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.48))
+    let foregroundPrimary = builder?.textPrimary ?? underLayer.foregroundPrimary
+    let foregroundSecondary = builder?.textSecondary ?? .color(color: foregroundPrimary.mainColor.withFakeAlpha(0.8, background: background.mainColor))
+    let foregroundTertiary = builder?.textTertiary ?? .color(color: foregroundSecondary.mainColor.withFakeAlpha(0.64, background: background.mainColor))
+    let foregroundQuaternary = builder?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.withFakeAlpha(0.48, background: background.mainColor))
     self.init(background: background,
               textPrimary: foregroundPrimary,
               textSecondary: foregroundSecondary,
@@ -120,6 +120,7 @@ public enum HelloThemeScheme: Codable, Sendable, Equatable {
 public struct HelloTheme: Codable, Hashable, Sendable {
   public var id: String
   public var name: String
+  public var scheme: HelloThemeScheme
   
   public var baseLayer: HelloThemeLayer
   public var headerLayer: HelloThemeLayer
@@ -137,12 +138,13 @@ public struct HelloTheme: Codable, Hashable, Sendable {
               surfaceSectionLayer: HelloThemeLayerBuilder? = nil) {
     self.id = id
     self.name = name
+    self.scheme = scheme
     do {
       let background = baseLayer?.background ?? (scheme == .light ? HelloTheme.light.baseLayer.background : HelloTheme.dark.baseLayer.background)
-      let foregroundPrimary = baseLayer?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.opacity(0.96))
-      let foregroundSecondary = baseLayer?.textSecondary ?? .color(color: foregroundPrimary.mainColor.opacity(0.8))
-      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.opacity(0.6))
-      let foregroundQuaternary = baseLayer?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.opacity(0.4))
+      let foregroundPrimary = baseLayer?.textPrimary ?? .color(color: background.mainColor.readableOverlayColor.withFakeAlpha(0.96, background: background.mainColor))
+      let foregroundSecondary = baseLayer?.textSecondary ?? .color(color: foregroundPrimary.mainColor.withFakeAlpha(0.8, background: background.mainColor))
+      let foregroundTertiary = baseLayer?.textTertiary ?? .color(color: foregroundSecondary.mainColor.withFakeAlpha(0.6, background: background.mainColor))
+      let foregroundQuaternary = baseLayer?.textQuaternary ?? .color(color: foregroundSecondary.mainColor.withFakeAlpha(0.4, background: background.mainColor))
       self.baseLayer = HelloThemeLayer(background: background,
                                        textPrimary: foregroundPrimary,
                                        textSecondary: foregroundSecondary,
@@ -159,21 +161,21 @@ public struct HelloTheme: Codable, Hashable, Sendable {
     self.floatingLayer = .init(builder: floatingLayer, on: self.baseLayer)
   }
   
-  public init(id: String,
-              name: String,
-              baseLayer: HelloThemeLayer,
-              headerLayer: HelloThemeLayer,
-              floatingLayer: HelloThemeLayer,
-              surfaceLayer: HelloThemeLayer,
-              surfaceSectionLayer: HelloThemeLayer) {
-    self.id = id
-    self.name = name
-    self.baseLayer = baseLayer
-    self.headerLayer = headerLayer
-    self.floatingLayer = floatingLayer
-    self.surfaceLayer = surfaceLayer
-    self.surfaceSectionLayer = surfaceSectionLayer
-  }
+//  public init(id: String,
+//              name: String,
+//              baseLayer: HelloThemeLayer,
+//              headerLayer: HelloThemeLayer,
+//              floatingLayer: HelloThemeLayer,
+//              surfaceLayer: HelloThemeLayer,
+//              surfaceSectionLayer: HelloThemeLayer) {
+//    self.id = id
+//    self.name = name
+//    self.baseLayer = baseLayer
+//    self.headerLayer = headerLayer
+//    self.floatingLayer = floatingLayer
+//    self.surfaceLayer = surfaceLayer
+//    self.surfaceSectionLayer = surfaceSectionLayer
+//  }
   
   public var isDark: Bool {
     baseLayer.background.mainColor.isDark

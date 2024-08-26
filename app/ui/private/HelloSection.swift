@@ -78,7 +78,7 @@ public struct HelloSection<Content: View>: View {
       }//.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
         .clipShape(.rect(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))
+          .stroke(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
         .frame(maxWidth: 520)
     }.frame(maxWidth: 520)
   }

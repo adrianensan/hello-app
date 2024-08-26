@@ -27,8 +27,8 @@ public extension HelloBackground {
           shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }
         #elseif os(iOS)
+        shape.fill(.regularMaterial)
         shape.fill((overlay ?? .transparent).swiftuiColor)
-          .background(.ultraThinMaterial)
         if !isBaseLayer, let border {
           shape.strokeBorder(border.color.swiftuiColor, lineWidth: border.width)
         }

@@ -56,17 +56,18 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         model: scrollModel,
         content: {
           VStack(spacing: 0) {
-#if os(iOS)
+            #if os(iOS)
             if navBarStyle == .scrollsWithContent {
               NavigationPageBarScrolling(title: title, navBarContent: {
                 navBarContent().padding(.trailing, config.navBarTrailingPadding)
               })
             }
-#endif
+            #endif
             
             content()
               .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0) + (scrollModel.scrollThreshold == nil && scrollModel.effectiveScrollThreshold < 0 ? 8 : 0))
               .padding(.horizontal, config.horizontalPagePadding)
+              .padding(.bottom, 16)
               .frame(maxWidth: .infinity)
           }
 //            .background(ClearClickableView())

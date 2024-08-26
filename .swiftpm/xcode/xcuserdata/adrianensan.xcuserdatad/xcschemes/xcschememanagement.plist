@@ -12,12 +12,12 @@
 		<key>HelloApp.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>51</integer>
+			<integer>53</integer>
 		</dict>
 		<key>HelloAppIconGenerator.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>53</integer>
+			<integer>54</integer>
 		</dict>
 		<key>HelloAppp-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -32,12 +32,12 @@
 		<key>HelloCore.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>54</integer>
+			<integer>52</integer>
 		</dict>
 		<key>HelloServer.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>52</integer>
+			<integer>51</integer>
 		</dict>
 		<key>HelloUI.xcscheme_^#shared#^_</key>
 		<dict>

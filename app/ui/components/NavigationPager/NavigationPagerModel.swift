@@ -220,6 +220,7 @@ public class PagerModel {
       }
     }
     guard viewStack.count > 1 else { return }
+    Haptics.buttonFeedback()
     var backPageCount = 1
     if viewStack.count > 2 {
       if viewStack[viewStack.count - 2].options.skipsWhenBack {
