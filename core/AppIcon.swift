@@ -1,6 +1,20 @@
 import Foundation
 
-public protocol BaseAppIcon: Codable, Equatable, Identifiable, CaseIterable, Sendable {
+public enum AppIconAvailability: String, Sendable {
+  case free
+  case paid
+  case hidden
+  
+  public var isAlwaysVisible: Bool {
+    switch self {
+    case .free: true
+    case .paid: true
+    case .hidden: false
+    }
+  }
+}
+
+public protocol BaseAppIcon: Codable, Hashable, Identifiable, CaseIterable, Sendable {
   
   init?(rawValue: String)
   
@@ -13,6 +27,8 @@ public protocol BaseAppIcon: Codable, Equatable, Identifiable, CaseIterable, Sen
   var displayName: String { get }
   
   var isFree: Bool { get }
+  
+  var availabilit: AppIconAvailability { get }
 }
 
 public extension BaseAppIcon {

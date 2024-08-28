@@ -17,7 +17,7 @@
 		<key>HelloAppIconGenerator.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>54</integer>
+			<integer>51</integer>
 		</dict>
 		<key>HelloAppp-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -37,7 +37,7 @@
 		<key>HelloServer.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>51</integer>
+			<integer>50</integer>
 		</dict>
 		<key>HelloUI.xcscheme_^#shared#^_</key>
 		<dict>

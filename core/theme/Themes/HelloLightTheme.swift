@@ -1,10 +1,10 @@
 public extension HelloTheme {
   
-  static var warmLight: HelloTheme {
-    warmLight(accent: .color(color: .retroApple.blue))
+  static var helloLight: HelloTheme {
+    helloLight(accent: .color(color: .retroApple.blue))
   }
   
-  static func warmLight(accent: HelloFill) -> HelloTheme {
+  static func helloLight(accent: HelloFill) -> HelloTheme {
 #if os(macOS)
     HelloTheme(id: "warm-light",
                name: "Warm Light",

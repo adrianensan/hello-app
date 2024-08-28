@@ -11,7 +11,7 @@ struct AppIconSettingsPage<AppIcon: IOSAppIcon>: View {
   var body: some View {
     NavigationPage(title: "App Icon") {
       VStack(alignment: .leading, spacing: 16) {
-        ForEach(AppIcon.collections) { collection in
+        ForEach(appIconModel.collections) { collection in
           HelloSection(title: collection.name?.uppercased()) {
             LazyVGrid(columns: [.init(.adaptive(minimum: 60, maximum: 160), spacing: 24)], spacing: 16) {
               ForEach(collection.icons) { icon in

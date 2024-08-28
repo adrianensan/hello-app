@@ -3,7 +3,7 @@ import SwiftUI
 import HelloCore
 
 public extension EnvironmentValues {
-  @Entry var theme: HelloSwiftUITheme = HelloSwiftUITheme(theme: .warmLight)
+  @Entry var theme: HelloSwiftUITheme = HelloSwiftUITheme(theme: .helloLight)
   @Entry var contentShape: AnyInsettableShape? = nil
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
@@ -83,7 +83,7 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
   private var themeManager: ActiveThemeManager = .main
   
   private var activeTheme: HelloTheme {
-    themeManager.activeTheme(isDark: colorScheme == .dark)
+    themeManager.activeTheme(for: colorScheme == .dark ? .dark : .light)
   }
   
   private var activeSwiftUITheme: HelloSwiftUITheme {

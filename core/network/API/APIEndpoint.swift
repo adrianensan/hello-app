@@ -19,8 +19,8 @@ public protocol APIEndpoint: Sendable {
   associatedtype ResponseType: Codable & Sendable = EmptyResponse
 //  associatedtype APIClient: HelloAPIClient
   
-  static var path: String { get }
   static var method: HTTPMethod { get }
+  static var path: String { get }
   
 //  var client: APIClient { get }
   var scheme: APIEndpointScheme { get }
@@ -41,13 +41,14 @@ public protocol APIEndpoint: Sendable {
 
 extension APIEndpoint {
   
-  static var path: String { "" }
-  var path: String { Self.path }
-  
-  static var method: HTTPMethod { .get }
-  var method: HTTPMethod { Self.method }
-  
   public var scheme: APIEndpointScheme { .https }
+  
+  public static var method: HTTPMethod { .get }
+  public var method: HTTPMethod { Self.method }
+  
+  public static var path: String { "" }
+  public var path: String { Self.path }
+  
   public var contentType: ContentType? { nil }
   public var contentTypeBoundary: String? { nil }
   

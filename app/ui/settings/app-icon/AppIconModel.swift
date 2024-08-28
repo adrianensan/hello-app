@@ -9,6 +9,9 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
   public private(set) var currentIcon: AppIcon = .defaultIcon
   
   @ObservationIgnored @Persistent(.activeAppIcon) var activeAppIcon
+  @ObservationIgnored @Persistent(.unlockedAppIcons) var unlockedAppIcons
+  
+  public var collections: [AppIconCollection<AppIcon>] = []
   
   public init() {
     refresh()
@@ -24,6 +27,12 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
       activeAppIcon = UIApplication.shared.alternateIconName
     }
     #endif
+    collections = AppIcon.collections
+      .map {
+        var collection = $0
+        collection.icons = $0.icons.filter { $0.availabilit.isAlwaysVisible || unlockedAppIcons.contains($0.id) }
+        return collection
+      }.filter { !$0.icons.isEmpty }
   }
   
   func set(icon: AppIcon) {

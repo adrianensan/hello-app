@@ -9,26 +9,37 @@ public class ActiveThemeManager {
   
   public static let main = ActiveThemeManager()
   
+  private static var isLowBrightness: Bool {
+    #if os(iOS)
+    UIScreen.main.brightness < 0.08
+    #elseif os(macOS)
+    false
+    #else
+    #endif
+  }
+  
   public private(set) var lightTheme: HelloTheme = .light
   public private(set) var darkTheme: HelloTheme = .dark
   
-  public private(set) var isDark: Bool = true
-  public private(set) var isLowBrightness: Bool = UIScreen.main.brightness < 0.08
+  public private(set) var colorScehem: HelloThemeScheme = .light
+  public private(set) var isLowBrightness: Bool = isLowBrightness
   
   private var themeMode = Persistence.model(for: .themeMode)
   private var accentColor = Persistence.model(for: .accentColor)
   private var useBarelyVisibleThemeWhenDark = Persistence.model(for: .useBarelyVisibleThemeWhenDark)
   
   private init() {
+    #if os(iOS)
     Task {
       for await notification in NotificationCenter.default.notifications(named: UIScreen.brightnessDidChangeNotification) {
         Task {
-          let isLowBrightness = UIScreen.main.brightness < 0.08
+          let isLowBrightness = Self.isLowBrightness
           guard self.isLowBrightness != isLowBrightness else { return }
           self.isLowBrightness = isLowBrightness
         }
       }
     }
+    #endif
   }
   
   public func set(theme: some HelloThemeSet) {
@@ -41,26 +52,27 @@ public class ActiveThemeManager {
     self.darkTheme = darkTheme
   }
   
-  public func activeTheme(isDark: Bool) -> HelloTheme {
-    var isDark = isDark
+  public func activeTheme(for colorScheme: HelloThemeScheme) -> HelloTheme {
+    var colorScheme = colorScheme
     switch themeMode.value {
     case .auto: ()
     case .alwaysLight:
-      isDark = false
+      colorScheme = .light
     case .alwaysDark:
-      isDark = true
+      colorScheme = .dark
     }
-    if self.isDark != isDark {
-      self.isDark = isDark
+    if self.colorScehem != colorScheme {
+      self.colorScehem = colorScheme
     }
-    if isDark {
+    switch colorScheme {
+    case .light:
+      return lightTheme
+    case .dark:
       if useBarelyVisibleThemeWhenDark.value && isLowBrightness {
         return .superBlack(accent: accentColor.value)
       } else {
         return darkTheme
       }
-    } else {
-      return lightTheme
     }
   }
 }

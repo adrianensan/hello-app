@@ -1,11 +1,11 @@
 import Foundation
 
 public extension HelloTheme {
-  static var black: HelloTheme {
-    black(accent: .color(color: .retroApple.blue))
+  static var helloDark: HelloTheme {
+    helloDark(accent: .color(color: .retroApple.blue))
   }
   
-  static func black(accent: HelloFill) -> HelloTheme {
+  static func helloDark(accent: HelloFill) -> HelloTheme {
 #if os(macOS)
     HelloTheme(id: "black",
                name: "Black",

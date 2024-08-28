@@ -20,7 +20,7 @@ public struct ImageViewer: View {
       HelloCloseButton(onDismiss: onDismiss)
         .offset(y: 20 * (imageViewModel.dismissProgress ?? 0))
         .environment(\.dismissProgress, imageViewModel.dismissProgress)
-        .environment(\.theme, .init(theme: .black))
+        .environment(\.theme, .init(theme: .helloDark))
         .environment(\.colorScheme, .dark)
         .environment(\.needsBlur, true)
     }

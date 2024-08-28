@@ -127,19 +127,19 @@ public class AppIconExporter {
   
   public func export<AppIcon: IOSAppIcon>(iOSIcons icons: [AppIcon]) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("ios") else { return }
-    for icon in AppIcon.allCases {
+    for icon in icons {
       let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).appiconset")
       try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
       
       try await save(view: icon.iOSView.light.flattenedView, size: CGSize(width: 1024, height: 1024),
-                     to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "light")),
+                     to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, suffix: "")),
                      allowOpacity: false)
       if let darkIcon = icon.iOSView.dark, let tintableIcon = icon.iOSView.tintable {
         try await save(view: darkIcon.flattenedView, size: CGSize(width: 1024, height: 1024),
-                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "dark")),
+                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, suffix: "-dark")),
                        allowOpacity: true)
         try await save(view: tintableIcon.flattenedView, size: CGSize(width: 1024, height: 1024),
-                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, variant: "tintable")),
+                       to: iconExportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, suffix: "-tintable")),
                        allowOpacity: false)
         try AppIconAssetsContents.iOS(name: icon.imageName)
           .prettyJSONData

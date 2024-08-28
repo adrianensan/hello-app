@@ -8,9 +8,7 @@ public struct AppIconSettingsRow<AppIcon: IOSAppIcon>: View {
   
   @State private var appIconModel: AppIconModel<AppIcon> = AppIconModel()
   
-  public init() {
-    
-  }
+  public init() {}
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {

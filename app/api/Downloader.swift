@@ -131,7 +131,8 @@ public class Downloader {
           throw .cfNetworkError(code: nsError.code)
         }
       default:
-        Log.verbose(nsError.domain)
+        Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(nsError.domain) \(nsError.code) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
+        throw .other(error)
       }
       Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
       throw .other(error)

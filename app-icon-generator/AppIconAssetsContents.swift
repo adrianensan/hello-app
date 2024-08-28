@@ -2,8 +2,8 @@ import Foundation
 
 public struct AppIconAssetsContents: Codable, Sendable {
   
-  static func iOSFileName(appIconName: String, variant: String) -> String {
-    "\(appIconName)-\(variant).png"
+  static func iOSFileName(appIconName: String, suffix: String) -> String {
+    "\(appIconName)\(suffix).png"
   }
     
   public struct Image: Codable, Sendable {
@@ -54,15 +54,15 @@ public struct AppIconAssetsContents: Codable, Sendable {
 public extension AppIconAssetsContents {
   static func iOSClassic(name: String) -> AppIconAssetsContents {
     AppIconAssetsContents(images: [
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, variant: "light"))
+      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: ""))
     ])
   }
   
   static func iOS(name: String) -> AppIconAssetsContents {
     AppIconAssetsContents(images: [
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, variant: "light")),
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, variant: "dark"), variant: .dark),
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, variant: "tintable"), variant: .tinted)
+      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "")),
+      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "-dark"), variant: .dark),
+      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "-tintable"), variant: .tinted)
     ])
   }
   
