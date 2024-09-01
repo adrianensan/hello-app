@@ -30,7 +30,7 @@ public class AppIconModel<AppIcon: BaseAppIcon> {
     collections = AppIcon.collections
       .map {
         var collection = $0
-        collection.icons = $0.icons.filter { $0.availabilit.isAlwaysVisible || unlockedAppIcons.contains($0.id) }
+        collection.icons = $0.icons.filter { $0.availability.isAlwaysVisible || unlockedAppIcons.contains($0.id) }
         return collection
       }.filter { !$0.icons.isEmpty }
   }

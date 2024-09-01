@@ -33,6 +33,8 @@ public class HelloPersistence {
   nonisolated public let keychain: KeychainHelper
   private var allowSaving: Bool = true
   
+  nonisolated public let isDemoMode: Bool = UserDefaults.standard.bool(forKey: "is-demo-mode")
+  
   nonisolated public func fileURL(for location: FilePersistenceLocation, subPath: String) -> URL {
     baseURL(for: location).appending(component: subPath)
   }
@@ -101,7 +103,7 @@ public class HelloPersistence {
           Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
           return
         }
-        observable.value = value
+        observable._value = value
       }
     }
     
@@ -122,6 +124,8 @@ public class HelloPersistence {
   }
   
   nonisolated func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
+    guard !isDemoMode || property.allowedInDemoMode else { return }
+    
     if property.isDeprecated {
       Log.warning("Using depreacted property \(property.self)", context: "Persistence")
     }
@@ -171,7 +175,7 @@ public class HelloPersistence {
     guard allowSaving else { return }
     do {
       try saveInternal(value, for: property)
-      if property.allowCache {
+      if isDemoMode && !property.allowedInDemoMode || property.allowCache {
         cache[property.location.id] = property.cleanup(value: value)
       }
       updated(value: value, for: property, skipModelUpdate: skipModelUpdate)
@@ -181,6 +185,9 @@ public class HelloPersistence {
   }
   
   public nonisolated func storedValue<Property: PersistenceProperty>(for property: Property) -> Property.Value {
+    if isDemoMode && !property.allowedInDemoMode {
+      return property.defaultDemoValue
+    }
     let returnValue: Property.Value
     
     switch property.location {
@@ -245,7 +252,7 @@ public class HelloPersistence {
     }
     
     let value = storedValue(for: property)
-    if property.allowCache {
+    if isDemoMode && !property.allowedInDemoMode || property.allowCache {
       cache[property.location.id] = value
     }
     
@@ -259,16 +266,19 @@ public class HelloPersistence {
   public func delete<Property: PersistenceProperty>(property: Property) {
     cache[property.location.id] = nil
     
-    switch property.location {
-    case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
-    case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
-    case .keychain(let key, let appGroup, let isBiometricallyLocked): try? keychain.remove(for: key)
-    case .memory: break
+    if !isDemoMode || property.allowedInDemoMode {
+      switch property.location {
+      case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
+      case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
+      case .keychain(let key, let appGroup, let isBiometricallyLocked): try? keychain.remove(for: key)
+      case .memory: break
+      }
     }
     updated(value: property.defaultValue, for: property, skipModelUpdate: false)
   }
   
   public func nuke(stopSaving: Bool = true) {
+    guard !isDemoMode else { return }
     allowSaving = !stopSaving
     cache = [:]
     for suite in DefaultsPersistenceSuite.allCases {
@@ -382,6 +392,12 @@ public class HelloPersistence {
   }
 }
 
+public enum PersistenceMode {
+  case normal
+  case demo
+  case freshInstall
+}
+
 @HelloPersistenceActor
 public enum Persistence {
   
@@ -390,12 +406,12 @@ public enum Persistence {
   
   @MainActor
   public static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
-    if let weakModel = models[property.location.id],
+    if let weakModel = models[property.id],
        let model = weakModel.value as? PersistentObservable<Property> {
       return model
     } else {
       let model = PersistentObservable(property)
-      models[property.location.id] = Weak(value: model)
+      models[property.id] = Weak(value: model)
       return model
     }
   }
@@ -510,12 +526,14 @@ public enum Persistence {
       return .folder(PersistenceFolderSnapshot(
         name: overrideName ?? name,
         size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+        sizeOnDisk: children.reduce(DataSize(bytes: 0)) { $0 + $1.sizeOnDisk },
         url: fileURL,
         files: children))
     } else {
       return .file(PersistenceFileSnapshot(
         name: name,
-        size: DataSize(bytes: fileURL.regularFileAllocatedSize()),
+        size: DataSize(bytes: fileURL.fileSize()),
+        sizeOnDisk: DataSize(bytes: fileURL.regularFileAllocatedSize()),
         dateCreated: fileURL.dateCreated,
         dateModified: fileURL.dateModified,
         url: fileURL))
@@ -553,6 +571,7 @@ public enum Persistence {
     return PersistenceSnapshot(userDefaults: userDefaultsSnapshot, files: PersistenceFolderSnapshot(
       name: "Root",
       size: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.size },
+      sizeOnDisk: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.sizeOnDisk },
       url: URL(filePath: "/"),
       files: fileSnapshots))
   }
@@ -585,5 +604,16 @@ public extension URL {
           resourceValues.isRegularFile == true else { return 0 }
     
     return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
+  }
+  
+  func fileSize() -> Int {
+    guard let resourceValues = try? self.resourceValues(forKeys: [
+      .isRegularFileKey,
+      .totalFileSizeKey,
+      .fileSizeKey,
+    ]),
+          resourceValues.isRegularFile == true else { return 0 }
+    
+    return resourceValues.totalFileSize ?? resourceValues.fileSize ?? 0
   }
 }

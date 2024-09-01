@@ -26,11 +26,7 @@ struct DeleteEverythingSettingsItem: View {
                 name: "Delete",
                 action: {
                   try await Persistence.nuke()
-                  UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
-                  Task {
-                    try await Task.sleep(seconds: 1)
-                    exit(0)
-                  }
+                  exitGracefully()
                 },
                 isDestructive: true)))
           },

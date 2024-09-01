@@ -11,7 +11,7 @@ public class TouchesModel {
   
   var activeTouches: [HelloTouch] = []
   
-  var hasScrolledDuringTouch: Bool = false
+//  var hasScrolledDuringTouch: Bool = false
   
   private init() {}
 }

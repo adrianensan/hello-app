@@ -22,6 +22,10 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
           LogsSettingsItem()
         }
         
+        HelloSection {
+          DemoModeSettingsItem()
+        }
+        
         HelloSection(title: "RESET") {
           ClearCacheSettingsItem()
           DeleteEverythingSettingsItem()

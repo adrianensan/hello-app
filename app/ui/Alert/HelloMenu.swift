@@ -129,7 +129,7 @@ public struct HelloMenu: View {
       VStack(spacing: 0) {
         ForEach(items) { item in
           if let url = item.shareURL {
-            ShareLink(item: url) {
+            HelloShareLink(url: url, clickStyle: .highlight) {
               HelloMenuRow(item: item)
             }
           } else if let string = item.shareString {

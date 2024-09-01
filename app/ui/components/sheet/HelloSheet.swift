@@ -28,7 +28,8 @@ public class HelloSheetModel {
   public private(set) var dragToDismissType: GestureType
   @ObservationIgnored var dragCanDismiss: Bool?
   
-  var shouldScrollInsteadOfDismiss: Bool { (pagerModel?.activePageScrollOffset ?? 0) < -1 }
+  @ObservationIgnored var isDraggingNavBar: Bool = false
+  var shouldScrollInsteadOfDismiss: Bool { !(pagerModel?.activePageIsReadyForDismiss ?? true) }
   var backProgress: CGFloat { pagerModel?.backProgressModel.backProgress ?? 0 }
   
   public init(dragToDismissType: GestureType = .highPriority) {
@@ -75,9 +76,14 @@ public struct HelloSheet<Content: View>: View {
       .padding(.bottom, 60)
       .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
-      .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous)
-        .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
       .padding(.bottom, -60)
+      .overlay(UnevenRoundedRectangle(
+        cornerRadii: RectangleCornerRadii(
+          topLeading: 30,
+          bottomLeading: Device.currentEffective.screenCornerRadius,
+          bottomTrailing: Device.currentEffective.screenCornerRadius,
+          topTrailing: 30))
+        .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
       .padding(.top, safeArea.top + 16)
       .handleSheetDismissDrag()
       .transformEnvironment(\.safeArea) { $0.top = 0 }

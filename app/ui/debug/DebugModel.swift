@@ -8,7 +8,11 @@ public class DebugModel {
   
   public static let main = DebugModel()
   
-  public var showBorders: Bool = Persistence.unsafeValue(.showDebugBorders)
+  private var showBordersProperty = Persistence.model(for: .showDebugBorders)
+  public var showBorders: Bool {
+    get { showBordersProperty.value }
+    set { showBordersProperty.value = newValue }
+  }
   
   private init() {}
 }

@@ -8,9 +8,12 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.helloPagerConfig) private var config
   @Environment(HelloScrollModel.self) private var scrollModel
+  @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
+  
+  @GestureState private var drag: CGSize?
   
   let title: String?
-  let navBarContent: @MainActor () -> NavBarContent
+  @ViewBuilder let navBarContent: @MainActor () -> NavBarContent
   
   public var body: some View {
     NavigationPageBar(title: title, navBarContent: navBarContent)
@@ -26,6 +29,10 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
           .compositingGroup()
           .blur(radius: interpolate(.linear, from: 8, to: 0, progress: scrollModel.scrollThresholdProgress))
           .opacity(scrollModel.hasScrolled ? 1 : scrollModel.scrollThresholdProgress)
+          .simultaneousGesture(DragGesture(minimumDistance: 0, coordinateSpace: .global)
+            .updating($drag) { value, state, _ in
+              state = value.translation
+            })
           .allowsHitTesting(scrollModel.hasScrolled)
 //          .animation(nil)
       ).padding(.top, -16)
@@ -33,5 +40,8 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
     //.padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
       .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
+      .onChange(of: drag == nil) {
+        sheetModel?.isDraggingNavBar = drag != nil
+      }
   }
 }

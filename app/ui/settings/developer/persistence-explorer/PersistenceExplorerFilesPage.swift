@@ -53,8 +53,10 @@ struct PersistenceExplorerFilesPage: View {
             .foregroundStyle(theme.foreground.tertiary.style)
         }
         HelloSection {
-          ForEach(sortedFiles) { file in
-            PersistenceExplorerFileRow(file: file)
+          LazyVStack(spacing: 0) {
+            ForEach(sortedFiles) { file in
+              PersistenceExplorerFileRow(file: file)
+            }
           }
         }
       }

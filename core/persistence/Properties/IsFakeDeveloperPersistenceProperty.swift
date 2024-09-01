@@ -4,6 +4,8 @@ public struct IsFakeDeveloperPersistenceProperty: PersistenceProperty {
   
   public var defaultValue: Bool { false }
   
+  public var defaultDemoValue: Bool { true }
+  
   public var location: PersistenceType { .defaults(key: "is-fake-developer") }
 }
 

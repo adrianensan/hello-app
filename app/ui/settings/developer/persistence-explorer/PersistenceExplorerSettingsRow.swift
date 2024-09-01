@@ -30,7 +30,7 @@ public struct PersistenceExplorerSettingsRow: View {
             .font(.system(size: 16, weight: .regular))
           Spacer(minLength: 0)
           if let files = model.files {
-            Text(files.size.string())
+            Text(files.sizeOnDisk.string())
               .font(.system(size: 16, weight: .regular))
           }
           Image(systemName: "chevron.right")

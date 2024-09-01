@@ -82,7 +82,7 @@ public struct AnimatedHelloImageView: View {
   }
 }
 
-public struct HelloImageOption: Equatable, Sendable {
+public struct HelloImageOption: Equatable, Identifiable, Sendable {
   public var imageSource: HelloImageSource
   public var variant: HelloImageVariant
   
@@ -90,6 +90,8 @@ public struct HelloImageOption: Equatable, Sendable {
     self.imageSource = imageSource
     self.variant = variant
   }
+  
+  public var id: String { HelloImageID(source: imageSource, variant: variant).id }
 }
 
 public struct HelloImageView<CustomView: View, Fallback: View>: View {
@@ -102,6 +104,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   private let viewable: Bool
   private let cornerRadius: CGFloat?
   private let resizeMode: ContentMode
+  private let cache: HelloImageCache?
   private let custom: (@MainActor (NativeImage) -> CustomView)?
   private let fallback: @MainActor () -> Fallback
   
@@ -109,6 +112,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               viewable: Bool = false,
               cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
+              cache: HelloImageCache? = nil,
               custom: (@MainActor (NativeImage) -> CustomView)?,
               fallback: @MainActor @escaping () -> Fallback) {
     imageOptions = options
@@ -116,6 +120,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
     self.viewable = viewable
     self.cornerRadius = cornerRadius
     self.resizeMode = resizeMode
+    self.cache = cache
     self.custom = custom
     self.fallback = fallback
   }
@@ -125,12 +130,14 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               viewable: Bool = false,
               cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
+              cache: HelloImageCache? = nil,
               @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
               fallback: @MainActor @escaping () -> Fallback) {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
+              cache: cache,
               custom: custom,
               fallback: fallback)
   }
@@ -140,12 +147,16 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
                    viewable: Bool = false,
                    cornerRadius: CGFloat? = nil,
                    resizeMode: ContentMode,
+                   cache: HelloImageCache? = nil,
                    custom: (@MainActor (NativeImage) -> CustomView)?,
                    fallback: @MainActor @escaping () -> Fallback) {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
               viewable: viewable,
               cornerRadius: cornerRadius,
-              resizeMode: resizeMode, custom: custom, fallback: fallback)
+              resizeMode: resizeMode,
+              cache: cache,
+              custom: custom,
+              fallback: fallback)
   }
   
   private var model: HelloImageModel? {
@@ -192,7 +203,9 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
     .onChange(of: imageOptions, initial: true) {
       var imageModels: [HelloImageModel] = []
       for imageOption in imageOptions {
-        imageModels.append(.model(for: imageOption.imageSource, variant: imageOption.variant) )
+        let model: HelloImageModel = .model(for: imageOption.imageSource, variant: imageOption.variant)
+        imageModels.append(model)
+        cache?.imageModelCache[imageOption.id] = model
         if imageModels.last?.image != nil {
           break
         }
@@ -208,12 +221,14 @@ public extension HelloImageView where Fallback == Color {
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil,
        @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView) {
     self.init(source,
               variant: variant,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
+              cache: cache,
               custom: custom,
               fallback: { Color.clear })
   }
@@ -225,12 +240,14 @@ public extension HelloImageView where CustomView == EmptyView {
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil,
        fallback: @MainActor @escaping () -> Fallback) {
     self.init(source,
               variant: variant,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
+              cache: cache,
               custom: nil,
               fallback: fallback)
   }
@@ -241,12 +258,14 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
        variant: HelloImageVariant = .original,
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
-       resizeMode: ContentMode = .fit) {
+       resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil) {
     self.init(source,
               variant: variant,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
+              cache: cache,
               custom: nil,
               fallback: { Color.clear })
   }
@@ -254,11 +273,13 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
   init(options: [HelloImageOption],
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
-       resizeMode: ContentMode = .fit) {
+       resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil) {
     self.init(options: options,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
+              cache: cache,
               custom: nil,
               fallback: { Color.clear })
   }

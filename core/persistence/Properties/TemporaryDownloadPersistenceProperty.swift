@@ -9,6 +9,8 @@ public struct TemporaryDownloadPersistenceProperty: PersistenceProperty {
   public var location: PersistenceType { .file(location: .temporary, path: "image-downloads/\(url.fileSafeString)") }
   
   public var allowCache: Bool { false }
+  
+  public var allowedInDemoMode: Bool { true }
 }
 
 public extension PersistenceProperty where Self == TemporaryDownloadPersistenceProperty {

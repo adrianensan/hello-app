@@ -12,6 +12,8 @@ public struct CachedRmoteImagePersistenceProperty: PersistenceProperty {
   
   public var defaultValue: Data? { nil }
   
+  public var allowedInDemoMode: Bool { true }
+  
   public var location: PersistenceType {
     if useAppGroup {
       .file(location: .appGroup, path: "cache/remote-images/\(variant.id)/\(url.fileSafeString)\(variant != .original ? ".heic" : "")")
@@ -19,8 +21,6 @@ public struct CachedRmoteImagePersistenceProperty: PersistenceProperty {
       .file(location: .cache, path: "cache-images/\(variant.id)/\(url.fileSafeString)\(variant != .original ? ".heic" : "")")
     }
   }
-  
-  public var allowCache: Bool { false }
 }
 
 public extension PersistenceProperty where Self == CachedRmoteImagePersistenceProperty {

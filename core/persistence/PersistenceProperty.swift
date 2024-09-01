@@ -156,6 +156,9 @@ public protocol PersistenceProperty: Sendable {
   static var persistence: HelloPersistence { get }
   
   var defaultValue: Value { get }
+  var defaultDemoValue: Value { get }
+  
+  var allowedInDemoMode: Bool { get }
   
   var location: PersistenceType { get }
   
@@ -180,6 +183,10 @@ extension PersistenceProperty {
   
   public func cleanup(value: Value) -> Value { value }
   
+  public var defaultDemoValue: Value { defaultValue }
+  
+  public var allowedInDemoMode: Bool { false }
+  
   public var allowCache: Bool {
     switch location {
     case .defaults: true
@@ -190,7 +197,7 @@ extension PersistenceProperty {
   }
   public var persistDefaultValue: Bool { false }
   public var isDeprecated: Bool { false }
-  var id: String { location.id }
+  public var id: String { location.id }
   
   public var oldProperty: OldProperty? { nil }
   public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
@@ -272,7 +279,7 @@ extension PersistenceProperty {
 public class PersistentObservable<Property: PersistenceProperty> {
 
   private let property: Property
-  public private(set) var _value: Property.Value
+  public internal(set) var _value: Property.Value
   public var value: Property.Value {
     get { _value }
     set {

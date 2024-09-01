@@ -28,7 +28,7 @@ public protocol BaseAppIcon: Codable, Hashable, Identifiable, CaseIterable, Send
   
   var isFree: Bool { get }
   
-  var availabilit: AppIconAvailability { get }
+  var availability: AppIconAvailability { get }
 }
 
 public extension BaseAppIcon {

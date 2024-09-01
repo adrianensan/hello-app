@@ -2,7 +2,6 @@ import SwiftUI
 
 public struct NavigationPageTitle: View {
   
-  @Environment(\.theme) private var theme
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.helloPagerConfig) private var config
   @Environment(HelloScrollModel.self) private var scrollModel

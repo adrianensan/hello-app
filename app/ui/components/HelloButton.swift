@@ -125,6 +125,35 @@ public enum HapticsType {
   }
 }
 
+public struct HelloShareLink<Content: View>: View {
+  
+  @State private var model: HelloButtonModel
+  
+  private var url: URL
+  private var clickStyle: HelloButtonClickStyle
+  private var content: @MainActor () -> Content
+  
+  public init(url: URL,
+              clickStyle: HelloButtonClickStyle = .scale,
+              haptics: HapticsType = .click,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.url = url
+    self.clickStyle = clickStyle
+    self.content = content
+    _model = State(initialValue: HelloButtonModel(hapticsType: haptics))
+  }
+  
+  public var body: some View {
+    ShareLink(item: url) {
+      content()
+        .clickable()
+    }.buttonStyle(.hello(clickStyle: clickStyle))
+      .accessibilityElement()
+      .accessibilityAddTraits(.isButton)
+      .environment(model)
+  }
+}
+
 public struct HelloButton<Content: View>: View {
   
   #if os(macOS)

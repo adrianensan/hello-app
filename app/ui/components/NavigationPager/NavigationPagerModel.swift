@@ -156,8 +156,8 @@ public class PagerModel {
     activePageID.flatMap { pageScrollModels[$0] }
   }
   
-  public var activePageScrollOffset: CGFloat {
-    activeScrollModel?.scrollOffset ?? 0
+  public var activePageIsReadyForDismiss: Bool {
+    activeScrollModel?.readyForDismiss ?? true
   }
   
   public func push<Page: View>(id: String = String(describing: Page.self),

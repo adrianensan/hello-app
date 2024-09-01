@@ -65,6 +65,14 @@ public struct AnimatedImageFrame: Sendable, Hashable {
 }
 
 @MainActor
+public class HelloImageCache {
+  
+  public static var new: HelloImageCache { HelloImageCache() }
+  
+  var imageModelCache: [String: HelloImageModel] = [:]
+}
+
+@MainActor
 @Observable
 public class HelloImageModel {
   

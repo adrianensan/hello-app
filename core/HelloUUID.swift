@@ -1,8 +1,8 @@
 import Foundation
 
-public struct HelloUUID: Identifiable, Sendable {
+public struct HelloUUID: Identifiable, Hashable, Sendable {
   
-  var date: Date = .now
+//  var date: Date = .now
   var bits: UInt128
   
   public init(bits: UInt128) {

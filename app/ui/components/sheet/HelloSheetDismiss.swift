@@ -47,7 +47,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .gesture(type: model.dragToDismissType, DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
         .updating($drag) { drag, state, transaction in
           if model.dragCanDismiss == nil {
-            model.dragCanDismiss = !model.shouldScrollInsteadOfDismiss && 0.8 * drag.translation.height > abs(drag.translation.width)
+            model.dragCanDismiss = (model.isDraggingNavBar || !model.shouldScrollInsteadOfDismiss) && 0.8 * drag.translation.height > abs(drag.translation.width)
           }
           
           if model.dragCanDismiss == true {
@@ -65,8 +65,11 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
           model.dragCanDismiss = nil
         })
       .onChange(of: drag) {
-        if drag == nil && model.dismissDrag != 0 {
-          model.dismissDrag = 0
+        if drag == nil {
+          model.isDraggingNavBar = false
+          if model.dismissDrag != 0 {
+            model.dismissDrag = 0
+          }
         }
       }
       .allowsHitTesting(model.isVisible)

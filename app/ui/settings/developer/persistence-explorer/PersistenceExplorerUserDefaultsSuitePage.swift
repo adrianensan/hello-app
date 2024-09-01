@@ -34,14 +34,18 @@ struct PersistenceExplorerUserDefaultsSuitePage: View {
             .foregroundStyle(theme.foreground.tertiary.style)
         }
         HelloSection(title: "App") {
-          ForEach(sortedAppEntries) { entry in
-            PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+          LazyVStack(spacing: 0) {
+            ForEach(sortedAppEntries) { entry in
+              PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+            }
           }
         }
         
         HelloSection(title: "System") {
-          ForEach(sortedSystemEntries) { entry in
-            PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+          LazyVStack(spacing: 0) {
+            ForEach(sortedSystemEntries) { entry in
+              PersistenceExplorerUserDefaultsObjectRow(entry: entry)
+            }
           }
         }
       }

@@ -35,7 +35,7 @@ public class HelloScrollModel {
   public var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
   
   fileprivate let coordinateSpaceName: String = .uuid
-  @ObservationIgnored fileprivate var readyForDismiss: Bool = true
+  @ObservationIgnored internal private(set) var readyForDismiss: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
   @ObservationIgnored private var isActive: Bool = true
@@ -57,7 +57,7 @@ public class HelloScrollModel {
   public var overscroll: CGFloat = 0
   
   public var hasScrolled: Bool = false// { scrollOffset < scrollThreshold }
-  public var hasScrolledDuringTouch: Bool = false
+//  public var hasScrolledDuringTouch: Bool = false
   
   public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
   
@@ -88,10 +88,7 @@ public class HelloScrollModel {
   
   fileprivate func update(offset: CGFloat) {
     guard isActive else { return }
-    if offset < 0 {
-      timeReachedTop = epochTime
-    }
-
+    
     if readyForDismiss
         && !isDismissing
         && offset > scrollOffset {
@@ -99,25 +96,29 @@ public class HelloScrollModel {
     }
     
     if !readyForDismiss
-        && offset >= 0 && offset < scrollOffset
-        && epochTime - timeReachedTop > 0.1 {
+        && offset >= 0
+        && epochTime - timeReachedTop > 0.3 {
       readyForDismiss = true
     } else if readyForDismiss && offset < 0 {
       readyForDismiss = false
       isDismissing = false
     }
     
-    #if os(iOS)
-    if !isScreenTouched {
-      TouchesModel.main.hasScrolledDuringTouch = false
+    if offset > scrollOffset {
+      timeReachedTop = epochTime
     }
-    #endif
+    
+//    #if os(iOS)
+//    if !isScreenTouched {
+//      TouchesModel.main.hasScrolledDuringTouch = false
+//    }
+//    #endif
     
     guard scrollOffset != offset else { return }
     scrollOffset = offset
-    #if os(iOS)
-    TouchesModel.main.hasScrolledDuringTouch = isScreenTouched
-    #endif
+//    #if os(iOS)
+//    TouchesModel.main.hasScrolledDuringTouch = isScreenTouched
+//    #endif
     let hasScrolled = scrollOffset < effectiveScrollThreshold
     if self.hasScrolled != hasScrolled {
       self.hasScrolled = hasScrolled
@@ -167,7 +168,7 @@ public struct HelloScrollView<Content: View>: View {
               @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.allowScroll = allowScroll
     self.content = content
-    _model = State(wrappedValue: model ?? HelloScrollModel())
+    _model = State(initialValue: model ?? HelloScrollModel())
   }
   
   public var body: some View {

@@ -17,7 +17,7 @@ struct PersistenceExplorerFileSheet: View {
     NavigationPagerView {
       NavigationPage(navBarContent: {
         HStack(spacing: 4) {
-          ShareLink(item: file.url) {
+          HelloShareLink(url: file.url) {
             Image(systemName: "square.and.arrow.up")
               .font(.system(size: 20, weight: .regular))
               .foregroundStyle(theme.foreground.primary.style)
@@ -91,6 +91,23 @@ struct PersistenceExplorerFileSheet: View {
                   .fixedSize()
                 Spacer(minLength: 16)
                 Text(file.size.string())
+                  .font(.system(size: 16, weight: .regular))
+                  .foregroundStyle(theme.surface.foreground.primary.style)
+                  .fixedSize(horizontal: false, vertical: true)
+              }
+            }
+            
+            HelloSectionItem {
+              HStack(spacing: 4) {
+                Image(systemName: "internaldrive")
+                  .font(.system(size: 20, weight: .regular))
+                  .frame(width: 32, height: 32)
+                  .frame(height: 1)
+                Text("Size On Disk")
+                  .font(.system(size: 16, weight: .regular))
+                  .fixedSize()
+                Spacer(minLength: 16)
+                Text(file.sizeOnDisk.string())
                   .font(.system(size: 16, weight: .regular))
                   .foregroundStyle(theme.surface.foreground.primary.style)
                   .fixedSize(horizontal: false, vertical: true)

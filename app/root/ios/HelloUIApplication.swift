@@ -1,7 +1,7 @@
 #if os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 
-public struct HelloTouch: Identifiable, Sendable {
+public struct HelloTouch: Identifiable, Equatable, Sendable {
   public var id: Int
   public var location: CGPoint
 }
@@ -30,7 +30,9 @@ public class HelloUIApplication: UIApplication {
     activeTouches.removeAll { !allTouchIDs.contains($0.id) }
     
     #if os(iOS)
-    helloApplication.touchesUpdateInternal(to: activeTouches)
+    Task {
+      helloApplication.touchesUpdateInternal(to: activeTouches)
+    }
     #endif
   }
 }

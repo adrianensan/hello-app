@@ -175,13 +175,18 @@ extension HelloApplication {
 #endif
       if AppInfo.isTestBuild {
         await Persistence.save(true, for: .isTester)
-        var unlockedAppIcons = await Persistence.atomicUpdate(for: .unlockedAppIcons) {
+        await Persistence.atomicUpdate(for: .unlockedAppIcons) {
           var unlockedAppIcons = $0
           if unlockedAppIcons.contains("betaTester") {
             unlockedAppIcons.insert("betaTester")
           }
           return unlockedAppIcons
         }
+      }
+      await Persistence.atomicUpdate(for: .installedApps) {
+        var installedApps = $0
+        installedApps.insert(AppInfo.rootBundleID)
+        return installedApps
       }
       Log.verbose("Device ID: \(await Persistence.value(.deviceID))")
       if let currentAppVersion = AppVersion.current {

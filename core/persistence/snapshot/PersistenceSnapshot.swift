@@ -22,6 +22,13 @@ public enum PersistenceFileSnapshotType: Identifiable, Sendable {
     }
   }
   
+  public var sizeOnDisk: DataSize {
+    switch self {
+    case .file(let persistenceFileSnapshot): persistenceFileSnapshot.sizeOnDisk
+    case .folder(let persistenceFolderSnapshot): persistenceFolderSnapshot.sizeOnDisk
+    }
+  }
+  
   public var url: URL {
     switch self {
     case .file(let persistenceFileSnapshot): persistenceFileSnapshot.url
@@ -127,6 +134,7 @@ public struct UserDefaultsSnapshot: Identifiable, Sendable {
 public struct PersistenceFolderSnapshot: Identifiable, Sendable {
   package var name: String
   package var size: DataSize
+  package var sizeOnDisk: DataSize
   package var dateCreated: Date?
   package var dateModified: Date?
   package var url: URL
@@ -138,6 +146,7 @@ public struct PersistenceFolderSnapshot: Identifiable, Sendable {
 public struct PersistenceFileSnapshot: Identifiable, Sendable {
   package var name: String
   package var size: DataSize
+  package var sizeOnDisk: DataSize
   package var dateCreated: Date?
   package var dateModified: Date?
   package var url: URL
