@@ -14,7 +14,7 @@ public enum AppIconAvailability: String, Sendable {
   }
 }
 
-public protocol BaseAppIcon: Codable, Hashable, Identifiable, CaseIterable, Sendable {
+public protocol BaseAppIcon: Codable, Hashable, Identifiable, Sendable {
   
   init?(rawValue: String)
   
@@ -25,8 +25,6 @@ public protocol BaseAppIcon: Codable, Hashable, Identifiable, CaseIterable, Send
   var rawValue: String { get }
   
   var displayName: String { get }
-  
-  var isFree: Bool { get }
   
   var availability: AppIconAvailability { get }
 }
@@ -46,8 +44,6 @@ public extension BaseAppIcon {
     default: imageName
     }
   }
-  
-  static var allIcons: [Self] { Array(allCases) }
   
   static func infer(from systemName: String?) -> Self {
     if let systemName = systemName {

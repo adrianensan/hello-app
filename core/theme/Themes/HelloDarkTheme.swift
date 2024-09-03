@@ -31,7 +31,11 @@ public extension HelloTheme {
                            border: .init(color: .white.opacity(0.1)))),
       surfaceLayer: .init(
         background: .color(color: HelloColor(r: 0.1, g: 0.09, b: 0.09),
-                           border: .init(color: .white.opacity(0.1)))))
+                           border: .init(color: .white.opacity(0.1)))),
+      surfaceSectionLayer: .init(
+        background: .color(color: HelloColor(r: 0.16, g: 0.15, b: 0.15),
+                           border: .init(color: .white.opacity(0.1))))
+    )
 #endif
   }
 }

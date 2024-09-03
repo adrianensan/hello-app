@@ -49,8 +49,24 @@ public struct HelloAppRootView<Content: View>: View {
     }.environment(\.safeArea, uiProperties.safeAreaInsets)
       .observeWindowFrame()
       .observeKeyboardFrame()
+      .dimHomeBarForTheme()
       .observeIsActive()
       .observeActiveTheme()
+      .onAppear {
+        let persistenceMode = Persistence.unsafeValue(.persistenceMode)
+        if persistenceMode != .normal {
+          windowModel.show(alert: HelloAlertConfig(
+            title: "\(persistenceMode.name) Mode Enabled",
+            message: "Nothing you do will persist after you close \(AppInfo.displayName).",
+            firstButton: .init(
+              name: "Disable",
+              action: {
+                Persistence.unsafeSave(.normal, for: .persistenceMode)
+                exitGracefully()
+              }, isDestructive: false),
+            secondButton: .ok))
+        }
+      }
   }
 }
 #endif

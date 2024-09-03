@@ -11,13 +11,17 @@
 		</dict>
 		<key>HelloApp.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
-			<integer>51</integer>
+			<integer>60</integer>
 		</dict>
 		<key>HelloAppIconGenerator.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
-			<integer>50</integer>
+			<integer>57</integer>
 		</dict>
 		<key>HelloAppp-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -31,13 +35,17 @@
 		</dict>
 		<key>HelloCore.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
-			<integer>53</integer>
+			<integer>58</integer>
 		</dict>
 		<key>HelloServer.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
-			<integer>52</integer>
+			<integer>59</integer>
 		</dict>
 		<key>HelloUI.xcscheme_^#shared#^_</key>
 		<dict>
@@ -87,6 +95,26 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>HelloApp</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>HelloAppIconGenerator</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>HelloCore</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>HelloServer</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>OFAPI</key>
 		<dict>
 			<key>primary</key>

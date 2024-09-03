@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -56,3 +57,4 @@ public struct HelloPicker<Item: HelloPickerItem>: View {
     }.frame(height: 28)
   }
 }
+#endif

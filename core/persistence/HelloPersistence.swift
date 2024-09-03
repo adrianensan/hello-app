@@ -15,7 +15,35 @@ public enum HelloPersistenceError: Error {
   public static let shared: HelloPersistenceActor = HelloPersistenceActor()
 }
 
-extension UserDefaults: @unchecked @retroactive Sendable {}
+//extension UserDefaults: @unchecked @retroactive Sendable {}
+
+public extension UserDefaults {
+  func value<Property: PersistenceProperty>(for property: Property) throws -> Property.Value {
+    switch property.location {
+    case .defaults(let suite, let key):
+      switch Property.Value.self {
+      case is Bool.Type, is Bool?.Type,
+        is String.Type, is String?.Type,
+        is Int.Type, is Int?.Type,
+        is Double.Type, is Double?.Type,
+        is Data.Type, is Data?.Type:
+        if let value = object(forKey: key) as? Property.Value {
+          return value
+        } else {
+          return property.defaultValue
+        }
+      default:
+        guard let data = object(forKey: key) as? Data,
+              let value = try? Property.Value.decodeJSON(from: data) else {
+          return property.defaultValue
+          break
+        }
+        return value
+      }
+    default: throw HelloError("Invalid persistence type")
+    }
+  }
+}
 
 @HelloPersistenceActor
 public class HelloPersistence {
@@ -24,7 +52,7 @@ public class HelloPersistence {
     weak var object: AnyObject?
     var callback: @Sendable (Property.Value) async -> Void
     
-    init(object: AnyObject, callback: @escaping  @Sendable (Property.Value) async -> Void) {
+    init(object: AnyObject, callback: @escaping @Sendable (Property.Value) async -> Void) {
       self.object = object
       self.callback = callback
     }
@@ -33,7 +61,7 @@ public class HelloPersistence {
   nonisolated public let keychain: KeychainHelper
   private var allowSaving: Bool = true
   
-  nonisolated public let isDemoMode: Bool = UserDefaults.standard.bool(forKey: "is-demo-mode")
+  nonisolated public let mode: PersistenceMode = (try? UserDefaults.standard.value(for: .persistenceMode)) ?? .normal
   
   nonisolated public func fileURL(for location: FilePersistenceLocation, subPath: String) -> URL {
     baseURL(for: location).appending(component: subPath)
@@ -124,7 +152,7 @@ public class HelloPersistence {
   }
   
   nonisolated func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
-    guard !isDemoMode || property.allowedInDemoMode else { return }
+    guard mode == .normal || property.allowedInDemoMode else { return }
     
     if property.isDeprecated {
       Log.warning("Using depreacted property \(property.self)", context: "Persistence")
@@ -175,7 +203,7 @@ public class HelloPersistence {
     guard allowSaving else { return }
     do {
       try saveInternal(value, for: property)
-      if isDemoMode && !property.allowedInDemoMode || property.allowCache {
+      if mode != .normal && !property.allowedInDemoMode || property.allowCache {
         cache[property.location.id] = property.cleanup(value: value)
       }
       updated(value: value, for: property, skipModelUpdate: skipModelUpdate)
@@ -185,8 +213,8 @@ public class HelloPersistence {
   }
   
   public nonisolated func storedValue<Property: PersistenceProperty>(for property: Property) -> Property.Value {
-    if isDemoMode && !property.allowedInDemoMode {
-      return property.defaultDemoValue
+    guard mode == .normal || property.allowedInDemoMode else {
+      return property.defaultValue(for: mode)
     }
     let returnValue: Property.Value
     
@@ -252,7 +280,7 @@ public class HelloPersistence {
     }
     
     let value = storedValue(for: property)
-    if isDemoMode && !property.allowedInDemoMode || property.allowCache {
+    if mode != .normal && !property.allowedInDemoMode || property.allowCache {
       cache[property.location.id] = value
     }
     
@@ -266,7 +294,7 @@ public class HelloPersistence {
   public func delete<Property: PersistenceProperty>(property: Property) {
     cache[property.location.id] = nil
     
-    if !isDemoMode || property.allowedInDemoMode {
+    if mode == .normal || property.allowedInDemoMode {
       switch property.location {
       case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
       case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
@@ -278,7 +306,7 @@ public class HelloPersistence {
   }
   
   public func nuke(stopSaving: Bool = true) {
-    guard !isDemoMode else { return }
+    guard mode == .normal else { return }
     allowSaving = !stopSaving
     cache = [:]
     for suite in DefaultsPersistenceSuite.allCases {
@@ -392,10 +420,20 @@ public class HelloPersistence {
   }
 }
 
-public enum PersistenceMode {
+public enum PersistenceMode: String, Codable, Identifiable, CaseIterable, Sendable {
   case normal
   case demo
   case freshInstall
+  
+  public var id: String { rawValue }
+  
+  public var name: String {
+    switch self {
+    case .normal: "Normal"
+    case .demo: "Demo"
+    case .freshInstall: "New"
+    }
+  }
 }
 
 @HelloPersistenceActor

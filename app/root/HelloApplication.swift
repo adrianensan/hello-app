@@ -199,7 +199,7 @@ extension HelloApplication {
             await helloApplication.onFirstLaunch()
           }
         }
-      }
+      }      
     }
     
     onLaunch()

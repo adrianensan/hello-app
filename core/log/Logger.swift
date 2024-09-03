@@ -31,7 +31,7 @@ public class Logger: Sendable {
     Task { try await flush(force: false) }
   }
   
-  private func generateRawString() -> String {
+  public func generateRawString() -> String {
     logStatements.reduce("") { $0 + $1.formattedLine + "\n" }
   }
   

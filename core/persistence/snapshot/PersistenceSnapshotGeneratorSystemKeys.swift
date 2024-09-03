@@ -6,7 +6,7 @@ public class PersistenceSnapshotGenerator {
   }
   
   static var systemUserDefaultKeys: Set<String> {
-    ["cloud.llm", "AddingEmojiKeybordHandled"]
+    ["cloud.llm", "AddingEmojiKeybordHandled", "InvisibleAutoplayNotPermitted"]
   }
   
 }

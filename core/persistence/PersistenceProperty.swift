@@ -156,7 +156,7 @@ public protocol PersistenceProperty: Sendable {
   static var persistence: HelloPersistence { get }
   
   var defaultValue: Value { get }
-  var defaultDemoValue: Value { get }
+  func defaultValue(for mode: PersistenceMode) -> Value
   
   var allowedInDemoMode: Bool { get }
   
@@ -183,7 +183,9 @@ extension PersistenceProperty {
   
   public func cleanup(value: Value) -> Value { value }
   
-  public var defaultDemoValue: Value { defaultValue }
+  public func defaultValue(for mode: PersistenceMode) -> Value {
+    defaultValue
+  }
   
   public var allowedInDemoMode: Bool { false }
   

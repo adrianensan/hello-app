@@ -98,9 +98,9 @@ public class AppIconExporter {
     }
   }
   
-  public func export<AppIcon: VisionOSAppIcon>(visionOSIcons icons: [AppIcon]) async throws {
+  public func export(visionOSIcons icons: [any VisionOSAppIcon]) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("visionOS") else { return }
-    for icon in AppIcon.allCases {
+    for icon in icons {
       let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).solidimagestack")
       try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
       var layerContents = LayeredAppIconContents()
@@ -125,7 +125,27 @@ public class AppIconExporter {
     }
   }
   
-  public func export<AppIcon: IOSAppIcon>(iOSIcons icons: [AppIcon]) async throws {
+  public func exportThumbnails(iOSIcons icons: [any IOSAppIcon]) async throws {
+    guard let exportPath = baseExportPath?.appendingPathComponent("ios-thumbnails") else { return }
+    try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
+    for icon in icons {
+      try await save(view: icon.iOSView.light.flattenedView, size: CGSize(width: 180, height: 180),
+                     to: exportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.imageName, suffix: "")),
+                     allowOpacity: false)
+    }
+  }
+  
+  public func exportThumbnails(iOSIconsPairs icons: [(name: String, icon: any IOSAppIcon)]) async throws {
+    guard let exportPath = baseExportPath?.appendingPathComponent("ios-thumbnails") else { return }
+    try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
+    for icon in icons {
+      try await save(view: icon.icon.iOSView.light.flattenedView, size: CGSize(width: 180, height: 180),
+                     to: exportPath.appendingPathComponent(AppIconAssetsContents.iOSFileName(appIconName: icon.name, suffix: "")),
+                     allowOpacity: false)
+    }
+  }
+  
+  public func export(iOSIcons icons: [any IOSAppIcon]) async throws {
     guard let exportPath = baseExportPath?.appendingPathComponent("ios") else { return }
     for icon in icons {
       let iconExportPath = exportPath.appendingPathComponent("\(icon.imageName).appiconset")
@@ -168,7 +188,7 @@ public class AppIconExporter {
     try? AppiconsetContentsGenerator.contentsFile(for: AppIcon.defaultIcon.imageName, with: IconScale.macOSMainIconScales)
       .write(to: mainIconExportPath.appendingPathComponent("Contents.json"), atomically: true, encoding: .utf8)
     
-    for icon in AppIcon.allCases {
+    for icon in icons {
       try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
       
       try await save(view: baseImage(for: icon.macOSView.view.flattenedView, scale: .init(size: CGSize(width: 256, height: 256), scaleFactor: 1, purpose: .mac)),

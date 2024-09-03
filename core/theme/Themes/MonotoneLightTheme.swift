@@ -5,17 +5,19 @@ public extension HelloTheme {
   }
   
   static func light(accent: HelloFill) -> HelloTheme {
-    HelloTheme(
-      id: "light",
-      name: "Light",
+    let layer = HelloThemeLayerBuilder.init(
+      background: .color(color: .white, border: .init(color: .black.opacity(0.25))),
+      accent: accent,
+      error: .color(color: .retroApple.red)
+    )
+    return HelloTheme(
+      id: "monotone-light",
+      name: "Monotone Light",
       scheme: .light,
-      baseLayer: .init(
-        background: .color(color: HelloColor(r: 1, g: 1, b: 1),
-                           border: .init(color: .black.opacity(0.2))),
-        accent: accent
-      ),
-      headerLayer: .init(
-        background: .blur(dark: false, overlay: HelloColor(r: 1, g: 1, b: 1).opacity(0.4))
-      ))
+      baseLayer: layer,
+      headerLayer: layer,
+      floatingLayer: layer,
+      surfaceLayer: layer,
+      surfaceSectionLayer: layer)
   }
 }

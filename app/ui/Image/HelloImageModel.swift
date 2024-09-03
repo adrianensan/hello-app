@@ -11,7 +11,7 @@ public struct HelloImageID {
     self.source = source
     self.variant = variant
   }
-    
+  
   public var id: String { "\(source.id)-\(variant.id)" }
 }
 
@@ -87,7 +87,7 @@ public class HelloImageModel {
       return model
     } else {
       let model = HelloImageModel(imageSource: imageSource, variant: variant)
-//      weakModels[id] = Weak(value: model)
+      //      weakModels[id] = Weak(value: model)
       switch variant {
       case .original:
         weakModels[id] = Weak(value: model)
@@ -131,19 +131,20 @@ public class HelloImageModel {
       image = nativeImage
       Task { await loadFrames(from: data) }
     case .remoteURL(let url):
-      if let cachedImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
-        image = NativeImage(data: cachedImageData)
-        Task { await loadFrames(from: cachedImageData) }
-      } else if let cachedOriginalImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) ?? Persistence.unsafeValue(.tempDownload(url: url)) {
-        loadTask = Task {
+      loadTask = Task {
+        if let cachedImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
+          image = NativeImage(data: cachedImageData)
+          await loadFrames(from: cachedImageData)
+        } else if let cachedOriginalImageData = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) ?? Persistence.unsafeValue(.tempDownload(url: url)) {
+          //        loadTask = Task {
           defer { loadTask = nil }
           let resizedImageData = try await ImageProcessor.resize(imageData: cachedOriginalImageData, maxSize: variant.size)
           await Persistence.save(resizedImageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           image = NativeImage(data: resizedImageData)
           await loadFrames(from: resizedImageData)
-        }
-      } else {
-        loadTask = Task {
+          //        }
+        } else {
+          //        loadTask = Task {
           defer { loadTask = nil }
           var imageData = try await HelloImageDownloadManager.main.download(from: url)
           await Persistence.save(imageData, for: .tempDownload(url: url))
@@ -155,59 +156,60 @@ public class HelloImageModel {
           await Persistence.save(imageData, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
           self.image = NativeImage(data: imageData)
           await loadFrames(from: imageData)
+          //        }
         }
       }
-    case .favicon(let url):
-      var helloURL = HelloURL(string: url)
-      guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
-      helloURL.scheme = .https
-      let url = helloURL.root.string
-      if let cachedFavicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
-        image = NativeImage(data: cachedFavicon)
-      } else if let favicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
-        loadTask = Task {
-          defer { loadTask = nil }
-          let resizedFavicon = try await ImageProcessor.resize(imageData: favicon, maxSize: variant.size)
-          await Persistence.save(resizedFavicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
-          image = NativeImage(data: resizedFavicon)
-        }
-      } else {
-        loadTask = Task {
-          defer { loadTask = nil }
-          var favicon = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
-          
-          await Persistence.save(favicon, for: .tempDownload(url: url))
-          switch variant {
-          case .original: ()
-          case .thumbnail(let size):
-            favicon = try await ImageProcessor.resize(imageData: favicon, maxSize: size)
+      case .favicon(let url):
+        var helloURL = HelloURL(string: url)
+        guard helloURL.host.contains(".") && !helloURL.host.hasSuffix(".") else { return }
+        helloURL.scheme = .https
+        let url = helloURL.root.string
+        if let cachedFavicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup)) {
+          image = NativeImage(data: cachedFavicon)
+        } else if let favicon = Persistence.unsafeValue(.cacheRemoteIamge(url: url, useAppGroup: Self.useAppGroup)) {
+          loadTask = Task {
+            defer { loadTask = nil }
+            let resizedFavicon = try await ImageProcessor.resize(imageData: favicon, maxSize: variant.size)
+            await Persistence.save(resizedFavicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
+            image = NativeImage(data: resizedFavicon)
           }
-          await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
-          image = NativeImage(data: favicon)
+        } else {
+          loadTask = Task {
+            defer { loadTask = nil }
+            var favicon = try await LinkFaviconURLDataParser.main.getFavicon(for: helloURL)
+            
+            await Persistence.save(favicon, for: .tempDownload(url: url))
+            switch variant {
+            case .original: ()
+            case .thumbnail(let size):
+              favicon = try await ImageProcessor.resize(imageData: favicon, maxSize: size)
+            }
+            await Persistence.save(favicon, for: .cacheRemoteIamge(url: url, variant: variant, useAppGroup: Self.useAppGroup))
+            image = NativeImage(data: favicon)
+          }
         }
+      case .nativeImage(let nativeImage):
+        image = nativeImage
+      case .frames(let frames):
+        image = frames.first?.image
+        self.frames = frames
+      case .data(let data):
+        image = NativeImage(data: data)
       }
-    case .nativeImage(let nativeImage):
-      image = nativeImage
-    case .frames(let frames):
-      image = frames.first?.image
-      self.frames = frames
-    case .data(let data):
-      image = NativeImage(data: data)
     }
-  }
-  
-  public func load() {
     
-  }
-  
-  public var asyncImage: NativeImage? {
-    get async {
-      try? await loadTask?.value
-      return image
+    public func load() {
+      
+    }
+    
+    public var asyncImage: NativeImage? {
+      get async {
+        try? await loadTask?.value
+        return image
+      }
+    }
+    
+    func loadFrames(from data: Data) async {
+      frames = await ImageProcessor.animatedFrames(from: data)
     }
   }
-  
-  func loadFrames(from data: Data) async {
-    frames = await ImageProcessor.animatedFrames(from: data)
-  }
-}

@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-public struct AppIconOptionView<AppIcon: IOSAppIcon>: View {
+public struct AppIconOptionView<AppIcon: BaseAppIcon>: View {
   
   @Environment(\.theme) private var theme
   
@@ -13,6 +13,7 @@ public struct AppIconOptionView<AppIcon: IOSAppIcon>: View {
   public var body: some View {
     VStack(spacing: 4) {
       AppIconView(icon: icon)
+        .frame(width: 60, height: 60)
         .padding(4)
         .background {
           AppIconShape()

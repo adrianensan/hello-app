@@ -5,38 +5,51 @@ import UniformTypeIdentifiers
 import HelloCore
 import HelloApp
 
+extension PersistenceMode: HelloPickerItem {}
+
 struct DemoModeSettingsItem: View {
   
   @Environment(HelloWindowModel.self) private var windowModel
   
-  @Persistent(.isDemoMode) private var isDemoMode
+  @Persistent(.persistenceMode) private var persistenceMode
   
-  private var actionName: String { isDemoMode ? "Disable" : "Enable" }
+  private var actionName: String { persistenceMode == .demo ? "Disable" : "Enable" }
+  
+  func title(for persistenceMode: PersistenceMode) -> String {
+    switch persistenceMode {
+    case .normal: "Disable \(self.persistenceMode.name) Mode"
+    case .demo: "Enable \(persistenceMode.name) Mode"
+    case .freshInstall: "Enable \(persistenceMode.name) Mode"
+    }
+  }
   
   var body: some View {
-    HelloButton(clickStyle: .highlight, action: {
-      windowModel.show(alert: HelloAlertConfig(
-        title: "\(actionName) Demo Mode",
-        message: "\(AppInfo.displayName) will close immediately",
-        firstButton: .cancel,
-        secondButton: .init(
-          name: actionName,
-          action: {
-            UserDefaults.standard.set(!isDemoMode, forKey: "is-demo-mode")
-            exitGracefully()
-          },
-          isDestructive: true)))
-    }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: isDemoMode ? "xmark" : "play.circle")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("\(actionName) Demo Mode")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-        }
+    HelloSectionItem {
+      HStack(spacing: 4) {
+        Image(systemName: "play.circle")
+          .font(.system(size: 20, weight: .regular))
+          .frame(width: 32, height: 32)
+        
+        Text("Persistence Mode")
+          .font(.system(size: 16, weight: .regular))
+        Spacer(minLength: 0)
+        
+        HelloPicker(selected: persistenceMode,
+                    options: PersistenceMode.allCases,
+                    onChange: { newPersistenceMode in
+          guard persistenceMode != newPersistenceMode else { return }
+          windowModel.show(alert: HelloAlertConfig(
+            title: title(for: newPersistenceMode),
+            message: "\(AppInfo.displayName) will close immediately",
+            firstButton: .cancel,
+            secondButton: .init(
+              name: actionName,
+              action: {
+                Persistence.unsafeSave(newPersistenceMode, for: .persistenceMode)
+                exitGracefully()
+              },
+              isDestructive: newPersistenceMode != .normal)))
+        })
       }
     }
   }

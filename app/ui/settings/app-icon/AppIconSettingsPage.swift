@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-struct AppIconSettingsPage<AppIcon: IOSAppIcon>: View {
+struct AppIconSettingsPage<AppIcon: BaseAppIcon>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea

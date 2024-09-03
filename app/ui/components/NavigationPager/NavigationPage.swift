@@ -77,9 +77,11 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
           globalDismissKeyboard()
         })
       
+      #if os(iOS)
       NavigationPageBarFixed(title: title, navBarContent: {
         navBarContent().padding(.trailing, config.navBarTrailingPadding)
       })
+      #endif
     }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil, initial: true) {
       #if os(iOS)
       scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 0 : -82

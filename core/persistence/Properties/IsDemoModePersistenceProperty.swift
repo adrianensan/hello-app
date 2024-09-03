@@ -1,16 +1,16 @@
 import Foundation
 
-public struct IsDemoModePersistenceProperty: PersistenceProperty {
+public struct PersistenceModePersistenceProperty: PersistenceProperty {
   
-  public var defaultValue: Bool { false }
+  public var defaultValue: PersistenceMode { .normal }
   
-  public var defaultDemoValue: Bool { true }
+  public var allowedInDemoMode: Bool { true }
   
-  public var location: PersistenceType { .defaults(key: "is-demo-mode") }
+  public var location: PersistenceType { .defaults(key: "persistence-mode") }
 }
 
-public extension PersistenceProperty where Self == IsDemoModePersistenceProperty {
-  static var isDemoMode: IsDemoModePersistenceProperty {
-    IsDemoModePersistenceProperty()
+public extension PersistenceProperty where Self == PersistenceModePersistenceProperty {
+  static var persistenceMode: PersistenceModePersistenceProperty {
+    PersistenceModePersistenceProperty()
   }
 }

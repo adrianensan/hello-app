@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -45,3 +46,4 @@ public struct NavigationPageBarFixed<NavBarContent: View>: View {
       }
   }
 }
+#endif

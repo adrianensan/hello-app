@@ -1,6 +1,8 @@
 import SwiftUI
 
-public struct AppIconView<AppIcon: IOSAppIcon>: View {
+import HelloCore
+
+public struct AppIconView<AppIcon: BaseAppIcon>: View {
   
   @Environment(\.theme) var theme
   
@@ -9,9 +11,9 @@ public struct AppIconView<AppIcon: IOSAppIcon>: View {
   var isSmall: Bool = false
   
   public var body: some View {
-    icon.view.flattenedView
+    HelloImageView(.asset(named: icon.imageName))
+//    icon.view.flattenedView
       .clipShape(AppIconShape())
-      .frame(width: isSmall ? 32 : 60, height: isSmall ? 32 : 60)
       .overlay(AppIconShape().stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))
   }
 }

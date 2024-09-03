@@ -78,7 +78,7 @@ public enum UserDefaultsObjectSnapshot: Hashable, Sendable {
     case .boolean(let bool): "\(bool ? "TRUE" : "FALSE")"
     case .int(let int): "\(int)"
     case .double(let double): String(format: "%.2f", double)
-    case .data(let data): "\(DataSize(bytes: data.count).string())"
+    case .data(let data): data.count < 6 ? "0x" + data.hexString : "\(DataSize(bytes: data.count).string())"
     case .stringArray(let stringArray): "[String](\(stringArray.count))"
     case .unknown: "Unknown"
     }

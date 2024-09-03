@@ -4,7 +4,13 @@ public struct IsFakeDeveloperPersistenceProperty: PersistenceProperty {
   
   public var defaultValue: Bool { false }
   
-  public var defaultDemoValue: Bool { true }
+  public func defaultValue(for mode: PersistenceMode) -> Bool {
+    switch mode {
+    case .normal: false
+    case .demo: true
+    case .freshInstall: true
+    }
+  }
   
   public var location: PersistenceType { .defaults(key: "is-fake-developer") }
 }

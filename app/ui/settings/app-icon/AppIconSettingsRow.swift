@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-public struct AppIconSettingsRow<AppIcon: IOSAppIcon>: View {
+public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
   
   @Environment(PagerModel.self) private var pagerModel
   
@@ -23,10 +23,9 @@ public struct AppIconSettingsRow<AppIcon: IOSAppIcon>: View {
           Text("App Icon")
             .font(.system(size: 16, weight: .regular))
           Spacer(minLength: 0)
-          appIconModel.currentIcon.view.flattenedView
-            .dimForTheme()
+          AppIconView(icon: appIconModel.currentIcon)
+//          appIconModel.currentIcon.view.flattenedView
             .frame(width: 32, height: 32)
-            .clipShape(AppIconShape())
           Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular))
         }
