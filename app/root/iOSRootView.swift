@@ -21,12 +21,12 @@ public struct HelloAppRootView<Content: View>: View {
       content()
         .compositingGroup()
 //        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
-//        .blur(radius: windowModel.blurBackgroundForPopup && !windowModel.popupViews.isEmpty ? 2 : 0)
+        .blur(radius: !windowModel.popupViews.isEmpty ? windowModel.blurAmountForPopup : 0)
         .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
         .disabled(!windowModel.popupViews.isEmpty)
         .allowsHitTesting(windowModel.popupViews.isEmpty)
       
-      if !windowModel.popupViews.isEmpty {
+      if let topView = windowModel.popupViews.last {
         ForEach(windowModel.popupViews) { popupView in
           let layer = windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0
           popupView.view()
@@ -35,8 +35,10 @@ public struct HelloAppRootView<Content: View>: View {
             .zIndex(3 + 0.1 * Double(layer))
             .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
                                     removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
-            .disabled(windowModel.popupViews.last?.id != popupView.id)
-            .allowsHitTesting(windowModel.popupViews.last?.id == popupView.id)
+            .compositingGroup()
+            .blur(radius: topView.id != popupView.id ? windowModel.blurAmountForPopup : 0)
+            .disabled(topView.hasExclusiveInteraction && topView.id != popupView.id)
+            .allowsHitTesting(!topView.hasExclusiveInteraction || topView.id == popupView.id)
         }
       }
       
@@ -52,6 +54,7 @@ public struct HelloAppRootView<Content: View>: View {
       .dimHomeBarForTheme()
       .observeIsActive()
       .observeActiveTheme()
+      .applyVisualEfects()
       .onAppear {
         let persistenceMode = Persistence.unsafeValue(.persistenceMode)
         if persistenceMode != .normal {
@@ -67,6 +70,8 @@ public struct HelloAppRootView<Content: View>: View {
             secondButton: .ok))
         }
       }
+      .disabled(windowModel.freeze)
+      .allowsHitTesting(!windowModel.freeze)
   }
 }
 #endif

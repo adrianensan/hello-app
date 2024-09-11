@@ -15,6 +15,11 @@ struct PersistenceExplorerSettingsPage: View {
   public var body: some View {
     NavigationPage(title: "Persistence", showScrollIndicators: true) {
       VStack(spacing: 32) {
+        if let bundleSnapshot = fileModel.bundleSnapshot {
+          HelloSection(title: "BUNDLE") {
+            PersistenceExplorerFileRow(file: bundleSnapshot)
+          }
+        }
         if let files = fileModel.files {
           HelloSection(title: "FILES") {
             ForEach(files.files) { file in

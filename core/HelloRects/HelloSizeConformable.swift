@@ -93,6 +93,8 @@ public extension HelloSizeConformable where NumberType: BinaryInteger {
 public extension HelloSizeConformable where NumberType: BinaryFloatingPoint {
   var magnitude: Double { sqrt(Double(width * width + height * height)) }
   var diagonal: Double { magnitude }
+  
+  var isSquare: Bool { width == height }
 }
 
 public extension HelloSizeConformable where Self == CGSize {

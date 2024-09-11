@@ -8,9 +8,11 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
   
   @ViewBuilder var additionalContent: @MainActor () -> AdditionalContent
   
+  @Persistent(.isDeveloper) private var isDeveloper
+  
   public var body: some View {
     NavigationPage(title: "Developer") {
-      VStack(alignment: .leading, spacing: 32) {
+      VStack(alignment: .leading, spacing: 24) {
         HelloSection(title: "UI") {
           ShowDebugContentSettingsItem()
           ShowTouchesSettingsItem()
@@ -24,6 +26,9 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
         
         HelloSection {
           DemoModeSettingsItem()
+          if isDeveloper {
+            ActiveSubscriptionSettingsRow()
+          }
         }
         
         HelloSection(title: "RESET") {

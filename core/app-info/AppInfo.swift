@@ -24,6 +24,9 @@ public enum AppInfo {
   public static var appGroup: String { "group.\(rootBundleID)" }
   #endif
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
+  public static var sharedHelloICloudContainer: String { "iCloud.com.adrianensan.hello" }
   
-  public static var helloGroup: String { "group.adrianensan.hello" }
+  public static var sharedHelloGroup: String { "group.com.adrianensan.hello" }
+  
+  public static var developerHelloApp: String { "com.adrianensan.hello" }
 }

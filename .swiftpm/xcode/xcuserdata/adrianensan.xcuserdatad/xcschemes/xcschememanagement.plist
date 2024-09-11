@@ -14,14 +14,14 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>60</integer>
+			<integer>62</integer>
 		</dict>
 		<key>HelloAppIconGenerator.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>57</integer>
+			<integer>58</integer>
 		</dict>
 		<key>HelloAppp-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -38,14 +38,14 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>58</integer>
+			<integer>59</integer>
 		</dict>
 		<key>HelloServer.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>59</integer>
+			<integer>61</integer>
 		</dict>
 		<key>HelloUI.xcscheme_^#shared#^_</key>
 		<dict>

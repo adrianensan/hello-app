@@ -35,7 +35,12 @@ struct PersistenceExplorerFileRow: View {
           Group {
             switch file {
             case .file(let file):
-              Image(systemName: ContentType.inferFrom(fileExtension: file.url.pathExtension).iconName)
+              switch ContentType.inferFrom(fileExtension: file.url.pathExtension).category {
+              case .image:
+                HelloImageView(.url(file.url.absoluteString), variant: .thumbnail(size: 80), cornerRadius: 8, resizeMode: .fit)
+              default:
+                Image(systemName: ContentType.inferFrom(fileExtension: file.url.pathExtension).iconName)
+              }
             case .folder(let folder):
               ZStack {
                 Image(systemName: "folder.fill")

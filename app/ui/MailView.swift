@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -66,3 +67,4 @@ struct MailView: UIViewControllerRepresentable {
     
   }
 }
+#endif

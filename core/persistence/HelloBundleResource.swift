@@ -20,15 +20,8 @@ extension HelloBundleResource where Self == AnyBundleResource {
   }
 }
 
-
-public extension HelloBundleResource {
-  var url: URL? {
-    Bundle.main.url(forResource: name, withExtension: nil)
-  }
-}
-
 public extension Bundle {
   func url(for resource: some HelloBundleResource) -> URL? {
-    resource.url
+    url(forResource: resource.name, withExtension: nil)
   }
 }

@@ -6,10 +6,10 @@ public struct HelloAlertConfig {
   
   public struct HelloAlertViewItem {
     var name: String
-    var action: (() -> Void)?
+    var action: (@MainActor () -> Void)?
     var isDestructive: Bool
     
-    public init(name: String, action: (() -> Void)? = nil, isDestructive: Bool = false) {
+    public init(name: String, action: (@MainActor () -> Void)? = nil, isDestructive: Bool = false) {
       self.name = name
       self.action = action
       self.isDestructive = isDestructive
@@ -21,11 +21,11 @@ public struct HelloAlertConfig {
       self.isDestructive = isDestructive
     }
     
-    public static func ok(action: (() -> Void)? = nil) -> HelloAlertViewItem {
+    public static func ok(action: (@MainActor () -> Void)? = nil) -> HelloAlertViewItem {
       HelloAlertViewItem(name: "OK", action: action, isDestructive: false)
     }
     
-    public static func cancel(action: (() -> Void)? = nil) -> HelloAlertViewItem {
+    public static func cancel(action: (@MainActor () -> Void)? = nil) -> HelloAlertViewItem {
       HelloAlertViewItem(name: "Cancel", action: action, isDestructive: false)
     }
     

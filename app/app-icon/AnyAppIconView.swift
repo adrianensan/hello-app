@@ -29,9 +29,9 @@ public struct HelloIOSAppIconView: Sendable {
       light: HelloAppIconView(
         front: icon.foregroundStyle(.white),
         back: LinearGradient(
-          colors: [accent.modify(saturation: 0.1, brightness: -0.25).swiftuiColor,
+          colors: [accent.modify(saturation: 0, brightness: 0).swiftuiColor,
                    accent.swiftuiColor,
-                   accent.modify(saturation: -0.05, brightness: 0.1).swiftuiColor],
+                   accent.modify(saturation: 0.2, brightness: 0).swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)),
       dark: HelloAppIconView(
@@ -113,16 +113,6 @@ public protocol AnyAppIconView: BaseAppIcon {
 }
 
 public extension AnyAppIconView {
-  var view: HelloAppIconView {
-    if let iosAppIcon = self as? any IOSAppIcon {
-      return iosAppIcon.iOSView.light
-    } else if let macAppIcon = self as? any MacOSAppIcon {
-      return macAppIcon.macOSView.view
-    } else {
-      return HelloAppIconView(view: Color.clear)
-    }
-  }
-  
   var delayBeforeCapture: TimeInterval { 0 }
 }
 

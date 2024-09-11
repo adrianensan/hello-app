@@ -3,20 +3,39 @@ import SwiftUI
 
 import HelloCore
 
+@MainActor
+@Observable
+public class HelloPickerGroup {
+  
+  public static var new: HelloPickerGroup { HelloPickerGroup() }
+  
+  var widths: [String: CGFloat] = [:]
+  
+  func biggestWidth(for pickerID: String) -> CGFloat? {
+    widths.filter { $0.key != pickerID }.values.max()
+  }
+}
+
 public struct HelloPicker<Item: HelloPickerItem>: View {
   
   @Environment(\.theme) private var theme
   @Environment(HelloWindowModel.self) private var windowModel
   
   @NonObservedState private var globalFrame: CGRect = .zero
+  @NonObservedState private var id: String = .uuid
   
   private var selectedOption: Item
   private var options: [Item]
+  private var group: HelloPickerGroup?
   private var onChange: @MainActor (Item) -> Void
   
-  public init(selected: Item, options: [Item], onChange: @escaping @MainActor (Item) -> Void) {
+  public init(selected: Item,
+              options: [Item],
+              group: HelloPickerGroup? = nil,
+              onChange: @escaping @MainActor (Item) -> Void) {
     self.selectedOption = selected
     self.options = options
+    self.group = group
     self.onChange = onChange
   }
   
@@ -51,9 +70,13 @@ public struct HelloPicker<Item: HelloPickerItem>: View {
         .foregroundStyle(theme.surfaceSection.foreground.primary.style)
         .frame(height: 36)
         .padding(.trailing, 16)
+        .frame(minWidth: group?.biggestWidth(for: id), alignment: .leading)
         .background(theme.surfaceSection.backgroundView(for: .rect(cornerRadius: 10)))
         .frame(height: 44)
-        .readFrame(to: $globalFrame)
+        .readFrame {
+          globalFrame = $0
+          group?.widths[id] = $0.width
+        }
     }.frame(height: 28)
   }
 }

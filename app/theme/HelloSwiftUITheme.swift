@@ -21,11 +21,11 @@ public struct HelloSwiftUITheme: Sendable {
   
   @MainActor
   public var backgroundView: some View {
-    theme.baseLayer.background.view(for: Rectangle())
+    base.backgroundView
   }
   
   @MainActor
-  public func backgroundView(for shape: some InsettableShape, isBaseLayer: Bool = true) -> some View {
+  public func backgroundView(for shape: some InsettableShape, isBaseLayer: Bool = false) -> some View {
     theme.baseLayer.background.view(for: shape, isBaseLayer: isBaseLayer)
   }
   
@@ -41,6 +41,14 @@ public struct HelloSwiftUITheme: Sendable {
   public var textPrimaryColor: Color { foreground.primary.color }
   public var textSecondaryColor: Color { foreground.secondary.color }
   public var textTertiaryColor: Color { foreground.tertiary.color }
+  
+  public var divider: HelloBorder {
+    if case .color(_, let border) = base.layer.background, let border {
+      border
+    } else {
+      HelloBorder(color: base.layer.foregroundPrimary.mainColor.opacity(0.12), width: 1)
+    }
+  }
   
   public var accent: HelloSwiftUIThemeForeground { base.accent }
   public var accentColor: Color { accent.color }

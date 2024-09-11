@@ -22,9 +22,9 @@ public struct HelloSectionItem<Content: View>: View {
       .foregroundStyle(theme.surface.foreground.primary.style)
       .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
       .background(theme.surface.backgroundColor)
-      .overlay(theme.surface.foreground.primary.color.opacity(0.1)
+      .overlay(theme.surface.divider.color.swiftuiColor
+        .frame(height: theme.surface.divider.width)
         .padding(.leading, leadingPadding ? 52 : 0)
-        .frame(height: 1)
         .offset(y: -1)
         .frame(maxHeight: .infinity, alignment: .top))
   }

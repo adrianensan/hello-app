@@ -29,15 +29,22 @@ public struct HelloVGrid<Content: View>: View {
   }
   
   public var body: some View {
-//    let maxColumnWidth: CGFloat = (windowFrame.size.width - CGFloat(numberOfColumns - 1) * spacing) / CGFloat(numberOfColumns)
-    Group(subviews: content()) { subviews in
-      VStack(alignment: alignment, spacing: spacing) {
+    let maxColumnWidth: CGFloat = (windowFrame.size.width - CGFloat(numberOfColumns - 1) * spacing) / CGFloat(numberOfColumns)
+    VStack(alignment: alignment, spacing: spacing) {
+      Group(subviews: content()) { subviews in
         let numberOfRows: Int = Int(ceil(Double(subviews.count) / Double(numberOfColumns)))
-        ForEach(0 ..< numberOfRows, id: \.self) { row in
+        ForEach(0..<numberOfRows, id: \.self) { row in
           HStack(spacing: spacing) {
             ForEach(subviews[row * numberOfColumns ..< min((row + 1) * numberOfColumns, subviews.count)]) { subview in
               subview
 //                .frame(maxWidth: maxColumnWidth)
+            }
+            if row == numberOfRows - 1 && subviews.count % numberOfColumns > 0 {
+              ForEach(0..<(numberOfColumns - subviews.count % numberOfColumns)) { _ in
+                Color.clear
+                  .frame(maxWidth: maxColumnWidth)
+                  .frame(height: 1)
+              }
             }
           }
         }

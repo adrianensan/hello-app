@@ -47,7 +47,6 @@ struct NavigationPageBackswipe: ViewModifier {
           }.onEnded { drag in
             if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
               pagerModel.popView()
-              ButtonHaptics.buttonFeedback()
             }
             backProgressModel.backSwipeAllowance = nil
             Task {

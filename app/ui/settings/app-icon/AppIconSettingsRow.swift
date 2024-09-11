@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -12,7 +13,7 @@ public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
-      pagerModel.push { AppIconSettingsPage<AppIcon>().environment(appIconModel) }
+      pagerModel.push(name: "App Icon") { AppIconSettingsPage<AppIcon>().environment(appIconModel) }
     }) {
       HelloSectionItem {
         HStack(spacing: 4) {
@@ -25,7 +26,8 @@ public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
           Spacer(minLength: 0)
           AppIconView(icon: appIconModel.currentIcon)
 //          appIconModel.currentIcon.view.flattenedView
-            .frame(width: 32, height: 32)
+            .frame(width: 40, height: 40)
+            .frame(height: 20)
           Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular))
         }
@@ -33,3 +35,4 @@ public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
     }
   }
 }
+#endif

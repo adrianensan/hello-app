@@ -16,17 +16,19 @@ public struct HelloSettingsRootPageContent<Content: View>: View {
   }
   
   public var body: some View {
-    VStack(spacing: 32) {
+    VStack(spacing: 24) {
       content()
       
-      if isDeveloper || isFakeDeveloper {
-        HelloSection {
+      HelloSection {
+        if isDeveloper || isFakeDeveloper {
           DeveloperSettingsRow()
         }
+        AboutSettingsRow()
       }
       
+//      OtherHelloAppsView()
+      
       HelloSettingsCopyrightSection()
-        .padding(.bottom, 16)
     }
   }
 }

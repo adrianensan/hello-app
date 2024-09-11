@@ -34,6 +34,14 @@ public struct HelloSwiftUIThemeLayer: Sendable {
   public var accent: HelloSwiftUIThemeForeground
   public var error: HelloSwiftUIThemeForeground
   
+  public var divider: HelloBorder {
+    if case .color(_, let border) = layer.background, let border {
+      border
+    } else {
+      HelloBorder(color: layer.foregroundPrimary.mainColor.opacity(0.12), width: 1)
+    }
+  }
+  
   public func font(size: CGFloat, weight: Font.Weight) -> Font {
     layer.font.font(size: size, weight: weight)
   }

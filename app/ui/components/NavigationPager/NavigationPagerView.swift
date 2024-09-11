@@ -46,8 +46,8 @@ public struct NavigationPagerView: View {
     _model = State(initialValue: model)
   }
   
-  public init(rootView: @escaping @MainActor () -> some View) {
-    _model = State(initialValue: PagerModel(rootView: rootView))
+  public init(name: String? = nil, rootView: @escaping @MainActor () -> some View) {
+    _model = State(initialValue: PagerModel(rootPage: PagerPage(name: name, view: rootView)))
   }
   
   private var previousPageOptions: PagerPageOptions {

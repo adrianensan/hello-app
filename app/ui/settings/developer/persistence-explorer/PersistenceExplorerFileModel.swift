@@ -31,6 +31,7 @@ public enum PersistenceExplorerFileSorting: Sendable, CaseIterable {
 @Observable
 class PersistenceExplorerFileModel {
   
+  var bundleSnapshot: PersistenceFileSnapshotType?
   var files: PersistenceFolderSnapshot?
   var userDefaults: [UserDefaultsSnapshot] = []
   
@@ -40,6 +41,9 @@ class PersistenceExplorerFileModel {
   
   init() {
     Task { try await refreshSnapshot() }
+    Task {
+      bundleSnapshot = try await Persistence.snapshot(of: Bundle.main.bundleURL, overrideName: "Bundle")
+    }
   }
   
   func sort(userDefaultsEntries: [UserDefaultsEntry]) -> [UserDefaultsEntry] {

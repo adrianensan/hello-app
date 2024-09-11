@@ -199,8 +199,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       }
     }.if(viewable) {
       $0.modifier(ViewableImageModifier(imageOptions: imageOptions, cornerRadius: cornerRadius))
-    }
-    .onChange(of: imageOptions, initial: true) {
+    }.onChange(of: imageOptions, initial: true) {
       var imageModels: [HelloImageModel] = []
       for imageOption in imageOptions {
         let model: HelloImageModel = .model(for: imageOption.imageSource, variant: imageOption.variant)

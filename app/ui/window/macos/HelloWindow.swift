@@ -163,6 +163,8 @@ public class HelloWindowModel {
   public weak var window: HelloWindow?
   public var subWindowID: String?
   
+  var isShowingConfetti: Bool = false
+  
   public init() {}
   
   public func subWindowClosed() {

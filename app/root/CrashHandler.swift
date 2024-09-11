@@ -4,79 +4,89 @@ import HelloCore
 
 extension NSException: @unchecked @retroactive Sendable {}
 
-public enum CrashHandler {
+public enum UNIXSignal: CaseIterable {
+  case hangup
+  case interrupt
+  case quit
+  case illegal
+  case trap
+  case abort
+  case floatingPointError
+  case kill
+  case segmentationFault
+  case pipeError
+  case termination
   
-  enum Signal: CaseIterable {
-    case hangup
-    case interrupt
-    case quit
-    case illegal
-    case trap
-    case abort
-    case floatingPointError
-    case kill
-    case segmentationFault
-    case pipeError
-    case termination
-    
-    init?(_ int: Int32) {
-      for signal in Signal.allCases {
-        if int == signal.value {
-          self = signal
-          return
-        }
-      }
-      return nil
-    }
-    
-    var value: Int32 {
-      switch self {
-      case .hangup: return SIGHUP
-      case .interrupt: return SIGINT
-      case .quit: return SIGQUIT
-      case .illegal: return SIGILL
-      case .trap: return SIGTRAP
-      case .abort: return SIGABRT
-      case .floatingPointError: return SIGFPE
-      case .kill: return SIGKILL
-      case .segmentationFault: return SIGSEGV
-      case .pipeError: return SIGPIPE
-      case .termination: return SIGTERM
+  public init?(_ int: Int32) {
+    for signal in UNIXSignal.allCases {
+      if int == signal.value {
+        self = signal
+        return
       }
     }
-    
-    var name: String {
-      switch self {
-      case .hangup: return "SIGHUP"
-      case .interrupt: return "SIGINT"
-      case .quit: return "SIGQUIT"
-      case .illegal: return "SIGILL"
-      case .trap: return "SIGTRAP"
-      case .abort: return "SIGABRT"
-      case .floatingPointError: return "SIGFPE"
-      case .kill: return "SIGKILL"
-      case .segmentationFault: return "SIGSEGV"
-      case .pipeError: return "SIGPIPE"
-      case .termination: return "SIGTERM"
+    return nil
+  }
+  
+  public init?(_ name: String) {
+    for signal in UNIXSignal.allCases {
+      if name.lowercased() == signal.name.lowercased() || name.lowercased() == signal.name.lowercased().deletingPrefix("sig") {
+        self = signal
+        return
       }
     }
-    
-    var description: String {
-      switch self {
-      case .hangup: return "Hangup"
-      case .interrupt: return "Interrupt"
-      case .quit: return "Quit"
-      case .illegal: return "Illegal Instruction"
-      case .trap: return "Trap"
-      case .abort: return "Abort"
-      case .floatingPointError: return "Floating Point Error"
-      case .kill: return "Kill"
-      case .segmentationFault: return "Segmentation Violation"
-      case .pipeError: return "Pipe write failure"
-      case .termination: return "Termination"
-      }
+    return nil
+  }
+  
+  public var value: Int32 {
+    switch self {
+    case .hangup: return SIGHUP
+    case .interrupt: return SIGINT
+    case .quit: return SIGQUIT
+    case .illegal: return SIGILL
+    case .trap: return SIGTRAP
+    case .abort: return SIGABRT
+    case .floatingPointError: return SIGFPE
+    case .kill: return SIGKILL
+    case .segmentationFault: return SIGSEGV
+    case .pipeError: return SIGPIPE
+    case .termination: return SIGTERM
     }
   }
+  
+  public var name: String {
+    switch self {
+    case .hangup: "SIGHUP"
+    case .interrupt: "SIGINT"
+    case .quit: "SIGQUIT"
+    case .illegal: "SIGILL"
+    case .trap: "SIGTRAP"
+    case .abort: "SIGABRT"
+    case .floatingPointError: "SIGFPE"
+    case .kill: "SIGKILL"
+    case .segmentationFault: "SIGSEGV"
+    case .pipeError: "SIGPIPE"
+    case .termination: "SIGTERM"
+    }
+  }
+  
+  public var description: String {
+    switch self {
+    case .hangup: return "Hangup"
+    case .interrupt: return "Interrupt"
+    case .quit: return "Quit"
+    case .illegal: return "Illegal Instruction"
+    case .trap: return "Trap"
+    case .abort: return "Abort"
+    case .floatingPointError: return "Floating Point Error"
+    case .kill: return "Kill"
+    case .segmentationFault: return "Segmentation Violation"
+    case .pipeError: return "Pipe write failure"
+    case .termination: return "Termination"
+    }
+  }
+}
+
+public enum CrashHandler {
   
   private static let originalExceptionHandler: (@convention(c) (NSException) -> Void)? = NSGetUncaughtExceptionHandler()
   
@@ -103,7 +113,7 @@ public enum CrashHandler {
     //                           appinfo:appinfo,
     //                           callStack:callStack)
     let stackTrace = Thread.callStackSymbols.reduce("") { $0 + "\n" + $1 }
-    if let signal = Signal(signal) {
+    if let signal = UNIXSignal(signal) {
       Log.crash("Signal \(signal.name) (\(signal.description))\(stackTrace)")
     } else {
       Log.crash("Signal \(signal)\(stackTrace)")
@@ -117,7 +127,7 @@ public enum CrashHandler {
   
   public static func setup() {
     NSSetUncaughtExceptionHandler(exceptionHandler)
-    for errorSignal in Signal.allCases {
+    for errorSignal in UNIXSignal.allCases {
       signal(errorSignal.value, signalHandler)
     }
   }
@@ -125,7 +135,7 @@ public enum CrashHandler {
   private static func restore() {
     NSSetUncaughtExceptionHandler(originalExceptionHandler)
     
-    for errorSignal in Signal.allCases {
+    for errorSignal in UNIXSignal.allCases {
       signal(errorSignal.value, SIG_DFL)
     }
   }

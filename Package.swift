@@ -27,9 +27,12 @@ let package = Package(
   dependencies: dependencies,
   targets: additionalTargets + [
     .target(name: "HelloCore", path: "core"),
-    .target(name: "HelloApp", dependencies: ["HelloCore"], path: "app"),
+    .target(name: "HelloApp", dependencies: ["HelloCore"], path: "app", resources: [.process("resources")]),
     .target(name: "HelloServer", dependencies: ["HelloCore", opensslTargetDependency], path: "server/code"),
-    .target(name: "HelloAppIconGenerator", dependencies: ["HelloApp"], path: "app-icon-generator"),
+    .target(name: "HelloAppIconGenerator",
+            dependencies: ["HelloApp"],
+            path: "app-icon-generator",
+            resources: [.process("resources")]),
     .testTarget(name: "HelloAppTests", dependencies: ["HelloApp"], path: "Tests")
     
   ],

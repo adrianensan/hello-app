@@ -183,12 +183,13 @@ extension HelloApplication {
           return unlockedAppIcons
         }
       }
+      Log.verbose("Device ID: \(await Persistence.value(.deviceID))")
+      _ = await Persistence.value(.firstDateLaunched)
       await Persistence.atomicUpdate(for: .installedApps) {
         var installedApps = $0
         installedApps.insert(AppInfo.rootBundleID)
         return installedApps
       }
-      Log.verbose("Device ID: \(await Persistence.value(.deviceID))")
       if let currentAppVersion = AppVersion.current {
         let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
         if currentAppVersion != previousAppVersion {
@@ -202,6 +203,8 @@ extension HelloApplication {
       }      
     }
     
+    _ = HelloSubscriptionModel.main
+    
     onLaunch()
     _ = Log.logger
   }
@@ -214,6 +217,7 @@ extension HelloApplication {
   }
   
   func onBecameActiveInternal() async {
+    Task { try await StoreModel.main.refresh() }
     await onBecameActive()
   }
   

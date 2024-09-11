@@ -41,31 +41,37 @@ public class HelloWindowModel {
   struct PopupWindow: Identifiable, Sendable {
     var id: String
     var uniqueInstanceID: String
+    var hasExclusiveInteraction: Bool
     var view: @MainActor () -> AnyView
     var onDismiss: (@MainActor () -> Void)?
     
     init(viewID: String,
+         hasExclusiveInteraction: Bool = true,
          view: @escaping @MainActor () -> some View,
          onDismiss: (@MainActor () -> Void)? = nil) {
       self.uniqueInstanceID = .uuid
       self.id = viewID
+      self.hasExclusiveInteraction = hasExclusiveInteraction
       self.view = { AnyView(view()) }
       self.onDismiss = onDismiss
     }
   }
   
-  var blurBackgroundForPopup: Bool = true
+  var blurAmountForPopup: CGFloat = 0
+  var isShowingConfetti: Bool = false
+  var freeze: Bool = false
+  var confettiID: String = .uuid
   var popupViews: [PopupWindow] = []
   
   public func showPopup<Content: View>(blurBackground: Bool = false,
                                        onDismiss: (@MainActor () -> Void)? = nil,
                                        _ view: @escaping @MainActor () -> Content) {
-    blurBackgroundForPopup = blurBackground
+    blurAmountForPopup = blurBackground ? 16 : 0
     popupViews.append(PopupWindow(viewID: String(describing: Content.self), view: view, onDismiss: onDismiss))
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
-    blurBackgroundForPopup = true
+    blurAmountForPopup = 0
     globalDismissKeyboard()
     popupViews.append(PopupWindow(viewID: alertConfig.id) { HelloAlert(config: alertConfig) })
   }
@@ -84,14 +90,15 @@ public class HelloWindowModel {
   
   public func present<Content: View>(
     id: String = String(describing: Content.self),
+    hasExclusiveInteraction: Bool = true,
     view: @MainActor @escaping () -> Content) {
       guard !popupViews.contains(where: { $0.id == id }) else {
         Log.warning("Trying to present duplicate view")
         return
       }
-      blurBackgroundForPopup = false
       globalDismissKeyboard()
-      popupViews.append(PopupWindow(viewID: id, view: view))
+      blurAmountForPopup = 0
+      popupViews.append(PopupWindow(viewID: id, hasExclusiveInteraction: hasExclusiveInteraction, view: view))
   }
   
   public func dismissPopup() {
@@ -123,6 +130,15 @@ public class HelloWindowModel {
     guard !popupViews.isEmpty else { return }
     popupViews.forEach { $0.onDismiss?() }
     popupViews = []
+  }
+  
+  public func showConfetti() {
+    confettiID = .uuid
+    isShowingConfetti = true
+  }
+  
+  public func stopConfetti() {
+    isShowingConfetti = false
   }
 }
 #endif

@@ -4,7 +4,7 @@ import HelloCore
 
 public struct AppIconOptionView<AppIcon: BaseAppIcon>: View {
   
-  @Environment(\.theme) private var theme
+  @Environment(\.theme) private var theme  
   
   var icon: AppIcon
   var isSelected: Bool
@@ -23,6 +23,7 @@ public struct AppIconOptionView<AppIcon: BaseAppIcon>: View {
       
       if showLabel {
         Text(icon.displayName)
+          .lineLimit(1)
           .font(.system(size: 11, weight: .medium))
           .foregroundColor(isSelected ? .white : theme.surface.foreground.primary.color)
           .fixedSize()

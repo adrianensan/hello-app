@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "hello-passwords-ios.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

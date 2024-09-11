@@ -1,37 +1,8 @@
+#if os(iOS)
 import SwiftUI
 import MessageUI
 
 import HelloCore
-
-enum FeedbackType: String, Identifiable, CaseIterable, Sendable {
-  case featureRequest
-  case bugReport
-  case feedback
-  case question
-  case other
-  
-  var id: String { rawValue }
-  
-  var name: String {
-    switch self {
-    case .featureRequest: "Feature Request"
-    case .bugReport: "Bug Report"
-    case .feedback: "Feedback"
-    case .question: "Question"
-    case .other: "Other"
-    }
-  }
-  
-  var code: String {
-    switch self {
-    case .featureRequest: "Feature Request"
-    case .bugReport: "Bug"
-    case .feedback: "Feedback"
-    case .question: "Question"
-    case .other: "Other"
-    }
-  }
-}
 
 struct EmailSetupSheet: View {
   
@@ -44,13 +15,19 @@ struct EmailSetupSheet: View {
   @State private var type: FeedbackType = .featureRequest
   @State private var includeLogs: Bool = false
   
-  private var mailLink: URL? { URL(string: """
-    mailto:adrianensan@me.com?subject=[\(AppInfo.displayName)] [\(type.code)]&body=
-    
-    ---DEBUG-INFO---
-    \(Device.current.description), \(OSInfo.description)
-    """)
+  private var emailRecipient: String = "adrianensan@me.com"
+  private var emailSubject: String { "[\(AppInfo.displayName)] [\(type.name)]" }
+  private var emailBody: String { """
+  
+  ----------
+  \(Device.current.description), \(OSInfo.description)
+  App Version: \(AppInfo.version) (\(AppInfo.build))
+  Tier: \(AppInfo.isTestBuild ? "Test" : ((HelloSubscriptionModel.main.activeSubscription?.tier).flatMap { "\($0)" } ?? "Free"))
+  \(Persistence.model(for: .deviceID).value)
+  """
   }
+  
+  private var mailLink: URL? { URL(string: "mailto:\(emailRecipient)?subject=\(emailSubject)&body=\(emailBody)") }
   
   var body: some View {
     VStack(spacing: 0) {
@@ -93,14 +70,9 @@ struct EmailSetupSheet: View {
       .padding(.bottom, safeArea.bottom + 16)
       .sheet(isPresented: $isShowingMailSheet) {
         MailView(
-          to: "adrianensan@me.com",
-          subject: "[\(AppInfo.displayName)] [\(type.name)]",
-          body: """
-          
-          
-          ---DEBUG-INFO---
-          \(Device.current.description), \(OSInfo.description)
-          """,
+          to: emailRecipient,
+          subject: emailSubject,
+          body: emailBody,
           attachments: includeLogs ? Log.logger.generateRawString().data(using: .utf8).map { [.logs(data: $0)] } ?? [] : [])
       }.onChange(of: isShowingMailSheet) {
         if !isShowingMailSheet {
@@ -109,3 +81,4 @@ struct EmailSetupSheet: View {
       }
   }
 }
+#endif

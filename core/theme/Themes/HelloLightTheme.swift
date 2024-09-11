@@ -20,11 +20,11 @@ public extension HelloTheme {
                surfaceSectionLayer: .init(background: .color(color: HelloColor(r: 0.96, g: 0.96, b: 0.96),
                                                              border: .init(color: .black.opacity(0.1)))))
 #else
-    HelloTheme(id: "warm-light",
-               name: "Warm Light",
+    HelloTheme(id: "hello-light",
+               name: "Hello Light",
                scheme: .light,
                baseLayer: .init(background: .color(color: HelloColor(r: 0.98, g: 0.98, b: 0.97),
-                                                   border: .init(color: .black.opacity(0.2))),
+                                                   border: .init(color: .black.opacity(0.1))),
                                 accent: accent,
                                 error: .color(color: .retroApple.red)),
                headerLayer: .init(background: .blur(dark: false, overlay: .white.opacity(0.4))),
@@ -32,7 +32,7 @@ public extension HelloTheme {
                                                        border: .init(color: .black.opacity(0.1)))),
                surfaceLayer: .init(background: .color(color: HelloColor(r: 1, g: 1, b: 1),
                                                       border: .init(color: .black.opacity(0.1)))),
-               surfaceSectionLayer: .init(background: .color(color: HelloColor(r: 0.96, g: 0.96, b: 0.96),
+               surfaceSectionLayer: .init(background: .color(color: HelloColor(r: 0.97, g: 0.97, b: 0.96),
                                                              border: .init(color: .black.opacity(0.1)))))
 #endif
   }

@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -27,3 +28,4 @@ public struct ContactAndFeedbackSettingsItem: View {
     }
   }
 }
+#endif

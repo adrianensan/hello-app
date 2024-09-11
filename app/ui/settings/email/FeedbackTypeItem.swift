@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -30,3 +31,4 @@ struct FeedbackTypeItem: View {
     }
   }
 }
+#endif

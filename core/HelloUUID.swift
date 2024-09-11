@@ -2,7 +2,6 @@ import Foundation
 
 public struct HelloUUID: Identifiable, Hashable, Sendable {
   
-//  var date: Date = .now
   var bits: UInt128
   
   public init(bits: UInt128) {
@@ -22,10 +21,10 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
     let bytes = [
       modifiedByte0, modifiedByte1, uuid.0, uuid.1, uuid.2, uuid.3, uuid.4, uuid.5, uuid.7,
       uuid.9, uuid.10, uuid.11, uuid.12, uuid.13, uuid.14, uuid.15]
-    let bigEndianUInt32 = bytes.withUnsafeBytes { $0.load(as: UInt128.self) }
+    let bigEndianUInt = bytes.withUnsafeBytes { $0.load(as: UInt128.self) }
     var value = CFByteOrderGetCurrent() == CFByteOrder(CFByteOrderLittleEndian.rawValue)
-    ? UInt128(bigEndian: bigEndianUInt32)
-    : bigEndianUInt32
+    ? UInt128(bigEndian: bigEndianUInt)
+    : bigEndianUInt
     
     self.init(bits: value)
   }

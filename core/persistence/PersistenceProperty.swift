@@ -43,7 +43,7 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
         return nil
       }
     case .helloShared:
-      if let helloDefaults = UserDefaults(suiteName: AppInfo.helloGroup) {
+      if let helloDefaults = UserDefaults(suiteName: AppInfo.sharedHelloGroup) {
         return helloDefaults
       } else {
         Log.fatal("Failed to create UserDefaults for share Hello, please ensure com.adrianensan.hello is added as an App Group", context: "Persistence")
@@ -111,7 +111,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     case .appGroup:
       FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.appGroup)
     case .helloShared:
-      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.helloGroup)
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.sharedHelloGroup)
     case .temporary:
       .temporaryDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .cache:

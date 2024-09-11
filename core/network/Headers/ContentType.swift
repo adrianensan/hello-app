@@ -259,26 +259,29 @@ public enum ContentType: String, CaseIterable, Equatable, Codable, Sendable {
   }
   
   public var iconName: String {
-    switch self {
-    case .zip, .rar, .tar, .bz, .bz2, .x7zip: "doc.zipper"
-    case .png, .jpeg, .heic, .heif, .tiff, .gif, .svg: "photo"
-    case .mp3, .m4a, .wav, .aac, .oggAudio, .webmAudio: "music.note"
-    case .ttf, .otf, .eot: "textformat"
-    case .mp4, .mov, .avi, .oggVideo, .webmVideo: "play.rectangle"
-    case .plain: "doc.text"
-    case .pdf, .word, .oldWord: "doc.richtext"
-    case .excel, .oldExcel, .csv: "tablecells"
-    case .json: "curlybraces"
-    case .xml, .html: "chevron.left.forwardslash.chevron.right"
-    case .bin: "terminal"
-    case .midi: "pianokeys"
-    case .fbx: "move.3d"
-    case .swift: "swift"
-    case .epub: "book"
-    case .ics: "calendar"
-    case .directory: "folder"
-    case .macosApp: "app"
-    default: "doc"
+    switch category {
+    case .image: "photo"
+    case .audio: "music.note"
+    case .video: "play.rectangle"
+    case .font: "textformat"
+    default:
+      switch self {
+      case .zip, .rar, .tar, .bz, .bz2, .x7zip: "doc.zipper"
+      case .plain: "doc.text"
+      case .pdf, .word, .oldWord: "doc.richtext"
+      case .excel, .oldExcel, .csv: "tablecells"
+      case .json: "curlybraces"
+      case .xml, .html: "chevron.left.forwardslash.chevron.right"
+      case .bin: "terminal"
+      case .midi: "pianokeys"
+      case .fbx: "move.3d"
+      case .swift: "swift"
+      case .epub: "book"
+      case .ics: "calendar"
+      case .directory: "folder"
+      case .macosApp: "app"
+      default: "doc"
+      }
     }
   }
   

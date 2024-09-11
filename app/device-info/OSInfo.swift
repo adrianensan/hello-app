@@ -9,7 +9,11 @@ public enum OSInfo {
   
   public static var version: String {
     let version = ProcessInfo.processInfo.operatingSystemVersion
-    return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+    if version.patchVersion == 0 {
+      return "\(version.majorVersion).\(version.minorVersion)"
+    } else {
+      return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+    }
   }
   
 #if os(watchOS)
