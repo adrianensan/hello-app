@@ -20,7 +20,7 @@ struct AppIconSettingsPage<AppIcon: BaseAppIcon>: View {
             LazyVGrid(columns: [.init(.adaptive(minimum: 60, maximum: 160), spacing: 24)], spacing: 16) {
               ForEach(collection.icons) { icon in
                 HelloButton(haptics: .action, action: {
-                  guard icon.availability != .paid || subscriptionModel.isSubscribed else {
+                  guard icon.availability != .paid || subscriptionModel.allowPremiumFeatures else {
                     pagerModel.push { HelloSubscriptionPage() }
                     return
                   }
@@ -29,7 +29,7 @@ struct AppIconSettingsPage<AppIcon: BaseAppIcon>: View {
                   AppIconOptionView(icon: icon, isSelected: icon == appIconModel.currentIcon, showLabel: collection.layout.showLabel)
                 }.buttonStyle(.scale(haptics: .onAction))
                   .overlay {
-                    if icon.availability == .paid && !subscriptionModel.isSubscribed {
+                    if icon.availability == .paid && !subscriptionModel.allowPremiumFeatures {
                       Image(systemName: "lock.fill")
                         .font(.system(size: 12, weight: .medium))
                         .monospacedDigit()

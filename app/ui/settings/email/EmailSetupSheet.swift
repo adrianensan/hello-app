@@ -22,8 +22,8 @@ struct EmailSetupSheet: View {
   ----------
   \(Device.current.description), \(OSInfo.description)
   App Version: \(AppInfo.version) (\(AppInfo.build))
-  Tier: \(AppInfo.isTestBuild ? "Test" : ((HelloSubscriptionModel.main.activeSubscription?.tier).flatMap { "\($0)" } ?? "Free"))
-  \(Persistence.model(for: .deviceID).value)
+  Tier: \(HelloSubscriptionModel.main.highestLevelSubscription?.type.description ?? "Free")
+  \(Persistence.mainActorValue(.deviceID))
   """
   }
   

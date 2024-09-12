@@ -107,10 +107,13 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
       case ._12mini, ._13mini: 120
       case ._12, ._12Pro, ._13, ._13Pro: 134
       case ._12ProMax, ._13ProMax: 152
-      case ._14, ._14Pro, ._15, ._15Pro: 134
+      case ._14, ._14Pro, ._15, ._15Pro, ._16: 134
       case ._14ProMax, ._15ProMax: 152
+      case ._16Pro: 134
+      case ._16ProMax: 152
       case ._14Plus: 152
       case ._15Plus: 152
+      case ._16Plus: 152
       case .se2: 0
       case .se3: 0
       case .unknown(modelNumber: let modelNumber): 0

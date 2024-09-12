@@ -2,7 +2,7 @@ import Foundation
 
 public struct HelloUUID: Identifiable, Hashable, Sendable {
   
-  var bits: UInt128
+  public var bits: UInt128
   
   public init(bits: UInt128) {
     self.bits = (bits & 0x0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) | 0x05000000000000000000000000000000
@@ -65,6 +65,21 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
 //    }
 //    raw = String(characters[modifiedIndex]) + raw.dropFirst()
 //    return raw
+  }
+  
+  public var shortHashString: String {
+    var sum: UInt = 0
+    for character in string {
+      sum += UInt(String(character), radix: 36) ?? 0
+    }
+    var subset: UInt32 = 0
+    for i in 1 ..< 32 {
+      if (bits & 0b1 << (i * 2)).nonzeroBitCount > 0 {
+        subset += 0b1 << (i - 1)
+      }
+    }
+    var sumCharacter = String(sum % 36, radix: 36, uppercase: false)
+    return "\(sumCharacter)\(String(subset, radix: 36, uppercase: false))"
   }
   
   public var systemUUIDString: String {

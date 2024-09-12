@@ -472,6 +472,11 @@ public enum Persistence {
     Property.persistence.storedValue(for: property)
   }
   
+  @MainActor
+  public static func mainActorValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
+    model(for: property).value
+  }
+  
 //  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
 //    await Property.Key.persistence.value(for: property)
 //  }

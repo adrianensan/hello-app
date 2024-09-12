@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol HelloNumeric: CustomStringConvertible, Hashable, Numeric, Sendable, Codable, Strideable where Self.Magnitude : HelloNumeric, Self.Magnitude == Self.Magnitude.Magnitude {
+public protocol HelloNumeric: CustomStringConvertible, Hashable, Numeric, Sendable, Codable, CVarArg, Strideable where Self.Magnitude : HelloNumeric, Self.Magnitude == Self.Magnitude.Magnitude {
   init(_ source: some BinaryInteger)
   init(_ source: some BinaryFloatingPoint)
   
@@ -27,6 +27,12 @@ extension CGFloat: HelloNumeric {}
 
 public extension HelloNumeric {
   var normalized: Self { self < 0 ? -1 : 1 }
+}
+
+public extension HelloNumeric where Self: BinaryFloatingPoint {
+  var string: String {
+    String(format: "%.2f", self).deletingSuffix("0").deletingSuffix(".0")
+  }
 }
 
 public typealias IntPoint = HelloPoint<Int>

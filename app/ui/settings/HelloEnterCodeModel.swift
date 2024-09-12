@@ -71,7 +71,7 @@ public class HelloEnterCodeModel {
     let input = input
     dismiss()
     switch input.lowercased() {
-    case "admin", "developer":
+    case "admin", "developer", "debug", "debugmode":
       if !isFakeDeveloper && !isDeveloper {
         windowModel?.show(alert: HelloAlertConfig(
           title: "Enable Developer Mode",
@@ -88,6 +88,20 @@ public class HelloEnterCodeModel {
     case "crash": exit(0)
     case "freeze": windowModel?.freeze = true
     case "confetti": windowModel?.showConfetti()
+    case "cat", "monki", "monkey":
+      Task {
+        let preloadModel = HelloImageModel.model(for: .asset(bundle: .helloApp, named: "cat"))
+        try await Task.sleep(seconds: 0.2)
+        windowModel?.showPopup {
+          ImageViewer(options: [.init(imageSource: .asset(bundle: .helloApp, named: "cat"), variant: .original)],
+                      originalFrame: nil, cornerRadius: 0)
+        }
+      }
+    case "nopromo":
+      HelloSubscriptionModel.main.removePromo()
+      windowModel?.show(alert: HelloAlertConfig(
+        title: "Promo Removed",
+        firstButton: .ok))
     case hasPrefix("promo"):
       let promoCode = input.deletingPrefix("promo")
       windowModel?.show(alert: HelloAlertConfig(
@@ -106,6 +120,43 @@ public class HelloEnterCodeModel {
     default:
       if let unixSignal = UNIXSignal(input) {
         exit(0)
+      } else if let promoCode: HelloPromoCode = try? .parse(from: input) {
+        guard let deviceUUID = try? HelloUUID(string: Persistence.mainActorValue(.deviceID)) else {
+          windowModel?.show(alert: HelloAlertConfig(
+            title: "Error",
+            message: "Failed to parse Device ID",
+            firstButton: .ok))
+          return
+        }
+        guard promoCode.deviceIDHash.lowercased() == deviceUUID.shortHashString else {
+          windowModel?.show(alert: HelloAlertConfig(
+            title: "Nothing Happened",
+            message: "Not sure what you expected",
+            firstButton: .ok))
+          return
+        }
+        guard !HelloSubscriptionModel.main.allowPremiumFeatures else {
+          windowModel?.show(alert: HelloAlertConfig(
+            title: "Already Premium",
+            message: "Premium features are already enabled",
+            firstButton: .ok))
+          return
+        }
+        
+        guard promoCode.appInt == 0 || promoCode.appInt == KnownApp.app(for: AppInfo.rootBundleID)?.int else {
+          windowModel?.show(alert: HelloAlertConfig(
+            title: "Premium Enabled",
+            message: "Premium features are now enabled",
+            firstButton: .ok))
+          return
+        }
+        
+        HelloSubscriptionModel.main.applyPromo(global: promoCode.appInt == 0)
+        
+        windowModel?.show(alert: HelloAlertConfig(
+          title: "Premium Enabled",
+          message: "Premium features are now enabled",
+          firstButton: .ok))
       } else {
         windowModel?.show(alert: HelloAlertConfig(
           title: "Nothing Happened",

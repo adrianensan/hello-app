@@ -74,7 +74,7 @@ public struct ConfettiView: View {
               try await Task.sleep(seconds: 1)
               Task {
                 try await Task.sleep(seconds: 6.1)
-                particles.dropFirst(18)
+                particles.removeFirst(18)
               }
             }
           } catch {

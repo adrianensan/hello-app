@@ -10,6 +10,7 @@ struct WindowFrameObservationViewModifier: ViewModifier {
   func body(content: Content) -> some View {
     content
       .environment(\.windowFrame, windowModel.window?.frame ?? CGRect(origin: .zero, size: uiProperties.size))
+      .environment(\.physicalScale, windowModel.physicalPixelScale)
   }
 }
 

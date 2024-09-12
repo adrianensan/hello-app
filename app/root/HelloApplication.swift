@@ -175,6 +175,7 @@ extension HelloApplication {
 #endif
       if AppInfo.isTestBuild {
         await Persistence.save(true, for: .isTester)
+        await Persistence.save(true, for: .isFakeDeveloper)
         await Persistence.atomicUpdate(for: .unlockedAppIcons) {
           var unlockedAppIcons = $0
           if unlockedAppIcons.contains("betaTester") {

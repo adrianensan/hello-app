@@ -13,6 +13,8 @@ public enum DeviceProcessor: Codable {
   case a15
   case a16
   case a17Pro
+  case a18
+  case a18Pro
   
   case s6
   case s7
@@ -38,6 +40,8 @@ public enum DeviceProcessor: Codable {
     case .a15: "A15 Bionic"
     case .a16: "A16 Bionic"
     case .a17Pro: "A17 Pro"
+    case .a18: "A18"
+    case .a18Pro: "A18 Pro"
       
     case .s6: "S6"
     case .s7: "S7"

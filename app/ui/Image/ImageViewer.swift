@@ -47,7 +47,7 @@ public struct ImageViewer: View {
               cornerRadius: CGFloat) {
     imageOptions = options
     self.originalFrameSaved = originalFrame
-    self._originalFrame = State(initialValue: originalFrame)
+    self._originalFrame = State(initialValue: nil)
     self.cornerRadius = cornerRadius
   }
   
@@ -83,15 +83,15 @@ public struct ImageViewer: View {
         }) {
           HelloImageView(options: imageOptions)
             .clipShape(RoundedRectangle(cornerRadius: originalFrame == nil ? 0 : cornerRadius, style: .continuous))
-          .frame(width: originalFrame?.width, height: originalFrame?.height)
-          .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
-          .frame(width: windowFrame.size.width, height: windowFrame.size.height,
-                 alignment: originalFrame == nil ? .center : .topLeading)
-          .offset(x: -1000 * (dismissVelocity?.x ?? 0),
-                  y: -1000 * (dismissVelocity?.y ?? 0))
-          .animation(.linear(duration: 1), value: dismissVelocity)
-          .animation(.dampSpring, value: originalFrame)
-      }
+            .frame(width: originalFrame?.width, height: originalFrame?.height)
+            .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
+            .frame(width: windowFrame.size.width, height: windowFrame.size.height,
+                   alignment: originalFrame == nil ? .center : .topLeading)
+            .offset(x: -1000 * (dismissVelocity?.x ?? 0),
+                    y: -1000 * (dismissVelocity?.y ?? 0))
+            .animation(.linear(duration: 1), value: dismissVelocity)
+            .animation(.dampSpring, value: originalFrame)
+        }
       ImageViewerCloseButton(onDismiss: {
         if let originalFrameSaved {
           originalFrame = originalFrameSaved

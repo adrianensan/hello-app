@@ -13,8 +13,8 @@ struct AboutSettingsPageContent: View {
   @Persistent(.firstDateLaunched) private var firstDateLaunched
   
   var body: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      HelloSection {
+    VStack(spacing: 24) {
+      HelloSection(title: "APP") {
         HelloMenuButton(items: { [.copy(string: AppInfo.displayName)] }) {
           HelloSectionItem(leadingPadding: false) {
             HStack(spacing: 0) {
@@ -29,8 +29,7 @@ struct AboutSettingsPageContent: View {
           }
         }
         
-        let appVersionString = "\(AppInfo.version) (\(AppInfo.build))"
-        HelloMenuButton(items: { [.copy(string: appVersionString)] }) {
+        HelloMenuButton(items: { [.copy(string: AppInfo.fullVersionString)] }) {
           HelloSectionItem(leadingPadding: false) {
             HStack(spacing: 0) {
               Text("App Version")
@@ -38,12 +37,43 @@ struct AboutSettingsPageContent: View {
               
               Spacer(minLength: 0)
               
-              Text(appVersionString)
+              Text(AppInfo.fullVersionString)
                 .font(.system(size: 16, weight: .regular))
             }
           }
         }
         
+        HelloMenuButton(items: { [.copy(string: AppInfo.rootBundleID)] }) {
+          HelloSectionItem(leadingPadding: false) {
+            HStack(spacing: 0) {
+              Text("Bundle ID")
+                .font(.system(size: 16, weight: .regular))
+              
+              Spacer(minLength: 0)
+              
+              Text(AppInfo.rootBundleID)
+                .font(.system(size: 16, weight: .regular))
+            }
+          }
+        }
+        
+        let firstDateLaunchedString = firstDateLaunched.absoluteDateAndTimeString
+        HelloMenuButton(items: { [.copy(string: firstDateLaunchedString)] }) {
+          HelloSectionItem(leadingPadding: false) {
+            HStack(spacing: 0) {
+              Text("Install Date")
+                .font(.system(size: 16, weight: .regular))
+              
+              Spacer(minLength: 0)
+              
+              Text(firstDateLaunchedString)
+                .font(.system(size: 16, weight: .regular))
+            }
+          }
+        }
+      }
+      
+      HelloSection(title: "DEVICE") {
         let deviceString = Device.current.description
         HelloMenuButton(items: { [.copy(string: deviceString)] }) {
           HelloSectionItem(leadingPadding: false) {
@@ -69,6 +99,21 @@ struct AboutSettingsPageContent: View {
               Spacer(minLength: 0)
               
               Text(deviceModel)
+                .font(.system(size: 16, weight: .regular))
+            }
+          }
+        }
+        
+        let processor = Device.current.processor.name
+        HelloMenuButton(items: { [.copy(string: processor)] }) {
+          HelloSectionItem(leadingPadding: false) {
+            HStack(spacing: 0) {
+              Text("Processor")
+                .font(.system(size: 16, weight: .regular))
+              
+              Spacer(minLength: 0)
+              
+              Text(processor)
                 .font(.system(size: 16, weight: .regular))
             }
           }
@@ -102,33 +147,6 @@ struct AboutSettingsPageContent: View {
             }
           }
         }
-        
-        let firstDateLaunchedString = firstDateLaunched.absoluteDateAndTimeString
-        HelloMenuButton(items: { [.copy(string: firstDateLaunchedString)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Install Date")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(firstDateLaunchedString)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
-        }
-        
-        HelloSectionItem(leadingPadding: false) {
-          HStack(spacing: 0) {
-            Text("Copyright")
-              .font(.system(size: 16, weight: .regular))
-            
-            Spacer(minLength: 0)
-            
-            Text("© 2024 Adrian Ensan")
-              .font(.system(size: 16, weight: .regular))
-          }
-        }
       }
       
       HelloSection {
@@ -159,6 +177,10 @@ struct AboutSettingsPageContent: View {
           }
         }
       }
+      
+      Text("© 2024 Adrian Ensan")
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(theme.foreground.tertiary.style)
     }
   }
 }

@@ -32,16 +32,20 @@ public struct HelloButtonStyle: ButtonStyle {
       }
     }.onChange(of: configuration.isPressed) {
       isPressed = isEnabled && configuration.isPressed
-      if model.hapticsType.hapticsOnClick && isPressed {
+      if isPressed {
+        if !model.hasPressed && model.hapticsType.hapticsOnClick {
+          ButtonHaptics.buttonFeedback()
+        }
         model.hasPressed = true
-        ButtonHaptics.buttonFeedback()
-      } else if !isPressed {
-        model.hasPressed = false
+      } else {
+        Task {
+          try await Task.sleepForABit()
+          model.hasPressed = false
+        }
       }
     }.onChange(of: model.forceVisualPress) {
-      if isPressed != model.forceVisualPress {
-        isPressed = model.forceVisualPress
-      }
+      guard isPressed != model.forceVisualPress else { return }
+      isPressed = model.forceVisualPress
     }.onChange(of: isEnabled) {
       if !isEnabled && isPressed {
         isPressed = false
@@ -208,18 +212,15 @@ public struct HelloButton<Content: View>: View {
           model.hasPressed = false
           model.hasClicked = false
         }
-        try? await Task.sleepForOneFrame()
-        if model.forceVisualPress {
-          model.forceVisualPress = false
-          try? await Task.sleepForOneFrame()
-        }
         try await action()
+        model.forceVisualPress = false
       }
+      model.forceVisualPress = true
       if model.hapticsType.hapticsOnAction {
         Haptics.buttonFeedback()
-      }
-      if !model.hasPressed {
-        model.forceVisualPress = true
+      } else if !model.hasPressed && model.hapticsType == .click {
+        model.hasPressed = true
+        Haptics.buttonFeedback()
       }
     }) {
       content()

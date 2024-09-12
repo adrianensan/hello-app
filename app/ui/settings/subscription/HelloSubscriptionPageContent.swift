@@ -97,14 +97,20 @@ struct HelloSubscriptionPageContent: View {
   
   public var body: some View {
     VStack(spacing: 24) {
-      if subcriptionModel.isSubscribed {
+      if subcriptionModel.isActuallySubscribed {
         Text("Thank you for\nsubscribing!")
           .font(.system(size: 36, weight: .bold))
           .multilineTextAlignment(.center)
           .fixedSize()
           .foregroundStyle(theme.foreground.primary.style)
         
-        OtherHelloAppsView()
+        Text("Your subscription is valid for ALL Hello apps")
+          .font(.system(size: 17, weight: .medium))
+          .multilineTextAlignment(.center)
+          .fixedSize(horizontal: false, vertical: true)
+          .foregroundStyle(theme.foreground.primary.style)
+        
+//        OtherHelloAppsView()
         Spacer(minLength: 0)
         if subcriptionModel.isSubscribedFromThisApp {
           HelloButton(action: { isManageSubscriptionsPresented = true }) {
@@ -146,7 +152,7 @@ struct HelloSubscriptionPageContent: View {
           .fixedSize()
           .foregroundStyle(theme.foreground.primary.style)
         
-        OtherHelloAppsView()
+//        OtherHelloAppsView()
         
         if subcriptionModel.isPromo {
           Text("You have been granted access to premium features!")
@@ -298,8 +304,8 @@ struct HelloSubscriptionPageContent: View {
       }
     }.manageSubscriptionsSheet(isPresented: $isManageSubscriptionsPresented)
       .onDisappear { windowModel.stopConfetti() }
-      .onChange(of: subcriptionModel.isSubscribed, initial: true) {
-        if subcriptionModel.isSubscribed {
+      .onChange(of: subcriptionModel.isActuallySubscribed, initial: true) {
+        if subcriptionModel.isActuallySubscribed {
           windowModel.showConfetti()
         } else {
           windowModel.stopConfetti()

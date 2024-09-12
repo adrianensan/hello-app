@@ -16,6 +16,7 @@ public extension EnvironmentValues {
   @Entry var safeArea: EdgeInsets = EdgeInsets()
   @Entry var keyboardFrame: CGRect = .zero
   @Entry var isFullscreen: Bool = false
+  @Entry var physicalScale: CGFloat = 1
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
   @Entry var helloDismiss: @MainActor () -> Void = {}
 }

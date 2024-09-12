@@ -14,6 +14,7 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
     NavigationPage(title: "Developer") {
       VStack(alignment: .leading, spacing: 24) {
         HelloSection(title: "UI") {
+          ScreenMetricsRow()
           ShowDebugContentSettingsItem()
           ShowTouchesSettingsItem()
           ShowDebugBordersSettingsItem()

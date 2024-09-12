@@ -12,6 +12,7 @@ public enum HelloAppPlatform: String, Identifiable, Codable, Sendable {
 
 public struct KnownApp: Identifiable, Equatable, Codable, Sendable {
   public var id: String
+  public var int: Int
   public var bundleID: String
   public var name: String
   public var url: String

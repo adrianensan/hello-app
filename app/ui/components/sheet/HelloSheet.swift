@@ -52,6 +52,7 @@ public struct HelloSheet<Content: View>: View {
   
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeArea
+  @Environment(\.physicalScale) private var physicalScale
   @Environment(\.theme) private var theme
   @Environment(\.colorScheme) private var colorScheme
   @Environment(\.viewID) private var viewID
@@ -80,8 +81,8 @@ public struct HelloSheet<Content: View>: View {
       .overlay(UnevenRoundedRectangle(
         cornerRadii: RectangleCornerRadii(
           topLeading: 30,
-          bottomLeading: Device.currentEffective.screenCornerRadius,
-          bottomTrailing: Device.currentEffective.screenCornerRadius,
+          bottomLeading: Device.currentEffective.screenCornerRadius * physicalScale,
+          bottomTrailing: Device.currentEffective.screenCornerRadius * physicalScale,
           topTrailing: 30))
         .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
       .padding(.top, safeArea.top + 16)

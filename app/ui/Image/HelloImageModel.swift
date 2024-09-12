@@ -17,7 +17,6 @@ public struct HelloImageID {
 
 public enum HelloImageSource: Hashable, Sendable, Identifiable {
   case asset(bundle: Bundle = .main, named: String)
-  case resource(bundle: Bundle = .main, fileName: String)
   case url(String)
   case remoteURL(String)
   case favicon(String)
@@ -29,12 +28,18 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
     lhs.id == rhs.id
   }
   
+  public static func resource(bundle: Bundle = .main, fileName: String) -> HelloImageSource {
+    guard let url = bundle.path(forResource: fileName, ofType: nil) else {
+      Log.error("Failed to find bundle image \(fileName)", context: "ImageModel")
+      return .data(Data())
+    }
+    return .url(url)
+  }
+  
   public var id: String {
     switch self {
     case .asset(let named):
       "asset-\(named)"
-    case .resource(let bundle, let fileName):
-      "resource-\(bundle)-\(fileName)"
     case .url(let url):
       "file-url-\(url)"
     case .remoteURL(let url):
@@ -125,27 +130,25 @@ public class HelloImageModel {
           self?.image = image
         }
       }
-    case .resource(let bundle, let fileName):
+    case .url(let urlString):
       loadTask = Task.detached {
-        guard let bundleURL = bundle.url(for: .any(fileName: fileName)),
-              let data = try? Data(contentsOf: bundleURL),
-              let nativeImage = NativeImage(data: data)
-        else {
-          Log.error("Failed to find bundle image \(fileName)", context: "ImageModel")
-          throw HelloError("Failed to find bundle image")
+        let url: URL
+        if urlString.hasPrefix("file://") {
+          guard let fileURL = try? URL(string: urlString) else {
+            return
+          }
+          url = fileURL
+        } else {
+          url = URL(fileURLWithPath: urlString)
         }
+        guard let data = try? Data(contentsOf: url),
+              let nativeImage = NativeImage(data: data)
+        else { return }
         Task { @MainActor [weak self] in
           self?.image = nativeImage
           await self?.loadFrames(from: data)
         }
       }
-    case .url(let fileURL):
-      guard let url = URL(string: fileURL),
-            let data = try? Data(contentsOf: url),
-            let nativeImage = NativeImage(data: data)
-      else { return }
-      image = nativeImage
-      Task { await loadFrames(from: data) }
     case .remoteURL(let url):
       loadTask = Task {
         defer { loadTask = nil }

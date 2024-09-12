@@ -37,7 +37,8 @@ struct PersistenceExplorerFileRow: View {
             case .file(let file):
               switch ContentType.inferFrom(fileExtension: file.url.pathExtension).category {
               case .image:
-                HelloImageView(.url(file.url.absoluteString), variant: .thumbnail(size: 80), cornerRadius: 8, resizeMode: .fit)
+                HelloImageView(.url(file.url.absoluteString), variant: .thumbnail(size: 80), resizeMode: .fit)
+                  .clipShape(.rect(cornerRadius: 8))
               default:
                 Image(systemName: ContentType.inferFrom(fileExtension: file.url.pathExtension).iconName)
               }

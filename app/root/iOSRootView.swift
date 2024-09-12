@@ -56,7 +56,7 @@ public struct HelloAppRootView<Content: View>: View {
       .observeActiveTheme()
       .applyVisualEfects()
       .onAppear {
-        let persistenceMode = Persistence.unsafeValue(.persistenceMode)
+        let persistenceMode = Persistence.mainActorValue(.persistenceMode)
         if persistenceMode != .normal {
           windowModel.show(alert: HelloAlertConfig(
             title: "\(persistenceMode.name) Mode Enabled",
@@ -64,7 +64,7 @@ public struct HelloAppRootView<Content: View>: View {
             firstButton: .init(
               name: "Disable",
               action: {
-                Persistence.unsafeSave(.normal, for: .persistenceMode)
+                await Persistence.save(.normal, for: .persistenceMode)
                 exitGracefully()
               }, isDestructive: false),
             secondButton: .ok))

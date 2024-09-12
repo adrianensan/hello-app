@@ -112,29 +112,37 @@ public class HelloSubscriptionModel {
     subscriptionsModel.value
   }
   
-  public var activeSubscription: HelloSubscription? {
-    subscriptions.values.first {
-      $0.isValid && (!$0.isTest || AppInfo.isTestBuild) && $0.appBundleID != HelloSubscription.promo.appBundleID
-    }
+  public var highestLevelSubscription: HelloSubscription? {
+    subscriptions.values.max { $0.level < $1.level }
   }
   
   public var activeSubscriptionFromThisApp: HelloSubscription? {
     storeModel.validSubscriptions
       .compactMap { HelloSubscriptionOption.infer(from: $0.productID) }
-      .map { HelloSubscription.new(for: $0.tier) }
+      .map {
+        if AppInfo.isTestBuild {
+          HelloSubscription.test
+        } else {
+          HelloSubscription.new(for: $0.tier)
+        }
+      }
       .first
   }
   
-  public var isSubscribed: Bool {
-    activeSubscription != nil
+  public var isActuallySubscribed: Bool {
+    highestLevelSubscription?.isValidSubscription == true
   }
   
   public var isPromo: Bool {
-    subscriptions[HelloSubscription.promo.appBundleID]?.isValid == true
+    if case .promo = highestLevelSubscription?.type {
+      true
+    } else {
+      false
+    }
   }
   
   public var allowPremiumFeatures: Bool {
-    activeSubscription != nil || isPromo
+    highestLevelSubscription?.isValid == true
   }
   
   public var isSubscribedFromThisApp: Bool {
@@ -142,36 +150,42 @@ public class HelloSubscriptionModel {
   }
   
   public var appSubscribedFrom: KnownApp? {
-    guard let bundleID = activeSubscription?.appBundleID else { return nil }
+    guard highestLevelSubscription?.isValidSubscription == true,
+          let bundleID = highestLevelSubscription?.appBundleID else {
+      return nil
+    }
     return .app(for: bundleID)
   }
   
-  private func setSubscribed(tier: Int) {
-    if subscriptions[AppInfo.bundleID] != .new(for: tier) {
-      subscriptionsModel.value[AppInfo.bundleID] = .new(for: tier)
-    }
-  }
-  
-  private func setUnsubscribed() {
-    if subscriptions[AppInfo.bundleID]?.isValid == true {
-      subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
-    }
-  }
-  
   func set(developerIsSubscribed: Bool) {
+    guard !isActuallySubscribed else { return }
     if developerIsSubscribed {
-      subscriptionsModel.value[AppInfo.developerHelloApp] = .developer
+      subscriptionsModel.value[AppInfo.rootBundleID] = .developer
     } else {
-      subscriptionsModel.value[AppInfo.developerHelloApp] = nil
+      subscriptionsModel.value[AppInfo.rootBundleID] = nil
+    }
+  }
+  
+  func applyPromo(global: Bool) {
+    subscriptionsModel.value[AppInfo.rootBundleID] = global ? .promoGlobal : .promoLocal
+  }
+  
+  func removePromo() {
+    if case .promo = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
+      subscriptionsModel.value[AppInfo.rootBundleID] = nil
     }
   }
   
   func refresh() {
     guard storeModel.isSetup else { return }
     if let subscription = activeSubscriptionFromThisApp {
-      setSubscribed(tier: subscription.tier)
+      if subscriptions[AppInfo.bundleID] != subscription {
+        subscriptionsModel.value[AppInfo.bundleID] = subscription
+      }
     } else {
-      setUnsubscribed()
+      if subscriptions[AppInfo.bundleID]?.isValid == true {
+        subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+      }
     }
   }
   

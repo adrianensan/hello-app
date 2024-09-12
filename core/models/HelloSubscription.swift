@@ -2,46 +2,121 @@ import Foundation
 
 public struct HelloSubscription: Codable, Equatable, Sendable {
   
+  public enum HelloSubscriptionType: Codable, Equatable, Sendable {
+    case test
+    case paid(tier: Int)
+    case developer
+    case promo(global: Bool)
+    
+    public var description: String {
+      switch self {
+      case .test: "Test"
+      case .paid(let tier): "Tier \(tier)"
+      case .developer: "Dev"
+      case .promo(let global): "Promo \(global ? "Global" : "Local")"
+      }
+    }
+  }
+  
   public enum Frequency: Codable, Sendable {
     case monthly
     case yearly
   }
   
   public var appBundleID: String
-  public var tier: Int
+  public var type: HelloSubscriptionType
   public var isValid: Bool
-  public var isTest: Bool
   
   init(appBundleID: String,
-       tier: Int,
-       isValid: Bool,
-       isTest: Bool) {
+       type: HelloSubscriptionType,
+       isValid: Bool) {
     self.appBundleID = appBundleID
-    self.tier = tier
+    self.type = type
     self.isValid = isValid
-    self.isTest = isTest
+  }
+  
+  public var isTest: Bool {
+    type == .test
+  }
+  
+  public var isActiveApp: Bool {
+    AppInfo.rootBundleID == appBundleID
+  }
+  
+  public var isGlobal: Bool {
+    switch type {
+    case .test: false
+    case .paid(let tier): true
+    case .developer: true
+    case .promo(let global): global
+    }
+  }
+  
+  public var isValidSubscription: Bool {
+    guard isValid else { return false }
+    return switch type {
+    case .test: true
+    case .paid(let tier): true
+    case .developer: false
+    case .promo: false
+    }
+  }
+  
+  public var level: Int {
+    var int = 0
+    if isValid {
+      int += 100
+    }
+    switch type {
+    case .test:
+      int += 10
+      if isActiveApp {
+        int += 1
+      }
+    case .paid(let tier):
+      int += 50 + 2 * tier
+      if isActiveApp {
+        int += 1
+      }
+    case .developer:
+      int += 40
+    case .promo(let global):
+      int += global ? 20 : 2
+    }
+    return int
   }
   
   public static var developer: HelloSubscription {
     HelloSubscription(
-      appBundleID: "com.adrianensan.hello",
-      tier: 1,
-      isValid: true,
-      isTest: false)
+      appBundleID: AppInfo.bundleID,
+      type: .developer,
+      isValid: true)
   }
   
-  public static var promo: HelloSubscription {
+  public static var promoGlobal: HelloSubscription {
     HelloSubscription(
-      appBundleID: "com.adrianensan.promo",
-      tier: 1,
-      isValid: true,
-      isTest: false)
+      appBundleID: AppInfo.bundleID,
+      type: .promo(global: true),
+      isValid: true)
+  }
+  
+  public static var promoLocal: HelloSubscription {
+    HelloSubscription(
+      appBundleID: AppInfo.bundleID,
+      type: .promo(global: true),
+      isValid: true)
+  }
+  
+  public static var test: HelloSubscription {
+    HelloSubscription(
+      appBundleID: AppInfo.bundleID,
+      type: .test,
+      isValid: true)
   }
   
   public static func new(for tier: Int) -> HelloSubscription {
     HelloSubscription(appBundleID: AppInfo.bundleID,
-                      tier: tier,
-                      isValid: true,
-                      isTest: AppInfo.isTestBuild)
+                      type: .paid(tier: tier),
+                      isValid: true)
   }
 }

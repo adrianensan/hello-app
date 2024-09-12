@@ -45,7 +45,7 @@ struct DemoModeSettingsItem: View {
             secondButton: .init(
               name: actionName,
               action: {
-                Persistence.unsafeSave(newPersistenceMode, for: .persistenceMode)
+                await Persistence.save(newPersistenceMode, for: .persistenceMode)
                 exitGracefully()
               },
               isDestructive: newPersistenceMode != .normal)))

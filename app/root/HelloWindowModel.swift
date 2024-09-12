@@ -63,6 +63,34 @@ public class HelloWindowModel {
   var confettiID: String = .uuid
   var popupViews: [PopupWindow] = []
   
+  public var physicalScreenPixelSize: IntSize {
+    IntSize(width: (window?.screen ?? UIScreen.main).nativeBounds.width,
+            height: (window?.screen ?? UIScreen.main).nativeBounds.height)
+  }
+  
+  public var pointSize: IntSize {
+    IntSize(width: (window?.screen ?? UIScreen.main).bounds.width,
+            height: (window?.screen ?? UIScreen.main).bounds.height)
+  }
+  
+  public var physicalPixelsPerPoint: CGFloat {
+    (window?.screen ?? UIScreen.main).nativeScale
+  }
+  
+  public var effectivePixelsPerPoint: CGFloat {
+    (window?.screen ?? UIScreen.main).scale
+  }
+  
+  public var physicalPixelScale: CGFloat {
+    effectivePixelsPerPoint / physicalPixelsPerPoint
+  }
+  
+  public var effectiveScreenPixelSize: IntSize {
+    let screen = window?.screen ?? UIScreen.main
+    return IntSize(width: screen.bounds.width * screen.scale,
+                   height: screen.bounds.height * screen.scale)
+  }
+  
   public func showPopup<Content: View>(blurBackground: Bool = false,
                                        onDismiss: (@MainActor () -> Void)? = nil,
                                        _ view: @escaping @MainActor () -> Content) {
