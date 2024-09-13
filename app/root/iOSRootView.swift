@@ -48,13 +48,13 @@ public struct HelloAppRootView<Content: View>: View {
           .zIndex(10)
       }
       #endif
-    }.environment(\.safeArea, uiProperties.safeAreaInsets)
-      .observeWindowFrame()
-      .observeKeyboardFrame()
-      .dimHomeBarForTheme()
+    }.dimHomeBarForTheme()
       .observeIsActive()
       .observeActiveTheme()
       .applyVisualEfects()
+      .environment(\.safeArea, uiProperties.safeAreaInsets)
+      .observeWindowFrame()
+      .observeKeyboardFrame()
       .onAppear {
         let persistenceMode = Persistence.mainActorValue(.persistenceMode)
         if persistenceMode != .normal {

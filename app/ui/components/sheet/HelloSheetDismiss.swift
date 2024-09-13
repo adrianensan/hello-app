@@ -3,6 +3,7 @@ import SwiftUI
 
 struct HelloSheetDismissDragViewModifier: ViewModifier {
   
+  @Environment(\.windowFrame) private var windowFrame
   @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloSheetModel.self) private var model
@@ -17,6 +18,10 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
     }
   }
   
+  private var isfloating: Bool {
+    windowFrame.size.minSide > 700
+  }
+  
   func body(content: Content) -> some View {
     content
       .readSize {
@@ -28,9 +33,10 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .compositingGroup()
 //      .frame(height: model.isVisible ? nil : 1, alignment: .top)
       .animation(.dampSpring, value: model.isVisible)
-      .offset(y: model.isVisible ? yDrag : model.sheetSize.height + 8)
+      .offset(y: model.isVisible ? yDrag : (isfloating ? windowFrame.height : model.sheetSize.height) + 8)
       .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+      .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: isfloating ? 0.8 * windowFrame.height : .infinity, alignment: isfloating ? .center : .bottom)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
       .background(HelloBackgroundDimmingView()
         .opacity(model.isVisible ? 1 : 0)
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)

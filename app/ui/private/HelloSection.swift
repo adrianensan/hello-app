@@ -76,10 +76,10 @@ public struct HelloSection<Content: View>: View {
       VStack(alignment: .leading, spacing: 0) {
         content()
       }//.background(theme.surface.backgroundView(for: .rect(cornerRadius: 16), isBaseLayer: true))
+      .frame(maxWidth: 520)
         .clipShape(.rect(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
           .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
-        .frame(maxWidth: 520)
     }.frame(maxWidth: 520)
   }
 }

@@ -68,14 +68,14 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
               .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0) + (scrollModel.scrollThreshold == nil && scrollModel.effectiveScrollThreshold < 0 ? 8 : 0))
               .padding(.horizontal, config.horizontalPagePadding)
               .padding(.bottom, 16)
-              .frame(maxWidth: .infinity)
-          }
+              .frame(maxWidth: .infinity)  
+          }.background(ClearClickableView().onTapGesture {
+            globalDismissKeyboard()
+          })
 //            .background(ClearClickableView())
         }).safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)
-        }.background(ClearClickableView().onTapGesture {
-          globalDismissKeyboard()
-        })
+        }
       
       #if os(iOS)
       NavigationPageBarFixed(title: title, navBarContent: {

@@ -152,7 +152,7 @@ struct HelloSubscriptionPageContent: View {
           .fixedSize()
           .foregroundStyle(theme.foreground.primary.style)
         
-//        OtherHelloAppsView()
+        OtherHelloAppsView()
         
         if subcriptionModel.isPromo {
           Text("You have been granted access to premium features!")
@@ -195,6 +195,7 @@ struct HelloSubscriptionPageContent: View {
                 .frame(width: 64)
             }.foregroundStyle(theme.foreground.secondary.style)
               .padding(.trailing, 10)
+              .frame(maxWidth: 520)
             HelloSection {
               HelloSubscriptionOptionsContent(selectedOption: $selectedOption, showAllOptions: showAllOptions)
             }

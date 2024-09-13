@@ -10,7 +10,7 @@ public enum HelloAppPlatform: String, Identifiable, Codable, Sendable {
   public var id: String { rawValue }
 }
 
-public struct KnownApp: Identifiable, Equatable, Codable, Sendable {
+public struct KnownApp: Identifiable, Hashable, Codable, Sendable {
   public var id: String
   public var int: Int
   public var bundleID: String

@@ -20,7 +20,7 @@ public struct HelloPromoCode: Sendable {
   }
   
   public static func new(for deviceID: String, app: KnownApp? = nil) throws -> HelloPromoCode {
-    guard let deviceUUID = try? HelloUUID(string: deviceID) else { throw HelloError("Invalid device ID") }
+    guard deviceID.count == 24, let deviceUUID = try? HelloUUID(string: deviceID) else { throw HelloError("Invalid device ID") }
     return HelloPromoCode(appInt: app?.int ?? 0, deviceIDHash: deviceUUID.shortHashString)
   }
 }

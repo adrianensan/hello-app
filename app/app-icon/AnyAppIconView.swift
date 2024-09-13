@@ -27,11 +27,16 @@ public struct HelloIOSAppIconView: Sendable {
   public static func auto(icon: some View, accent: HelloColor) -> HelloIOSAppIconView {
     HelloIOSAppIconView(
       light: HelloAppIconView(
-        front: icon.foregroundStyle(.white),
+        front:
+          GeometryReader { geometry in
+            icon.foregroundStyle(.white)
+              .compositingGroup()
+              .shadow(color: .black.opacity(0.2), radius: 0.005 * geometry.size.minSide)
+          }
+        ,
         back: LinearGradient(
-          colors: [accent.modify(saturation: 0, brightness: 0).swiftuiColor,
-                   accent.swiftuiColor,
-                   accent.modify(saturation: 0.2, brightness: 0).swiftuiColor],
+          colors: [accent.modify(saturation: 0.1, brightness: -0.2).swiftuiColor,
+                   accent.swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)),
       dark: HelloAppIconView(

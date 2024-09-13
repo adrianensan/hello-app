@@ -66,28 +66,37 @@ public struct HelloSheet<Content: View>: View {
     let sheetModel = HelloSheetModel(dragToDismissType: dragToDismissType)
     self._model = State(initialValue: sheetModel)
     self.content = content
-  }  
+  }
 
+  private var isfloating: Bool {
+    windowFrame.size.minSide > 700
+  }
+  
   public var body: some View {
     content()
       .coordinateSpace(.sheet)
       .overlay(HelloCloseButton { model.dismiss() }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing))
       .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-      .padding(.bottom, 60)
+      .padding(.bottom, isfloating ? 0 : 60)
       .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
-      .padding(.bottom, -60)
+      .padding(.bottom, isfloating ? 0 : -60)
       .overlay(UnevenRoundedRectangle(
         cornerRadii: RectangleCornerRadii(
           topLeading: 30,
-          bottomLeading: Device.currentEffective.screenCornerRadius * physicalScale,
-          bottomTrailing: Device.currentEffective.screenCornerRadius * physicalScale,
+          bottomLeading: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
+          bottomTrailing: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
           topTrailing: 30))
         .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
-      .padding(.top, safeArea.top + 16)
+      .padding(.top, isfloating ? 0 : safeArea.top + 16)
       .handleSheetDismissDrag()
-      .transformEnvironment(\.safeArea) { $0.top = 0 }
+      .transformEnvironment(\.safeArea) {
+        $0.top = 0
+        if isfloating {
+          $0.bottom = 0
+        }
+      }
       .environment(model)
       .environment(\.helloDismiss, { model.dismiss() })
   }

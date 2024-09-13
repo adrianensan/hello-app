@@ -167,6 +167,23 @@ public class HelloWindowModel {
   
   public init() {}
   
+  public var pointSize: CGSize {
+    (window?.screen ?? NSScreen.main)?.frame.size ?? .zero
+  }
+  
+  public var physicalScreenPixelSize: IntSize {
+    let size = pointSize * ((window?.screen ?? NSScreen.main)?.backingScaleFactor ?? 1)
+    return IntSize(width: size.width, height: size.height)
+  }
+  
+  public var effectiveScreenPixelSize: IntSize { physicalScreenPixelSize }
+  
+  public var physicalPixelsPerPoint: CGFloat { (window?.screen ?? NSScreen.main)?.backingScaleFactor ?? 1 }
+  
+  public var effectivePixelsPerPoint: CGFloat { physicalPixelsPerPoint }
+  
+  public var physicalPixelScale: CGFloat { effectivePixelsPerPoint / physicalPixelsPerPoint }
+  
   public func subWindowClosed() {
     if let oldSubWindowID = subWindowID {
       Task {

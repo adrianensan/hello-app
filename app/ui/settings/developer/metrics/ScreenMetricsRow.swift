@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -29,3 +30,4 @@ public struct ScreenMetricsRow: View {
     }
   }
 }
+#endif

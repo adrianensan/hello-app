@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -99,3 +100,4 @@ public struct ScreenMetricsPage: View {
     }
   }
 }
+#endif
