@@ -80,6 +80,24 @@ enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
   }
 }
 
+struct HelloSubscriptionCloudProperty: ICloudProperty {
+  typealias Value = [String: HelloSubscription]
+  
+  var recordID: String { "hello-subscriptions" }
+  
+  var recordType: String { "HelloSubscriptionsMap" }
+  
+  var valueType: ICloudPropertyValueType { .data }
+  
+  var scope: ICloudPropertyScope { .hello }
+}
+
+extension ICloudProperty where Self == HelloSubscriptionCloudProperty {
+  static var helloSubscriptions: HelloSubscriptionCloudProperty {
+    HelloSubscriptionCloudProperty()
+  }
+}
+
 @MainActor
 @Observable
 public class HelloSubscriptionModel {
@@ -92,12 +110,12 @@ public class HelloSubscriptionModel {
   
   var isPurchasing: Bool { storeModel.isPurchasing }
   
-  init() {
+  private init() {
     storeModel.setup(knownProductIDs: HelloSubscriptionOption.allCases.map { $0.id })
     refresh()
   }
   
-  public var tier1MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Monthly.id] }
+  var tier1MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Monthly.id] }
   var tier1YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Yearly.id] }
   var tier2MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Monthly.id] }
   var tier2YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Yearly.id] }
@@ -107,7 +125,7 @@ public class HelloSubscriptionModel {
   func product(for subscriptionOption: HelloSubscriptionOption) -> Product? {
     storeModel.availableProducts[subscriptionOption.id]
   }
-
+  
   private var subscriptions: [String: HelloSubscription] {
     subscriptionsModel.value
   }
@@ -133,12 +151,8 @@ public class HelloSubscriptionModel {
     highestLevelSubscription?.isValidSubscription == true
   }
   
-  public var isPromo: Bool {
-    if case .promo = highestLevelSubscription?.type {
-      true
-    } else {
-      false
-    }
+  public var isDeveloperEnabled: Bool {
+    subscriptionsModel.value[AppInfo.rootBundleID]?.type == .developer
   }
   
   public var allowPremiumFeatures: Bool {
@@ -158,42 +172,84 @@ public class HelloSubscriptionModel {
   }
   
   func set(developerIsSubscribed: Bool) {
-    guard !isActuallySubscribed else { return }
     if developerIsSubscribed {
-      subscriptionsModel.value[AppInfo.rootBundleID] = .developer
-    } else {
-      subscriptionsModel.value[AppInfo.rootBundleID] = nil
+      if subscriptionsModel.value[AppInfo.rootBundleID]?.isValid != true {
+        updateSubscription(to: nil)
+      }
+    } else if case .developer = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
+      updateSubscription(to: nil)
     }
   }
   
   func applyPromo(global: Bool) {
-    subscriptionsModel.value[AppInfo.rootBundleID] = global ? .promoGlobal : .promoLocal
+    guard !isActuallySubscribed else { return }
+    updateSubscription(to: global ? .promoGlobal : .promoLocal)
   }
   
   func removePromo() {
     if case .promo = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
-      subscriptionsModel.value[AppInfo.rootBundleID] = nil
+      updateSubscription(to: nil)
     }
+  }
+  
+  private func updateSubscription(to targetSubscription: HelloSubscription?) {
+    guard subscriptionsModel.value[AppInfo.rootBundleID] != targetSubscription else { return }
+    subscriptionsModel.value[AppInfo.rootBundleID] = targetSubscription
+    sync(hasLocalChanged: true)
   }
   
   func refresh() {
     guard storeModel.isSetup else { return }
+    var hasChanged = false
     if let subscription = activeSubscriptionFromThisApp {
       if subscriptions[AppInfo.bundleID] != subscription {
         subscriptionsModel.value[AppInfo.bundleID] = subscription
+        hasChanged = true
       }
     } else {
-      if subscriptions[AppInfo.bundleID]?.isValid == true {
-        subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+      if let existingSubscription = subscriptions[AppInfo.bundleID], existingSubscription.isValid {
+        switch existingSubscription.type {
+        case .paid:
+          if !AppInfo.isTestBuild {
+            if existingSubscription.isValid {
+              subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+              hasChanged = true
+            }
+          } else {
+            subscriptionsModel.value[AppInfo.bundleID] = nil
+            hasChanged = true
+          }
+        case .test:
+          if AppInfo.isTestBuild {
+            if existingSubscription.isValid {
+              subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+              hasChanged = true
+            }
+          } else {
+            subscriptionsModel.value[AppInfo.bundleID] = nil
+            hasChanged = true
+          }
+        default: ()
+        }
       }
     }
+    sync(hasLocalChanged: hasChanged)
   }
   
   func purchase(productID: String) async throws {
     try await storeModel.purchase(id: productID)
   }
   
-  var isDeveloperSubscribed: Bool {
-    subscriptions[AppInfo.developerHelloApp]?.isValid == true
+  private func sync(hasLocalChanged: Bool) {
+    Task {
+      try await ICloudSyncManager.main.sync(
+        property: .helloSubscriptions,
+        persistenceProperty: .subscriptions,
+        hasLocalUpdates: hasLocalChanged) { localValue, cloudValue in
+          var mergedValue = cloudValue
+          mergedValue[AppInfo.bundleID] = localValue[AppInfo.bundleID]
+          return mergedValue
+        }
+    }
   }
 }

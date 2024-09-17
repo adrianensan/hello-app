@@ -9,7 +9,8 @@ struct ClickableViewModifier: ViewModifier {
   func body(content: Content) -> some View {
     if debugModel.showBorders {
       content
-        .overlay(Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1))
+        .overlay(Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1)
+          .allowsHitTesting(false))
     } else {
       content
         .background(Color.clear.contentShape(.interaction, .rect))
@@ -26,16 +27,14 @@ public struct ClearClickableView: View {
   public var body: some View {
     if debugModel.showBorders {
       Color.clear.contentShape(.interaction, .rect)
-        .overlay {
-          Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1)
-        }
+        .overlay {Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1)
+          .allowsHitTesting(false)}
     } else {
       Color.clear.contentShape(.interaction, .rect)
     }
   }
 }
 
-@MainActor
 public extension View {
   func clickable() -> some View {
     modifier(ClickableViewModifier())

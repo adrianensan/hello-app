@@ -6,14 +6,17 @@ import HelloApp
 
 public struct OtherHelloAppsView: View {
   
-  public init() {}
+  var size: CGFloat
+  
+  public init(size: CGFloat = 40) {
+    self.size = size
+  }
   
   public var body: some View {
     HStack(spacing: 4) {
       ForEach(KnownApp.all) { knownApp in
         KnownAppIconView(app: knownApp, prefferedPlatform: .iOS)
-          .frame(width: 40, height: 40)
-          .frame(width: 44, height: 44)
+          .frame(width: size, height: size)
       }
     }
   }

@@ -28,8 +28,6 @@ public enum AppInfo {
   
   public static var sharedHelloGroup: String { "group.com.adrianensan.hello" }
   
-  public static var developerHelloApp: String { "com.adrianensan.hello" }
-  
   public static var fullVersionString: String {
     #if DEBUG || targetEnvironment(simulator)
     "\(AppInfo.version) (\(AppInfo.build)) [DEBUG]"

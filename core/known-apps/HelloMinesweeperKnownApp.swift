@@ -6,8 +6,9 @@ public extension KnownApp {
       id: "hello-minesweeper",
       int: 3,
       bundleID: "com.adrianensan.minesweeper",
+      appleID: "1583978000",
       name: "Hello Minesweeper",
-      url: "",
+      description: "The highest quality minesweeper you'll ever play.",
       platforms: [.iOS])
   }
 }

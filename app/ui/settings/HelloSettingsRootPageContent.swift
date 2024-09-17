@@ -20,10 +20,10 @@ public struct HelloSettingsRootPageContent<Content: View>: View {
       content()
       
       HelloSection {
+        AboutSettingsRow()
         if isDeveloper || isFakeDeveloper {
           DeveloperSettingsRow()
         }
-        AboutSettingsRow()
       }
       
 //      OtherHelloAppsView()

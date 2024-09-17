@@ -8,6 +8,7 @@ public struct HelloSettingsCopyrightSection: View {
   
   @Environment(\.theme) private var theme
   @Environment(HelloWindowModel.self) private var windowModel
+  @Environment(PagerModel.self) private var pagerModel
   
   @State private var enterCodeModel = HelloEnterCodeModel()
   
@@ -21,6 +22,7 @@ public struct HelloSettingsCopyrightSection: View {
         .clickable()
         .onTapGesture {
           enterCodeModel.windowModel = windowModel
+          enterCodeModel.pagerModel = pagerModel
           enterCodeModel.click()
         }
     }.foregroundStyle(theme.foreground.tertiary.style)

@@ -14,6 +14,7 @@ public class HelloEnterCodeModel {
   
   var id: String = .uuid
   weak var windowModel: HelloWindowModel?
+  weak var pagerModel: PagerModel?
   
   var unlockDevModeClickCount: Int = 0
   @ObservationIgnored private var unlockDevModeLastClick: TimeInterval = 0
@@ -70,6 +71,8 @@ public class HelloEnterCodeModel {
   public func enter() {
     let input = input
     dismiss()
+    var alertTitle: String?
+    var alertMessage: String?
     switch input.lowercased() {
     case "admin", "developer", "debug", "debugmode":
       if !isFakeDeveloper && !isDeveloper {
@@ -79,90 +82,61 @@ public class HelloEnterCodeModel {
           firstButton: .cancel,
           secondButton: .init(name: "Enable", action: { self.isFakeDeveloper = true }, isDestructive: true)))
       } else {
-        windowModel?.show(alert: HelloAlertConfig(
-          title: "Developer Mode Enabled",
-          message: #"Access developer options through the "Developer" settings menu"#,
-          firstButton: .ok))
+        alertTitle = "Developer Mode Enabled"
+        alertMessage = #"Access developer options through the "Developer" settings menu"#
       }
     case "exit", "close": exitGracefully()
     case "crash": exit(0)
+    case "knockknock": alertTitle = "Who's There"
     case "freeze": windowModel?.freeze = true
     case "confetti": windowModel?.showConfetti()
-    case "cat", "monki", "monkey":
+    case "cat", "cats", "pet", "pets", "monki", "monkey":
       Task {
-        let preloadModel = HelloImageModel.model(for: .asset(bundle: .helloApp, named: "cat"))
-        try await Task.sleep(seconds: 0.2)
-        windowModel?.showPopup {
-          ImageViewer(options: [.init(imageSource: .asset(bundle: .helloApp, named: "cat"), variant: .original)],
-                      originalFrame: nil, cornerRadius: 0)
-        }
+        try await Task.sleep(seconds: 0.5)
+        pagerModel?.push { CatPage() }
       }
     case "nopromo":
       HelloSubscriptionModel.main.removePromo()
-      windowModel?.show(alert: HelloAlertConfig(
-        title: "Promo Removed",
-        firstButton: .ok))
-    case hasPrefix("promo"):
-      let promoCode = input.deletingPrefix("promo")
-      windowModel?.show(alert: HelloAlertConfig(
-        title: "Code Redeemed",
-        message: "Premium features are now enabled",
-        firstButton: .ok))
-      
-//      windowModel?.show(alert: HelloAlertConfig(
-//        title: "Code Already Redeemed",
-//        message: "You already have access to premium features",
-//        firstButton: .ok))
-//      windowModel?.show(alert: HelloAlertConfig(
-//        title: "Invalid promo code",
-//        message: "Invalid promo code",
-//        firstButton: .ok))
+      alertTitle = "Promo Removed"
     default:
       if let unixSignal = UNIXSignal(input) {
         exit(0)
       } else if let promoCode: HelloPromoCode = try? .parse(from: input) {
         guard let deviceUUID = try? HelloUUID(string: Persistence.mainActorValue(.deviceID)) else {
-          windowModel?.show(alert: HelloAlertConfig(
-            title: "Error",
-            message: "Failed to parse Device ID",
-            firstButton: .ok))
-          return
+          alertTitle = "Nothing Happened"
+          alertMessage = "Not sure what you expected"
+          break
         }
         guard promoCode.deviceIDHash.lowercased() == deviceUUID.shortHashString else {
-          windowModel?.show(alert: HelloAlertConfig(
-            title: "Nothing Happened",
-            message: "Not sure what you expected",
-            firstButton: .ok))
-          return
+          alertTitle = "Nothing Happened"
+          alertMessage = "Not sure what you expected"
+          break
         }
         guard !HelloSubscriptionModel.main.allowPremiumFeatures else {
-          windowModel?.show(alert: HelloAlertConfig(
-            title: "Already Premium",
-            message: "Premium features are already enabled",
-            firstButton: .ok))
-          return
+          alertTitle = "Already Premium"
+          alertMessage = "Premium features are already enabled"
+          break
         }
         
         guard promoCode.appInt == 0 || promoCode.appInt == KnownApp.app(for: AppInfo.rootBundleID)?.int else {
-          windowModel?.show(alert: HelloAlertConfig(
-            title: "Premium Enabled",
-            message: "Premium features are now enabled",
-            firstButton: .ok))
-          return
+          alertTitle = "Nothing Happened"
+          alertMessage = "Not sure what you expected"
+          break
         }
         
         HelloSubscriptionModel.main.applyPromo(global: promoCode.appInt == 0)
-        
-        windowModel?.show(alert: HelloAlertConfig(
-          title: "Premium Enabled",
-          message: "Premium features are now enabled",
-          firstButton: .ok))
+        alertTitle = "Premium Enabled"
+        alertMessage = "Premium features are now enabled"
       } else {
-        windowModel?.show(alert: HelloAlertConfig(
-          title: "Nothing Happened",
-          message: "Not sure what you expected",
-          firstButton: .ok))
+        alertTitle = "Nothing Happened"
+        alertMessage = "Not sure what you expected"
       }
+    }
+    if let alertTitle {
+      windowModel?.show(alert: HelloAlertConfig(
+        title: alertTitle,
+        message: alertMessage,
+        firstButton: .ok))
     }
   }
   

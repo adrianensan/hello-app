@@ -6,8 +6,9 @@ public extension KnownApp {
       id: "hello-podcasts",
       int: 1,
       bundleID: "com.adrianensan.podcasts",
+      appleID: "1554541767",
       name: "Hello Podcasts",
-      url: "",
+      description: "Easy to use Podcast Player",
       platforms: [.iOS])
   }
 }

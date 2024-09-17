@@ -24,7 +24,7 @@ public struct AppStoreReviewSettingsItem: View {
             Image(systemName: "heart")
               .font(.system(size: 20, weight: .regular))
               .frame(width: 32, height: 32)
-            Text("Review in App Store")
+            Text("Write Review in App Store")
               .font(.system(size: 16, weight: .regular))
               .fixedSize()
             Spacer(minLength: 16)

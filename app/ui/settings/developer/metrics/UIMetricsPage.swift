@@ -4,7 +4,7 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct ScreenMetricsPage: View {
+public struct UIMetricsPage: View {
   
   @Environment(\.displayScale) private var displayScale
   @Environment(\.theme) private var theme
@@ -78,7 +78,7 @@ public struct ScreenMetricsPage: View {
         HelloSection(title: "Window") {
           HelloSectionItem(leadingPadding: false) {
             HStack(spacing: 4) {
-              Text("Point Size")
+              Text("Size (Points)")
                 .font(.system(size: 16, weight: .regular))
               Spacer(minLength: 0)
               Text("\(windowFrame.width.string) x \(windowFrame.height.string)")
@@ -87,7 +87,7 @@ public struct ScreenMetricsPage: View {
           }
           HelloSectionItem(leadingPadding: false) {
             HStack(spacing: 4) {
-              Text("Pixel Size")
+              Text("Size (Pixels)")
                 .font(.system(size: 16, weight: .regular))
               Spacer(minLength: 0)
               Text("\(Int(displayScale * windowFrame.width)) x \(Int(displayScale * windowFrame.height))")

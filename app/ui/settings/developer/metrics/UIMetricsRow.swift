@@ -2,31 +2,27 @@
 import SwiftUI
 
 import HelloCore
+import HelloApp
 
-public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
+public struct UIMetricsRow: View {
   
   @Environment(PagerModel.self) private var pagerModel
-  
-  @State private var appIconModel: AppIconModel<AppIcon> = AppIconModel()
   
   public init() {}
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
-      pagerModel.push(name: "App Icon") { AppIconSettingsPage<AppIcon>().environment(appIconModel) }
+      pagerModel.push(name: "UI Metrics") { UIMetricsPage() }
     }) {
       HelloSectionItem {
         HStack(spacing: 4) {
-          Image(systemName: "app")
+          Image(systemName: "ruler")
             .font(.system(size: 20, weight: .regular))
             .frame(width: 32, height: 32)
           
-          Text("App Icon")
+          Text("UI Metrics")
             .font(.system(size: 16, weight: .regular))
           Spacer(minLength: 0)
-          AppIconView(icon: appIconModel.currentIcon)
-            .frame(width: 36, height: 36)
-            .frame(height: 20)
           Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular))
         }

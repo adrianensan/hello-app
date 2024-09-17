@@ -1,6 +1,6 @@
 import Foundation
 
-private let htmlEntitiesTrie = Trie(valuesMap: [
+private let htmlEntities = [
   "&amp;": "&",
   "%20": " ",
   "&#x20;": " ",
@@ -72,7 +72,42 @@ private let htmlEntitiesTrie = Trie(valuesMap: [
   "&#39;": "'",
   "&#039;": "'",
   "&#8217;": "'",
-])
+]
+
+private let charactersToHTMLEntities: [Character: String] = [
+  "&": "&amp;",
+  "#": "&num;",
+  "\\": "&bsol;",
+  "%": "&percnt;",
+  "$": "&dollar;",
+  "\"": "&quot;",
+  "<": "&lt;",
+  ">": "&gt;",
+  "–": "&ndash;",
+  "@": "&commat;",
+  ";": "&semi;",
+  "*": "&ast;",
+  "°": "&deg;",
+  "^": "&hat;",
+  "©": "&copy;",
+  "'": "&apos;",
+]
+
+private let htmlEntitiesTrie = Trie(valuesMap: htmlEntities)
+
+public extension String {
+  var addingHTMLEntities: String {
+    var encodedString = ""
+    for character in self {
+      if let htmlEntity = charactersToHTMLEntities[character] {
+        encodedString += htmlEntity
+      } else {
+        encodedString += String(character)
+      }
+    }
+    return encodedString
+  }
+}
 
 public extension StringProtocol {
   

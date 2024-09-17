@@ -23,7 +23,7 @@ struct EmailSetupSheet: View {
   \(Device.current.description), \(OSInfo.description)
   App Version: \(AppInfo.version) (\(AppInfo.build))
   Tier: \(HelloSubscriptionModel.main.highestLevelSubscription?.type.description ?? "Free")
-  \(Persistence.mainActorValue(.deviceID))
+  Device ID: \(Persistence.mainActorValue(.deviceID))
   """
   }
   

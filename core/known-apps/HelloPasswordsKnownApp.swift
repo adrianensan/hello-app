@@ -6,8 +6,9 @@ public extension KnownApp {
       id: "hello-passwords",
       int: 5,
       bundleID: "com.adrianensan.passwords",
+      appleID: "6502266745",
       name: "Hello Passwords",
-      url: "",
+      description: "",
       platforms: [.iOS])
   }
 }

@@ -47,7 +47,7 @@ public struct ImageViewer: View {
               cornerRadius: CGFloat) {
     imageOptions = options
     self.originalFrameSaved = originalFrame
-    self._originalFrame = State(initialValue: nil)
+    self._originalFrame = State(initialValue: originalFrame)
     self.cornerRadius = cornerRadius
   }
   

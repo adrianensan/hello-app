@@ -208,12 +208,13 @@ public struct HelloButton<Content: View>: View {
       guard !model.hasClicked else { return }
       model.hasClicked = true
       Task {
-        defer {
+        defer { model.hasClicked = false }
+        Task {
+          try? await Task.sleepForOneFrame()
           model.hasPressed = false
-          model.hasClicked = false
+          model.forceVisualPress = false
         }
         try await action()
-        model.forceVisualPress = false
       }
       model.forceVisualPress = true
       if model.hapticsType.hapticsOnAction {

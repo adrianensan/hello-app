@@ -21,7 +21,7 @@ public struct ContactAndFeedbackSettingsItem: View {
           Text("Contact/Feedback")
             .font(.system(size: 16, weight: .regular))
           Spacer(minLength: 0)
-          Image(systemName: "arrow.up.forward.app")
+          Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular))
         }
       }

@@ -147,7 +147,7 @@ extension Never: PersistenceProperty {
   public var location: PersistenceType { .memory(key: "never") }
 }
 
-public protocol PersistenceProperty: Sendable {
+public protocol PersistenceProperty<Value>: Sendable {
   
   associatedtype Value: Codable & Sendable
 //  associatedtype Key: PersistenceKey

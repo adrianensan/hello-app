@@ -8,14 +8,27 @@ public enum HelloAppPlatform: String, Identifiable, Codable, Sendable {
   case macOS
   
   public var id: String { rawValue }
+  
+  public var name: String {
+    rawValue
+  }
+}
+
+public extension [HelloAppPlatform] {
+  var string: String {
+    reduce("") {
+      $0 + ($0.isEmpty ? "" : ", ") + $1.name
+    }
+  }
 }
 
 public struct KnownApp: Identifiable, Hashable, Codable, Sendable {
   public var id: String
   public var int: Int
   public var bundleID: String
+  public var appleID: String
   public var name: String
-  public var url: String
+  public var description: String = ""
   public var platforms: [HelloAppPlatform]
 }
 

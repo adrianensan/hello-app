@@ -154,7 +154,7 @@ struct HelloSubscriptionPageContent: View {
         
         OtherHelloAppsView()
         
-        if subcriptionModel.isPromo {
+        if subcriptionModel.allowPremiumFeatures {
           Text("You have been granted access to premium features!")
             .font(.system(size: 17, weight: .medium))
             .multilineTextAlignment(.center)

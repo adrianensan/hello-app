@@ -6,8 +6,9 @@ public extension KnownApp {
       id: "hello-emoji",
       int: 4,
       bundleID: "com.adrianensan.hello-emoji",
+      appleID: "6468196358",
       name: "Hello Emoji",
-      url: "",
+      description: "Over 1300 fully animated emoji iMessage stickers.",
       platforms: [.iMessage])
   }
 }

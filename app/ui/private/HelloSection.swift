@@ -7,11 +7,16 @@ public struct HelloSectionItem<Content: View>: View {
   @Environment(\.theme) private var theme
 
   private var content: @MainActor () -> Content
-  private var leadingPadding: Bool
+  private var leadingDividerPadding: CGFloat
   
   public init(leadingPadding: Bool = true, @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.content = content
-    self.leadingPadding = leadingPadding
+    self.leadingDividerPadding = leadingPadding ? 52 : 0
+  }
+  
+  public init(leadingDividerPadding: CGFloat, @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.content = content
+    self.leadingDividerPadding = leadingDividerPadding
   }
   
   public var body: some View {
@@ -24,7 +29,7 @@ public struct HelloSectionItem<Content: View>: View {
       .background(theme.surface.backgroundColor)
       .overlay(theme.surface.divider.color.swiftuiColor
         .frame(height: theme.surface.divider.width)
-        .padding(.leading, leadingPadding ? 52 : 0)
+        .padding(.leading, leadingDividerPadding)
         .offset(y: -1)
         .frame(maxHeight: .infinity, alignment: .top))
   }
