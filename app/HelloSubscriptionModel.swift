@@ -3,7 +3,7 @@ import StoreKit
 
 import HelloCore
 
-enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
+package enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
   case tier1Monthly
   case tier1Yearly
   case tier2Monthly
@@ -11,7 +11,7 @@ enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
   case tier3Monthly
   case tier3Yearly
   
-  enum Frequency {
+  package enum Frequency {
     case monthly
     case yearly
     
@@ -46,7 +46,7 @@ enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
     return nil
   }
   
-  public var id: String {
+  package var id: String {
     switch self {
     case .tier1Monthly: AppInfo.rootBundleID + ".subscription.tier1.monthly"
     case .tier1Yearly: AppInfo.rootBundleID + ".subscription.tier1.yearly"
@@ -57,7 +57,7 @@ enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
     }
   }
   
-  public var frequency: Frequency {
+  package var frequency: Frequency {
     switch self {
     case .tier1Monthly: .monthly
     case .tier1Yearly: .yearly
@@ -68,7 +68,7 @@ enum HelloSubscriptionOption: Identifiable, Codable, Sendable, CaseIterable {
     }
   }
   
-  public var tier: Int {
+  package var tier: Int {
     switch self {
     case .tier1Monthly: 1
     case .tier1Yearly: 1
@@ -108,21 +108,21 @@ public class HelloSubscriptionModel {
   
   private var subscriptionsModel = Persistence.model(for: .subscriptions)
   
-  var isPurchasing: Bool { storeModel.isPurchasing }
+  package var isPurchasing: Bool { storeModel.isPurchasing }
   
   private init() {
     storeModel.setup(knownProductIDs: HelloSubscriptionOption.allCases.map { $0.id })
     refresh()
   }
   
-  var tier1MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Monthly.id] }
-  var tier1YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Yearly.id] }
-  var tier2MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Monthly.id] }
-  var tier2YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Yearly.id] }
-  var tier3MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier3Monthly.id] }
-  var tier3YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier3Yearly.id] }
+  package var tier1MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Monthly.id] }
+  package var tier1YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier1Yearly.id] }
+  package var tier2MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Monthly.id] }
+  package var tier2YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier2Yearly.id] }
+  package var tier3MonthlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier3Monthly.id] }
+  package var tier3YearlyProduct: Product? { storeModel.availableProducts[HelloSubscriptionOption.tier3Yearly.id] }
   
-  func product(for subscriptionOption: HelloSubscriptionOption) -> Product? {
+  package func product(for subscriptionOption: HelloSubscriptionOption) -> Product? {
     storeModel.availableProducts[subscriptionOption.id]
   }
   
@@ -159,6 +159,10 @@ public class HelloSubscriptionModel {
     highestLevelSubscription?.isValid == true
   }
   
+  public var allowSuperPremiumFeatures: Bool {
+    highestLevelSubscription?.isValidSuperSubscription == true
+  }
+  
   public var isSubscribedFromThisApp: Bool {
     subscriptions[AppInfo.rootBundleID]?.isValid == true
   }
@@ -171,22 +175,22 @@ public class HelloSubscriptionModel {
     return .app(for: bundleID)
   }
   
-  func set(developerIsSubscribed: Bool) {
+  package func set(developerIsSubscribed: Bool) {
     if developerIsSubscribed {
       if subscriptionsModel.value[AppInfo.rootBundleID]?.isValid != true {
-        updateSubscription(to: nil)
+        updateSubscription(to: .developer)
       }
     } else if case .developer = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
       updateSubscription(to: nil)
     }
   }
   
-  func applyPromo(global: Bool) {
+  package func applyPromo(global: Bool) {
     guard !isActuallySubscribed else { return }
     updateSubscription(to: global ? .promoGlobal : .promoLocal)
   }
   
-  func removePromo() {
+  package func removePromo() {
     if case .promo = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
       updateSubscription(to: nil)
     }
@@ -233,10 +237,19 @@ public class HelloSubscriptionModel {
         }
       }
     }
+    var premiumIcons = ["gold"]
+    var unlockedIcons = Persistence.mainActorValue(.unlockedAppIcons)
+    if allowSuperPremiumFeatures {
+      if !unlockedIcons.isSuperset(of: premiumIcons) {
+        Persistence.mainActorSave(unlockedIcons.union(premiumIcons), for: .unlockedAppIcons)
+      }
+    } else if !unlockedIcons.intersection(premiumIcons).isEmpty {
+      Persistence.mainActorSave(unlockedIcons.subtracting(premiumIcons), for: .unlockedAppIcons)
+    }
     sync(hasLocalChanged: hasChanged)
   }
   
-  func purchase(productID: String) async throws {
+  package func purchase(productID: String) async throws {
     try await storeModel.purchase(id: productID)
   }
   

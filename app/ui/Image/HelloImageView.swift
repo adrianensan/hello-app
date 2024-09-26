@@ -96,11 +96,17 @@ public struct HelloImageOption: Equatable, Identifiable, Sendable {
 
 public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
+  public enum HelloImageLoadType: Sendable {
+    case async
+    case sync
+  }
+  
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
   
   @State private var imageModels: [HelloImageModel] = []
   private var imageOptions: [HelloImageOption]
+  private let load: HelloImageLoadType
   private let viewable: Bool
   private let cornerRadius: CGFloat?
   private let resizeMode: ContentMode
@@ -109,6 +115,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   private let fallback: @MainActor () -> Fallback
   
   public init(options: [HelloImageOption],
+              load: HelloImageLoadType = .async,
               viewable: Bool = false,
               cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
@@ -116,6 +123,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               custom: (@MainActor (NativeImage) -> CustomView)?,
               fallback: @MainActor @escaping () -> Fallback) {
     imageOptions = options
+    self.load = load
     //    imageModels = imageOptions.map { .model(for: $0.imageSource, variant: $0.variant) }
     self.viewable = viewable
     self.cornerRadius = cornerRadius
@@ -127,6 +135,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   public init(_ source: HelloImageSource,
               variant: HelloImageVariant = .original,
+              load: HelloImageLoadType = .async,
               viewable: Bool = false,
               cornerRadius: CGFloat? = nil,
               resizeMode: ContentMode = .fit,
@@ -134,6 +143,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
               @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView,
               fallback: @MainActor @escaping () -> Fallback) {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
@@ -144,6 +154,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   
   fileprivate init(_ source: HelloImageSource,
                    variant: HelloImageVariant = .original,
+                   load: HelloImageLoadType = .async,
                    viewable: Bool = false,
                    cornerRadius: CGFloat? = nil,
                    resizeMode: ContentMode,
@@ -151,6 +162,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
                    custom: (@MainActor (NativeImage) -> CustomView)?,
                    fallback: @MainActor @escaping () -> Fallback) {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
@@ -203,6 +215,12 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       var imageModels: [HelloImageModel] = []
       for imageOption in imageOptions {
         let model: HelloImageModel = .model(for: imageOption.imageSource, variant: imageOption.variant)
+        switch load {
+        case .async:
+          model.loadAsync()
+        case .sync:
+          model.loadSync()
+        }
         imageModels.append(model)
         cache?.imageModelCache[imageOption.id] = model
         if imageModels.last?.image != nil {
@@ -217,6 +235,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
 public extension HelloImageView where Fallback == Color {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       load: HelloImageLoadType = .async,
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
@@ -224,6 +243,7 @@ public extension HelloImageView where Fallback == Color {
        @ViewBuilder custom: @MainActor @escaping (NativeImage) -> CustomView) {
     self.init(source,
               variant: variant,
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
@@ -236,6 +256,7 @@ public extension HelloImageView where Fallback == Color {
 public extension HelloImageView where CustomView == EmptyView {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       load: HelloImageLoadType = .async,
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
@@ -243,6 +264,7 @@ public extension HelloImageView where CustomView == EmptyView {
        fallback: @MainActor @escaping () -> Fallback) {
     self.init(source,
               variant: variant,
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
@@ -255,12 +277,14 @@ public extension HelloImageView where CustomView == EmptyView {
 public extension HelloImageView where CustomView == EmptyView, Fallback == Color {
   init(_ source: HelloImageSource,
        variant: HelloImageVariant = .original,
+       load: HelloImageLoadType = .async,
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
        cache: HelloImageCache? = nil) {
     self.init(source,
               variant: variant,
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,
@@ -270,11 +294,13 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
   }
   
   init(options: [HelloImageOption],
+       load: HelloImageLoadType = .async,
        viewable: Bool = false,
        cornerRadius: CGFloat? = nil,
        resizeMode: ContentMode = .fit,
        cache: HelloImageCache? = nil) {
     self.init(options: options,
+              load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,
               resizeMode: resizeMode,

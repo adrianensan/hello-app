@@ -46,7 +46,7 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
     isPressedAction(isPressed)
     if isPressed {
       guard let duration = duration else { return }
-      let date = Date()
+      let date: Date = .now
       touchDownDate = date
       
       Task {
@@ -55,6 +55,7 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
           disabled = true
           
           Task {
+            try await Task.sleepForOneFrame()
             disabled = false
           }
         }

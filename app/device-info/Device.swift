@@ -114,6 +114,7 @@ public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
       case ._14Plus: 152
       case ._15Plus: 152
       case ._16Plus: 152
+      case ._17, ._17Plus, ._17Pro, ._17ProMax: 152
       case .se2: 0
       case .se3: 0
       case .unknown(modelNumber: let modelNumber): 0

@@ -3,7 +3,7 @@ import Foundation
 @MainActor
 public protocol LoggerSubscriber: AnyObject, Sendable {
   func statementLogged(_: LogStatement)
-  func refresh(_: [LogStatement])
+  func refresh()
 }
 
 @MainActor
@@ -63,7 +63,7 @@ public class Logger: Sendable {
   
   public func clear() async throws {
     logStatements = []
-    subscriber?.refresh([])
+    subscriber?.refresh()
     if !isFlushPending {
       isFlushPending = true
       try await flush(force: false)
@@ -88,10 +88,10 @@ public class Logger: Sendable {
     }
     isFlushPending = false
     let oldestAllowed = epochTime - 60 * 60 * 24
-    let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }).suffix(1000))
+    let filteredLogStatements = Array(logStatements.drop(while: { $0.timeStamp < oldestAllowed }).suffix(2000))
     if logStatements.first?.id != filteredLogStatements.first?.id {
-      subscriber?.refresh(filteredLogStatements)
       logStatements = filteredLogStatements
+      subscriber?.refresh()
     }
     await flushReal(logStatements: logStatements)
   }

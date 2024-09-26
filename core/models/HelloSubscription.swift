@@ -62,6 +62,16 @@ public struct HelloSubscription: Codable, Equatable, Sendable {
     }
   }
   
+  public var isValidSuperSubscription: Bool {
+    guard isValid else { return false }
+    return switch type {
+    case .test: true
+    case .paid(let tier): tier > 1
+    case .developer: true
+    case .promo: false
+    }
+  }
+  
   public var level: Int {
     var int = 0
     if isValid {

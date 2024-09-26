@@ -84,6 +84,10 @@ public class StoreModel {
   }
   
   private func refreshProducts() async throws {
+    guard availableProducts.count != knownProductIDs.count else {
+      Log.verbose("Skipped loading products, all known products loaded", context: "StoreKit")
+      return
+    }
     availableProducts = try await Product.products(for: knownProductIDs).idsMappedToValues
     if availableProducts.count == knownProductIDs.count {
       Log.info("Loaded all \(knownProductIDs.count) known products", context: "StoreKit")

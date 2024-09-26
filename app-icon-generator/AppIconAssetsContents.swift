@@ -1,10 +1,9 @@
 import Foundation
 
+import HelloCore
+import HelloApp
+
 public struct AppIconAssetsContents: Codable, Sendable {
-  
-  static func iOSFileName(appIconName: String, suffix: String) -> String {
-    "\(appIconName)\(suffix).png"
-  }
     
   public struct Image: Codable, Sendable {
     
@@ -22,11 +21,39 @@ public struct AppIconAssetsContents: Codable, Sendable {
     }
     
     public var filename: String
-    public var platform: String
+    public var platform: String?
     public var idiom: String
     public var scale: String?
     public var size: String
     public var appearances: [Appearance]?
+    
+    public init(appIconName: String, variant: AppIconImageVariant) {
+      self.filename = variant.imageName(for: appIconName)
+      self.platform = variant.platform?.rawValue
+      self.idiom = variant.idiom.rawValue
+      self.scale = variant.scale.map { "\($0)x" }
+      self.size = "\(variant.size.width.string)x\(variant.size.height.string)"
+      self.appearances = variant.appearance.map {
+        switch $0 {
+        case .dark: [.dark]
+        case .tinted: [.tinted]
+        }
+      }
+    }
+    
+    public init(filename: String,
+                platform: String,
+                idiom: String = "universal",
+                scale: Int,
+                size: CGSize,
+                appearances: [Appearance]? = nil) {
+      self.filename = filename
+      self.platform = platform
+      self.idiom = idiom
+      self.scale = "\(scale)x"
+      self.size = "\(size.width.string)x\(size.height.string)"
+      self.appearances = appearances
+    }
     
     public init(filename: String,
                 platform: String,
@@ -49,35 +76,9 @@ public struct AppIconAssetsContents: Codable, Sendable {
   fileprivate init(images: [Image]) {
     self.images = images
   }
-}
-
-public extension AppIconAssetsContents {
-  static func iOSClassic(name: String) -> AppIconAssetsContents {
-    AppIconAssetsContents(images: [
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: ""))
-    ])
-  }
   
-  static func iOS(name: String) -> AppIconAssetsContents {
-    AppIconAssetsContents(images: [
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "")),
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "-dark"), variant: .dark),
-      .iOS(fileName: AppIconAssetsContents.iOSFileName(appIconName: name, suffix: "-tintable"), variant: .tinted)
-    ])
-  }
-  
-  static func watchOS(fileName: String) -> AppIconAssetsContents {
-    AppIconAssetsContents(images: [.watchOS(fileName: fileName)])
-  }
-}
-
-public extension AppIconAssetsContents.Image {
-  static func iOS(fileName: String, variant: Appearance? = nil) -> AppIconAssetsContents.Image {
-    .init(filename: fileName, platform: "ios", appearances: variant.map { [$0] })
-  }
-  
-  static func watchOS(fileName: String) -> AppIconAssetsContents.Image {
-    .init(filename: fileName, platform: "watchos")
+  init(appIconName: String, variants: [AppIconImageVariant]) {
+    images = variants.map { .init(appIconName: appIconName, variant: $0) }
   }
 }
 

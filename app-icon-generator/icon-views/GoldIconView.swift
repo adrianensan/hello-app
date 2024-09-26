@@ -3,22 +3,22 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct GoldAppIconView<IconView: View>: View {
+public struct GoldAppIconView: View {
   
-  private var iconView: @MainActor (HelloColor) -> IconView
+  private var iconView: AnyView
   
-  public init(iconView: @escaping @MainActor (HelloColor) -> IconView) {
-    self.iconView = iconView
+  public init(iconView: some View) {
+    self.iconView = AnyView(iconView)
   }
   
   public var body: some View {
     ZStack {
-      HelloImageView(.asset(bundle: .helloAppIconGenerator, named: "gold-texture"))
+      HelloImageView(.asset(bundle: .helloAppIconGenerator, named: "gold-texture"), load: .sync)
 //      iconView(.black.opacity(0.6))
       Color.black.opacity(0.8).mask {
         ZStack {
           Color.white
-          iconView(.black)
+          Color.black.mask(iconView)
         }.compositingGroup()
           .luminanceToAlpha()
       }
@@ -26,7 +26,7 @@ public struct GoldAppIconView<IconView: View>: View {
       GeometryReader { geometry in
         Color.black
           .mask {
-            iconView(.white)
+            Color.white.mask(iconView)
           }.shadow(color: .black.opacity(0.8),
                    radius: 0.02 * geometry.size.maxSide,
                    x: -0.01 * geometry.size.maxSide,
@@ -34,7 +34,7 @@ public struct GoldAppIconView<IconView: View>: View {
           .mask {
             ZStack {
               Color.white
-              iconView(.black)
+              Color.black.mask(iconView)
             }.compositingGroup()
               .luminanceToAlpha()
           }

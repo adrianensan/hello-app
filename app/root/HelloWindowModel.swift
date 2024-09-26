@@ -57,9 +57,9 @@ public class HelloWindowModel {
     }
   }
   
-  var blurAmountForPopup: CGFloat = 0
+  public var blurAmountForPopup: CGFloat = 0
   var isShowingConfetti: Bool = false
-  var freeze: Bool = false
+  public var freeze: Bool = false
   var confettiID: String = .uuid
   var popupViews: [PopupWindow] = []
   

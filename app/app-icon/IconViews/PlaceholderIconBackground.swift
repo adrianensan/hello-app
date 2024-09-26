@@ -1,49 +1,49 @@
 import SwiftUI
 
-struct PlaceholderIconBackground: View {
+public struct PlaceholderIconBackground: View {
   
-  var lineWidth: CGFloat { 0.01 }
+  var lineWidth: CGFloat { 0.004 }
   
-  var color: Color = .white
+  public init() {}
   
-  var body: some View {
+  public var body: some View {
     GeometryReader { geometry in
       ZStack {
         ZStack {
           HStack(spacing: 0) {
             Rectangle()
-              .fill(color)
+              .fill()
               .frame(maxWidth: lineWidth * geometry.size.width,
                      maxHeight: .infinity)
             Spacer(minLength: 0)
             Rectangle()
-              .fill(color)
+              .fill()
               .frame(maxWidth: lineWidth * geometry.size.width,
                      maxHeight: .infinity)
           }
           VStack(spacing: 0) {
             Rectangle()
-              .fill(color)
+              .fill()
               .frame(maxWidth: .infinity,
                      maxHeight: lineWidth * geometry.size.width)
             Spacer(minLength: 0)
             Rectangle()
-              .fill(color)
+              .fill()
               .frame(maxWidth: .infinity,
                      maxHeight: lineWidth * geometry.size.width)
           }
           Circle()
-            .strokeBorder(color, lineWidth: lineWidth * geometry.size.width)
-        }.padding(0.05 * geometry.size.width)
+            .strokeBorder(lineWidth: lineWidth * geometry.size.width)
+        }.padding(0.054 * geometry.size.width)
         HStack(spacing: 0) {
           Spacer(minLength: 0)
           Rectangle()
-            .fill(color)
+            .fill()
             .frame(maxWidth: lineWidth * geometry.size.width,
                    maxHeight: .infinity)
           Spacer(minLength: 0)
           Rectangle()
-            .fill(color)
+            .fill()
             .frame(maxWidth: lineWidth * geometry.size.width,
                    maxHeight: .infinity)
           Spacer(minLength: 0)
@@ -51,50 +51,55 @@ struct PlaceholderIconBackground: View {
         VStack(spacing: 0) {
           Spacer(minLength: 0)
           Rectangle()
-            .fill(color)
+            .fill()
             .frame(maxWidth: .infinity,
                    maxHeight: lineWidth * geometry.size.width)
           Spacer(minLength: 0)
           Rectangle()
-            .fill(color)
+            .fill()
             .frame(maxWidth: .infinity,
                    maxHeight: lineWidth * geometry.size.width)
           Spacer(minLength: 0)
         }
+        
+//        Circle()
+//          .strokeBorder(lineWidth: lineWidth * geometry.size.width)
+//          .frame(1/3 * geometry.size.minSide)
+//        
+//        Circle()
+//          .strokeBorder(lineWidth: lineWidth * geometry.size.width)
+//          .frame(1/2 * geometry.size.minSide)
+        
         Rectangle()
-          .fill(color)
+          .fill()
           .frame(maxWidth: lineWidth * geometry.size.width,
                  maxHeight: .infinity)
         Rectangle()
-          .fill(color)
+          .fill()
           .frame(maxWidth: .infinity,
                  maxHeight: lineWidth * geometry.size.width)
         ZStack {
           Rectangle()
-            .fill(color)
-            .frame(maxWidth:.infinity,
-                   maxHeight: lineWidth * geometry.size.width)
-            .rotationEffect(.radians(0.25 * .pi))
-            .offset(x: -0.5 * geometry.size.width, y: -0.5 * geometry.size.height)
-          Rectangle()
-            .fill(color)
-            .frame(maxWidth:.infinity,
-                   maxHeight: lineWidth * geometry.size.width)
-            .rotationEffect(.radians(0.25 * .pi))
-            .offset(x: 0.5 * geometry.size.width, y: 0.5 * geometry.size.height)
-          Rectangle()
-            .fill(color)
-            .frame(maxWidth: .infinity,
-                   maxHeight: lineWidth * geometry.size.width)
+            .fill()
+            .frame(width: geometry.size.diagonal, height: lineWidth * geometry.size.width)
             .rotationEffect(.radians(-0.25 * .pi))
-            .offset(x: -0.5 * geometry.size.width, y: 0.5 * geometry.size.height)
           Rectangle()
-            .fill(color)
-            .frame(maxWidth: .infinity,
-                   maxHeight: lineWidth * geometry.size.width)
-            .rotationEffect(.radians(-0.25 * .pi))
-            .offset(x: 0.5 * geometry.size.width, y: -0.5 * geometry.size.height)
-        }
+            .fill()
+            .frame(width: geometry.size.diagonal, height: lineWidth * geometry.size.width)
+            .rotationEffect(.radians(0.25 * .pi))
+//          Rectangle()
+//            .fill()
+//            .frame(maxWidth: .infinity,
+//                   maxHeight: lineWidth * geometry.size.width)
+//            .rotationEffect(.radians(-0.25 * .pi))
+//            .offset(x: -0.5 * geometry.size.width, y: 0.5 * geometry.size.height)
+//          Rectangle()
+//            .fill()
+//            .frame(maxWidth: .infinity,
+//                   maxHeight: lineWidth * geometry.size.width)
+//            .rotationEffect(.radians(-0.25 * .pi))
+//            .offset(x: 0.5 * geometry.size.width, y: -0.5 * geometry.size.height)
+        }.frame(width: geometry.size.width, height: geometry.size.height)
       }
     }
   }

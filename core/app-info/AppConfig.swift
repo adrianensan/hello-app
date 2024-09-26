@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol HelloAppConfig {
-  associatedtype AppIconType: BaseAppIcon
+  associatedtype AppIconConfig: HelloAppIconConfig
   
   var id: String { get }
   var name: String { get }

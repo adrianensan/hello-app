@@ -8,11 +8,9 @@ public struct OutlineHelloEyes: View {
   var eyeWidth: CGFloat { 0.06 }
   var eyeHeight: CGFloat { 0.1 }
   
-  let color: HelloColor
   var outlineWidth: CGFloat
   
-  public init(color: HelloColor, strokeWidth: Double = 0.0125) {
-    self.color = color
+  public init(strokeWidth: Double = 0.0125) {
     self.outlineWidth = strokeWidth
   }
   
@@ -20,11 +18,11 @@ public struct OutlineHelloEyes: View {
     GeometryReader { geometry in
       HStack(spacing: 0) {
         RoundedRectangle(cornerRadius: 0.45 * eyeWidth * geometry.size.width, style: .continuous)
-          .stroke(color.swiftuiColor, lineWidth: outlineWidth * geometry.size.minSide)
+          .stroke(lineWidth: outlineWidth * geometry.size.minSide)
           .frame(width: eyeWidth * geometry.size.width)
         Spacer(minLength: 0)
         RoundedRectangle(cornerRadius: 0.45 * eyeWidth * geometry.size.width, style: .continuous)
-          .stroke(color.swiftuiColor, lineWidth: outlineWidth * geometry.size.minSide)
+          .stroke(lineWidth: outlineWidth * geometry.size.minSide)
           .frame(width: eyeWidth * geometry.size.width)
       }.frame(width: eyeSpacing * geometry.size.width, height: eyeHeight * geometry.size.width)
         .offset(y: 0.06 * geometry.size.height)

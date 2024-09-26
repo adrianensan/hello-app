@@ -6,32 +6,15 @@ public enum IPhoneModel: CustomStringConvertible, Equatable, Sendable {
 
   static let identifierPrefix: String = "iPhone"
 
-  case xs
-  case xsMax
+  case xs, xsMax
   case xr
-  case _11
-  case _11Pro
-  case _11ProMax
-  case _12mini
-  case _12
-  case _12Pro
-  case _12ProMax
-  case _13mini
-  case _13
-  case _13Pro
-  case _13ProMax
-  case _14
-  case _14Plus
-  case _14Pro
-  case _14ProMax
-  case _15
-  case _15Plus
-  case _15Pro
-  case _15ProMax
-  case _16
-  case _16Plus
-  case _16Pro
-  case _16ProMax
+  case _11, _11Pro, _11ProMax
+  case _12mini, _12, _12Pro, _12ProMax
+  case _13mini, _13, _13Pro, _13ProMax
+  case _14, _14Plus, _14Pro, _14ProMax
+  case _15, _15Plus, _15Pro, _15ProMax
+  case _16, _16Plus, _16Pro, _16ProMax
+  case _17, _17Plus, _17Pro, _17ProMax
   case se2
   case se3
   case unknown(modelNumber: String)
@@ -64,6 +47,10 @@ public enum IPhoneModel: CustomStringConvertible, Equatable, Sendable {
     case ._16Plus: "16 Plus"
     case ._16Pro: "16 Pro"
     case ._16ProMax: "16 Pro Max"
+    case ._17: "17?"
+    case ._17Plus: "17 Plus?"
+    case ._17Pro: "17 Pro?"
+    case ._17ProMax: "17 Pro Max?"
     case .se2: "SE (2020)"
     case .se3: "SE (2022)"
     case .unknown(let modelNumber): "[\(modelNumber)]"
@@ -96,10 +83,14 @@ public enum IPhoneModel: CustomStringConvertible, Equatable, Sendable {
     case "15,5": ._15Plus
     case "16,1": ._15Pro
     case "16,2": ._15ProMax
-    case "17,1": ._15Pro
-    case "17,2": ._15ProMax
-    case "17,3": ._15
-    case "17,4": ._15Plus
+    case "17,1": ._16Pro
+    case "17,2": ._16ProMax
+    case "17,3": ._16
+    case "17,4": ._16Plus
+    case "18,1": ._17Pro
+    case "18,2": ._17ProMax
+    case "18,3": ._17
+    case "18,4": ._17Plus
     default: .unknown(modelNumber: modelNumber)
     }
   }

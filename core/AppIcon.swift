@@ -1,6 +1,6 @@
 import Foundation
 
-public enum AppIconAvailability: String, Sendable {
+public enum FeatureAvailability: String, Sendable {
   case free
   case paid
   case hidden
@@ -10,6 +10,14 @@ public enum AppIconAvailability: String, Sendable {
     case .free: true
     case .paid: true
     case .hidden: false
+    }
+  }
+  
+  public var isAlwaysAvailable: Bool {
+    switch self {
+    case .free: true
+    case .paid: false
+    case .hidden: true
     }
   }
 }
@@ -26,7 +34,7 @@ public protocol BaseAppIcon: Codable, Hashable, Identifiable, Sendable {
   
   var displayName: String { get }
   
-  var availability: AppIconAvailability { get }
+  var availability: FeatureAvailability { get }
 }
 
 public extension BaseAppIcon {

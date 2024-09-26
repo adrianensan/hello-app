@@ -42,6 +42,29 @@ public extension CGImage {
   public static let shared: ImageProcessingActor = ImageProcessingActor()
 }
 
+
+public enum HelloImageFormat: String, Identifiable, Codable, Sendable {
+  case jpg
+  case png
+  case heic
+  case gif
+  case tiff
+  
+  public var utType: UTType {
+    switch self {
+    case .jpg: .jpeg
+    case .png: .png
+    case .heic: .heic
+    case .gif: .gif
+    case .tiff: .tiff
+    }
+  }
+  
+  public var id: String { rawValue }
+  
+  public var fileExtension: String { rawValue }
+}
+
 @ImageProcessingActor
 public class ImageProcessor {
   
@@ -49,24 +72,6 @@ public class ImageProcessor {
     case invalidData
     case failedToCreateDestination
     case failedToResize
-  }
-  
-  public enum HelloImageFormat: Codable, Sendable {
-    case jpg
-    case png
-    case heic
-    case gif
-    case tiff
-    
-    public var utType: UTType {
-      switch self {
-      case .jpg: .jpeg
-      case .png: .png
-      case .heic: .heic
-      case .gif: .gif
-      case .tiff: .tiff
-      }
-    }
   }
   
 //  public static func resize(imageData: Data, maxSize: Int, format: HelloImageFormat = .heic) throws -> Data {

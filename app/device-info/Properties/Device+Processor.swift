@@ -14,6 +14,8 @@ extension Device {
       case ._15Pro, ._15ProMax: .a17Pro
       case ._16, ._16Plus: .a18
       case ._16Pro, ._16ProMax: .a18Pro
+      case ._17, ._17Plus: .a19
+      case ._17Pro, ._17ProMax: .a19Pro
       case .se2: .a13
       case .se3: .a15
       case .unknown(let modelNumber): .a15

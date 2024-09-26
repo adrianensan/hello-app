@@ -91,7 +91,7 @@ public enum CrashHandler {
   private static let originalExceptionHandler: (@convention(c) (NSException) -> Void)? = NSGetUncaughtExceptionHandler()
   
   private static let exceptionHandler: @convention(c) @Sendable (NSException) -> Void = { exception in
-    Log.crash("Crash with \(exception.name.rawValue): \(exception.description)", context: "App")
+    Log.crash("Crash with \(exception.name.rawValue): \(exception.description)")
     restore()
     Task {
       try await Log.logger.flush(force: true)

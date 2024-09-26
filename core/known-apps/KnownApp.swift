@@ -7,7 +7,7 @@ public enum HelloAppPlatform: String, Identifiable, Codable, Sendable {
   case visionOS
   case macOS
   
-  public var id: String { rawValue }
+  public var id: String { rawValue.lowercased() }
   
   public var name: String {
     rawValue

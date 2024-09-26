@@ -220,7 +220,11 @@ public extension HelloAPIClient {
     let response: HTTPResponse<Data?> = HTTPResponse<Data?>(httpURLResponse: httpResponse, data: data)
     
     guard response.status.isSuccess else {
-      Log.error("\(logStart)", context: "API")
+      if let bodyString = response.body as? String {
+        Log.error("\(logStart) \(bodyString)", context: "API")
+      } else {
+        Log.error("\(logStart)", context: "API")
+      }
       try await handle(errorResponse: response)
       let error = APIError.httpError(statusCode: httpResponse.statusCode)
       if !isRetry, try await retryHandler?(error) == true {
@@ -231,7 +235,13 @@ public extension HelloAPIClient {
       }
     }
     
-    let headers: [String: String] = [:]
+    var headers: [String: String] = [:]
+    
+    for (key, value) in httpResponse.allHeaderFields {
+      if let keyString = key as? String, let valueString = value as? String {
+        headers[keyString.lowercased()] = valueString
+      }
+    }
     
     handle(headers: httpResponse.allHeaderFields, for: endpoint)
     

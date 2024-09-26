@@ -13,6 +13,7 @@ public struct MacAppIconWrapperView<Content: View>: View {
   public var body: some View {
     GeometryReader { geometry in
       view
+        .compositingGroup()
         .clipShape(AppIconShape())
         .padding(0.05 * geometry.size.minSide)
     }

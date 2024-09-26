@@ -20,6 +20,7 @@ let package = Package(
   platforms: [.iOS(.v18), .macOS(.v15), .watchOS(.v11), .visionOS(.v2)],
   products: [
     .library(name: "HelloApp", targets: ["HelloApp"]),
+    .library(name: "HelloAppMain", targets: ["HelloAppMain"]),
     .library(name: "HelloCore", targets: ["HelloCore"]),
     .library(name: "HelloServer", targets: ["HelloServer"]),
     .library(name: "HelloAppIconGenerator", targets: ["HelloAppIconGenerator"]),
@@ -27,7 +28,8 @@ let package = Package(
   dependencies: dependencies,
   targets: additionalTargets + [
     .target(name: "HelloCore", path: "core"),
-    .target(name: "HelloApp", dependencies: ["HelloCore"], path: "app", resources: [.process("resources")]),
+    .target(name: "HelloApp", dependencies: ["HelloCore"], path: "app"),
+    .target(name: "HelloAppMain", dependencies: ["HelloApp"], path: "app-main", resources: [.process("resources")]),
     .target(name: "HelloServer", dependencies: ["HelloCore", opensslTargetDependency], path: "server/code"),
     .target(name: "HelloAppIconGenerator",
             dependencies: ["HelloApp"],

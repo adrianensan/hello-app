@@ -33,7 +33,7 @@ public struct HelloKeyboard: View {
     "asdfghjkl"
   ]
   
-  init(string: Binding<String>) {
+  public init(string: Binding<String>) {
     self._string = string
   }
   

@@ -4,14 +4,14 @@ import UIKit
 import UniformTypeIdentifiers
 import MessageUI
 
-struct MailView: UIViewControllerRepresentable {
+public struct MailView: UIViewControllerRepresentable {
   
-  struct Attachment: Sendable {
+  public struct Attachment: Sendable {
     var fileName: String
     var data: Data
     var type: String
     
-    static func logs(data: Data) -> Attachment {
+    package static func logs(data: Data) -> Attachment {
       Attachment(fileName: "logs.txt", data: data, type: UTType.text.identifier)
     }
   }
@@ -21,7 +21,7 @@ struct MailView: UIViewControllerRepresentable {
   var body: String
   var attachments: [Attachment]
   
-  init(to recipient: String, subject: String, body: String, attachments: [Attachment]) {
+  public init(to recipient: String, subject: String, body: String, attachments: [Attachment]) {
     self.recipient = recipient
     self.subject = subject
     self.body = body
@@ -30,7 +30,7 @@ struct MailView: UIViewControllerRepresentable {
   
   @Environment(\.presentationMode) var presentation
   
-  class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
+  public class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
     
     @Binding var presentation: PresentationMode
     
@@ -38,18 +38,18 @@ struct MailView: UIViewControllerRepresentable {
       _presentation = presentation
     }
     
-    func mailComposeController(_ controller: MFMailComposeViewController,
+    public func mailComposeController(_ controller: MFMailComposeViewController,
                                didFinishWith result: MFMailComposeResult,
                                error: Error?) {
       $presentation.wrappedValue.dismiss()
     }
   }
   
-  func makeCoordinator() -> Coordinator {
+  public func makeCoordinator() -> Coordinator {
     return Coordinator(presentation: presentation)
   }
   
-  func makeUIViewController(context: UIViewControllerRepresentableContext<MailView>) -> MFMailComposeViewController {
+  public func makeUIViewController(context: UIViewControllerRepresentableContext<MailView>) -> MFMailComposeViewController {
     let vc = MFMailComposeViewController()
     vc.setToRecipients([recipient])
     vc.setSubject(subject)
@@ -62,7 +62,7 @@ struct MailView: UIViewControllerRepresentable {
     return vc
   }
   
-  func updateUIViewController(_ uiViewController: MFMailComposeViewController,
+  public func updateUIViewController(_ uiViewController: MFMailComposeViewController,
                               context: UIViewControllerRepresentableContext<MailView>) {
     
   }

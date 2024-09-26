@@ -178,8 +178,8 @@ extension HelloApplication {
         await Persistence.save(true, for: .isFakeDeveloper)
         await Persistence.atomicUpdate(for: .unlockedAppIcons) {
           var unlockedAppIcons = $0
-          if unlockedAppIcons.contains("betaTester") {
-            unlockedAppIcons.insert("betaTester")
+          if !unlockedAppIcons.isSuperset(of: ["beta-tester", "placeholder"]) {
+            unlockedAppIcons.formUnion(["beta-tester", "placeholder"])
           }
           return unlockedAppIcons
         }

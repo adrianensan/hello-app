@@ -62,6 +62,7 @@ public actor ICloudSyncManager {
   }
   
   private let assetKey = "data"
+  private let stableIDKey = "stable-id"
   
   private var isSyncing: Bool = false
   private var awatingSync: Bool = false
@@ -91,7 +92,7 @@ public actor ICloudSyncManager {
     property: Property,
     persistenceProperty: some PersistenceProperty<Property.Value>,
     hasLocalUpdates: Bool,
-    mergeHandler: @Sendable @escaping (_ localValue: Property.Value, _ cloudValue: Property.Value) -> Property.Value
+    mergeHandler: @Sendable @escaping (_ localValue: Property.Value, _ cloudValue: Property.Value) async throws -> Property.Value
   ) async throws {
     guard !isSyncing else {
       awatingSync = true
@@ -100,19 +101,24 @@ public actor ICloudSyncManager {
     isSyncing = true
     defer { isSyncing = false }
     
+    guard await Persistence.value(.persistenceMode) == .normal else {
+      Log.verbose("Skipping sync due to persistence mode", context: "Cloud")
+      return
+    }
+    
     do {
-      guard let identityToken = FileManager.default.ubiquityIdentityToken as? Data else {
+      guard let _ = FileManager.default.ubiquityIdentityToken else {
         state = .notSignedIn
         throw HelloError("iCloud not available")
       }
       
       let syncState = await Persistence.value(.cloudSyncState)
-      var propertyMetadata = syncState?.propertyMetadata[property.recordID] ?? .init(id: .uuid, dateModified: .distantPast)
+      var propertyMetadata = syncState[property.recordID] ?? .new
       
-      guard syncState?.token == nil || syncState?.token == identityToken else {
-        state = .accountMismatch
-        throw HelloError("Cloud account mismatch")
-      }
+//      guard syncState?.token == nil || syncState?.token == identityToken else {
+//        state = .accountMismatch
+//        throw HelloError("Cloud account mismatch")
+//      }
       
       let recordID = CKRecord.ID(recordName: property.recordID)
       var record: CKRecord
@@ -121,7 +127,7 @@ public actor ICloudSyncManager {
       } catch {
         switch error {
         case CKError.unknownItem:
-          Log.info("No item found in cloud for \(property.recordID)")
+          Log.info("No item found for \(property.recordID)", context: "Cloud")
           record = CKRecord(recordType: property.recordType, recordID: recordID)
         case CKError.badDatabase, CKError.badContainer:
           state = .dbError
@@ -135,13 +141,17 @@ public actor ICloudSyncManager {
         }
       }
       
-      let cloudMetadata = metadata(for: record) ?? propertyMetadata
+      let cloudMetadata = metadata(for: record, localMetadata: propertyMetadata) ?? propertyMetadata
       
       state = .ok
       
       //    let container = CKContainer.default()
       //    let containerID = container.value(forKey: "containerID") as! NSObject // CKContainerID
       //    let environment = containerID.value(forKey: "environment")!
+      
+      guard cloudMetadata.stableID == propertyMetadata.stableID else {
+        throw HelloError("Seemingly regressed cloud version for \(property.recordID)")
+      }
       
       guard cloudMetadata.dateModified >= propertyMetadata.dateModified else {
         throw HelloError("Seemingly regressed cloud version for \(property.recordID)")
@@ -150,7 +160,7 @@ public actor ICloudSyncManager {
       var value = await Persistence.value(persistenceProperty)
       var needsToUpdateCloud: Bool
       var needsToUpdateLocal: Bool
-      if cloudMetadata.id == propertyMetadata.id {
+      if cloudMetadata.changeID == propertyMetadata.changeID {
         if hasLocalUpdates {
           Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
           needsToUpdateCloud = true
@@ -163,7 +173,7 @@ public actor ICloudSyncManager {
       } else {
         Log.verbose("Merging value for \(property.recordID)", context: "Cloud")
         let cloudObject = try parseValue(from: record, for: property)
-        value = mergeHandler(value, cloudObject)
+        value = try await mergeHandler(value, cloudObject)
         needsToUpdateCloud = true
         needsToUpdateLocal = true
       }
@@ -184,7 +194,7 @@ public actor ICloudSyncManager {
           record[assetKey] = CKAsset(fileURL: url)
         }
         record = try await database(for: property).save(record)
-        guard let updatedMetadata = metadata(for: record) else {
+        guard let updatedMetadata = metadata(for: record, localMetadata: propertyMetadata) else {
           throw HelloError("Failed to parse updated metadata for \(property.recordID)")
         }
         propertyMetadata = updatedMetadata
@@ -193,11 +203,11 @@ public actor ICloudSyncManager {
       }
       let updatedMetadata = propertyMetadata
       await Persistence.atomicUpdate(for: .cloudSyncState) {
-        var cloudSyncState = $0 ?? .init(token: identityToken)
-        cloudSyncState.propertyMetadata[property.recordID] = updatedMetadata
-        return cloudSyncState
+        var state = $0
+        state[property.recordID] = updatedMetadata
+        return state
       }
-      Log.info("Sync complete for \(property.recordID)", context: "Cloud")
+      Log.info("Sync complete for \(property.recordID)\nchanged: {local: \(needsToUpdateLocal), remote: \(needsToUpdateCloud)}", context: "Cloud")
     } catch {
       Log.error(error.localizedDescription, context: "Cloud")
       throw error
@@ -227,12 +237,15 @@ public actor ICloudSyncManager {
     }
   }
   
-  private func metadata(for record: CKRecord) -> CloudPropertyMetadata? {
-    guard let id = record.recordChangeTag?.id,
+  private func metadata(for record: CKRecord, localMetadata: CloudPropertyMetadata) -> CloudPropertyMetadata? {
+    guard let changeID = record.recordChangeTag?.id,
           let modificationDate = record.modificationDate else {
       return nil
     }
           
-    return CloudPropertyMetadata(id: id, dateModified: modificationDate)
+    return CloudPropertyMetadata(
+      stableID: (record[stableIDKey] as? String) ?? localMetadata.stableID,
+      changeID: changeID,
+      dateModified: modificationDate)
   }
 }

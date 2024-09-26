@@ -333,7 +333,10 @@ public class HelloPersistence {
   }
   
   public func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    switch property.location {
+    guard mode == .normal else {
+      return cache[property.location.id] != nil
+    }
+    return switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
     case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
     case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
@@ -342,9 +345,11 @@ public class HelloPersistence {
   }
   
   nonisolated public func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    switch property.location {
+    guard mode == .normal else { return false }
+    return switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
-    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).path)
+    case .file(let location, let path):
+      FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).path)
     case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
     case .memory: false
     }
@@ -475,6 +480,11 @@ public enum Persistence {
   @MainActor
   public static func mainActorValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
     model(for: property).value
+  }
+  
+  @MainActor
+  public static func mainActorSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
+    model(for: property).value = value
   }
   
 //  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {

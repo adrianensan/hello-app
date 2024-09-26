@@ -9,6 +9,7 @@ struct ClickableViewModifier: ViewModifier {
   func body(content: Content) -> some View {
     if debugModel.showBorders {
       content
+        .background(Color.clear.contentShape(.interaction, .rect))
         .overlay(Rectangle().strokeBorder(HelloColor.retroApple.red.swiftuiColor, lineWidth: 1)
           .allowsHitTesting(false))
     } else {

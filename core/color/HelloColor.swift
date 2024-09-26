@@ -243,6 +243,8 @@ public extension HelloColor {
   static var oldWhite: HelloColor { HelloColor(r: 0.95, g: 0.95, b: 0.91) }
   static var offWhite: HelloColor { HelloColor(r: 0.95, g: 0.95, b: 0.95) }
   
+  static func greyscale(_ white: CGFloat) -> HelloColor { HelloColor(r: white, g: white, b: white) }
+  
   static var dimWhite: HelloColor { HelloColor(r: 0.5, g: 0.5, b: 0.5) }
   static var veryDimWhite: HelloColor { HelloColor(r: 0.35, g: 0.35, b: 0.35) }
   static var veryDimRed: HelloColor { HelloColor(r: 0.5, g: 0.1, b: 0.1) }

@@ -18,8 +18,8 @@ public class ActiveThemeManager {
     #endif
   }
   
-  public private(set) var lightTheme: HelloTheme = .light
-  public private(set) var darkTheme: HelloTheme = .dark
+  public private(set) var lightTheme: HelloTheme = .helloLight
+  public private(set) var darkTheme: HelloTheme = .helloDark
   
   public private(set) var colorScehem: HelloThemeScheme = .light
   public private(set) var isLowBrightness: Bool = isLowBrightness
