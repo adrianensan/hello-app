@@ -27,7 +27,7 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
         
         HelloSection {
           DemoModeSettingsItem()
-          if isDeveloper {
+          if isDeveloper && helloApplication.appConfig.hasPremiumFeatures {
             ActiveSubscriptionSettingsRow()
           }
         }

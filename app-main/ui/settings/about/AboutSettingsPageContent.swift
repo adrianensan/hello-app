@@ -109,7 +109,7 @@ struct AboutSettingsPageContent: View {
         HelloMenuButton(items: { [.copy(string: processor)] }) {
           HelloSectionItem(leadingPadding: false) {
             HStack(spacing: 0) {
-              Text("Processor")
+              Text("Chip")
                 .font(.system(size: 16, weight: .regular))
               
               Spacer(minLength: 0)

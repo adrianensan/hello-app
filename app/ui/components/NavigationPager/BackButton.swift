@@ -3,7 +3,8 @@ import Observation
 
 extension Animation {
   public static var interactive: Animation {
-    .spring(response: 0.15, dampingFraction: 0.85, blendDuration: 0)
+    .interpolatingSpring(duration: 0.02)
+//    .spring(response: 0.15, dampingFraction: 0.85, blendDuration: 0)
   }
 }
 

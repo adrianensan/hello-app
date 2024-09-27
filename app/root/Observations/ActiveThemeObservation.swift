@@ -5,6 +5,7 @@ import HelloCore
 public extension EnvironmentValues {
   @Entry var theme: HelloSwiftUITheme = HelloSwiftUITheme(theme: .helloLight)
   @Entry var contentShape: AnyInsettableShape? = nil
+  @Entry var viewShape: AnyInsettableShape = .init(.rect)
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
   @Entry var hasAppliedTheme: Bool = false

@@ -34,6 +34,7 @@ public struct NavigationPagerView: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeAreaInsets
+  @Environment(\.viewShape) private var viewShape
   #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   #endif
@@ -77,7 +78,7 @@ public struct NavigationPagerView: View {
               .environment(\.pageID, page.id)
               .id(page.viewID)
               .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-              .clipped()
+              .clipShape(viewShape)
               .background(ClearClickableView()
                 .onTapGesture { globalDismissKeyboard() })
 //              .clipShape(RoundedRectangle(cornerRadius: Device.currentEffective.screenCornerRadius, style: .continuous))

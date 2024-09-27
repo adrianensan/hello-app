@@ -88,7 +88,7 @@ public struct HelloSheet<Content: View>: View {
           bottomLeading: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
           bottomTrailing: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
           topTrailing: 30))
-        .strokeBorder(theme.surface.backgroundOutline, lineWidth: theme.surface.backgroundOutlineWidth))
+        .strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
       .padding(.top, isfloating ? 0 : safeArea.top + 16)
       .handleSheetDismissDrag()
       .transformEnvironment(\.safeArea) {

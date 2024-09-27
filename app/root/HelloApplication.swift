@@ -3,7 +3,7 @@ import SwiftUI
 import HelloCore
 
 @MainActor
-var helloApplication: (any HelloApplication)! = nil
+package var helloApplication: (any HelloApplication)! = nil
 
 @MainActor
 public struct HelloScene: Sendable {
@@ -71,7 +71,9 @@ public struct HelloScene: Sendable {
 @MainActor
 public protocol HelloApplication: AnyObject {
   
-  static func load() -> Self
+  init()
+  
+  var appConfig: any HelloAppConfig { get }
   
   /// Do any work needed before the application is created
   func onLaunch()
@@ -122,7 +124,7 @@ public extension HelloApplication {
   private static func setup() {
     guard helloApplication == nil else { return }
     CrashHandler.setup()
-    helloApplication = load()
+    helloApplication = Self()
   }
   
   static func main() {
@@ -204,7 +206,9 @@ extension HelloApplication {
       }      
     }
     
-    _ = HelloSubscriptionModel.main
+    if appConfig.hasPremiumFeatures {
+      _ = HelloSubscriptionModel.main
+    }
     
     onLaunch()
     _ = Log.logger
@@ -218,7 +222,9 @@ extension HelloApplication {
   }
   
   func onBecameActiveInternal() async {
-    Task { try await StoreModel.main.refresh() }
+    if appConfig.hasPremiumFeatures {
+      Task { try await StoreModel.main.refresh() }
+    }
     await onBecameActive()
   }
   

@@ -39,6 +39,7 @@ public class HelloScrollModel {
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
   @ObservationIgnored private var isActive: Bool = true
+//  @ObservationIgnored private var lastUpdate: TimeInterval = epochTime
   
   public init(scrollThreshold: CGFloat? = nil, showScrollIndicator: Bool = false) {
     self.scrollThreshold = scrollThreshold
@@ -87,6 +88,8 @@ public class HelloScrollModel {
   }
   
   fileprivate func update(offset: CGFloat) {
+//    let time: TimeInterval = epochTime
+//    lastUpdate = time
     guard isActive else { return }
     
     if readyForDismiss
@@ -174,9 +177,10 @@ public struct HelloScrollView<Content: View>: View {
   public var body: some View {
     ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
       VStack(spacing: 0) {
-        PositionReaderView(onPositionChange: { scrollOffset in
-          model.update(offset: scrollOffset.y)
-        }, coordinateSpace: .named(model.coordinateSpaceName))
+        GeometryReader { geometry in
+          let _ = model.update(offset: geometry.frame(in: .named(model.coordinateSpaceName)).origin.y)
+          Color.clear
+        }.frame(height: 0)
         content()
       }
     }.scrollDisabled(!model.scrollEnabled)

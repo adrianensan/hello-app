@@ -97,12 +97,23 @@ public class HelloEnterCodeModel {
         pagerModel?.push { CatPage() }
       }
     case "nopromo":
-      HelloSubscriptionModel.main.removePromo()
-      alertTitle = "Promo Removed"
+      if helloApplication.appConfig.hasPremiumFeatures {
+        HelloSubscriptionModel.main.removePromo()
+        alertTitle = "Promo Removed"
+      } else {
+        alertTitle = "Nothing Happened"
+        alertMessage = "Not sure what you expected"
+      }
     default:
       if let unixSignal = UNIXSignal(input) {
         exit(0)
       } else if let promoCode: HelloPromoCode = try? .parse(from: input) {
+        guard helloApplication.appConfig.hasPremiumFeatures else {
+          alertTitle = "Nothing Happened"
+          alertMessage = "Not sure what you expected"
+          break
+        }
+        
         guard let deviceUUID = try? HelloUUID(string: Persistence.mainActorValue(.deviceID)) else {
           alertTitle = "Nothing Happened"
           alertMessage = "Not sure what you expected"
