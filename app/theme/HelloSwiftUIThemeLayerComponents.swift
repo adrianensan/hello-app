@@ -8,6 +8,7 @@ public struct HelloSwiftUIThemeBackground: Sendable {
 public struct HelloSwiftUIThemeForeground: Sendable {
   public var color: Color
   public var style: AnyShapeStyle
+  public var readableOverlayColor: Color
 }
 
 public struct HelloSwiftUIThemeForegroundLayers: Sendable {

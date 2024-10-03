@@ -8,7 +8,7 @@ public extension KnownApp {
       bundleID: "com.adrianensan.passwords",
       appleID: "6502266745",
       name: "Hello Passwords",
-      description: "",
+      description: "Securily store your passwords, credit cards and much more",
       platforms: [.iOS])
   }
 }

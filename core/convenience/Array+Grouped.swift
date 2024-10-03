@@ -48,4 +48,16 @@ public extension Array where Element: Identifiable {
   var idsMappedToValues: [Element.ID: Element] {
     Dictionary(map { ($0.id, $0) }, uniquingKeysWith: { (first, _) in first })
   }
+  
+  
+}
+
+public extension Array {
+  func element(at index: Int) -> Element? {
+    if index >= 0 && index < count {
+      self[index]
+    } else {
+      nil
+    }
+  }
 }

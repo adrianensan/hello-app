@@ -9,6 +9,7 @@ struct HelloSwiftUIWatchOSApp: App {
     WindowGroup {
       helloApplication.view()
         .environment(\.windowFrame, WKInterfaceDevice.current().screenBounds)
+        .environment(\.viewFrame, WKInterfaceDevice.current().screenBounds)
         .environment(\.safeArea, EdgeInsets(WKApplication.shared().rootInterfaceController?.contentSafeAreaInsets ?? UIEdgeInsets()))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()

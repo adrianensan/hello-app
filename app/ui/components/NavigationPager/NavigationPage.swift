@@ -4,6 +4,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config
+  @OptionalEnvironment(PagerModel.self) private var pagerModel
   
   @State private var scrollModel: HelloScrollModel
   @State private var isSmallSize: Bool = false
@@ -59,7 +60,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
             #if os(iOS)
             if navBarStyle == .scrollsWithContent {
               NavigationPageBarScrolling(title: title, navBarContent: {
-                navBarContent().padding(.trailing, config.navBarTrailingPadding)
+                HelloPageNavBarContent(navBarContent: navBarContent)
               })
             }
             #endif
@@ -79,7 +80,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
       
       #if os(iOS)
       NavigationPageBarFixed(title: title, navBarContent: {
-        navBarContent().padding(.trailing, config.navBarTrailingPadding)
+        HelloPageNavBarContent(navBarContent: navBarContent)
       })
       #endif
     }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil, initial: true) {

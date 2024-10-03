@@ -34,12 +34,7 @@ fileprivate struct ViewableImageModifier: ViewModifier {
           }
           
           #if os(iOS)
-          windowModel.showPopup(onDismiss: {
-            Task {
-              try? await Task.sleep(seconds: 0.4)
-              isViewing = false
-            }
-          }) {
+          windowModel.showPopup(onDismiss: { isViewing = false }) {
             ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadius: cornerRadius)
           }
           #endif
@@ -264,6 +259,23 @@ public extension HelloImageView where CustomView == EmptyView {
        fallback: @MainActor @escaping () -> Fallback) {
     self.init(source,
               variant: variant,
+              load: load,
+              viewable: viewable,
+              cornerRadius: cornerRadius,
+              resizeMode: resizeMode,
+              cache: cache,
+              custom: nil,
+              fallback: fallback)
+  }
+  
+  init(options: [HelloImageOption],
+       load: HelloImageLoadType = .async,
+       viewable: Bool = false,
+       cornerRadius: CGFloat? = nil,
+       resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil,
+       fallback: @MainActor @escaping () -> Fallback) {
+    self.init(options: options,
               load: load,
               viewable: viewable,
               cornerRadius: cornerRadius,

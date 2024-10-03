@@ -2,6 +2,9 @@ import SwiftUI
 
 public struct HelloPickerPopup: View {
   
+  public static var collapsedRowHeight: CGFloat { 40 }
+  public static var expandedRowHeight: CGFloat { 44 }
+  
   @Environment(\.theme) private var theme
   
   private var position: CGPoint
@@ -25,7 +28,7 @@ public struct HelloPickerPopup: View {
   public var body: some View {
     HelloPickerPopupViewWrapper(
       position: position,
-      size: CGSize(width: width, height: CGFloat(items.count) * 44),
+      size: CGSize(width: width, height: CGFloat(items.count) * HelloPickerPopup.expandedRowHeight),
       startIndex: Binding(get: { items.firstIndex { $0.id == selectedItemID } ?? 0 },
                           set: { _ in })
     ) { isVisible in

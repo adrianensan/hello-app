@@ -4,15 +4,18 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct HelloSettingsRootPageContent<Content: View>: View {
+public struct HelloSettingsRootPageContent<Content: View, AdditionalDeveloperContent: View>: View {
   
   @Persistent(.isDeveloper) private var isDeveloper
   @Persistent(.isFakeDeveloper) private var isFakeDeveloper
   
   @ViewBuilder private var content: @MainActor () -> Content
+  @ViewBuilder private var additionalDeveloperContent: @MainActor () -> AdditionalDeveloperContent
   
-  public init(@ViewBuilder content: @escaping @MainActor () -> Content) {
+  public init(@ViewBuilder content: @escaping @MainActor () -> Content,
+              @ViewBuilder additionalDeveloperContent: @escaping @MainActor () -> AdditionalDeveloperContent) {
     self.content = content
+    self.additionalDeveloperContent = additionalDeveloperContent
   }
   
   public var body: some View {
@@ -22,7 +25,7 @@ public struct HelloSettingsRootPageContent<Content: View>: View {
       HelloSection {
         AboutSettingsRow()
         if isDeveloper || isFakeDeveloper {
-          DeveloperSettingsRow()
+          DeveloperSettingsRow(additionalContent: additionalDeveloperContent)
         }
       }
       
@@ -30,6 +33,13 @@ public struct HelloSettingsRootPageContent<Content: View>: View {
       
       HelloSettingsCopyrightSection()
     }
+  }
+}
+
+public extension HelloSettingsRootPageContent where AdditionalDeveloperContent == EmptyView {
+  public init(@ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.content = content
+    self.additionalDeveloperContent = { EmptyView() }
   }
 }
 #endif

@@ -69,20 +69,10 @@ public struct HelloAlert: View {
   private func dismiss() {
     isDismissed = true
     animateIn = false
-    windowModel.dismiss(id: config.id)
-//    print("p1", "fsfsfsfsfsfsf")
-//    Task {
-//      print("p2", "fsfsfsfsfsfsf")
-//      do {
-//        print("start", "fsfsfsfsfsfsf")
-//        try await Task.sleep(seconds: 0.02)
-//        print("end", "fsfsfsfsfsfsf")
-//      } catch {
-//        print(error, "fsfsfsfsfsfsf")
-//      }
-//      print("continue", "fsfsfsfsfsfsf")
-//      windowModel.dismissAlert()
-//    }
+    Task {
+      try? await Task.sleep(seconds: 0.2)
+      windowModel.dismiss(id: config.id)
+    }
   }
   
   public var body: some View {

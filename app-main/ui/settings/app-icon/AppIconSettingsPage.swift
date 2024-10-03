@@ -34,7 +34,7 @@ struct AppIconSettingsPage<AppIcon: BaseAppIcon>: View {
                       Image(systemName: "lock.fill")
                         .font(.system(size: 12, weight: .medium))
                         .monospacedDigit()
-                        .foregroundStyle(theme.theme.baseLayer.accent.mainColor.readableOverlayColor.swiftuiColor)
+                        .foregroundStyle(theme.accent.readableOverlayColor)
                         .fixedSize()
                         .frame(24)
                         .background(Circle().fill(theme.floating.accent.style))

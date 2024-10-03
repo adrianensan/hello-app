@@ -75,7 +75,7 @@ public struct LogsNavigationPage: View {
       }) {
         Image(systemName: "line.3.horizontal")
           .font(.system(size: 26, weight: .medium))
-          .foregroundStyle(.white)
+          .foregroundStyle(theme.accent.readableOverlayColor)
         //          .foregroundStyle(theme.floating.foreground.primary.style)
           .frame(width: 60, height: 60)
           .background(Circle().fill(theme.accent.style))

@@ -31,7 +31,7 @@ extension Device {
       case .ultra1, .ultra2: 114
       case .unknown: 111
       }
-    case .simulator(let simulatedDevice): simulatedDevice.screenCornerRadius
+    case .simulator(let simulatedDevice): simulatedDevice.screenCornerRadiusPixels
     default: 0
     }
   }

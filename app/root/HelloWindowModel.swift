@@ -68,9 +68,9 @@ public class HelloWindowModel {
             height: (window?.screen ?? UIScreen.main).nativeBounds.height)
   }
   
-  public var pointSize: IntSize {
-    IntSize(width: (window?.screen ?? UIScreen.main).bounds.width,
-            height: (window?.screen ?? UIScreen.main).bounds.height)
+  public var pointSize: CGSize {
+    CGSize(width: (window?.screen ?? UIScreen.main).bounds.width,
+           height: (window?.screen ?? UIScreen.main).bounds.height)
   }
   
   public var physicalPixelsPerPoint: CGFloat {

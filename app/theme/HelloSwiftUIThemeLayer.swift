@@ -55,20 +55,33 @@ public struct HelloSwiftUIThemeLayer: Sendable {
     
     backgroundColor = theme.background.mainColor.swiftuiColor
     
+    let isDim = theme.background.mainColor.isDim && theme.foregroundPrimary.mainColor.isDim
     foreground = HelloSwiftUIThemeForegroundLayers(
-      primary: HelloSwiftUIThemeForeground(color: theme.foregroundPrimary.mainColor.swiftuiColor,
-                                           style: theme.foregroundPrimary.view),
-      secondary: HelloSwiftUIThemeForeground(color: theme.foregroundSecondary.mainColor.swiftuiColor,
-                                             style: theme.foregroundSecondary.view),
-      tertiary: HelloSwiftUIThemeForeground(color: theme.foregroundTertiary.mainColor.swiftuiColor,
-                                            style: theme.foregroundTertiary.view),
-      quaternary: HelloSwiftUIThemeForeground(color: theme.foregroundQuaternary.mainColor.swiftuiColor,
-                                            style: theme.foregroundQuaternary.view))
+      primary: HelloSwiftUIThemeForeground(
+        color: theme.foregroundPrimary.mainColor.swiftuiColor,
+        style: theme.foregroundPrimary.view,
+        readableOverlayColor: theme.foregroundPrimary.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1)),
+      secondary: HelloSwiftUIThemeForeground(
+        color: theme.foregroundSecondary.mainColor.swiftuiColor,
+        style: theme.foregroundSecondary.view,
+        readableOverlayColor: theme.foregroundSecondary.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1)),
+      tertiary: HelloSwiftUIThemeForeground(
+        color: theme.foregroundTertiary.mainColor.swiftuiColor,
+        style: theme.foregroundTertiary.view,
+        readableOverlayColor: theme.foregroundTertiary.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1)),
+      quaternary: HelloSwiftUIThemeForeground(
+        color: theme.foregroundQuaternary.mainColor.swiftuiColor,
+        style: theme.foregroundQuaternary.view,
+        readableOverlayColor: theme.foregroundQuaternary.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1)))
     
-    accent = HelloSwiftUIThemeForeground(color: theme.accent.mainColor.swiftuiColor,
-                                         style: AnyShapeStyle(theme.accent.view))
+    accent = HelloSwiftUIThemeForeground(
+      color: theme.accent.mainColor.swiftuiColor,
+      style: AnyShapeStyle(theme.accent.view),
+      readableOverlayColor: theme.accent.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1))
     
-    error = HelloSwiftUIThemeForeground(color: theme.error.mainColor.swiftuiColor,
-                                        style: AnyShapeStyle(theme.error.view))
+    error = HelloSwiftUIThemeForeground(
+      color: theme.error.mainColor.swiftuiColor,
+      style: AnyShapeStyle(theme.error.view),
+      readableOverlayColor: theme.error.mainColor.readableOverlayColor.swiftuiColor.opacity(isDim ? 0.5 : 1))
   }
 }

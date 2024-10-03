@@ -29,7 +29,7 @@ public class KeychainHelper {
   
   private let accessGroup: String?
   
-  public let bioSecAccessControl: SecAccessControl? = SecAccessControlCreateWithFlags(
+  nonisolated public let bioSecAccessControl: SecAccessControl? = SecAccessControlCreateWithFlags(
     nil,
     kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
     .biometryCurrentSet,

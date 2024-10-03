@@ -68,11 +68,11 @@ public struct HelloPicker<Item: HelloPickerItem>: View {
         }
       }.font(.system(size: 16, weight: .regular))
         .foregroundStyle(theme.surfaceSection.foreground.primary.style)
-        .frame(height: 36)
+        .frame(height: HelloPickerPopup.collapsedRowHeight)
         .padding(.trailing, 16)
         .frame(minWidth: group?.biggestWidth(for: id), alignment: .leading)
         .background(theme.surfaceSection.backgroundView(for: .rect(cornerRadius: 10)))
-        .frame(height: 44)
+        .frame(height: HelloPickerPopup.expandedRowHeight)
         .readFrame {
           globalFrame = $0
           group?.widths[id] = $0.width

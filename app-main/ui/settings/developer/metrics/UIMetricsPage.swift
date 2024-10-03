@@ -23,7 +23,7 @@ public struct UIMetricsPage: View {
               Text("Size (Points)")
                 .font(.system(size: 16, weight: .regular))
               Spacer(minLength: 0)
-              Text("\(windowModel.pointSize.width) x \(windowModel.pointSize.height)")
+              Text("\(windowModel.pointSize.width.string) x \(windowModel.pointSize.height.string)")
                 .font(.system(size: 16, weight: .regular))
             }
           }

@@ -7,7 +7,7 @@ struct HomeBarDimmerView: View {
   @Environment(\.theme) private var theme
   
   static var isSupported: Bool {
-    Device.currentEffective.homeBarWidth > 0
+    Device.current.homeBarWidth > 0
   }
   
   var body: some View {
@@ -20,7 +20,7 @@ struct HomeBarDimmerView: View {
         Capsule()
           .fill(.white.opacity(isActive ? 1 : 0))
           .padding(.vertical, 1)
-      }.frame(width: Device.currentEffective.homeBarWidth, height: 5)
+      }.frame(width: Device.current.homeBarWidth, height: 5)
         .padding(.bottom, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }

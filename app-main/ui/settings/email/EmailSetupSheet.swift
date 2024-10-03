@@ -61,7 +61,7 @@ struct EmailSetupSheet: View {
         }) {
           Text("Continue")
             .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.theme.baseLayer.accent.mainColor.readableOverlayColor.swiftuiColor)
+            .foregroundStyle(theme.accent.readableOverlayColor)
             .frame(height: 52)
             .frame(maxWidth: 220)
             .background(Capsule(style: .continuous).fill(theme.accent.style))

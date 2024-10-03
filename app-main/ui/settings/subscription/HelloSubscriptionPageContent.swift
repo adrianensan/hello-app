@@ -296,7 +296,7 @@ struct HelloSubscriptionPageContent: View {
                 Text("\(product.displayPrice.deletingSuffix(".00"))/\(selectedOption.frequency.unit)")
                   .font(.system(size: 13, weight: .medium))
               }
-            }.foregroundStyle(theme.theme.baseLayer.accent.mainColor.readableOverlayColor.swiftuiColor)
+            }.foregroundStyle(theme.accent.readableOverlayColor)
               .frame(height: 52)
               .frame(maxWidth: 220)
               .background(Capsule(style: .continuous).fill(theme.accent.style))

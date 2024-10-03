@@ -8,37 +8,9 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
   
   @ViewBuilder var additionalContent: @MainActor () -> AdditionalContent
   
-  @Persistent(.isDeveloper) private var isDeveloper
-  
   public var body: some View {
     NavigationPage(title: "Developer") {
-      VStack(alignment: .leading, spacing: 24) {
-        HelloSection(title: "UI") {
-          UIMetricsRow()
-          ShowDebugContentSettingsItem()
-          ShowTouchesSettingsItem()
-          ShowDebugBordersSettingsItem()
-        }
-        
-        HelloSection(title: "DIAGNOSTICS") {
-          PersistenceExplorerSettingsRow()
-          LogsSettingsItem()
-        }
-        
-        HelloSection {
-          DemoModeSettingsItem()
-          if isDeveloper && helloApplication.appConfig.hasPremiumFeatures {
-            ActiveSubscriptionSettingsRow()
-          }
-        }
-        
-        HelloSection(title: "RESET") {
-          ClearCacheSettingsItem()
-          DeleteEverythingSettingsItem()
-        }
-        
-        additionalContent()
-      }
+      DeveloperSettingsPageContent(additionalContent: additionalContent)
     }
   }
 }

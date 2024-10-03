@@ -10,10 +10,12 @@ public struct HelloPickerPopupRow: View {
   
   public var body: some View {
     HStack(spacing: 0) {
-      Image(systemName: isExpanded ? "checkmark" : "chevron.up.chevron.down")
-      //        .contentTransition(.symbolEffect(.replace))
-        .frame(width: 32)
-        .opacity(isSelected ? 1 : 0)
+      ZStack {
+        Image(systemName: "checkmark")
+          .opacity(isSelected && isExpanded ? 1 : 0)
+        Image(systemName: "chevron.up.chevron.down")
+          .opacity(isSelected && !isExpanded ? 1 : 0)
+      }.frame(width: 32)
       Text(item.name)
         .lineLimit(1)
       Spacer(minLength: 0)

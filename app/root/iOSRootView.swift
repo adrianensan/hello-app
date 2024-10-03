@@ -31,10 +31,8 @@ public struct HelloAppRootView<Content: View>: View {
           let layer = windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0
           popupView.view()
             .id(popupView.uniqueInstanceID)
-            .environment(\.viewID, popupView.id)
+            .environment(\.popupID, popupView.id)
             .zIndex(3 + 0.1 * Double(layer))
-            .transition(.asymmetric(insertion: .opacity.animation(.linear(duration: 0)),
-                                    removal: .opacity.animation(.linear(duration: 0.1).delay(0.4))))
             .compositingGroup()
             .blur(radius: topView.id != popupView.id ? windowModel.blurAmountForPopup : 0)
             .disabled(topView.hasExclusiveInteraction && topView.id != popupView.id)

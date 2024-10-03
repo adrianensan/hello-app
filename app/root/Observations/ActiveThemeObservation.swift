@@ -6,18 +6,23 @@ public extension EnvironmentValues {
   @Entry var theme: HelloSwiftUITheme = HelloSwiftUITheme(theme: .helloLight)
   @Entry var contentShape: AnyInsettableShape? = nil
   @Entry var viewShape: AnyInsettableShape = .init(.rect)
+  @Entry var pageShape: AnyInsettableShape = .init(.rect)
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
   @Entry var hasAppliedTheme: Bool = false
   @Entry var dismissProgress: CGFloat?
   @Entry var needsBlur: Bool = false
+  @Entry var needsContrast: Bool = false
   @Entry var viewID: String? = nil
+  @Entry var popupID: String? = nil
   @Entry var pageID: String? = nil
   @Entry var windowFrame: CGRect = .zero
+  @Entry var viewFrame: CGRect = .zero
   @Entry var safeArea: EdgeInsets = EdgeInsets()
   @Entry var keyboardFrame: CGRect = .zero
   @Entry var isFullscreen: Bool = false
   @Entry var physicalScale: CGFloat = 1
+  @Entry var pixelsPerPoint: CGFloat = 1
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
   @Entry var helloDismiss: @MainActor () -> Void = {}
 }

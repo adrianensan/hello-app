@@ -38,8 +38,39 @@ class PoolCancelSignal {
   }
 }
 
+final class PollActorSerialExecutor: SerialExecutor {
+  private let queue = DispatchQueue(label: "SocketPollQueue")
+  
+  func enqueue(_ job: UnownedJob) {
+    queue.async {
+      job.runSynchronously(on: self.asUnownedSerialExecutor())
+    }
+  }
+  
+  func asUnownedSerialExecutor() -> UnownedSerialExecutor {
+    return UnownedSerialExecutor(ordinary: self)
+  }
+}
+
+@globalActor final public actor SocketPollActor: GlobalActor {
+  public static let shared: SocketPollActor = SocketPollActor()
+  
+  public nonisolated var unownedExecutor: UnownedSerialExecutor { Self.sharedUnownedExecutor }
+  
+  public static var sharedUnownedExecutor: UnownedSerialExecutor = PollActorSerialExecutor().asUnownedSerialExecutor()
+}
+
 @globalActor final public actor SocketPoolActor: GlobalActor {
   public static let shared: SocketPoolActor = SocketPoolActor()
+}
+
+@SocketPollActor
+enum SocketPollerlll {
+  static func pollSocket(_ pollfds: [pollfd], _ count: nfds_t, _ timeout: Int32) -> [pollfd] {
+    var pollfds = pollfds
+    poll(&pollfds, nfds_t(pollfds.count), -1)
+    return pollfds
+  }
 }
 
 @SocketPoolActor
@@ -51,7 +82,7 @@ class SocketPoller {
   var stateUpdateListener: ([Int32: SocketState]) -> Void = { _ in }
   
   nonisolated init() {
-    Task {
+    Task { @SocketPoolActor in
       await self.pollEventLoop()
     }
   }
@@ -69,6 +100,7 @@ class SocketPoller {
   }
   
   private func pollEventLoop() async {
+    var sleepInterval: TimeInterval = 0.01
     while true {
       var pollfdMap: [Int32: pollfd] = [:]
       for socket in ([cancelSocket.outputFD] + readObservedSockets) {
@@ -84,6 +116,7 @@ class SocketPoller {
       }
       var pollfds = [pollfd](pollfdMap.values)
 //      Log.verbose("waiting on \(pollfds.count - 1) sockets", context: "Poll")
+//      pollfds = await SocketPollerlll.pollSocket(pollfds, nfds_t(pollfds.count), -1)
       poll(&pollfds, nfds_t(pollfds.count), 0)
       cancelSocket.reset()
       var socketStates: [Int32: SocketState] = [:]
@@ -109,12 +142,17 @@ class SocketPoller {
           }
         }
       }
+      Log.verbose("Done", context: "Poll")
       if socketStates.contains(where: { $0.value != .idle }) {
+        sleepInterval = 0.005
         let socketStates = socketStates
         self.stateUpdateListener(socketStates)
-        try? await Task.sleep(seconds: 0.02)
+        try? await Task.sleep(seconds: sleepInterval)
       } else {
-        try? await Task.sleep(seconds: 0.5)
+        if sleepInterval < 1 {
+          sleepInterval += 0.002
+        }
+        try? await Task.sleep(seconds: sleepInterval)
       }
     }
   }

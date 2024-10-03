@@ -18,6 +18,7 @@ public struct HelloWatchRootView<Content: View>: View {
     view
       .ignoresSafeArea()
       .environment(\.windowFrame, windowFrame)
+      .environment(\.viewFrame, windowFrame)
       .environment(\.safeArea, safeArea)
       .readGeometry {
         windowFrame = $0.frame(in: .global)

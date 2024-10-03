@@ -1,10 +1,12 @@
 #if os (iOS)
 import SwiftUI
 
+import HelloCore
+
 struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   @Environment(\.windowFrame) private var windowFrame
-  @Environment(\.viewID) private var viewID
+  @Environment(\.popupID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloSheetModel.self) private var model
   
@@ -24,7 +26,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .readSize {
+      .readSizeSync {
         guard model.sheetSize != $0 else { return }
         model.sheetSize = $0
       }
@@ -34,7 +36,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
 //      .frame(height: model.isVisible ? nil : 1, alignment: .top)
       .animation(.dampSpring, value: model.isVisible)
       .offset(y: model.isVisible ? yDrag : (isfloating ? windowFrame.height : model.sheetSize.height) + 8)
-      .animation(yDrag == 0 ? .dampSpring : .interactive, value: yDrag)
+      .animation(yDrag == 0 ? .dampSpring : nil, value: yDrag)
       .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: isfloating ? 0.8 * windowFrame.height : .infinity, alignment: isfloating ? .center : .bottom)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
       .background(HelloBackgroundDimmingView()
@@ -83,6 +85,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .onChange(of: model.isVisible) {
         if !model.isVisible {
           Task {
+            try? await Task.sleep(seconds: 0.2)
             windowModel.dismiss(id: viewID)
           }
         }

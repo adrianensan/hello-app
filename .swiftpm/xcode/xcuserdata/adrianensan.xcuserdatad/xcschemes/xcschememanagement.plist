@@ -14,7 +14,7 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>70</integer>
+			<integer>72</integer>
 		</dict>
 		<key>HelloAppDynamic.xcscheme_^#shared#^_</key>
 		<dict>
@@ -26,12 +26,12 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>65</integer>
+			<integer>67</integer>
 		</dict>
 		<key>HelloAppMain.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>72</integer>
+			<integer>73</integer>
 		</dict>
 		<key>HelloAppp-Package.xcscheme_^#shared#^_</key>
 		<dict>
@@ -48,14 +48,14 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>68</integer>
+			<integer>70</integer>
 		</dict>
 		<key>HelloServer.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>69</integer>
+			<integer>71</integer>
 		</dict>
 		<key>HelloUI.xcscheme_^#shared#^_</key>
 		<dict>

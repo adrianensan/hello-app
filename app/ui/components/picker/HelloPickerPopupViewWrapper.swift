@@ -7,7 +7,7 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeArea
-  @Environment(\.viewID) private var viewID
+  @Environment(\.popupID) private var viewID
   @Environment(\.theme) private var theme
   
   @State private var isVisible: Bool = false
@@ -29,6 +29,7 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   
   private var adjustedPosition: CGPoint {
     var position = position
+    position.y -= CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight
     let anchor = Alignment.topLeading
     let minWindowEdgeDistances = position - anchor.point * size - CGPoint(x: 8, y: safeArea.top + 8)
     if minWindowEdgeDistances.y < 0 {
@@ -42,19 +43,23 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
     return position
   }
   
+  var diff: CGFloat {
+    0.5 * (HelloPickerPopup.expandedRowHeight - HelloPickerPopup.collapsedRowHeight)
+  }
+  
   public var body: some View {
     content($isVisible)
       .background(theme.surfaceSection.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous), isBaseLayer: true))
-      .offset(y: isVisible ? 0 : -(CGFloat(startIndex) * 44 + 4))
-      .frame(height: isVisible ? size.height : 36, alignment: .topLeading)
+      .offset(y: isVisible ? 0 : -(CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight + diff))
+      .frame(height: isVisible ? size.height : HelloPickerPopup.collapsedRowHeight, alignment: .topLeading)
       .clipShape(RoundedRectangle(cornerRadius: isVisible ? 16 : 10, style: .continuous))
       .overlay(RoundedRectangle(cornerRadius: isVisible ? 16 : 10, style: .continuous)
         .strokeBorder(theme.surfaceSection.backgroundOutline, lineWidth: theme.surfaceSection.backgroundOutlineWidth))
-      .offset(y: isVisible ? -CGFloat(startIndex) * 44 : 4)
+      .offset(y: isVisible ? 0 : diff)
     //      .frame(width: 1, height: 1, alignment: anchor)
       .compositingGroup()
       .animation(.pageAnimation, value: isVisible)
-      .offset(adjustedPosition)
+      .offset(isVisible ? adjustedPosition : position)
       .environment(\.helloDismiss, { isVisible = false })
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .background(HelloBackgroundDimmingView()
@@ -75,10 +80,13 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
         isVisible = true
       }.onChange(of: isVisible) {
         if !isVisible {
-          if let viewID {
-            windowModel.dismiss(id: viewID)
-          } else {
-            windowModel.dismissPopup()
+          Task {
+            try? await Task.sleep(seconds: 0.21)
+            if let viewID {
+              windowModel.dismiss(id: viewID)
+            } else {
+              windowModel.dismissPopup()
+            }
           }
         }
       }

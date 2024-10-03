@@ -8,6 +8,7 @@ public struct HelloCloseButton: View {
   @Environment(\.theme) private var theme
   @Environment(\.dismissProgress) private var manualDismissProgress
   @Environment(\.needsBlur) private var needsBlur
+  @Environment(\.needsContrast) private var needsContrast
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   
   private let segmentLength: CGFloat = 22
@@ -22,6 +23,28 @@ public struct HelloCloseButton: View {
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .none, action: { onDismiss() }) {
       ZStack {
+        if needsContrast {
+          ZStack {
+            Capsule(style: .continuous)
+              .fill(.background)
+              .frame(width: 7, height: segmentLength + 4 - dismissProgress * 0.5 * segmentLength)
+              .frame(height: segmentLength + 4, alignment: .top)
+              .rotationEffect(.radians(0.25 * .pi))
+            
+            Capsule(style: .continuous)
+              .fill(.background)
+              .frame(width: 7, height: segmentLength + 4 - dismissProgress * 0.5 * segmentLength)
+              .frame(height: segmentLength + 4, alignment: .top)
+              .rotationEffect(.radians(-0.25 * .pi))
+            
+            Capsule(style: .continuous)
+              .fill(.background)
+              .frame(width: 7, height: dismissProgress * 22 + 2)
+              .frame(width: 1, height: 1, alignment: .bottom)
+          }.compositingGroup()
+            .opacity(0.8)
+        }
+        
         Capsule(style: .continuous)
           .fill()
           .frame(width: 3, height: segmentLength - dismissProgress * 0.5 * segmentLength)
@@ -45,8 +68,7 @@ public struct HelloCloseButton: View {
         .background(
           Capsule(style: .continuous)
             .fill(.thinMaterial)
-            .blur(radius: needsBlur ? 0 : 16 * (1 - min(1, (Double(sheetModel?.backProgress ?? 0) / 0.4))))
-            .opacity(needsBlur ? 1 : min(1, (Double(sheetModel?.backProgress ?? 0) / 0.2)))
+            .opacity(needsBlur ? 1 : 0)
         )
         .frame(width: 60, height: 60)
         .clickable()

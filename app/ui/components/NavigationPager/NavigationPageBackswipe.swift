@@ -2,24 +2,54 @@ import SwiftUI
 
 struct NavigationPageBackswipe: ViewModifier {
   
+  @Environment(\.theme) private var theme
+  @Environment(\.pageShape) private var pageShape
+  @Environment(\.helloPagerConfig) private var pagerConfig
   @Environment(PagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
-  @Environment(\.helloPagerConfig) private var pagerConfig
   
   @GestureState private var backDragWidth: CGFloat?
 //  @State private var touchesModel: TouchesModel = .main
+  let pageID: String
   let size: CGSize
   
-  var pageSpacing: CGFloat { size.width + 10 }
+  var isActive: Bool {
+    pagerModel.viewStack.firstIndex { $0.id == pageID } ?? .max >= pagerModel.viewDepth - 1
+  }
+  
+  var offset: CGFloat {
+    let pageIndex = pagerModel.viewStack.firstIndex { $0.id == pageID } ?? .max
+    if pageIndex > pagerModel.viewDepth - 1 {
+      return size.width + 10
+    } else if pageIndex == pagerModel.viewDepth - 1 {
+      return backProgressModel.drag ?? 0
+    } else if pageIndex == pagerModel.viewDepth - 2 {
+      return 0.5 * (-size.width + (backProgressModel.drag ?? 0))
+    } else {
+      return -1 * size.width - 10
+    }
+  }
+  
+  var backProgress: CGFloat {
+    min(1, max(0, (-size.width + (backProgressModel.drag ?? 0)) / (-size.width)))
+  }
   
   func body(content: Content) -> some View {
     content
+      .overlay(
+        HelloBackgroundDimmingView()
+          .opacity(isActive ? 0 : 0.8 * backProgress)
+          .animation(.pageAnimation, value: isActive)
+//          .animation(.interactive, value: backProgress)
+          .allowsTightening(false)
+      ).overlay(pageShape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth)
+        .opacity(backProgressModel.drag == nil ? 0 : 1))
       .allowsHitTesting(pagerModel.allowInteraction && backProgressModel.backProgress == 0)
       .disabled(backProgressModel.backProgress != 0)
       .compositingGroup()
-      .offset(x: -CGFloat(pagerModel.viewDepth - 1) * pageSpacing + (backDragWidth ?? 0))
+      .offset(x: offset)
 //      .animation(.pageAnimation, value: pagerModel.viewDepth)
-      .animation(backDragWidth == nil ? .pageAnimation : .interactive, value: backDragWidth)
+      .animation(backProgressModel.drag == nil ? .pageAnimation : nil, value: offset)
       .nest {
 #if os(iOS)
         $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
@@ -28,7 +58,7 @@ struct NavigationPageBackswipe: ViewModifier {
               backProgressModel.backSwipeAllowance = 0.5 * drag.translation.width > abs(drag.translation.height)
             }
             
-            var dragWidth: CGFloat = 0
+            var dragWidth: CGFloat? = nil
             if backProgressModel.backSwipeAllowance == true {
               if drag.translation.width > 0 {
                 dragWidth = drag.translation.width
@@ -38,8 +68,9 @@ struct NavigationPageBackswipe: ViewModifier {
             }
             
             state = dragWidth
+            backProgressModel.drag = dragWidth
             
-            let progress = min(1, max(0, dragWidth / 200))
+            let progress = min(1, max(0, (dragWidth ?? 0) / 200))
             if backProgressModel.backProgress != progress {
               backProgressModel.backProgress = progress
             }
@@ -57,18 +88,17 @@ struct NavigationPageBackswipe: ViewModifier {
               pagerModel.popView()
             }
             backProgressModel.backSwipeAllowance = nil
-            Task {
-              if backProgressModel.backProgress != 0 {
-                backProgressModel.backProgress = 0
-              }
-            }
+            backProgressModel.reset()
           })
 #else
         $0
 #endif
       }.onChange(of: backDragWidth) {
         if backDragWidth == nil {
-          backProgressModel.backProgress = 0
+          Task {
+            try await Task.sleepForOneFrame()
+            backProgressModel.reset()
+          }
         }
 //        let progress = min(1, max(0, backDragGestureState.width / 200))
 //        if backProgressModel.backProgress != progress {
@@ -90,7 +120,7 @@ struct NavigationPageBackswipe: ViewModifier {
 }
 
 extension View {
-  func handlePageBackSwipe(pageSize: CGSize) -> some View {
-    self.modifier(NavigationPageBackswipe(size: pageSize))
+  func handlePageBackSwipe(pageID: String, pageSize: CGSize) -> some View {
+    self.modifier(NavigationPageBackswipe(pageID: pageID, size: pageSize))
   }
 }

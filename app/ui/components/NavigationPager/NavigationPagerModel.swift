@@ -7,7 +7,7 @@ public struct PagerPage: Sendable, Identifiable {
   public var name: String?
   public var view: @MainActor () -> AnyView
   public var options: PagerPageOptions
-  var viewID: String = .uuid
+  var instanceID: String = .uuid
   
   @MainActor
   public init(id: String = .uuid,
@@ -50,7 +50,6 @@ public struct HelloPagerConfig: Sendable {
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
   public var navBarStyle: NavigationPageNavigationBarStyle
-  public var navBarTrailingPadding: CGFloat
   public var navBarFadeTransitionMultiplier: CGFloat
   public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
@@ -60,7 +59,6 @@ public struct HelloPagerConfig: Sendable {
               horizontalPagePadding: CGFloat = 16,
               belowNavBarPadding: CGFloat = 0,
               navBarStyle: NavigationPageNavigationBarStyle = .fixed,
-              navBarTrailingPadding: CGFloat = 0,
               navBarFadeTransitionMultiplier: CGFloat = 1,
               overrideNavBarTitleScrollsDown: Bool? = nil,
               allowsBack: Bool = true,
@@ -69,7 +67,6 @@ public struct HelloPagerConfig: Sendable {
     self.horizontalPagePadding = horizontalPagePadding
     self.belowNavBarPadding = belowNavBarPadding
     self.navBarStyle = navBarStyle
-    self.navBarTrailingPadding = navBarTrailingPadding
     self.navBarFadeTransitionMultiplier = navBarFadeTransitionMultiplier
     self.overrideNavBarTitleScrollsDown = overrideNavBarTitleScrollsDown
     self.allowsBack = allowsBack
@@ -111,7 +108,7 @@ public class PagerModel {
   public private(set) var viewDepth: Int = 0
   public var allowInteraction: Bool = true
   var config: HelloPagerConfig
-  private var lastPage: String?
+  @ObservationIgnored var dismissed: [String] = []
   
   private var pageScrollModels: [String: HelloScrollModel] = [:]
   
@@ -136,28 +133,30 @@ public class PagerModel {
     viewDepth = 1
   }
   
-  public var activePage: PagerPage? {
-    if viewDepth > 0 && viewDepth <= viewStack.count {
-      return viewStack[viewDepth - 1]
-    } else {
-      return nil
-    }
+  public var activePage: PagerPage? { viewStack.element(at: viewDepth - 1) }
+  
+  public var activePageID: String? { activePage?.id }
+  
+  public var currentPageType: String? { activePage?.options.type }
+  
+  public var activeScrollModel: HelloScrollModel? { activePageID.flatMap { pageScrollModels[$0] } }
+  
+  public var activePageIsReadyForDismiss: Bool { activeScrollModel?.readyForDismiss ?? true }
+  
+  func pageIndex(for pageID: String) -> Int? {
+    viewStack.firstIndex { $0.id == pageID }
   }
   
-  public var activePageID: String? {
-    activePage?.id
+  func backText(for pageID: String) -> String {
+    viewStack.element(at: (pageIndex(for: pageID) ?? 0) - 1)?.name ?? "Back"
   }
   
-  public var currentPageType: String? {
-    activePage?.options.type
+  func canGoBack(from pageID: String) -> Bool {
+    (activePage?.options.allowBackOverride ?? config.allowsBack) && pageIndex(for: pageID) ?? 0 > 0
   }
   
-  public var activeScrollModel: HelloScrollModel? {
-    activePageID.flatMap { pageScrollModels[$0] }
-  }
-  
-  public var activePageIsReadyForDismiss: Bool {
-    activeScrollModel?.readyForDismiss ?? true
+  func isDismissed(instanceID: String) -> Bool {
+    dismissed.contains(instanceID)
   }
   
   public func push<Page: View>(id: String = String(describing: Page.self),
@@ -165,32 +164,32 @@ public class PagerModel {
                                animated: Bool = true,
                                withOptions options: PagerPageOptions = PagerPageOptions(),
                                view: @escaping @MainActor () -> Page) {
-    guard allowInteraction, !viewStack.contains(where: { $0.id == id }) else { return }
+    Log.verbose("Attempting to push page \(id)", context: "Pager")
+    guard allowInteraction else { return }
 //    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {
-        if lastPage == id {
-          viewDepth = viewStack.count
-          return
-        }
-        _ = viewStack.popLast()
+        let removedPage = viewStack.popLast()
+        dismissed.removeAll { $0 == removedPage?.instanceID }
       }
     }
+    guard !viewStack.contains(where: { $0.id == id }) else { return }
     allowInteraction = false
-    lastPage = id
     let newPage = PagerPage(id: id, name: name, view: view, options: options)
     viewStack.append(newPage)
     if animated {
       Task {
-        try await Task.sleepForOneFrame()
+        try await Task.sleepForABit()
+//        try await Task.sleepForOneFrame()
         withAnimation(.pageAnimation) {
           self.viewDepth = self.viewStack.count
-        }
-        Task {
-          try await Task.sleep(seconds: 0.24)
           self.allowInteraction = true
         }
+//        Task {
+//          try await Task.sleep(seconds: 0.24)
+//          self.allowInteraction = true
+//        }
       }
     } else {
       self.viewDepth = self.viewStack.count
@@ -210,6 +209,13 @@ public class PagerModel {
   }
   
   public func popView(animated: Bool = true) {
+    Log.verbose("Attempting to pop page", context: "Pager")
+    guard let activePage else {
+      Log.error("Trying to pop view with no active page", context: "Pager")
+      return
+    }
+    let pageIDToRemove = activePage.instanceID
+    dismissed.append(pageIDToRemove)
     globalDismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
@@ -232,13 +238,17 @@ public class PagerModel {
     if animated {
       withAnimation(.pageAnimation) {
         viewDepth = viewStack.count - backPageCount
+        backProgressModel.reset()
       }
     } else {
       viewDepth = viewStack.count - backPageCount
+      backProgressModel.reset()
     }
     Task {
-      try await Task.sleepForOneFrame()
-      _ = viewStack.popLast()
+      try await Task.sleep(seconds: 0.32)
+      guard dismissed.contains(pageIDToRemove) else { return }
+      viewStack.removeAll { $0.instanceID == pageIDToRemove }
+      dismissed.removeAll { $0 == pageIDToRemove }
     }
   }
   

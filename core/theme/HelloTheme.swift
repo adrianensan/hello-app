@@ -151,7 +151,7 @@ public struct HelloTheme: Codable, Hashable, Sendable {
                                        textTertiary: foregroundTertiary,
                                        textQuaternary: foregroundQuaternary,
                                        font: baseLayer?.font ?? .rounded,
-                                       accent: baseLayer?.accent ?? .semanticColor(.accent),
+                                       accent: baseLayer?.accent ?? .color(color: scheme == .dark ? .darkThemeBlueAccent : .lightThemeBlueAccent),
                                        disabled: .color(color: .white),
                                        error: baseLayer?.error ?? .semanticColor(.error))
     }

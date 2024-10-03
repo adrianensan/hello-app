@@ -1,5 +1,4 @@
 import SwiftUI
-import Observation
 
 extension Animation {
   public static var interactive: Animation {
@@ -11,21 +10,37 @@ extension Animation {
 @MainActor
 @Observable
 public class BackProgressModel {
-  
   public var backProgress: CGFloat = 0
+  public var drag: CGFloat?
   @ObservationIgnored public var backSwipeAllowance: Bool?
+  
+  func reset() {
+    if backProgress != 0 {
+      backProgress = 0
+    }
+    if drag != nil {
+      drag = nil
+    }
+  }
 }
 
 public struct BackButton: View {
   
   @Environment(\.theme) private var theme
+  @Environment(\.pageID) private var pageID
+  @Environment(\.viewID) private var instanceID
   @Environment(PagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
-  var rotationInterval: CGFloat = 0.6
+  private var rotationInterval: CGFloat = 0.6
   
-  var rotationIntervalProgress: CGFloat {
-    max(0, min(1, backProgressModel.backProgress / rotationInterval))
+  private var rotationIntervalProgress: CGFloat {
+    max(0, min(1, backProgress / rotationInterval))
+  }
+  
+  private var backProgress: CGFloat {
+    pagerModel.isDismissed(instanceID: instanceID ?? "") ? 1 :
+      pagerModel.activePageID == pageID ? backProgressModel.backProgress : 0
   }
   
   public init() {
@@ -50,46 +65,25 @@ public struct BackButton: View {
         
         Capsule(style: .continuous)
           .fill()
-          .frame(width: backProgressModel.backProgress * 36 + (rotationIntervalProgress * 10), height: 3)
+          .frame(width: backProgress * 36 + (rotationIntervalProgress * 10), height: 3)
           .offset(x: rotationIntervalProgress * 10)
           .frame(width: 1, height: 1, alignment: .trailing)
       }.frame(width: 44, height: 44)
         .offset(x: -6)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-        .frame(width: 44 + backProgressModel.backProgress * 36, height: 44)
+        .frame(width: 44 + backProgress * 36, height: 44, alignment: .trailing)
+        .frame(width: 44, height: 44, alignment: .leading)
         .padding(.leading, -4)
       
-      let effectiveBackProgress: CGFloat = pagerModel.viewDepth != pagerModel.viewStack.count ? 1 : 0
-      VStack(alignment: .leading, spacing: 0) {
-        HelloForEach(pagerModel.viewStack.dropLast(), reversed: true) { index, page in
-          let distance: CGFloat = CGFloat(pagerModel.viewStack.count - index - 2) + (pagerModel.viewDepth > 1 ? effectiveBackProgress : 0)
-          Text(page.name ?? "Back")
-            .font(.system(size: 14, weight: .semibold))
-            .fixedSize()
-            .frame(height: 14)
-            .opacity(1 - 0.6 * abs(distance))
-            .scaleEffect(1 - 0.3 * abs(distance), anchor: .leading)
-            .offset(x: pagerModel.viewStack.count - 2 == index ? 40 * effectiveBackProgress : 0)
-        }
-      }.frame(height: pagerModel.viewDepth > 2 ? 24 : 14, alignment: .top)
-//        .offset(y: -14 * effectiveBackProgress)
+      Text(pagerModel.backText(for: pageID ?? "nil"))
+        .font(.system(size: 14, weight: .semibold))
+        .fixedSize()
+        .opacity(1 - rotationIntervalProgress)
+        .offset(x: 16 * rotationIntervalProgress)
         .padding(.trailing, 12)
-        .animation(.pageAnimation, value: pagerModel.viewStack.count)
-        .animation(.pageAnimation, value: pagerModel.viewDepth)
     }.foregroundStyle(theme.header.foreground.primary.style)
 //      .foregroundStyle(theme.accent.style)
-      .background {
-      ZStack {
-        Capsule(style: .continuous)
-          .fill(.thinMaterial)
-          .blur(radius: 16 * (1 - min(1, (backProgressModel.backProgress / 0.4))))
-          .opacity(min(1, (backProgressModel.backProgress / 0.2)))
-      }
-        //        Capsule(style: .continuous)
-        //          .fill(theme.textPrimary.swiftuiColor)
-        //          .frame(width: 44 + backProgressModel.backProgress * 36, height: 44, alignment: .leading)
-      }
-      .animation(backProgressModel.backProgress == 0 ? .pageAnimation : .interactive, value: backProgressModel.backProgress)
+      .animation(backProgress == 0 ? .pageAnimation : nil, value: backProgress)
 //      .hoverEffect(.lift)
   }
 }

@@ -92,7 +92,20 @@ public actor ICloudSyncManager {
     property: Property,
     persistenceProperty: some PersistenceProperty<Property.Value>,
     hasLocalUpdates: Bool,
-    mergeHandler: @Sendable @escaping (_ localValue: Property.Value, _ cloudValue: Property.Value) async throws -> Property.Value
+    mergeHandler: @Sendable (_ localValue: Property.Value, _ cloudValue: Property.Value) async throws -> Property.Value
+  ) async throws {
+    try await sync(
+      property: property,
+      persistenceProperty: persistenceProperty,
+      hasLocalUpdates: { _, _ in hasLocalUpdates },
+      mergeHandler: mergeHandler)
+  }
+  
+  public func sync<Property: ICloudProperty>(
+    property: Property,
+    persistenceProperty: some PersistenceProperty<Property.Value>,
+    hasLocalUpdates: @Sendable (_ localValue: Property.Value, _ cloudValue: Property.Value) async throws -> Bool,
+    mergeHandler: @Sendable (_ localValue: Property.Value, _ cloudValue: Property.Value) async throws -> Property.Value
   ) async throws {
     guard !isSyncing else {
       awatingSync = true
@@ -122,13 +135,16 @@ public actor ICloudSyncManager {
       
       let recordID = CKRecord.ID(recordName: property.recordID)
       var record: CKRecord
+      var hasCloudItem: Bool
       do {
         record = try await database(for: property).record(for: recordID)
+        hasCloudItem = true
       } catch {
         switch error {
         case CKError.unknownItem:
           Log.info("No item found for \(property.recordID)", context: "Cloud")
           record = CKRecord(recordType: property.recordType, recordID: recordID)
+          hasCloudItem = false
         case CKError.badDatabase, CKError.badContainer:
           state = .dbError
           throw error
@@ -158,24 +174,31 @@ public actor ICloudSyncManager {
       }
       
       var value = await Persistence.value(persistenceProperty)
+      
       var needsToUpdateCloud: Bool
       var needsToUpdateLocal: Bool
-      if cloudMetadata.changeID == propertyMetadata.changeID {
-        if hasLocalUpdates {
-          Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
-          needsToUpdateCloud = true
-          needsToUpdateLocal = false
+      if hasCloudItem {
+        let cloudObject = try parseValue(from: record, for: property)
+        if cloudMetadata.changeID == propertyMetadata.changeID {
+          if try await hasLocalUpdates(value, cloudObject) {
+            Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
+            needsToUpdateCloud = true
+            needsToUpdateLocal = false
+          } else {
+            Log.verbose("No change for \(property.recordID)", context: "Cloud")
+            needsToUpdateCloud = false
+            needsToUpdateLocal = false
+          }
         } else {
-          Log.verbose("No change for \(property.recordID)", context: "Cloud")
-          needsToUpdateCloud = false
-          needsToUpdateLocal = false
+          Log.verbose("Merging value for \(property.recordID)", context: "Cloud")
+          value = try await mergeHandler(value, cloudObject)
+          needsToUpdateCloud = true
+          needsToUpdateLocal = true
         }
       } else {
-        Log.verbose("Merging value for \(property.recordID)", context: "Cloud")
-        let cloudObject = try parseValue(from: record, for: property)
-        value = try await mergeHandler(value, cloudObject)
+        Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
         needsToUpdateCloud = true
-        needsToUpdateLocal = true
+        needsToUpdateLocal = false
       }
       
       if needsToUpdateLocal {
@@ -190,6 +213,7 @@ public actor ICloudSyncManager {
           record[assetKey] = valueData
         case .asset:
           let url = FileManager.default.temporaryDirectory.appendingPathComponent("cloud/\(property.recordID).json")
+          try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
           try valueData.write(to: url)
           record[assetKey] = CKAsset(fileURL: url)
         }

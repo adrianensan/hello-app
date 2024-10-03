@@ -15,6 +15,13 @@ public extension View {
     })
   }
   
+  func readSizeSync(onChange: @escaping @MainActor (CGSize) -> Void) -> some View {
+    background(GeometryReader { geometry in
+      onChange(geometry.size)
+      return Color.clear
+    })
+  }
+  
   func readSize(to binding: Binding<CGSize>, onChange: (@MainActor () -> Void)?) -> some View {
     background(GeometryReader { geometry in
       Task {

@@ -88,8 +88,11 @@ public class Downloader {
     guard !downloadingURLs.contains(url) else { throw .duplicate }
     downloadingURLs.insert(url)
     defer { downloadingURLs.remove(url) }
-    let requestStartTime = epochTime
+  
     let urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
+    Log.verbose("Starting download for \(urlString)", context: "Downloader")
+    
+    let requestStartTime = epochTime
     
     let urlResponse: URLResponse
     let data: Data

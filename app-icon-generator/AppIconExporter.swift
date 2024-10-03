@@ -59,14 +59,18 @@ public enum AppIconExporter {
     try? FileManager.default.removeItem(at: exportPath)
   }
   
-  static public func export(for appIconConfig: some HelloAppIconGeneratorConfig) async throws {
-    for platform in appIconConfig.platforms {
+  static public func export(for appConfig: some HelloAppConfig) async throws {
+    for platform in appConfig.appIconConfig.platforms {
+      guard let appIconConfig = appConfig.appIconConfig as? any HelloAppIconGeneratorConfig else {
+        fatalError("no HelloAppIconGeneratorConfig")
+      }
       switch platform {
       case .iOS:
         try await export(
           iOSIcons: appIconConfig.allGenaratable,
           for: appIconConfig,
           context: AppIconExporterContext(
+            appID: appConfig.id,
             platform: .iOS,
             size: CGSize(width: 1024, height: 1024),
             iconFill: appIconConfig.iconFill,
@@ -76,6 +80,7 @@ public enum AppIconExporter {
           iMessageIcon: appIconConfig.defaultGeneratable,
           for: appIconConfig,
           context: AppIconExporterContext(
+            appID: appConfig.id,
             platform: .iMessage,
             size: CGSize(width: 1024, height: 768),
             iconFill: appIconConfig.iconFill,
@@ -85,6 +90,7 @@ public enum AppIconExporter {
           watchOSIcon: appIconConfig.defaultGeneratable,
           for: appIconConfig,
           context: AppIconExporterContext(
+            appID: appConfig.id,
             platform: .watchOS,
             size: CGSize(width: 1024, height: 1024),
             iconFill: appIconConfig.iconFill,
@@ -94,6 +100,7 @@ public enum AppIconExporter {
           visionOSIcon: appIconConfig.defaultGeneratable,
           for: appIconConfig,
           context: AppIconExporterContext(
+            appID: appConfig.id,
             platform: .visionOS,
             size: CGSize(width: 1024, height: 1024),
             iconFill: appIconConfig.iconFill,
@@ -103,6 +110,7 @@ public enum AppIconExporter {
           macOSIcons: appIconConfig.allGenaratable,
           for: appIconConfig,
           context: AppIconExporterContext(
+            appID: appConfig.id,
             platform: .macOS,
             size: CGSize(width: 1024, height: 1024),
             iconFill: appIconConfig.iconFill,
@@ -113,8 +121,8 @@ public enum AppIconExporter {
   
   static private func export(iOSIcons: [any HelloSwiftUIAppIcon], for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
     guard let baseExportPath = baseExportPath else { return }
-    let exportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/ios")
-    let thumbnailExportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/ios-thumbnails")
+    let exportPath = baseExportPath.appendingPathComponent("\(context.appID)/ios")
+    let thumbnailExportPath = baseExportPath.appendingPathComponent("\(context.appID)/ios-thumbnails")
     
     try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
     try? FileManager.default.createDirectory(at: thumbnailExportPath, withIntermediateDirectories: true, attributes: [:])
@@ -132,7 +140,7 @@ public enum AppIconExporter {
       
       let isDefault = icon.id == appConfig.defaultIcon.id
       if isDefault {
-        try await saveSharedThumbnail(imageData: lightIconImageData, for: appConfig, context: context)
+        try await saveSharedThumbnail(imageData: lightIconImageData, context: context)
         try await save(imageData: lightIconImageData, icon: icon, for: .iOSMain, at: iconExportPath)
       } else {
         try await save(imageData: lightIconImageData, icon: icon, for: AppIconImageVariant.iOSAlternate, at: iconExportPath)
@@ -182,17 +190,17 @@ public enum AppIconExporter {
 //    }
 //  }
   
-  static private func saveSharedThumbnail(imageData: Data, for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
+  static private func saveSharedThumbnail(imageData: Data, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
     let thumbnailImageData = try await ImageProcessor.resize(imageData: imageData, maxSize: 180, format: .heic)
     let sharedExportPath = baseExportPath.appendingPathComponent("hello")
     try? FileManager.default.createDirectory(at: sharedExportPath, withIntermediateDirectories: true, attributes: [:])
-    try thumbnailImageData.write(to: sharedExportPath.appendingPathComponent("\(appConfig.appID)-\(context.platform.id).heic"))
+    try thumbnailImageData.write(to: sharedExportPath.appendingPathComponent("\(context.appID)-\(context.platform.id).heic"))
   }
   
   static private func export(iMessageIcon icon: any HelloSwiftUIAppIcon, for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
-    let iconExportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/imessage/\(icon.systemName).stickersiconset")
+    let iconExportPath = baseExportPath.appendingPathComponent("\(context.appID)/imessage/\(icon.systemName).stickersiconset")
     try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
     
     let baseSquareImageData = try await imageData(for: icon.imessageView(context: context).flattenedView, size: CGSize(width: 1024, height: 1024), allowOpacity: false)
@@ -209,25 +217,25 @@ public enum AppIconExporter {
       try await save(imageData: imageData, icon: icon, for: variant, at: iconExportPath)
     }
     try generateContentsFile(at: iconExportPath, for: icon, variants: AppIconImageVariant.iMessageVariants)
-    try await saveSharedThumbnail(imageData: baseIMessageImageData, for: appConfig, context: context)
+    try await saveSharedThumbnail(imageData: baseIMessageImageData, context: context)
   }
   
   static private func export(watchOSIcon icon: any HelloSwiftUIAppIcon, for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
-    let iconExportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/imessage/\(icon.systemName).stickersiconset")
+    let iconExportPath = baseExportPath.appendingPathComponent("\(context.appID)/imessage/\(icon.systemName).stickersiconset")
     try? FileManager.default.createDirectory(at: iconExportPath, withIntermediateDirectories: true, attributes: [:])
     
     let imageData = try await imageData(for: icon.watchosView(context: context).flattenedView, size: CGSize(width: 1024, height: 1024), allowOpacity: false)
     try await save(imageData: imageData, icon: icon, for: .watchOS, at: iconExportPath)
     try generateContentsFile(at: iconExportPath, for: icon, variants: [.watchOS])
     
-    try await saveSharedThumbnail(imageData: imageData, for: appConfig, context: context)
+    try await saveSharedThumbnail(imageData: imageData, context: context)
   }
   
   static public func export(visionOSIcon icon: any HelloSwiftUIAppIcon, for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
-    let exportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/visionos")
-    let thumbnailExportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/visionos-thumbnails")
+    let exportPath = baseExportPath.appendingPathComponent("\(context.appID)/visionos")
+    let thumbnailExportPath = baseExportPath.appendingPathComponent("\(context.appID)/visionos-thumbnails")
     try? FileManager.default.createDirectory(at: exportPath, withIntermediateDirectories: true, attributes: [:])
     
     let iconExportPath = exportPath.appendingPathComponent("\(icon.systemName).solidimagestack")
@@ -249,12 +257,12 @@ public enum AppIconExporter {
     try? layerContents.jsonData.write(to: iconExportPath.appendingPathComponent("Contents.json"))
     
     let imageData = try await imageData(for: icon.visionosView(context: context).flattenedView, size: CGSize(width: 1024, height: 1024), allowOpacity: false)
-    try await saveSharedThumbnail(imageData: imageData, for: appConfig, context: context)
+    try await saveSharedThumbnail(imageData: imageData, context: context)
   }
 
   static public func export(macOSIcons icons: [any HelloSwiftUIAppIcon], for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
-    let exportPath = baseExportPath.appendingPathComponent("\(appConfig.appID)/macos")
+    let exportPath = baseExportPath.appendingPathComponent("\(context.appID)/macos")
     
     let mainIconExportPath = exportPath.appendingPathComponent("AppIcon.appiconset")
     try? FileManager.default.createDirectory(at: mainIconExportPath, withIntermediateDirectories: true, attributes: [:])
@@ -263,7 +271,7 @@ public enum AppIconExporter {
       for: appConfig.defaultGeneratable.macosView(context: context).view.flattenedView,
       size: CGSize(width: 1024, height: 1024),
       allowOpacity: true)
-    try await saveSharedThumbnail(imageData: imageData, for: appConfig, context: context)
+    try await saveSharedThumbnail(imageData: imageData, context: context)
     
     try await save(imageData: imageData, icon: appConfig.defaultGeneratable, for: AppIconImageVariant.macVariants, at: mainIconExportPath)
     try generateContentsFile(at: mainIconExportPath, for: appConfig.defaultGeneratable, variants: AppIconImageVariant.macVariants)

@@ -23,7 +23,6 @@ public struct NavigationPageBar<NavBarContent: View>: View {
         .frame(height: config.navBarHeight)
     }.font(.system(size: 20, weight: .semibold))
       .foregroundColor(theme.header.foreground.primary.color)
-      .padding(.horizontal, config.horizontalPagePadding)
 //      .padding(.top, config.belowNavBarPadding)
       .frame(height: title == nil
              ? max(config.navBarHeight, config.belowNavBarPadding)

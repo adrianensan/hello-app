@@ -2,8 +2,6 @@ import Foundation
 
 public protocol HelloAppIconConfig: Codable, Hashable, Sendable {
   
-  var appID: String { get }
-  
   var defaultIcon: any HelloAppIcon { get }
   
   var platforms: [HelloAppPlatform] { get }
@@ -24,8 +22,11 @@ public extension HelloAppIconConfig {
   
   var tintOptions: [HelloAppIconTint] { HelloAppIconTint.defaultOptions }
   
-  var mainIcons: [any HelloAppIcon] { [defaultIcon] + betaIcons + superPremiumIcons }
+  var collections: [HelloAppIconCollection] { [] }
+  func tintableIcons(for tint: HelloAppIconTint) -> [any HelloTintableAppIcon] { [] }
   
+  var mainIcons: [any HelloAppIcon] { [defaultIcon] + betaIcons + superPremiumIcons }
+
   var tintedIcons: [any HelloAppIcon] {
     tintOptions.reduce([]) { icons, tint in icons + tintableIcons(for: tint) }
   }

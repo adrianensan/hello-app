@@ -34,7 +34,7 @@ public struct KnownApp: Identifiable, Hashable, Codable, Sendable {
 
 public extension KnownApp {
   public static var all: [KnownApp] {
-    var apps: [KnownApp] = [.helloPodcasts, .helloPasswords, .helloSolitaire, .helloMinesweeper, .helloEmoji]
+    var apps: [KnownApp] = [.helloPodcasts, .helloPasswords, .helloSolitaire, .helloEmoji]
     if let currentApp = apps.first(where: { $0.bundleID == AppInfo.rootBundleID }) {
       apps.removeAll { $0.bundleID == currentApp.bundleID }
       apps.insert(currentApp, at: 0)

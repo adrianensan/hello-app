@@ -29,7 +29,7 @@ public struct ImageViewer: View {
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.contentShape) private var contentShape
-  @Environment(\.viewID) private var viewID
+  @Environment(\.popupID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var model = ImageViewModel()
@@ -64,7 +64,10 @@ public struct ImageViewer: View {
           Task {
             if originalFrameSaved == nil {
               dismissVelocity = velocity
-              windowModel.dismiss(id: viewID)
+              Task {
+                try? await Task.sleep(seconds: 0.5)
+                windowModel.dismiss(id: viewID)
+              }
             }
           }
         },
@@ -77,7 +80,10 @@ public struct ImageViewer: View {
           if let originalFrameSaved {
             Task {
               originalFrame = originalFrameSaved + offset
-              windowModel.dismiss(id: viewID)
+              Task {
+                try? await Task.sleep(seconds: 0.5)
+                windowModel.dismiss(id: viewID)
+              }
             }
           }
         }) {
@@ -99,7 +105,7 @@ public struct ImageViewer: View {
           dismissVelocity = CGPoint(x: 0, y: -4)
         }
         Task {
-          try await Task.sleepForOneFrame()
+          try? await Task.sleep(seconds: 0.5)
           windowModel.dismiss(id: viewID)
         }
       }).padding(8)

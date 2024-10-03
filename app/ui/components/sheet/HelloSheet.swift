@@ -52,10 +52,9 @@ public struct HelloSheet<Content: View>: View {
   
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeArea
-  @Environment(\.physicalScale) private var physicalScale
+  @Environment(\.pixelsPerPoint) private var pixelsPerPoint
   @Environment(\.theme) private var theme
   @Environment(\.colorScheme) private var colorScheme
-  @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var model: HelloSheetModel
@@ -72,23 +71,43 @@ public struct HelloSheet<Content: View>: View {
     windowFrame.size.minSide > 700
   }
   
+  var shape: AnyInsettableShape {
+    AnyInsettableShape(
+      UnevenRoundedRectangle(
+        cornerRadii: RectangleCornerRadii(
+          topLeading: 30,
+          bottomLeading: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          bottomTrailing: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          topTrailing: 30))
+    )
+  }
+  
+  var pageShape: AnyInsettableShape {
+    AnyInsettableShape(
+      UnevenRoundedRectangle(
+        cornerRadii: RectangleCornerRadii(
+          topLeading: 30,
+          bottomLeading: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          bottomTrailing: 0,
+          topTrailing: 0))
+    )
+  }
+  
   public var body: some View {
     content()
       .coordinateSpace(.sheet)
-      .overlay(HelloCloseButton { model.dismiss() }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing))
-      .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+      .overlay {
+        if model.pagerModel == nil {
+          HelloCloseButton { model.dismiss() }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        }
+      }
+      .clipShape(shape)
       .padding(.bottom, isfloating ? 0 : 60)
       .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
       .padding(.bottom, isfloating ? 0 : -60)
-      .overlay(UnevenRoundedRectangle(
-        cornerRadii: RectangleCornerRadii(
-          topLeading: 30,
-          bottomLeading: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
-          bottomTrailing: isfloating ? 30 : Device.currentEffective.screenCornerRadius * physicalScale,
-          topTrailing: 30))
-        .strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
+      .overlay(shape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
       .padding(.top, isfloating ? 0 : safeArea.top + 16)
       .handleSheetDismissDrag()
       .transformEnvironment(\.safeArea) {
@@ -98,6 +117,8 @@ public struct HelloSheet<Content: View>: View {
         }
       }
       .environment(model)
+      .environment(\.viewShape, shape)
+      .environment(\.pageShape, pageShape)
       .environment(\.helloDismiss, { model.dismiss() })
   }
 }
