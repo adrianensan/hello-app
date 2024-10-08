@@ -10,8 +10,6 @@ public struct HelloEnterCodeOverlay: View {
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloEnterCodeModel.self) private var enterCodeModel
   
-  @State private var hasAppeared: Bool = false
-  
   public var body: some View {
     ZStack(alignment: .topLeading) {
       HelloLogo()
@@ -19,6 +17,7 @@ public struct HelloEnterCodeOverlay: View {
         .offset(x: enterCodeModel.logoFrame.minX,
                 y: enterCodeModel.logoFrame.minY)
         .foregroundStyle(theme.foreground.quaternary.style)
+        .opacity(enterCodeModel.presented ? 0 : 1)
       HelloBackgroundDimmingView()
         .opacity(enterCodeModel.presented ? 1 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

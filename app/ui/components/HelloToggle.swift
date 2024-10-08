@@ -14,7 +14,7 @@ public struct HelloToggle: View {
     self.action = action
   }
   
-  public init<PersistentPropertyy: PersistenceProperty>(_ property: Persistent<PersistentPropertyy>) where PersistentPropertyy.Value == Bool {
+  public init(_ property: Persistent<some PersistenceProperty<Bool>>) {
     self.isSelected = property.wrappedValue
     self.action = { property.wrappedValue.toggle() }
   }

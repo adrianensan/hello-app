@@ -49,8 +49,6 @@ public extension View {
 @MainActor
 public class HelloRootViewController: UIHostingController<AnyView> {
   
-  private static var instances: [String: HelloRootViewController] = [:]
-  
   var statusBarStyle: UIStatusBarStyle = .default
   var lockRotation: Bool = false
   var hideHomeIndicator: Bool = false
@@ -90,11 +88,10 @@ public class HelloRootViewController: UIHostingController<AnyView> {
 //      }
       
     
-    super.init(rootView: AnyView(HelloAppRootView( { wrappedView })
+    super.init(rootView: AnyView(HelloAppRootView { wrappedView }
       .environment(uiProperties)
       .environment(windowModel)
       .ignoresSafeArea()))
-    Self.instances[id] = self
 //    view.backgroundColor = .black
     disableKeyboardOffset()
     

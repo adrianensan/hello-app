@@ -7,6 +7,7 @@ import HelloApp
 
 public struct DeveloperSettingsRow<AdditionalContent: View>: View {
   
+  @Environment(\.theme) private var theme
   @Environment(PagerModel.self) private var pagerModel
   
   @ViewBuilder private var additionalContent: @MainActor () -> AdditionalContent
@@ -19,19 +20,7 @@ public struct DeveloperSettingsRow<AdditionalContent: View>: View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
       pagerModel.push(name: "Developer") { DeveloperSettingsPage(additionalContent: additionalContent) }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "hammer")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("Developer")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular))
-        }
-      }
+      HelloNavigationRow(icon: "hammer", name: "Developer", actionIcon: .arrow)
     }
   }
 }

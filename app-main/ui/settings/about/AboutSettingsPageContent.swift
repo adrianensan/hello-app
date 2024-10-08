@@ -150,32 +150,13 @@ struct AboutSettingsPageContent: View {
         }
       }
       
+      
       HelloSection {
         HelloButton(clickStyle: .highlight, action: { pagerModel.push { TechnicalDetailsSettingsPage() } }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Technical Details")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Image(systemName: "chevron.right")
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+          HelloNavigationRow(icon: nil, name: "Technical Details", actionIcon: .arrow)
         }
         HelloButton(clickStyle: .highlight, action: { pagerModel.push { PrivacyPolicySettingsPage() } }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Privacy Policy")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Image(systemName: "chevron.right")
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+          HelloNavigationRow(icon: nil, name: "Privacy Policy", actionIcon: .arrow)
         }
       }
       

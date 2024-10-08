@@ -192,10 +192,10 @@ public enum AppIconExporter {
   
   static private func saveSharedThumbnail(imageData: Data, context: AppIconExporterContext) async throws {
     guard let baseExportPath else { return }
-    let thumbnailImageData = try await ImageProcessor.resize(imageData: imageData, maxSize: 180, format: .heic)
+    let thumbnailImageData = try await ImageProcessor.resize(imageData: imageData, maxSize: 180, format: .png)
     let sharedExportPath = baseExportPath.appendingPathComponent("hello")
     try? FileManager.default.createDirectory(at: sharedExportPath, withIntermediateDirectories: true, attributes: [:])
-    try thumbnailImageData.write(to: sharedExportPath.appendingPathComponent("\(context.appID)-\(context.platform.id).heic"))
+    try thumbnailImageData.write(to: sharedExportPath.appendingPathComponent("\(context.appID)-\(context.platform.id).png"))
   }
   
   static private func export(iMessageIcon icon: any HelloSwiftUIAppIcon, for appConfig: some HelloAppIconGeneratorConfig, context: AppIconExporterContext) async throws {

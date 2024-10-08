@@ -36,6 +36,10 @@ struct NavigationPageBackswipe: ViewModifier {
   
   func body(content: Content) -> some View {
     content
+      .clipShape(pageShape)
+      .background(theme.backgroundView(for: pageShape, isBaseLayer: true)
+        .shadow(color: .black.opacity(pagerModel.activePageID == pageID.id ? 0.2 : 0), radius: 16)
+        .onTapGesture { globalDismissKeyboard() })
       .overlay(
         HelloBackgroundDimmingView()
           .opacity(isActive ? 0 : 0.8 * backProgress)
@@ -44,8 +48,8 @@ struct NavigationPageBackswipe: ViewModifier {
           .allowsTightening(false)
       ).overlay(pageShape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth)
         .opacity(backProgressModel.drag == nil ? 0 : 1))
-      .allowsHitTesting(pagerModel.allowInteraction && backProgressModel.backProgress == 0)
-      .disabled(backProgressModel.backProgress != 0)
+      .allowsHitTesting(pagerModel.activePageID == pageID && pagerModel.allowInteraction && backProgressModel.backProgress == 0)
+      .disabled(pagerModel.activePageID != pageID || backProgressModel.backProgress != 0)
       .compositingGroup()
       .offset(x: offset)
 //      .animation(.pageAnimation, value: pagerModel.viewDepth)

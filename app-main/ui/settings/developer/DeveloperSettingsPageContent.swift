@@ -17,6 +17,7 @@ struct DeveloperSettingsPageContent<AdditionalContent: View>: View {
         ShowDebugContentSettingsItem()
         ShowTouchesSettingsItem()
         ShowDebugBordersSettingsItem()
+        DisableViewMaskingSettingsItem()
       }
       
       HelloSection(title: "DIAGNOSTICS") {

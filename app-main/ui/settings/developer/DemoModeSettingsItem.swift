@@ -24,33 +24,23 @@ struct DemoModeSettingsItem: View {
   }
   
   var body: some View {
-    HelloSectionItem {
-      HStack(spacing: 4) {
-        Image(systemName: "play.circle")
-          .font(.system(size: 20, weight: .regular))
-          .frame(width: 32, height: 32)
-        
-        Text("Persistence Mode")
-          .font(.system(size: 16, weight: .regular))
-        Spacer(minLength: 0)
-        
-        HelloPicker(selected: persistenceMode,
-                    options: PersistenceMode.allCases,
-                    onChange: { newPersistenceMode in
-          guard persistenceMode != newPersistenceMode else { return }
-          windowModel.show(alert: HelloAlertConfig(
-            title: title(for: newPersistenceMode),
-            message: "\(AppInfo.displayName) will close immediately",
-            firstButton: .cancel,
-            secondButton: .init(
-              name: actionName,
-              action: {
-                await Persistence.save(newPersistenceMode, for: .persistenceMode)
-                exitGracefully()
-              },
-              isDestructive: newPersistenceMode != .normal)))
-        })
-      }
+    HelloNavigationRow(icon: "play.circle", name: "Persistence Mode") {
+      HelloPicker(selected: persistenceMode,
+                  options: PersistenceMode.allCases,
+                  onChange: { newPersistenceMode in
+        guard persistenceMode != newPersistenceMode else { return }
+        windowModel.show(alert: HelloAlertConfig(
+          title: title(for: newPersistenceMode),
+          message: "\(AppInfo.displayName) will close immediately",
+          firstButton: .cancel,
+          secondButton: .init(
+            name: actionName,
+            action: {
+              await Persistence.save(newPersistenceMode, for: .persistenceMode)
+              exitGracefully()
+            },
+            isDestructive: newPersistenceMode != .normal)))
+      })
     }
   }
 }

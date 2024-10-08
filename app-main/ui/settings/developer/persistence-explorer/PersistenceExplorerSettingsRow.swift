@@ -20,20 +20,9 @@ public struct PersistenceExplorerSettingsRow: View {
         }
       }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "folder")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("Persistence Explorer")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          if let files = model.files {
-            Text(files.sizeOnDisk.string())
-              .font(.system(size: 16, weight: .regular))
-          }
-          Image(systemName: "chevron.right")
+      HelloNavigationRow(icon: "folder", name: "Persistence Explorer", actionIcon: .arrow) {
+        if let files = model.files {
+          Text(files.sizeOnDisk.string())
             .font(.system(size: 16, weight: .regular))
         }
       }

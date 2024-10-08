@@ -71,6 +71,7 @@ struct PersistenceExplorerFileRow: View {
           if case .folder = file {
             Image(systemName: "chevron.right")
               .font(.system(size: 16, weight: .regular))
+              .foregroundStyle(theme.surface.foreground.tertiary.style)
           }
         }
       }.frame(height: 56)

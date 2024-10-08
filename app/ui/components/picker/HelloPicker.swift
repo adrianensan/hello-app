@@ -11,7 +11,7 @@ public class HelloPickerGroup {
   
   var widths: [String: CGFloat] = [:]
   
-  func biggestWidth(for pickerID: String) -> CGFloat? {
+  public func biggestWidth(for pickerID: String? = nil) -> CGFloat? {
     widths.filter { $0.key != pickerID }.values.max()
   }
 }
@@ -59,6 +59,7 @@ public struct HelloPicker<Item: HelloPickerItem>: View {
       HStack(spacing: 0) {
         Image(systemName: "chevron.up.chevron.down")
           .frame(width: 32)
+          .foregroundStyle(theme.surfaceSection.foreground.tertiary.style)
         ZStack(alignment: .leading) {
           ForEach(options) { option in
             Text(option.name)

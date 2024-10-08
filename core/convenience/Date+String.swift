@@ -71,7 +71,7 @@ public extension Date {
       return "Today"
     } else if Calendar.current.isDateInYesterday(self) {
       return "Yesterday"
-    } else if Date.now.timeIntervalSince1970 - timeIntervalSince1970 < 60 * 60 * 24 * 30 * 10 {
+    } else if Date.now.timeIntervalSince1970 - timeIntervalSince1970 > 0 && Date.now.timeIntervalSince1970 - timeIntervalSince1970 < 60 * 60 * 24 * 30 * 10 {
       let formatter = DateFormatter() +& { $0.dateFormat = "MMM d" }
       return formatter.string(from: self)
     } else {
@@ -81,6 +81,7 @@ public extension Date {
   
   var relativeDateWithGranularRecentString: String {
     let dateDiff = epochTime - self.timeIntervalSince1970
+    guard dateDiff >= 0 else { return absoluteDateString }
     if dateDiff < 60 {
       return "Now"
     } else if dateDiff < 60 * 60 {
@@ -96,6 +97,7 @@ public extension Date {
   
   var relativeDateWithGranularRecentShortString: String {
     let dateDiff = epochTime - self.timeIntervalSince1970
+    guard dateDiff >= 0 else { return absoluteDateString }
     if dateDiff < 60 {
       return "Now"
     } else if dateDiff < 60 * 60 {

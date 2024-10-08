@@ -6,6 +6,7 @@ import HelloApp
 
 public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
   
+  @Environment(\.theme) private var theme
   @Environment(PagerModel.self) private var pagerModel
   
   @State private var appIconModel: AppIconModel<AppIcon> = AppIconModel()
@@ -30,6 +31,7 @@ public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
             .frame(height: 20)
           Image(systemName: "chevron.right")
             .font(.system(size: 16, weight: .regular))
+            .foregroundStyle(theme.surface.foreground.tertiary.style)
         }
       }
     }

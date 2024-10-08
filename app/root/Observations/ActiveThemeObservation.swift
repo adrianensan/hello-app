@@ -7,6 +7,7 @@ public extension EnvironmentValues {
   @Entry var contentShape: AnyInsettableShape? = nil
   @Entry var viewShape: AnyInsettableShape = .init(.rect)
   @Entry var pageShape: AnyInsettableShape = .init(.rect)
+  @Entry var windowCornerRadius: CGFloat = 0
   @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
   @Entry var hasAppliedTheme: Bool = false

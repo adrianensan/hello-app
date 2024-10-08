@@ -158,6 +158,8 @@ public protocol PersistenceProperty<Value>: Sendable {
   var defaultValue: Value { get }
   func defaultValue(for mode: PersistenceMode) -> Value
   
+  var demoIsSet: Bool { get }
+  
   var allowedInDemoMode: Bool { get }
   
   var location: PersistenceType { get }
@@ -186,6 +188,8 @@ extension PersistenceProperty {
   public func defaultValue(for mode: PersistenceMode) -> Value {
     defaultValue
   }
+  
+  public var demoIsSet: Bool { false }
   
   public var allowedInDemoMode: Bool { false }
   

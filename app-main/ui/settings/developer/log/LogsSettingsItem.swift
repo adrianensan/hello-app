@@ -13,19 +13,7 @@ struct LogsSettingsItem: View {
     HelloButton(clickStyle: .highlight, action: {
       pagerModel.push { LogsNavigationPage() }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "apple.terminal")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("Logs")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular))
-        }
-      }
+      HelloNavigationRow(icon: "apple.terminal", name: "Logs", actionIcon: .arrow)
     }
   }
 }

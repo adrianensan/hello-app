@@ -8,18 +8,10 @@ struct ShowDebugBordersSettingsItem: View {
   @Persistent(.showDebugBorders) private var showDebugBorders
   
   var body: some View {
-    HelloSectionItem {
-      HStack(spacing: 4) {
-        Image(systemName: "squareshape")
-          .font(.system(size: 20, weight: .regular))
-          .frame(width: 32, height: 32)
-        Text("Show Debug Borders")
-          .font(.system(size: 16, weight: .regular))
-        Spacer(minLength: 0)
-        HelloToggle(isSelected: showDebugBorders) {
-          showDebugBorders.toggle()
-          DebugModel.main.showBorders = showDebugBorders
-        }
+    HelloNavigationRow(icon: "squareshape", name: "Show Debug Borders") {
+      HelloToggle(isSelected: showDebugBorders) {
+        showDebugBorders.toggle()
+        DebugModel.main.showBorders = showDebugBorders
       }
     }
   }

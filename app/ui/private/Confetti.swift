@@ -8,7 +8,7 @@ public struct ConfettiParticle: Identifiable {
     HelloColor.retroApple.all.randomElement()!.swiftuiColor
   }
   
-  public var id: String = UUID().uuidString
+  public var id: String = .uuid
   public var delay: TimeInterval
   public var size = CGSize(width: .random(in: 4...8), height: .random(in: 6...12))
   public var color: Color = randomColor()

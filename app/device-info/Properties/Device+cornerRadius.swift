@@ -19,8 +19,10 @@ extension Device {
       }
     case .iPad(let iPadModel):
       switch iPadModel {
-      case .air4, .pro11Inch1, .pro11Inch2, .pro12Inch3, .pro12Inch4: 54
-      default: 0
+      case .air4, .pro11Inch1, .pro11Inch2, .pro11Inch3, .pro11Inch4, .pro11Inch5,
+          .pro12Inch3, .pro12Inch4, .pro12Inch5, .pro12Inch6, .pro13Inch7: 54
+      case ._7, ._8, ._9, ._10, .air3, .air5, .air11Inch6, .air13Inch6, .mini5, .mini6: 0
+      case .unknown: 0
       }
     case .appleWatch(let model):
       switch model {

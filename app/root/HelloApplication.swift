@@ -177,11 +177,12 @@ extension HelloApplication {
 #endif
       if AppInfo.isTestBuild {
         await Persistence.save(true, for: .isTester)
-        await Persistence.save(true, for: .isFakeDeveloper)
         await Persistence.atomicUpdate(for: .unlockedAppIcons) {
           var unlockedAppIcons = $0
-          if !unlockedAppIcons.isSuperset(of: ["beta-tester", "placeholder"]) {
-            unlockedAppIcons.formUnion(["beta-tester", "placeholder"])
+          let betaAppIcons: [String] = [TestflightHelloAppIcon.testflight.id,
+                                        PlaceholderHelloAppIcon.placeholder.id]
+          if !unlockedAppIcons.isSuperset(of: betaAppIcons) {
+            unlockedAppIcons.formUnion(betaAppIcons)
           }
           return unlockedAppIcons
         }

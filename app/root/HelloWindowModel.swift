@@ -85,6 +85,14 @@ public class HelloWindowModel {
     effectivePixelsPerPoint / physicalPixelsPerPoint
   }
   
+  public var isFullscreen: Bool {
+    window?.frame.size == pointSize
+  }
+  
+  public var isFullscreenWidth: Bool {
+    window?.frame.size.width == pointSize.width
+  }
+  
   public var effectiveScreenPixelSize: IntSize {
     let screen = window?.screen ?? UIScreen.main
     return IntSize(width: screen.bounds.width * screen.scale,

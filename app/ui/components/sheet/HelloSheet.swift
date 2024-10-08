@@ -21,6 +21,7 @@ public class HelloSheetModel {
   var pagerModel: PagerModel?
   var dismissDrag: CGFloat = 0
   var isVisible: Bool = false
+  public var isFloating: Bool = false
   var sheetSize: CGSize = .zero
   
   public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
@@ -59,6 +60,8 @@ public struct HelloSheet<Content: View>: View {
   
   @State private var model: HelloSheetModel
   
+  private var debugModel: DebugModel = .main
+  
   private var content: @MainActor () -> Content
   
   public init(dragToDismissType: GestureType = .highPriority, content: @escaping @MainActor () -> Content) {
@@ -76,8 +79,8 @@ public struct HelloSheet<Content: View>: View {
       UnevenRoundedRectangle(
         cornerRadii: RectangleCornerRadii(
           topLeading: 30,
-          bottomLeading: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
-          bottomTrailing: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          bottomTrailing: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
           topTrailing: 30))
     )
   }
@@ -87,7 +90,7 @@ public struct HelloSheet<Content: View>: View {
       UnevenRoundedRectangle(
         cornerRadii: RectangleCornerRadii(
           topLeading: 30,
-          bottomLeading: isfloating ? 30 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+          bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
           bottomTrailing: 0,
           topTrailing: 0))
     )
@@ -103,10 +106,8 @@ public struct HelloSheet<Content: View>: View {
         }
       }
       .clipShape(shape)
-      .padding(.bottom, isfloating ? 0 : 60)
-      .background(theme.backgroundView(for: RoundedRectangle(cornerRadius: 30, style: .continuous), isBaseLayer: true)
+      .background(theme.backgroundView(for: shape, isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
-      .padding(.bottom, isfloating ? 0 : -60)
       .overlay(shape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
       .padding(.top, isfloating ? 0 : safeArea.top + 16)
       .handleSheetDismissDrag()
@@ -120,6 +121,9 @@ public struct HelloSheet<Content: View>: View {
       .environment(\.viewShape, shape)
       .environment(\.pageShape, pageShape)
       .environment(\.helloDismiss, { model.dismiss() })
+      .onChange(of: isfloating, initial: true) {
+        model.isFloating = isfloating
+      }
   }
 }
 #endif

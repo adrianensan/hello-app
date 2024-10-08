@@ -9,17 +9,9 @@ struct ActiveSubscriptionSettingsRow: View {
   
   var body: some View {
     if !subscriptionModel.allowPremiumFeatures || subscriptionModel.isDeveloperEnabled {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "dollarsign")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          Text("Enable Premium Features")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          HelloToggle(isSelected: subscriptionModel.isDeveloperEnabled) {
-            subscriptionModel.set(developerIsSubscribed: !subscriptionModel.isDeveloperEnabled)
-          }
+      HelloNavigationRow(icon: "dollarsign", name: "Enable Premium Features") {
+        HelloToggle(isSelected: subscriptionModel.isDeveloperEnabled) {
+          subscriptionModel.set(developerIsSubscribed: !subscriptionModel.isDeveloperEnabled)
         }
       }
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct NavigationPage<Content: View, NavBarContent: View>: View {
+public struct NavigationPage<Content: View, TitleContent: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config
@@ -9,31 +9,31 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   @State private var scrollModel: HelloScrollModel
   @State private var isSmallSize: Bool = false
   
-  private var title: String?
   private var allowScroll: Bool
   @ViewBuilder private var content: @MainActor () -> Content
+  @ViewBuilder private var titleContent: @MainActor () -> TitleContent
   @ViewBuilder private var navBarContent: @MainActor () -> NavBarContent
   
-  public init(title: String? = nil,
-              allowScroll: Bool = true,
+  public init(allowScroll: Bool = true,
               model: HelloScrollModel? = nil,
+              @ViewBuilder titleContent: @escaping @MainActor () -> TitleContent,
               @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
               @ViewBuilder content: @escaping @MainActor () -> Content) {
-    self.title = title
     self.allowScroll = allowScroll
     self.content = content
+    self.titleContent = titleContent
     self.navBarContent = navBarContent
     _scrollModel = State(initialValue: model ?? HelloScrollModel())
   }
   
-  public init(title: String? = nil,
-              allowScroll: Bool = true,
+  public init(allowScroll: Bool = true,
               showScrollIndicators: Bool,
+              @ViewBuilder titleContent: @escaping @MainActor () -> TitleContent,
               @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
               @ViewBuilder content: @escaping @MainActor () -> Content) {
-    self.title = title
     self.allowScroll = allowScroll
     self.content = content
+    self.titleContent = titleContent
     self.navBarContent = navBarContent
     _scrollModel = State(initialValue: HelloScrollModel(showScrollIndicator: showScrollIndicators))
   }
@@ -43,11 +43,11 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   }
   
   private var navBarHeight: CGFloat {
-    if config.belowNavBarPadding > 0 {
-      config.belowNavBarPadding + (title == nil ? 0 : 44)
-    } else {
+//    if config.belowNavBarPadding > 0 {
+//      config.belowNavBarPadding + (title == nil ? 0 : 44)
+//    } else {
       config.navBarHeight
-    }
+//    }
   }
   
   public var body: some View {
@@ -59,7 +59,7 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
           VStack(spacing: 0) {
             #if os(iOS)
             if navBarStyle == .scrollsWithContent {
-              NavigationPageBarScrolling(title: title, navBarContent: {
+              NavigationPageBarScrolling(titleContent: titleContent, navBarContent: {
                 HelloPageNavBarContent(navBarContent: navBarContent)
               })
             }
@@ -79,13 +79,13 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
         }
       
       #if os(iOS)
-      NavigationPageBarFixed(title: title, navBarContent: {
+      NavigationPageBarFixed(titleContent: titleContent, navBarContent: {
         HelloPageNavBarContent(navBarContent: navBarContent)
       })
       #endif
-    }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil, initial: true) {
+    }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || !(TitleContent.self == NavigationPageTitle.self), initial: true) {
       #if os(iOS)
-      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || title == nil ? 0 : -82
+      scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || !(TitleContent.self == NavigationPageTitle.self) ? 0 : -82
       #else
       scrollModel.defaultScrollThreshold = 0
       #endif
@@ -97,8 +97,58 @@ public struct NavigationPage<Content: View, NavBarContent: View>: View {
   }
 }
 
-public extension NavigationPage where NavBarContent == EmptyView {
-  init(title: String? = nil,
+public extension NavigationPage where TitleContent == NavigationPageTitle {
+  public init(title: String,
+              allowScroll: Bool = true,
+              model: HelloScrollModel? = nil,
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              model: model,
+              titleContent: { NavigationPageTitle(title: title) },
+              navBarContent: navBarContent,
+              content: content)
+  }
+  
+  public init(title: String,
+              allowScroll: Bool = true,
+              showScrollIndicators: Bool,
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              showScrollIndicators: showScrollIndicators,
+              titleContent: { NavigationPageTitle(title: title) },
+              navBarContent: navBarContent,
+              content: content)
+  }
+}
+
+public extension NavigationPage where TitleContent == EmptyView {
+  public init(allowScroll: Bool = true,
+              model: HelloScrollModel? = nil,
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              model: model,
+              titleContent: { EmptyView() },
+              navBarContent: navBarContent,
+              content: content)
+  }
+  
+  public init(allowScroll: Bool = true,
+              showScrollIndicators: Bool,
+              @ViewBuilder navBarContent: @escaping @MainActor () -> NavBarContent,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              showScrollIndicators: showScrollIndicators,
+              titleContent: { EmptyView() },
+              navBarContent: navBarContent,
+              content: content)
+  }
+}
+
+public extension NavigationPage where TitleContent == NavigationPageTitle, NavBarContent == EmptyView {
+  init(title: String,
        allowScroll: Bool = true,
        model: HelloScrollModel? = nil,
        @ViewBuilder content: @escaping @MainActor () -> Content) {
@@ -109,13 +159,35 @@ public extension NavigationPage where NavBarContent == EmptyView {
               content: content)
   }
   
-  init(title: String? = nil,
+  init(title: String,
        allowScroll: Bool = true,
        showScrollIndicators: Bool,
        @ViewBuilder content: @escaping @MainActor () -> Content) {
     self.init(title: title,
               allowScroll: allowScroll,
               model: HelloScrollModel(showScrollIndicator: showScrollIndicators),
+              navBarContent: { EmptyView() },
+              content: content)
+  }
+}
+
+public extension NavigationPage where TitleContent == EmptyView, NavBarContent == EmptyView {
+  init(allowScroll: Bool = true,
+       model: HelloScrollModel? = nil,
+       @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              model: model,
+              titleContent: { EmptyView() },
+              navBarContent: { EmptyView() },
+              content: content)
+  }
+  
+  init(allowScroll: Bool = true,
+       showScrollIndicators: Bool,
+       @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.init(allowScroll: allowScroll,
+              model: HelloScrollModel(showScrollIndicator: showScrollIndicators),
+              titleContent: { EmptyView() },
               navBarContent: { EmptyView() },
               content: content)
   }

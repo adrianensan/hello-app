@@ -50,6 +50,7 @@ public struct HelloVGrid<Content: View>: View {
             HStack(spacing: spacing) {
               ForEach(subviews[row * numberOfColumns ..< min((row + 1) * numberOfColumns, subviews.count)]) { subview in
                 subview
+                  .frame(maxWidth: maxColumnWidth)
                 //                .frame(maxWidth: maxColumnWidth)
               }
               if row == numberOfRows - 1 && subviews.count % numberOfColumns > 0 {

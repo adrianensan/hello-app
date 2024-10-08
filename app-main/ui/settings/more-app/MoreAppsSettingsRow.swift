@@ -6,6 +6,7 @@ import HelloApp
 
 public struct MoreAppsSettingsRow: View {
   
+  @Environment(\.theme) private var theme
   @Environment(PagerModel.self) private var pagerModel
   
   public init() {}
@@ -14,20 +15,9 @@ public struct MoreAppsSettingsRow: View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
       pagerModel.push(name: "More Apps") { MoreAppsSettingsPage() }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "arrowshape.down")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("More Apps")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          OtherHelloAppsView(size: 24)
-            .frame(height: 8)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular))
-        }
+      HelloNavigationRow(icon: "arrowshape.down", name: "More Apps", actionIcon: .arrow) {
+        OtherHelloAppsView(size: 24)
+          .frame(height: 8)
       }
     }
   }

@@ -249,6 +249,10 @@ public class HelloSubscriptionModel {
     sync(hasLocalChanged: hasChanged)
   }
   
+  public func restorePurchases() async throws {
+    try await storeModel.refresh()
+  }
+  
   package func purchase(productID: String) async throws {
     try await storeModel.purchase(id: productID)
   }

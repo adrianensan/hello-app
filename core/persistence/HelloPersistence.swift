@@ -345,7 +345,13 @@ public class HelloPersistence {
   }
   
   nonisolated public func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    guard mode == .normal else { return false }
+    guard mode == .normal else {
+      if mode == .demo {
+        return property.demoIsSet
+      } else {
+        return false
+      }
+    }
     return switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
     case .file(let location, let path):

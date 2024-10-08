@@ -15,6 +15,7 @@ public struct HelloPickerPopupRow: View {
           .opacity(isSelected && isExpanded ? 1 : 0)
         Image(systemName: "chevron.up.chevron.down")
           .opacity(isSelected && !isExpanded ? 1 : 0)
+          .foregroundColor(theme.surfaceSection.foreground.tertiary.color)
       }.frame(width: 32)
       Text(item.name)
         .lineLimit(1)

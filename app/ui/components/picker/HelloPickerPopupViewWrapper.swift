@@ -29,6 +29,7 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   
   private var adjustedPosition: CGPoint {
     var position = position
+    position.x -= 2
     position.y -= CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight
     let anchor = Alignment.topLeading
     let minWindowEdgeDistances = position - anchor.point * size - CGPoint(x: 8, y: safeArea.top + 8)
@@ -49,6 +50,7 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   
   public var body: some View {
     content($isVisible)
+      .padding(.horizontal, isVisible ? 2 : 0)
       .background(theme.surfaceSection.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous), isBaseLayer: true))
       .offset(y: isVisible ? 0 : -(CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight + diff))
       .frame(height: isVisible ? size.height : HelloPickerPopup.collapsedRowHeight, alignment: .topLeading)

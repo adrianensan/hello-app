@@ -81,9 +81,10 @@ struct HelloSubscriptionOpionsSectionContent: View {
 
 struct HelloSubscriptionPageContent: View {
   
+  @Environment(\.theme) private var theme
+  @Environment(\.openURL) private var openURL
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(PagerModel.self) private var pagerModel
-  @Environment(\.theme) private var theme
   
   let subcriptionModel: HelloSubscriptionModel = .main
   
@@ -279,27 +280,51 @@ struct HelloSubscriptionPageContent: View {
         }
         
         Spacer(minLength: 0)
-        if let product = selectedProduct {
-          HelloButton(action: {
-            try await subcriptionModel.purchase(productID: product.id)
-          }) {
-            ZStack {
-              if subcriptionModel.isPurchasing {
-                LoadingSpinner(lineWidth: 4)
-                  .frame(width: 36, height: 36)
-                  .padding(.leading, 8)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-              }
-              VStack(spacing: 2) {
-                Text("Subscribe")
-                  .font(.system(size: 17, weight: .semibold))
-                Text("\(product.displayPrice.deletingSuffix(".00"))/\(selectedOption.frequency.unit)")
-                  .font(.system(size: 13, weight: .medium))
-              }
-            }.foregroundStyle(theme.accent.readableOverlayColor)
-              .frame(height: 52)
-              .frame(maxWidth: 220)
-              .background(Capsule(style: .continuous).fill(theme.accent.style))
+        VStack(spacing: 8) {
+          if let product = selectedProduct {
+            HelloButton(action: {
+              try await subcriptionModel.purchase(productID: product.id)
+            }) {
+              ZStack {
+                if subcriptionModel.isPurchasing {
+                  LoadingSpinner(lineWidth: 4)
+                    .frame(width: 36, height: 36)
+                    .padding(.leading, 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                VStack(spacing: 2) {
+                  Text("Subscribe")
+                    .font(.system(size: 17, weight: .semibold))
+                  Text("\(product.displayPrice.deletingSuffix(".00"))/\(selectedOption.frequency.unit)")
+                    .font(.system(size: 13, weight: .medium))
+                }
+              }.foregroundStyle(theme.accent.readableOverlayColor)
+                .frame(height: 52)
+                .frame(maxWidth: 220)
+                .background(Capsule(style: .continuous).fill(theme.accent.style))
+            }
+          }
+          HStack(spacing: 8) {
+            HelloButton(action: { try await subcriptionModel.restorePurchases() }) {
+              Text("Restore Purchases")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(theme.foreground.tertiary.style)
+                .frame(height: 32)
+            }
+            
+            Text("•")
+              .font(.system(size: 13, weight: .medium))
+              .foregroundStyle(theme.foreground.tertiary.style)
+            
+            HelloButton(action: {
+              guard let url = URL(string: "https://adrianensan.me/apps/\(helloApplication.appConfig.id)") else { return }
+              openURL(url)
+            }) {
+              Text("Terms & Conditions")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(theme.foreground.tertiary.style)
+                .frame(height: 32)
+            }
           }
         }
       }

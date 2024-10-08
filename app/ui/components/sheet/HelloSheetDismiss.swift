@@ -6,11 +6,14 @@ import HelloCore
 struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   @Environment(\.windowFrame) private var windowFrame
+  @Environment(\.keyboardFrame) private var keyboardFrame
   @Environment(\.popupID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloSheetModel.self) private var model
   
   @GestureState private var drag: CGFloat?
+  
+  @State private var readyToShow: Bool = false
   
   private var yDrag: CGFloat {
     if model.dismissDrag < 0 {
@@ -24,20 +27,30 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
     windowFrame.size.minSide > 700
   }
   
+  private var offset: CGFloat {
+    (isfloating ? -0.5 * keyboardFrame.height : 0) + yDrag
+  }
+  
+  private var height: CGFloat {
+    isfloating ? (keyboardFrame.height > 0 ? 0.9 * windowFrame.height - keyboardFrame.height : 0.7 * windowFrame.height) : .infinity
+  }
+  
   func body(content: Content) -> some View {
     content
+      .environment(\.viewFrame, .init(origin: .zero, size: model.sheetSize))
       .readSizeSync {
         guard model.sheetSize != $0 else { return }
         model.sheetSize = $0
       }
-      .opacity(model.sheetSize != .zero ? 1 : 0)
+      .opacity(readyToShow ? 1 : 0)
       .disabled(yDrag != 0)
       .compositingGroup()
 //      .frame(height: model.isVisible ? nil : 1, alignment: .top)
       .animation(.dampSpring, value: model.isVisible)
-      .offset(y: model.isVisible ? yDrag : (isfloating ? windowFrame.height : model.sheetSize.height) + 8)
+      .offset(y: model.isVisible ? offset : (isfloating ? windowFrame.height : (model.sheetSize.height > 0 ? model.sheetSize.height : windowFrame.height)) + 8)
       .animation(yDrag == 0 ? .dampSpring : nil, value: yDrag)
-      .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: isfloating ? 0.8 * windowFrame.height : .infinity, alignment: isfloating ? .center : .bottom)
+      .animation(.dampSpring, value: keyboardFrame)
+      .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: height, alignment: isfloating ? .center : .bottom)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
       .background(HelloBackgroundDimmingView()
         .opacity(model.isVisible ? 1 : 0)
@@ -92,6 +105,8 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       }.onChange(of: model.sheetSize != .zero) {
         guard model.sheetSize != .zero && !model.isVisible else { return }
         Task {
+          try? await Task.sleepForOneFrame()
+          readyToShow = true
           try? await Task.sleepForOneFrame()
           model.isVisible = true
         }

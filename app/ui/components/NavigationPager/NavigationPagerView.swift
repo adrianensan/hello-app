@@ -49,14 +49,6 @@ public struct NavigationPagerView: View {
     _model = State(initialValue: PagerModel(rootPage: PagerPage(name: name, view: rootView)))
   }
   
-//  private var previousPageOptions: PagerPageOptions {
-//    model.viewStack[max(0, model.viewDepth - 2)].options
-//  }
-  
-  private var currentPageOptions: PagerPageOptions {
-    model.activePage?.options ?? PagerPageOptions()
-  }
-  
   private var config: HelloPagerConfig {
     model.config
   }
@@ -70,15 +62,9 @@ public struct NavigationPagerView: View {
             .environment(\.pageID, page.id)
             .environment(\.viewID, page.instanceID)
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-            .clipShape(pageShape)
-            .background(theme.backgroundView(for: pageShape, isBaseLayer: true)
-              .shadow(color: .black.opacity(model.activePageID == page.id ? 0.2 : 0), radius: 16)
-              .onTapGesture { globalDismissKeyboard() })
             .zIndex(4 + 0.1 * Double(index))
 //              .clipShape(RoundedRectangle(cornerRadius: Device.current.screenCornerRadius, style: .continuous))
             .handlePageBackSwipe(pageID: page.id, pageSize: geometry.size)
-            .disabled(model.activePageID != page.id)
-            .allowsHitTesting(model.activePageID == page.id)
             .id(page.instanceID)
         }
 //          .background(ClearClickableView().onTapGesture {

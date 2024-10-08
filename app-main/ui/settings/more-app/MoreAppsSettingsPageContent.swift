@@ -30,7 +30,7 @@ struct MoreAppsSettingsPageContent: View {
               presentedApp = app
             }) {
               HelloSectionItem(leadingDividerPadding: 82) {
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                   KnownAppIconView(app: app, prefferedPlatform: .iOS)
                     .frame(width: 60, height: 60)
                   

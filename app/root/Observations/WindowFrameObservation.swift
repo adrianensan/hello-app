@@ -2,30 +2,38 @@ import SwiftUI
 
 import HelloCore
 
-struct WindowFrameObservationViewModifier: ViewModifier {
+fileprivate struct WindowFrameObservationViewModifier: ViewModifier {
   
+  @Environment(\.windowCornerRadius) private var windowCornerRadius
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(UIProperties.self) private var uiProperties
   
-  func body(content: Content) -> some View {
+  private var debugModel: DebugModel = .main
+  
+  fileprivate func body(content: Content) -> some View {
+    let isFullscreen = uiProperties.size == windowModel.pointSize
+    let isFullscreenWidth = uiProperties.size.width == windowModel.pointSize.width
+    let screenCornerRaidusPoints = Device.current.screenCornerRadiusPixels / windowModel.physicalPixelsPerPoint
+    let shape = debugModel.disableMasking ? AnyInsettableShape(.rect) : AnyInsettableShape(.rect(
+      cornerRadii: RectangleCornerRadii(
+        topLeading: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius,
+        bottomLeading: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,
+        bottomTrailing: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,
+        topTrailing: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius)))
     content
       .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.viewFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.physicalScale, windowModel.physicalPixelScale)
       .environment(\.pixelsPerPoint, windowModel.physicalPixelsPerPoint)
-      .if(uiProperties.size == windowModel.pointSize) {
-        let shape = AnyInsettableShape(.rect(cornerRadius: Device.current.screenCornerRadiusPixels / windowModel.physicalPixelsPerPoint))
-        $0
-          .clipShape(shape)
-          .background(Color.black)
-          .environment(\.viewShape, shape)
-          .environment(\.pageShape, AnyInsettableShape(.rect(
-            cornerRadii: RectangleCornerRadii(
-              topLeading: Device.current.screenCornerRadiusPixels / windowModel.physicalPixelsPerPoint,
-              bottomLeading: Device.current.screenCornerRadiusPixels / windowModel.physicalPixelsPerPoint,
-              bottomTrailing: 0,
-              topTrailing: 0))))
-      }
+      .clipShape(shape)
+      .background(Color.black)
+      .environment(\.viewShape, shape)
+      .environment(\.pageShape, debugModel.disableMasking ? AnyInsettableShape(.rect) : AnyInsettableShape(.rect(
+        cornerRadii: RectangleCornerRadii(
+          topLeading: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius,
+          bottomLeading: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,
+          bottomTrailing: windowCornerRadius,
+          topTrailing: windowCornerRadius))))
   }
 }
 

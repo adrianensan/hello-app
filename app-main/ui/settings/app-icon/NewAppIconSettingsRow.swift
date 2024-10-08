@@ -6,6 +6,7 @@ import HelloApp
 
 public struct NewAppIconSettingsRow: View {
   
+  @Environment(\.theme) private var theme
   @Environment(PagerModel.self) private var pagerModel
   
   @State private var appIconModel: NewAppIconModel
@@ -18,21 +19,10 @@ public struct NewAppIconSettingsRow: View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
       pagerModel.push(name: "App Icon") { NewAppIconSettingsPage().environment(appIconModel) }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "app")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("App Icon")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          NewAppIconView(icon: appIconModel.currentIcon)
-            .frame(width: 36, height: 36)
-            .frame(height: 20)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular))
-        }
+      HelloNavigationRow(icon: "app", name: "App Icon", actionIcon: .arrow) {
+        NewAppIconView(icon: appIconModel.currentIcon)
+          .frame(width: 36, height: 36)
+          .frame(height: 20)
       }
     }.onAppear { appIconModel.setup() }
   }
