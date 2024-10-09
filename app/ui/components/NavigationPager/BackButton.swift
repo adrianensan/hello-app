@@ -77,10 +77,12 @@ public struct BackButton: View {
       
       Text(pagerModel.backText(for: pageID ?? "nil"))
         .font(.system(size: 14, weight: .semibold))
-        .fixedSize()
+        .lineLimit(2)
+        .minimumScaleFactor(0.8)
         .opacity(1 - rotationIntervalProgress)
         .offset(x: 16 * rotationIntervalProgress)
         .padding(.trailing, 12)
+        .frame(maxWidth: 100, alignment: .leading)
     }.foregroundStyle(theme.header.foreground.primary.style)
 //      .foregroundStyle(theme.accent.style)
       .animation(backProgress == 0 ? .pageAnimation : nil, value: backProgress)

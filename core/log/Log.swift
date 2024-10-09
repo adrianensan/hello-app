@@ -21,7 +21,7 @@ public enum Log {
   
   nonisolated package static let logger: Logger = Logger(ephemeral: ephemeral)
   
-  nonisolated private static func log(level: LogLevel, message: String, context: String?) {
+  package static func log(level: LogLevel, message: String, context: String?) {
     guard shouldPrintStatements || level >= logLevel else { return }
     let logStatement = LogStatement(level: level, message: message, context: context)
     if shouldPrintStatements {

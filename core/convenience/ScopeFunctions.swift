@@ -1,5 +1,10 @@
 import Foundation
 
+public func logAndThrow(level: LogLevel = .error, context: String? = nil, _ message: String) throws -> Never {
+  Log.log(level: level, message: message, context: context)
+  throw HelloError(message)
+}
+
 infix operator +& : AssignmentPrecedence
 @inline(__always) public func +&<Value>(_ value: Value, _ applyBlock: (inout Value) -> Void) -> Value {
   var copy = value
