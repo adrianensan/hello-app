@@ -113,7 +113,7 @@ public extension HelloAPIClient {
       bodyData = data
       inferredContentType = nil
     } else if let string = endpoint.body as? String? {
-      bodyData = string?.data(using: .utf8)
+      bodyData = string?.data
       inferredContentType = .plain
     } else {
       do {
@@ -300,7 +300,7 @@ public extension HelloAPIClient {
           for try await line in stream.lines {
             let components = line.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
             guard components.count == 2, components[0] == "data" else {
-              if let chunk = try? Endpoint.ResponseType.decodeJSON(from: line.data(using: .utf8)!) {
+              if let chunk = try? Endpoint.ResponseType.decodeJSON(from: line.data) {
                 continuation.yield(chunk)
               }
               continue
@@ -311,7 +311,7 @@ public extension HelloAPIClient {
             if message == "[DONE]" {
               continuation.finish()
               return
-            } else if let chunk = try? Endpoint.ResponseType.decodeJSON(from: message.data(using: .utf8)!) {
+            } else if let chunk = try? Endpoint.ResponseType.decodeJSON(from: message.data) {
               continuation.yield(chunk)
             }
           }

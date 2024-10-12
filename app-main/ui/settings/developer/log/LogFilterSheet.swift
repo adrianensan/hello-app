@@ -3,6 +3,18 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
+public struct LogContextFilter: Identifiable, HelloPickerItem {
+  
+  public var filter: String?
+  
+  public init(filter: String?) {
+    self.filter = filter
+  }
+  
+  public var id: String { filter ?? "none" }
+  public var name: String { filter ?? "All" }
+}
+
 struct LogFilterSheet: View {
   
   @Environment(\.windowFrame) private var windowFrame
@@ -10,8 +22,7 @@ struct LogFilterSheet: View {
   @Environment(\.theme) private var theme
   @Environment(LoggerModel.self) private var logModel
   
-  init() {
-  }
+  init() {}
   
   var body: some View {
     VStack(spacing: 0) {
@@ -23,26 +34,22 @@ struct LogFilterSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
       
       HelloSection {
-        HelloSectionItem {
-          VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 4) {
-              Image(systemName: "apple.terminal")
-                .font(.system(size: 20, weight: .regular))
-                .frame(width: 32, height: 32)
-              Text("Show Verbose Logs")
-                .font(.system(size: 16, weight: .regular))
-                .fixedSize()
-              Spacer(minLength: 0)
-              HelloToggle(isSelected: logModel.showVerbose, action: { logModel.set(showVerbose: !logModel.showVerbose) })
-            }
-            Text("Including logs can be incredibly useful for diagnosing any issues you may be having.")
-              .font(.system(size: 13, weight: .regular))
-              .foregroundStyle(theme.surface.foreground.tertiary.style)
-              .fixedSize(horizontal: false, vertical: true)
-              .padding(.leading, 36)
-              .padding(.trailing, 64)
-          }
-        }
+        HelloNavigationRow(
+          icon: "line.3.horizontal.decrease",
+          name: "Filter",
+          trailingContent: {
+            HelloPicker(selected: LogContextFilter(filter: logModel.filter),
+                        options: [LogContextFilter(filter: nil)] + logModel.filters.map(LogContextFilter.init),
+                        onChange: { logModel.set(filter: $0.filter) })
+          })
+        
+        HelloNavigationRow(
+          icon: "apple.terminal",
+          name: "Show Verbose Logs",
+          description: "Including logs can be incredibly useful for diagnosing any issues you may be having.",
+          trailingContent: {
+            HelloToggle(isSelected: logModel.showVerbose, action: { logModel.set(showVerbose: !logModel.showVerbose) })
+          })
       }
     }.padding(.horizontal, 16)
       .padding(.bottom, safeArea.bottom + 16)

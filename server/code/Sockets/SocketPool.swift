@@ -142,7 +142,7 @@ class SocketPoller {
           }
         }
       }
-      Log.verbose("Done", context: "Poll")
+//      Log.verbose("Done", context: "Poll")
       if socketStates.contains(where: { $0.value != .idle }) {
         sleepInterval = 0.005
         let socketStates = socketStates

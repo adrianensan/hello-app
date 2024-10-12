@@ -4,8 +4,6 @@ extension String {
   
   static let lineBreak: String = "\r\n"
   
-  var data: Data { data(using: .utf8) ?? Data() }
-  
   var filterNewlines: String { filter{ !String.lineBreak.contains($0) } }
   
   var trimWhitespace: String { trimmingCharacters(in: .whitespaces) }

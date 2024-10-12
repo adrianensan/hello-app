@@ -22,8 +22,12 @@ public enum Encryption {
     try SyncEncryption.decrypt(data: data, with: password)
   }
   
-  public static func sha512(_ string: String, salt: Data) throws -> Data {
-    try SyncEncryption.sha512(string, salt: salt)
+  public static func sha512(_ string: String, salt: Data) -> Data {
+    SyncEncryption.sha512(string, salt: salt)
+  }
+  
+  public static func sha256(_ string: String, salt: Data) -> Data {
+    SyncEncryption.sha256(string, salt: salt)
   }
   
   nonisolated public static var randomBytes: [UInt8] {
@@ -52,12 +56,12 @@ public enum SyncEncryption {
     return try AES.GCM.open(sealedBox, using: key)
   }
   
-  public static func sha512(_ string: String, salt: Data) throws -> Data {
-    guard let stringData = string.data(using: .utf8) else {
-      Log.wtf("Failed to get data from string", context: "Encryption")
-      throw HelloError("Failed to get data from password")
-    }
-    return Data(SHA256.hash(data: stringData + salt))
+  public static func sha256(_ string: String, salt: Data) -> Data {
+    Data(SHA256.hash(data: string.data + salt))
+  }
+  
+  public static func sha512(_ string: String, salt: Data) -> Data {
+    Data(SHA512.hash(data: string.data + salt))
   }
   
   nonisolated public static var randomBytes: [UInt8] {

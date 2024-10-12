@@ -84,7 +84,7 @@ public class APIHTTPEndpoint<Endpoint: APIEndpoint>: HTTPEndpoint {
           }
           return HTTPResponse(copying: response, body: responseBody)
         case is String.Type, is String?.Type:
-          guard let stringData = (responseBody as? String)?.data(using: .utf8) else {
+          guard let stringData = (responseBody as? String)?.data else {
             return .badRequest
           }
           return HTTPResponse(copying: response, body: stringData)

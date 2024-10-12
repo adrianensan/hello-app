@@ -13,26 +13,29 @@ public class LoggerModel: LoggerSubscriber, Sendable {
   public private(set) var showVerbose: Bool = false
   public private(set) var filter: String?
   
+  public private(set) var filters: [String] = []
+  
   public init(logger: Logger) {
     self.logger = logger
-    refresh()
   }
   
   public func setup() {
     logger.subscribe(self)
+    refresh()
+    filters = logger.logStatements.compactMap { $0.context }.removingDuplicates().sorted()
   }
   
   public func statementLogged(_ statement: LogStatement) {
-    if showVerbose || statement.level > .verbose {
+    if shouldShow(statement: statement) {
       logStatements.append(statement)
+    }
+    if let context = statement.context, !filters.contains(context) {
+      filters = (filters + [context]).sorted()
     }
   }
   
   public func refresh() {
-    logStatements = logger.logStatements.filter {
-      (showVerbose || $0.level > .verbose) &&
-      (filter == nil || $0.context == filter)
-    }
+    logStatements = logger.logStatements.filter { shouldShow(statement: $0) }
   }
   
   public func set(showVerbose: Bool) {
@@ -41,9 +44,17 @@ public class LoggerModel: LoggerSubscriber, Sendable {
     refresh()
   }
   
-  public func set(filter: String) {
+  public func set(filter: String?) {
     guard self.filter != filter else { return }
     self.filter = filter
     refresh()
+  }
+  
+  private func shouldShow(statement: LogStatement) -> Bool {
+    if let filter, statement.context == filter {
+      true
+    } else {
+      (showVerbose || statement.level > .verbose) && (filter == nil || statement.context == filter)
+    }
   }
 }

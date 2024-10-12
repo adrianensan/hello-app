@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 
 extension SecAccessControl: @unchecked @retroactive Sendable {}
 
@@ -58,11 +59,8 @@ public class KeychainHelper {
   
   nonisolated public func set(_ value: String, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
     guard value != (try? string(for: key)) else { return }
-    guard let data = value.data(using: .utf8) else {
-      throw KeychainError.invalidValue
-    }
     
-    try set(data, for: key, appGroup: appGroup, isBiometricallyLocked: isBiometricallyLocked)
+    try set(value.data, for: key, appGroup: appGroup, isBiometricallyLocked: isBiometricallyLocked)
   }
   
   nonisolated public func set(_ data: Data, for key: String, appGroup: Bool, isBiometricallyLocked: Bool) throws {
@@ -78,6 +76,9 @@ public class KeychainHelper {
     }
     if isBiometricallyLocked, let accessControl = bioSecAccessControl {
       query[kSecAttrAccessControl] = accessControl
+      let context = LAContext()
+      context.interactionNotAllowed = true
+      query[kSecUseAuthenticationContext] = context
     } else {
       query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
     }
@@ -117,6 +118,26 @@ public class KeychainHelper {
     #endif
   }
   
+  nonisolated public func isSet(key: String, appGroup: Bool = false, isBiometricallyLocked: Bool = false) throws -> Bool {
+    do {
+      var attributes = baseAttributes
+      if isBiometricallyLocked, let accessControl = bioSecAccessControl {
+        attributes[kSecAttrAccessControl] = accessControl
+        let context = LAContext()
+        context.interactionNotAllowed = true
+        attributes[kSecUseAuthenticationContext] = context
+      } else {
+        attributes[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+      }
+      let _ = try data(for: key, additionalAttributes: attributes)
+      return true
+    } catch KeychainError.other(error: errSecInteractionNotAllowed) {
+      return true
+    } catch {
+      return false
+    }
+  }
+  
   nonisolated public func string(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> String {
     let data = try data(for: key, additionalAttributes: additionalAttributes)
     guard let string = String(data: data, encoding: .utf8) else {
@@ -125,13 +146,12 @@ public class KeychainHelper {
     return string
   }
   
-  nonisolated public func data(for key: String, additionalAttributes: [CFString: Any] = [:]) throws -> Data {
+  nonisolated public func data(for key: String, additionalAttributes: [CFString: Any] = [:]) throws(KeychainError) -> Data {
     #if os(iOS) || os(macOS) || os(watchOS)
     var query = baseAttributes
     query[kSecAttrAccount] = key
     query[kSecMatchLimit] = kSecMatchLimitOne
     query[kSecReturnData] = true
-    query[kSecUseAuthenticationUI] = kSecUseAuthenticationUIAllow
     for (key, value) in additionalAttributes {
       query[key] = value
     }

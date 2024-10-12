@@ -7,6 +7,7 @@ public struct HelloMenuItem: Identifiable {
   var name: String
   var icon: String
   var isSelected: Bool
+  var isDestructive: Bool
   var action: @MainActor () async throws -> Void
   var shareURL: URL?
   var shareString: String?
@@ -15,11 +16,13 @@ public struct HelloMenuItem: Identifiable {
               name: String,
               icon: String,
               isSelected: Bool = false,
+              isDestructive: Bool = false,
               action: @MainActor @escaping () async throws -> Void) {
     self.id = id
     self.name = name
     self.icon = icon
     self.isSelected = isSelected
+    self.isDestructive = isDestructive
     self.action = action
   }
   
@@ -31,6 +34,7 @@ public struct HelloMenuItem: Identifiable {
     self.name = name
     self.icon = icon
     self.isSelected = false
+    isDestructive = false
     self.action = {}
     self.shareURL = url
   }
@@ -43,6 +47,7 @@ public struct HelloMenuItem: Identifiable {
     self.name = name
     self.icon = icon
     self.isSelected = false
+    isDestructive = false
     self.action = {}
     self.shareString = string
   }
@@ -93,7 +98,7 @@ public struct HelloMenuRow: View {
           .frame(width: 32)
       }
     }.font(.system(size: 14, weight: .medium))
-      .foregroundColor(theme.foreground.primary.color)
+      .foregroundColor(item.isDestructive ? theme.error.color : theme.foreground.primary.color)
       .padding(.horizontal, 4)
       .frame(width: 240, height: 44)
       .clickable()

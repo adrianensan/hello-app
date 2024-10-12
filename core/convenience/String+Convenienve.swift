@@ -11,19 +11,6 @@ public extension String {
     self[index(for: range.lowerBound)..<index(for: range.upperBound)]
   }
   
-  func index(for offset: Int) -> Index {
-    index(startIndex, offsetBy: offset)
-  }
-  
-  var fileSafeString: String {
-    var filtered = String(filter { !#"/\:%"'"#.contains($0) })
-    filtered = filtered.components(separatedBy: "?")[0]
-    if filtered.count > 250 {
-      filtered = String(filtered.dropFirst(filtered.count - 251))
-    }
-    return filtered
-  }
-  
   func deletingPrefix(_ prefix: String) -> String {
     guard self.hasPrefix(prefix) else { return self }
     return String(dropFirst(prefix.count))
@@ -48,12 +35,24 @@ extension String: @retroactive Identifiable {
 }
 
 public extension StringProtocol {
+  
+  var data: Data { data(using: .utf8) ?? Data(utf8) }
+  
   var url: URL? {
     guard self.contains(".") else { return nil }
     
     let urlString = removingHTMLEntities
     
     return URL(string: urlString)
+  }
+  
+  var fileSafeString: String {
+    var filtered = String(filter { !#"/\:%"'"#.contains($0) })
+    filtered = filtered.components(separatedBy: "?")[0]
+    if filtered.count > 250 {
+      filtered = String(filtered.dropFirst(filtered.count - 251))
+    }
+    return filtered
   }
   
   var unwrappingCDATA: SubSequence {
@@ -82,5 +81,9 @@ public extension StringProtocol {
   
   var sortableName: String {
     lowercased().deletingPrefix("the").trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+  
+  func index(for offset: Int) -> Index {
+    index(startIndex, offsetBy: offset)
   }
 }
