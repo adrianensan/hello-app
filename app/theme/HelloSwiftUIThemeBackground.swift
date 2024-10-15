@@ -17,11 +17,11 @@ struct HelloBackgroundViewModifier: ViewModifier {
 
 @MainActor
 public extension View {
-  func helloBackground(shape: some InsettableShape, layer: HelloSwiftUITheme.HelloSwiftUIThemeLayerID = .base) -> some View{
+  func helloBackground(shape: some InsettableShape, layer: HelloSwiftUITheme.HelloSwiftUIThemeLayerID = .base) -> some View {
     modifier(HelloBackgroundViewModifier(shape: AnyInsettableShape(shape), layer: layer))
   }
   
-  func helloBackground(layer: HelloSwiftUITheme.HelloSwiftUIThemeLayerID = .base) -> some View{
+  func helloBackground(layer: HelloSwiftUITheme.HelloSwiftUIThemeLayerID = .base) -> some View {
     helloBackground(shape: Rectangle(), layer: layer)
   }
 }

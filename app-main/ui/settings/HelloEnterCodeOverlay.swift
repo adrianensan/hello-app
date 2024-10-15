@@ -54,7 +54,7 @@ public struct HelloEnterCodeOverlay: View {
                 .foregroundStyle(theme.foreground.primary.style)
                 .frame(height: 60)
                 .frame(maxWidth: .infinity)
-            }.environment(\.contentShape, AnyInsettableShape(.rect))
+            }.environment(\.contentShape, .rect)
             theme.divider.color.swiftuiColor
               .frame(width: theme.divider.width)
             HelloButton(clickStyle: .highlight, action: { enterCodeModel.enter() }) {
@@ -63,7 +63,7 @@ public struct HelloEnterCodeOverlay: View {
                 .foregroundStyle(theme.foreground.primary.style)
                 .frame(height: 60)
                 .frame(maxWidth: .infinity)
-            }.environment(\.contentShape, AnyInsettableShape(.rect))
+            }.environment(\.contentShape, .rect)
           }.frame(height: 60)
           theme.divider.color.swiftuiColor
             .frame(height: theme.divider.width)

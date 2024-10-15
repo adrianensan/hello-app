@@ -8,6 +8,15 @@ public struct HelloSubscription: Codable, Equatable, Sendable {
     case developer
     case promo(global: Bool)
     
+    public var id: String {
+      switch self {
+      case .test: "test"
+      case .paid(let tier): "tier-\(tier)"
+      case .developer: "dev"
+      case .promo(let global): "promo-\(global ? "global" : "local")"
+      }
+    }
+    
     public var description: String {
       switch self {
       case .test: "Test"

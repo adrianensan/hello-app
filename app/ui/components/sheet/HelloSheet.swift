@@ -75,25 +75,19 @@ public struct HelloSheet<Content: View>: View {
   }
   
   var shape: AnyInsettableShape {
-    AnyInsettableShape(
-      UnevenRoundedRectangle(
-        cornerRadii: RectangleCornerRadii(
-          topLeading: 30,
-          bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
-          bottomTrailing: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
-          topTrailing: 30))
-    )
+    .rect(cornerRadii: RectangleCornerRadii(
+      topLeading: 30,
+      bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      bottomTrailing: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      topTrailing: 30))
   }
   
   var pageShape: AnyInsettableShape {
-    AnyInsettableShape(
-      UnevenRoundedRectangle(
-        cornerRadii: RectangleCornerRadii(
-          topLeading: 30,
-          bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
-          bottomTrailing: 0,
-          topTrailing: 0))
-    )
+    .rect(cornerRadii: RectangleCornerRadii(
+      topLeading: 30,
+      bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      bottomTrailing: 0,
+      topTrailing: 0))
   }
   
   public var body: some View {

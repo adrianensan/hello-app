@@ -147,11 +147,11 @@ public struct HelloMenu: View {
               try await item.action()
             }) {
               HelloMenuRow(item: item)
-            }.environment(\.contentShape, AnyInsettableShape(Rectangle()))
+            }.environment(\.contentShape, .rect)
           }
         }
-      }.clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .background(theme.floating.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous)))
+      }.clipShape(.rect(cornerRadius: 12))
+        .background(theme.floating.backgroundView(for: .rect(cornerRadius: 12)))
     }
   }
 }

@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -55,3 +56,4 @@ struct LogFilterSheet: View {
       .padding(.bottom, safeArea.bottom + 16)
   }
 }
+#endif

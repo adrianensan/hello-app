@@ -107,7 +107,7 @@ public struct HelloAlert: View {
             .frame(maxWidth: .infinity)
             .clickable()
 //            .background(theme.rowBackground.swiftuiColor)
-        }.environment(\.contentShape, AnyInsettableShape(.rect))
+        }.environment(\.contentShape, .rect)
         
         if let secondButton = config.secondButton {
           theme.foreground.primary.color.opacity(0.1)
@@ -123,7 +123,7 @@ public struct HelloAlert: View {
               .frame(maxWidth: .infinity)
               .clickable()
 //              .background(theme.rowBackground.swiftuiColor)
-          }.environment(\.contentShape, AnyInsettableShape(.rect))
+          }.environment(\.contentShape, .rect)
         }
       }
     }.frame(width: 280)

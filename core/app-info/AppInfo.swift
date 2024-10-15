@@ -15,18 +15,19 @@ public enum AppInfo {
   public static let isTestBuild = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
   #endif
   
+  public static var sharedBundleID: String { "com.adrianensan.hello" }
   public static var rootBundleID: String {
     bundleID.components(separatedBy: ".").prefix(3).joined(separator: ".")
   }
   #if os(macOS)
   public static var appGroup: String { "\(teamID).group.\(rootBundleID)" }
+  public static var sharedHelloGroup: String { "\(teamID).group.\(sharedBundleID)" }
   #else
   public static var appGroup: String { "group.\(rootBundleID)" }
+  public static var sharedHelloGroup: String { "group.\(sharedBundleID)" }
   #endif
   public static var iCloudContainer: String { "iCloud.\(rootBundleID)" }
-  public static var sharedHelloICloudContainer: String { "iCloud.com.adrianensan.hello" }
-  
-  public static var sharedHelloGroup: String { "group.com.adrianensan.hello" }
+  public static var sharedHelloICloudContainer: String { "iCloud.\(sharedBundleID)" }
   
   public static var fullVersionString: String {
     #if DEBUG || targetEnvironment(simulator)

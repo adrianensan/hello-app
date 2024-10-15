@@ -63,8 +63,8 @@ public class HelloPersistence {
   
   nonisolated public let mode: PersistenceMode = (try? UserDefaults.standard.value(for: .persistenceMode)) ?? .normal
   
-  nonisolated public func fileURL(for location: FilePersistenceLocation, subPath: String) -> URL {
-    baseURL(for: location).appending(component: subPath)
+  nonisolated public func fileURL(for location: FilePersistenceLocation, subPath: String, isNew: Bool) -> URL {
+    baseURL(for: location, isNew: isNew).appending(component: subPath)
   }
   
   private var cache: [String: Any] = [:]
@@ -91,8 +91,8 @@ public class HelloPersistence {
 //    }
   }
   
-  nonisolated private func baseURL(for location: FilePersistenceLocation) -> URL {
-    guard let url = location.url else {
+  nonisolated private func baseURL(for location: FilePersistenceLocation, isNew: Bool) -> URL {
+    guard let url = (isNew ? location.newURL : location.url) else {
       Log.error("Failed to get URL for \(location.id)", context: "Persistence")
       return .temporaryDirectory
     }
@@ -184,7 +184,7 @@ public class HelloPersistence {
         userDefault.set(data, forKey: key)
       }
     case .file(let location, let path):
-      try save(value, to: fileURL(for: location, subPath: path))
+      try save(value, to: fileURL(for: location, subPath: path, isNew: true))
     case .keychain(let key, let appGroup, let isBiometricallyLocked):
       if let string = value as? String? {
         if let string = string {
@@ -246,7 +246,11 @@ public class HelloPersistence {
         returnValue = value
       }
     case .file(let location, let path):
-      returnValue = value(at: fileURL(for: location, subPath: path), for: property)
+      if FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path, isNew: true).path) {
+        returnValue = value(at: fileURL(for: location, subPath: path, isNew: true), for: property)
+      } else {
+        returnValue = value(at: fileURL(for: location, subPath: path, isNew: false), for: property)
+      }
     case .keychain(let key, let appGroup, let isBiometricallyLocked):
       switch Property.Value.self {
       case is String.Type, is String?.Type:
@@ -297,7 +301,9 @@ public class HelloPersistence {
     if mode == .normal || property.allowedInDemoMode {
       switch property.location {
       case .defaults(let suite, let key): userDefaults(for: suite).removeObject(forKey: key)
-      case .file(let location, let path): try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path).path)
+      case .file(let location, let path):
+        try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path, isNew: true).path)
+        try? FileManager.default.removeItem(atPath: fileURL(for: location, subPath: path, isNew: false).path)
       case .keychain(let key, let appGroup, let isBiometricallyLocked): try? keychain.remove(for: key)
       case .memory: break
       }
@@ -319,29 +325,25 @@ public class HelloPersistence {
     keychain.nuke()
     
     for location in FilePersistenceLocation.allCases {
-      try? FileManager.default.removeItem(at: baseURL(for: location))
+      try? FileManager.default.removeItem(at: baseURL(for: location, isNew: true))
     }
   }
   
   nonisolated public func size<Property: PersistenceProperty>(of property: Property) -> Int {
     switch property.location {
     case .defaults: 0
-    case .file(let location, let path): size(of: fileURL(for: location, subPath: path))
+    case .file(let location, let path):
+      size(of: fileURL(for: location, subPath: path, isNew: true))
     case .keychain: 0
     case .memory: 0
     }
   }
   
   public func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    guard mode == .normal else {
+    guard mode == .normal && property.location.type != .memory else {
       return cache[property.location.id] != nil
     }
-    return switch property.location {
-    case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
-    case .file(let location, let path): FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).relativePath)
-    case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
-    case .memory: cache[property.location.id] != nil
-    }
+    return unsafeIsSet(property: property)
   }
   
   nonisolated public func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
@@ -355,7 +357,8 @@ public class HelloPersistence {
     return switch property.location {
     case .defaults(let suite, let key): userDefaults(for: suite).object(forKey: key) != nil
     case .file(let location, let path):
-      FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path).path)
+      FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path, isNew: true).path) ||
+      FileManager.default.fileExists(atPath: fileURL(for: location, subPath: path, isNew: false).path)
     case .keychain(let key, let appGroup, let isBiometricallyLocked): (try? keychain.data(for: key)) != nil
     case .memory: false
     }
@@ -370,9 +373,9 @@ public class HelloPersistence {
     case .defaults: nil
     case .file(let location, let path):
       if let lastSlashIndex = path.lastIndex(of: "/") {
-        fileURL(for: location, subPath: String(path[..<lastSlashIndex]))
+        fileURL(for: location, subPath: String(path[..<lastSlashIndex]), isNew: true)
       } else {
-        fileURL(for: location, subPath: path)
+        fileURL(for: location, subPath: path, isNew: true)
       }
     case .keychain: nil
     case .memory: nil
@@ -621,7 +624,7 @@ public enum Persistence {
     
     var fileSnapshots: [PersistenceFileSnapshotType] = []
     for fileLocation in FilePersistenceLocation.allCases.sorted(by: { $0.name < $1.name }) {
-      if let url = fileLocation.url,
+      if let url = fileLocation.newURL,
          let folderSnapshot = try? snapshot(of: url, overrideName: fileLocation.name){
         fileSnapshots.append(folderSnapshot)
       }

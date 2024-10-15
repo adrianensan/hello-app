@@ -41,7 +41,7 @@ public struct HelloPickerPopup: View {
             try await item.action()
           }) {
             HelloPickerPopupRow(item: item, isSelected: item.id == selectedItemID, isExpanded: isVisible.wrappedValue)
-          }.environment(\.contentShape, AnyInsettableShape(Rectangle()))
+          }.environment(\.contentShape, .rect)
         }
       }.frame(width: width)
     }

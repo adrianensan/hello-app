@@ -44,3 +44,11 @@ public extension HelloAppIconConfig {
     Dictionary(all.map { ($0.systemName, $0) }, uniquingKeysWith: { (first, _) in first })[id]
   }
 }
+
+
+
+public struct BasicHelloAppIconConfig: HelloAppIconConfig {
+  public var defaultIcon: any HelloAppIcon { .placeholder }
+  
+  public var platforms: [HelloAppPlatform] { [.iOS] }
+}

@@ -67,6 +67,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
   case helloShared
   case temporary
   case cache
+  case downloads
   case custom(String)
   
   public static var allCases: [FilePersistenceLocation] { [
@@ -75,7 +76,8 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     .appGroup,
     .helloShared,
     .temporary,
-    .cache
+    .cache,
+    .downloads
   ]}
   
   public var id: String {
@@ -86,6 +88,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     case .helloShared: "hello-shared"
     case .temporary: "temporary"
     case .cache: "cache"
+    case .downloads: "downloads"
     case .custom(let url): url
     }
   }
@@ -98,6 +101,7 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
     case .helloShared: "Hello"
     case .temporary: "Temporary"
     case .cache: "Cache"
+    case .downloads: "Downloads"
     case .custom(let url): url
     }
   }
@@ -116,10 +120,39 @@ public enum FilePersistenceLocation: Hashable, Identifiable, Sendable {
       .temporaryDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .cache:
       .cachesDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
+    case .downloads:
+      .downloadsDirectory.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     case .custom(let url):
       URL(string: url)?.appending(component: AppInfo.bundleID, directoryHint: .isDirectory)
     }
   }
+  public var newURL: URL? {
+    switch self {
+    case .document:
+        .documentsDirectory
+    case .applicationSupport:
+        .applicationSupportDirectory
+    case .appGroup:
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.appGroup)
+    case .helloShared:
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppInfo.sharedHelloGroup)
+    case .temporary:
+        .temporaryDirectory
+    case .cache:
+        .cachesDirectory
+    case .downloads:
+        .downloadsDirectory
+    case .custom(let url):
+      URL(string: url)
+    }
+  }
+}
+
+public enum PersistenceLocationType: Sendable {
+  case defaults
+  case file
+  case keychain
+  case memory
 }
 
 public enum PersistenceType: Sendable {
@@ -135,6 +168,15 @@ public enum PersistenceType: Sendable {
     case .file(let location, let path): "file-\(location.id)-\(path)"
     case .keychain(let key, let appGroup, let isBiometricallyLocked): "keychain-\(key)\(isBiometricallyLocked ? "-bio" : "")"
     case .memory(let key): "memory-\(key)"
+    }
+  }
+  
+  public var type: PersistenceLocationType {
+    switch self {
+    case .defaults: .defaults
+    case .file: .file
+    case .keychain: .keychain
+    case .memory: .memory
     }
   }
 }
@@ -211,7 +253,14 @@ extension PersistenceProperty {
   public var fileURL: URL? {
     switch location {
     case .defaults: nil
-    case .file(let location, let path): location.url?.appending(component: path)
+    case .file(let location, let path):
+      if let url = location.newURL?.appending(component: path),
+         FileManager.default.fileExists(atPath: url.path) {
+        url
+      } else {
+        location.url?.appending(component: path)
+      }
+      
     case .keychain: nil
     case .memory: nil
     }

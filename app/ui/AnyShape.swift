@@ -37,3 +37,25 @@ public struct AnyInsettableShape: InsettableShape {
     base(rect.insetBy(dx: insetAmount, dy: insetAmount))
   }
 }
+
+public extension AnyInsettableShape {
+  static var circle: AnyInsettableShape {
+    AnyInsettableShape(.circle)
+  }
+  
+  static var capsule: AnyInsettableShape {
+    AnyInsettableShape(.capsule)
+  }
+  
+  static var rect: AnyInsettableShape {
+    AnyInsettableShape(.rect)
+  }
+  
+  static func rect(cornerRadius: CGFloat) -> AnyInsettableShape {
+    AnyInsettableShape(.rect(cornerRadius: cornerRadius))
+  }
+  
+  static func rect(cornerRadii: RectangleCornerRadii) -> AnyInsettableShape {
+    AnyInsettableShape(.rect(cornerRadii: cornerRadii))
+  }
+}

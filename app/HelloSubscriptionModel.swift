@@ -130,6 +130,11 @@ public class HelloSubscriptionModel {
     subscriptionsModel.value
   }
   
+  private var appSubscription: HelloSubscription? {
+    get { subscriptionsModel.value[AppInfo.rootBundleID] }
+    set { subscriptionsModel.value[AppInfo.rootBundleID] = newValue }
+  }
+  
   public var highestLevelSubscription: HelloSubscription? {
     subscriptions.values.max { $0.level < $1.level }
   }
@@ -152,7 +157,7 @@ public class HelloSubscriptionModel {
   }
   
   public var isDeveloperEnabled: Bool {
-    subscriptionsModel.value[AppInfo.rootBundleID]?.type == .developer
+    appSubscription?.type == .developer
   }
   
   public var allowPremiumFeatures: Bool {
@@ -164,7 +169,7 @@ public class HelloSubscriptionModel {
   }
   
   public var isSubscribedFromThisApp: Bool {
-    subscriptions[AppInfo.rootBundleID]?.isValid == true
+    appSubscription?.isValid == true
   }
   
   public var appSubscribedFrom: KnownApp? {
@@ -177,10 +182,10 @@ public class HelloSubscriptionModel {
   
   package func set(developerIsSubscribed: Bool) {
     if developerIsSubscribed {
-      if subscriptionsModel.value[AppInfo.rootBundleID]?.isValid != true {
+      if appSubscription?.isValid != true {
         updateSubscription(to: .developer)
       }
-    } else if case .developer = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
+    } else if case .developer = appSubscription?.type {
       updateSubscription(to: nil)
     }
   }
@@ -191,14 +196,14 @@ public class HelloSubscriptionModel {
   }
   
   package func removePromo() {
-    if case .promo = subscriptionsModel.value[AppInfo.rootBundleID]?.type {
+    if case .promo = appSubscription?.type {
       updateSubscription(to: nil)
     }
   }
   
   private func updateSubscription(to targetSubscription: HelloSubscription?) {
-    guard subscriptionsModel.value[AppInfo.rootBundleID] != targetSubscription else { return }
-    subscriptionsModel.value[AppInfo.rootBundleID] = targetSubscription
+    guard appSubscription != targetSubscription else { return }
+    appSubscription = targetSubscription
     sync(hasLocalChanged: true)
   }
   
@@ -206,31 +211,31 @@ public class HelloSubscriptionModel {
     guard storeModel.isSetup else { return }
     var hasChanged = false
     if let subscription = activeSubscriptionFromThisApp {
-      if subscriptions[AppInfo.bundleID] != subscription {
-        subscriptionsModel.value[AppInfo.bundleID] = subscription
+      if appSubscription != subscription {
+        appSubscription = subscription
         hasChanged = true
       }
     } else {
-      if let existingSubscription = subscriptions[AppInfo.bundleID], existingSubscription.isValid {
+      if let existingSubscription = appSubscription, existingSubscription.isValid {
         switch existingSubscription.type {
         case .paid:
           if !AppInfo.isTestBuild {
             if existingSubscription.isValid {
-              subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+              appSubscription?.isValid = false
               hasChanged = true
             }
           } else {
-            subscriptionsModel.value[AppInfo.bundleID] = nil
+            appSubscription = nil
             hasChanged = true
           }
         case .test:
           if AppInfo.isTestBuild {
             if existingSubscription.isValid {
-              subscriptionsModel.value[AppInfo.bundleID]?.isValid = false
+              appSubscription?.isValid = false
               hasChanged = true
             }
           } else {
-            subscriptionsModel.value[AppInfo.bundleID] = nil
+            appSubscription = nil
             hasChanged = true
           }
         default: ()
@@ -264,7 +269,7 @@ public class HelloSubscriptionModel {
         persistenceProperty: .subscriptions,
         hasLocalUpdates: hasLocalChanged) { localValue, cloudValue in
           var mergedValue = cloudValue
-          mergedValue[AppInfo.bundleID] = localValue[AppInfo.bundleID]
+          mergedValue[AppInfo.rootBundleID] = localValue[AppInfo.rootBundleID]
           return mergedValue
         }
     }
