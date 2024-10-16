@@ -8,11 +8,13 @@ public struct HelloNavigationRow: View {
   public enum ActionIcon: Sendable {
     case arrow
     case openExternal
+    case custom(String)
     
     var iconName: String {
       switch self {
       case .arrow: "chevron.right"
       case .openExternal: "arrow.up.forward.app"
+      case .custom(let iconName): iconName
       }
     }
   }

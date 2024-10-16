@@ -144,11 +144,15 @@ public class HelloWindowModel {
   }
   
   public func dismiss(id: String?) {
+    guard let id else {
+      dismissPopup()
+      return
+    }
     guard !popupViews.isEmpty else { return }
     popupViews
       .filter { $0.id == id }
       .forEach { $0.onDismiss?() }
-    popupViews = popupViews.filter { $0.id != id }
+    popupViews.removeAll { $0.id == id }
   }
   
   public func dismiss(above targetID: String) {

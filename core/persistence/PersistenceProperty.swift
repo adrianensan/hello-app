@@ -265,6 +265,16 @@ extension PersistenceProperty {
     case .memory: nil
     }
   }
+  
+  public var oldFileURL: URL? {
+    switch location {
+    case .defaults: nil
+    case .file(let location, let path):
+      location.url?.appending(component: path)
+    case .keychain: nil
+    case .memory: nil
+    }
+  }
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
 }
 

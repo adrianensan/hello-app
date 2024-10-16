@@ -536,14 +536,14 @@ public enum Persistence {
   }
   
   nonisolated public static func wipeFiles(in location: FilePersistenceLocation) throws {
-    guard let url = location.url else { return }
+    guard let url = location.newURL else { return }
     for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
       try FileManager.default.removeItem(at: fileURL)
     }
   }
   
   nonisolated public static func wipeFiles(in location: FilePersistenceLocation, notAccessedWithin timeInterval: TimeInterval) throws {
-    guard let url = location.url else { return }
+    guard let url = location.newURL else { return }
     try wipeFiles(in: url, notAccessedWithin: timeInterval)
   }
   
@@ -558,13 +558,13 @@ public enum Persistence {
   }
   
   nonisolated public static func delete(location: FilePersistenceLocation) throws {
-    guard let url = location.url else { return }
+    guard let url = location.newURL else { return }
     try FileManager.default.removeItem(at: url)
   }
   
   static package func nuke() {
     for filePersistenceLocation in FilePersistenceLocation.allCases {
-      if let url = filePersistenceLocation.url {
+      if let url = filePersistenceLocation.newURL {
         try? FileManager.default.removeItem(at: url)
       }
     }
@@ -615,7 +615,7 @@ public enum Persistence {
                 key: key,
                 object: UserDefaultsObjectSnapshot.infer(from: value),
                 isSystem:
-                  PersistenceSnapshotGenerator.systemUserDefaultKeyPrefixes.contains { prefix in key.starts(with: prefix) } ||
+                  PersistenceSnapshotGenerator.systemUserDefaultKeyPrefixes.contains(where: key.starts) ||
                   PersistenceSnapshotGenerator.systemUserDefaultKeys.contains(key))
             }
           ))
@@ -625,7 +625,7 @@ public enum Persistence {
     var fileSnapshots: [PersistenceFileSnapshotType] = []
     for fileLocation in FilePersistenceLocation.allCases.sorted(by: { $0.name < $1.name }) {
       if let url = fileLocation.newURL,
-         let folderSnapshot = try? snapshot(of: url, overrideName: fileLocation.name){
+         let folderSnapshot = try? snapshot(of: url, overrideName: fileLocation.name) {
         fileSnapshots.append(folderSnapshot)
       }
     }

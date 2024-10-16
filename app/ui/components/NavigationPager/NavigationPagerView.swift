@@ -56,8 +56,7 @@ public struct NavigationPagerView: View {
   public var body: some View {
     GeometryReader { geometry in
       ZStack(alignment: .leading) {
-        ForEach(model.viewStack) { page in
-          let index = model.pageIndex(for: page.id) ?? 0
+        HelloForEach(model.viewStack) { index, page in
           page.view()
             .environment(\.pageID, page.id)
             .environment(\.viewID, page.instanceID)
@@ -102,6 +101,7 @@ public struct NavigationPagerView: View {
 //        }
 //        #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
+        .compositingGroup()
 //        .background(theme.backgroundView)
 //        .background(theme.foreground.primary.color
 //          .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness))

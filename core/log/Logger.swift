@@ -27,7 +27,7 @@ public class Logger: Sendable {
       logStatements = []
     }
     
-    logStatements.append(LogStatement(level: .meta, message: "Launch---------------", context: "App"))
+    logStatements.append(LogStatement(level: .meta, message: "Launch ------------------", context: "App"))
     Task { try await flush(force: false) }
   }
   
@@ -58,7 +58,7 @@ public class Logger: Sendable {
   }
   
   public func terminate() {
-    unsafeSyncLog(LogStatement(level: .meta, message: "Terminate------------", context: "App"))
+    unsafeSyncLog(LogStatement(level: .meta, message: "Terminate ---------------", context: "App"))
   }
   
   public func clear() async throws {

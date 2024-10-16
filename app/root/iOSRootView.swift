@@ -27,12 +27,12 @@ public struct HelloAppRootView<Content: View>: View {
         .allowsHitTesting(windowModel.popupViews.isEmpty)
       
       if let topView = windowModel.popupViews.last {
-        ForEach(windowModel.popupViews) { popupView in
-          let layer = windowModel.popupViews.firstIndex(where: { $0.id == popupView.id }) ?? 0
+        HelloForEach(windowModel.popupViews) { i, popupView in
           popupView.view()
             .id(popupView.uniqueInstanceID)
             .environment(\.popupID, popupView.id)
-            .zIndex(3 + 0.1 * Double(layer))
+            .environment(\.viewID, popupView.uniqueInstanceID)
+            .zIndex(3 + 0.1 * Double(i))
             .compositingGroup()
             .blur(radius: topView.id != popupView.id ? windowModel.blurAmountForPopup : 0)
             .disabled(topView.hasExclusiveInteraction && topView.id != popupView.id)

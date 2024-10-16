@@ -1,6 +1,6 @@
 import SwiftUI
 
-fileprivate struct HelloEnumeratedCollectionElement<Element: Sendable>: Identifiable, Sendable {
+fileprivate struct HelloEnumeratedCollectionElement<Element: Sendable & Identifiable>: Identifiable, Sendable {
   var index: Int
   var element: Element
   var isLast: Bool
@@ -11,10 +11,10 @@ fileprivate struct HelloEnumeratedCollectionElement<Element: Sendable>: Identifi
     self.isLast = false
   }
   
-  var id: Int { index }
+  var id: Element.ID { element.id }
 }
 
-fileprivate extension Collection where Element: Sendable {
+fileprivate extension Collection where Element: Sendable & Identifiable {
   func enumeratedIdentifiable() -> [HelloEnumeratedCollectionElement<Element>] {
     var enumeratedList = enumerated().map {
       HelloEnumeratedCollectionElement(index: $0.offset, element: $0.element)
@@ -48,5 +48,10 @@ public struct HelloForEach<Element, Content: View>: View where Element: Sendable
     ForEach(reversed ? data.enumeratedIdentifiable().reversed() : data.enumeratedIdentifiable()) { element in
       content(element.index, element.element, element.isLast)
     }
+    
+//    ForEach(reversed ? data.reversed() : data) { element in
+//      let index = data.firstIndex(where: { element.id == $0.id }) ?? 0
+//      content(index, element, data.last?.id == element.id)
+//    }
   }
 }

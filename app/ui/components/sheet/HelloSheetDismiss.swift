@@ -8,6 +8,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.keyboardFrame) private var keyboardFrame
   @Environment(\.popupID) private var viewID
+  @Environment(\.viewID) private var viiiewID
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloSheetModel.self) private var model
   
@@ -42,12 +43,10 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
         guard model.sheetSize != $0 else { return }
         model.sheetSize = $0
       }
-      .opacity(readyToShow ? 1 : 0)
-      .disabled(yDrag != 0)
       .compositingGroup()
-//      .frame(height: model.isVisible ? nil : 1, alignment: .top)
+      .disabled(yDrag != 0)
       .animation(.dampSpring, value: model.isVisible)
-      .offset(y: model.isVisible ? offset : (isfloating ? windowFrame.height : (model.sheetSize.height > 0 ? model.sheetSize.height : windowFrame.height)) + 8)
+      .offset(y: model.isVisible ? offset : (isfloating ? windowFrame.height : (readyToShow ? model.sheetSize.height : windowFrame.height)) + 8)
       .animation(yDrag == 0 ? .dampSpring : nil, value: yDrag)
       .animation(.dampSpring, value: keyboardFrame)
       .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: height, alignment: isfloating ? .center : .bottom)
@@ -102,12 +101,20 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
             windowModel.dismiss(id: viewID)
           }
         }
-      }.onChange(of: model.sheetSize != .zero) {
+      }
+      .onChange(of: model.sheetSize) { oldSize, newSize in
+        if model.waitingForSizing && oldSize.height > 0 {
+          model.waitingForSizing = false
+        }
         guard model.sheetSize != .zero && !model.isVisible else { return }
         Task {
-          try? await Task.sleepForOneFrame()
+          if model.waitingForSizing {
+            try await Task.sleepForABit()
+            guard !readyToShow else { return }
+          }
+          try await Task.sleepForOneFrame()
           readyToShow = true
-          try? await Task.sleepForOneFrame()
+          try await Task.sleepForOneFrame()
           model.isVisible = true
         }
       }

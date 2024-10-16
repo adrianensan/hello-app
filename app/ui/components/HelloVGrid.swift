@@ -9,6 +9,10 @@ public enum HelloVGridColumns: Sendable {
 
 public struct HelloVGrid<Content: View>: View {
   
+  #if os(iOS)
+  @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
+  #endif
+  
   private var columns: HelloVGridColumns
   private var alignment: HorizontalAlignment
   private var spacing: CGFloat
@@ -68,5 +72,10 @@ public struct HelloVGrid<Content: View>: View {
         }
       }.frame(width: geometry.size.width)
     }.frame(height: height)
+      .onAppear {
+        #if os(iOS)
+        sheetModel?.waitingForSizing = true
+        #endif
+      }
   }
 }

@@ -218,8 +218,8 @@ extension HelloApplication {
   func onTerminateInternal() {
     try? Persistence.wipeFiles(in: .temporary, notAccessedWithin: .secondsInDay)
     Persistence.unsafeSave(.now, for: .lastestDateLaunched)
-    Log.terminate()
     onTerminate()
+    Log.terminate()
   }
   
   func onBecameActiveInternal() async {

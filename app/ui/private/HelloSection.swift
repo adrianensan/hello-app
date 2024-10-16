@@ -25,7 +25,7 @@ public struct HelloSectionItem<Content: View>: View {
       .padding(.trailing, 12)
       .padding(.vertical, 12)
       .foregroundStyle(theme.surface.foreground.primary.style)
-      .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+      .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
       .background(theme.surface.backgroundColor)
       .overlay(theme.surface.divider.color.swiftuiColor
         .frame(height: theme.surface.divider.width)

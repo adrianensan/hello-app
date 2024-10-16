@@ -23,6 +23,7 @@ public class HelloSheetModel {
   var isVisible: Bool = false
   public var isFloating: Bool = false
   var sheetSize: CGSize = .zero
+  public var waitingForSizing: Bool = false
   
   public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
   
