@@ -31,7 +31,7 @@ struct LoadingView: View {
   
   var body: some View {
     LoadingSpinner()
-      //.foregroundColor(tbTheme.textPrimary.swiftuiColor)
+      //.foregroundStyle(tbTheme.textPrimary.swiftuiColor)
       .frame(width: 44, height: 44)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(Color.black.opacity(0.4))

@@ -26,7 +26,7 @@ public struct AppIconOptionView<AppIcon: BaseAppIcon>: View {
         Text(icon.displayName)
           .lineLimit(1)
           .font(.system(size: 11, weight: .medium))
-          .foregroundColor(isSelected ? .white : theme.surface.foreground.primary.color)
+          .foregroundStyle(isSelected ? .white : theme.surface.foreground.primary.color)
           .fixedSize()
           .padding(.horizontal, 8)
           .padding(.vertical, 4)

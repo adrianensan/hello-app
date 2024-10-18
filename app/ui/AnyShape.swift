@@ -1,16 +1,16 @@
 import SwiftUI
 
-public struct AnyShape: Shape {
-  private let base: @Sendable (CGRect) -> Path
-  
-  public init<S: Shape>(_ shape: S) {
-    base = shape.path(in:)
-  }
-  
-  public func path(in rect: CGRect) -> Path {
-    base(rect)
-  }
-}
+//public struct AnyShape: Shape {
+//  private let base: @Sendable (CGRect) -> Path
+//  
+//  public init<S: Shape>(_ shape: S) {
+//    base = shape.path(in:)
+//  }
+//  
+//  public func path(in rect: CGRect) -> Path {
+//    base(rect)
+//  }
+//}
 
 public struct AnyInsettableShape: InsettableShape {
   
@@ -35,6 +35,28 @@ public struct AnyInsettableShape: InsettableShape {
   
   public func path(in rect: CGRect) -> Path {
     base(rect.insetBy(dx: insetAmount, dy: insetAmount))
+  }
+}
+
+public extension AnyShape {
+  static var circle: AnyShape {
+    AnyShape(.circle)
+  }
+  
+  static var capsule: AnyShape {
+    AnyShape(.capsule)
+  }
+  
+  static var rect: AnyShape {
+    AnyShape(.rect)
+  }
+  
+  static func rect(cornerRadius: CGFloat) -> AnyShape {
+    AnyShape(.rect(cornerRadius: cornerRadius))
+  }
+  
+  static func rect(cornerRadii: RectangleCornerRadii) -> AnyShape {
+    AnyShape(.rect(cornerRadii: cornerRadii))
   }
 }
 

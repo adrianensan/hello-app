@@ -98,7 +98,7 @@ public struct HelloMenuRow: View {
           .frame(width: 32)
       }
     }.font(.system(size: 14, weight: .medium))
-      .foregroundColor(item.isDestructive ? theme.error.color : theme.foreground.primary.color)
+      .foregroundStyle(item.isDestructive ? theme.error.color : theme.foreground.primary.color)
       .padding(.horizontal, 4)
       .frame(width: 240, height: 44)
       .clickable()

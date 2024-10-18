@@ -18,7 +18,7 @@ public extension EdgeInsets {
 //@available(macOS 14.0, *)
 //@MainActor
 //@Observable
-//public class HelloSafeArea: ObservableObject {
+//public class HelloSafeArea {
 //  public var safeAreaInsets: EdgeInsets = .init()
 //  
 //  #if os(iOS)

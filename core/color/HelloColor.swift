@@ -260,6 +260,17 @@ public extension HelloColor {
   
   static var darkThemeBlueAccent: HelloColor { HelloColor(r: 0.23, g: 0.51, b: 0.97) }
   static var lightThemeBlueAccent: HelloColor { HelloColor(r: 0.2, g: 0.47, b: 0.96) }
+  
+  static var options: [HelloColor] {
+    [
+      .white, .light, .dimWhite, .veryDimWhite,
+      .dark, .black, .veryDimRed, .dimRed,
+      .retroApple.red, .ketchup.red, .fadedRed, .fullRed,
+      .mario.red, .retroApple.purple, .retroApple.blue, .mario.blue, .retroApple.green, .neonGreen,
+      .ketchup.orange, .retroApple.orange, .retroApple.yellow, .ketchup.yellow, .mario.yellow
+      
+    ]
+  }
 }
 
 public struct HelloDynamicColor: Sendable {

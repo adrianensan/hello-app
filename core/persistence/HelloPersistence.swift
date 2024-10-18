@@ -93,7 +93,7 @@ public class HelloPersistence {
   
   nonisolated private func baseURL(for location: FilePersistenceLocation, isNew: Bool) -> URL {
     guard let url = (isNew ? location.newURL : location.url) else {
-      Log.error("Failed to get URL for \(location.id)", context: "Persistence")
+      Log.fatal("Failed to get URL for \(location.id)", context: "Persistence")
       return .temporaryDirectory
     }
     return url

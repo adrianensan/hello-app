@@ -69,12 +69,12 @@ struct LoggerLineView: View {
     HStack(alignment: .top, spacing: 2) {
       Image(systemName: logStatement.level.icon)
         .font(.system(size: iconSize, weight: .bold, design: .monospaced))
-        .foregroundColor(symbolColor)
+        .foregroundStyle(symbolColor)
         .frame(width: iconSize, height: iconSize + 2)
       
       Text(logStatement.timeStampString)
         .font(.system(size: timeStampFontSize, weight: .semibold, design: .monospaced))
-        .foregroundColor(timeColor)
+        .foregroundStyle(timeColor)
         .frame(height: iconSize + 2)
         .padding(.horizontal, 2)
         .background(RoundedRectangle(cornerRadius: 4, style: .continuous)
@@ -90,7 +90,7 @@ struct LoggerLineView: View {
       #else
       ((logStatement.context.map { Text($0 + " ").bold() } ?? Text("")) + Text(logStatement.message))
         .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
-        .foregroundColor(.primary)
+        .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
       #endif
     }.frame(height: isExpanded ? nil : 16)

@@ -39,7 +39,7 @@
 //    BaseTooltipView {
 //      Text(string)
 //        .font(.system(size: 14, weight: .regular))
-//        .foregroundColor(theme.text.primaryColor)
+//        .foregroundStyle(theme.text.primaryColor)
 //        .multilineTextAlignment(.center)
 //        .fixedSize()
 //    }

@@ -90,6 +90,43 @@ public class Haptics {
     }
   }
   
+  public func pulse2(count: Int, intensity: Float = 1, interval: CGFloat) {
+    guard hapticsLevel == .normal else { return }
+    
+    guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+    var events = [CHHapticEvent]()
+    
+    func intensity(for i: Int) -> Float {
+      switch i % 4 {
+      case 0: 0.8 - 0.4 * Float(i) / Float(count)
+      case 2: 0.2
+      default: .random(in: 0.2...(0.8 - 0.4 * Float(i) / Float(count)))
+      }
+    }
+    
+    for i in 0..<count {
+      let progress = 0.8 - 0.6 * sqrt(Float(i) / Float(count))
+      events.append(CHHapticEvent(eventType: .hapticTransient,
+                                  parameters: [
+                                    CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity(for: i)),//i % 2 == 0 ? 0.8 : 0.2),
+                                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.32),
+                                    CHHapticEventParameter(parameterID: .attackTime, value: 0),
+                                    CHHapticEventParameter(parameterID: .decayTime, value: 1)],
+                                  relativeTime: CGFloat(i) * interval))
+    }
+    do {
+      let pattern = try CHHapticPattern(events: events, parameters: [])
+      let player = try engine?.makePlayer(with: pattern)
+      try player?.start(atTime: CHHapticTimeImmediate)
+    } catch {
+      print("Failed to play pattern: \(error.localizedDescription).")
+    }
+  }
+  
+  public func cancel() {
+    engine?.stop()
+  }
+  
   public func feedback(intensity: Float) {
     do {
       let event = CHHapticEvent(

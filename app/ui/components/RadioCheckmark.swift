@@ -23,7 +23,7 @@ public struct RadioCheckmark: View {
           .resizable()
           .aspectRatio(contentMode: .fit)
           .font(.system(size: 17, weight: .bold))
-          .foregroundColor(.white)
+          .foregroundStyle(.white)
           .padding(geometry.size.minSide / 4)
           .frame(width: geometry.size.minSide, height: geometry.size.minSide)
           .background(Circle().fill(theme.surface.accent.style))

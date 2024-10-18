@@ -36,7 +36,7 @@ struct AppIconSettingsPageOption: View {
           Text(icon.name)
             .lineLimit(1)
             .font(.system(size: 11, weight: .medium))
-            .foregroundColor(isSelected ? .white : theme.surface.foreground.primary.color)
+            .foregroundStyle(isSelected ? .white : theme.surface.foreground.primary.color)
             .fixedSize()
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -96,7 +96,7 @@ struct NewAppIconSettingsPage: View {
                     .background(AppIconShape().stroke(tint.background.color.swiftuiColor, lineWidth: 2)
                       .frame(appIconModel.selectedTint == tint ? 44 : 30))
                     .overlay(tint.foreground.view
-                      .clipShape(AppIconShape())
+                      .clipShape(Circle())
                       .frame(8))
                     .animation(.fastSpring, value: appIconModel.selectedTint == tint)
                     .frame(44)

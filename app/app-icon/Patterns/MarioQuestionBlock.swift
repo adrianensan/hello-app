@@ -34,7 +34,7 @@ public struct QuestionBlockView: View {
         Text("?")
           .font(.custom("LCD Solid", fixedSize: 0.9 * geometry.size.width))
           .offset(y: 0.05 * geometry.size.width)
-          .foregroundColor(color.readableOverlayColor.swiftuiColor)
+          .foregroundStyle(color.readableOverlayColor.swiftuiColor)
       }.background(color.swiftuiColor)
     }
   }

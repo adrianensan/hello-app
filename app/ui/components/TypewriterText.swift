@@ -22,7 +22,7 @@ public struct TypewriterText: View {
   
   public var body: some View {
     (Text(appearedText)
-     + Text(hiddenText).foregroundColor(Color.clear))
+     + Text(hiddenText).foregroundStyle(Color.clear))
     .opacity(appear || appearedText.isEmpty ? 1 : 0)
     .onChange(of: text) {
       appearedText = ""

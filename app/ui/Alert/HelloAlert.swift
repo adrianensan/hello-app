@@ -80,7 +80,7 @@ public struct HelloAlert: View {
       VStack(spacing: 6) {
         Text(config.title)
           .font(.system(size: 17, weight: .medium))
-          .foregroundColor(theme.foreground.primary.color)
+          .foregroundStyle(theme.foreground.primary.color)
           .fixedSize(horizontal: false, vertical: true)
         
         if let message = config.message {
