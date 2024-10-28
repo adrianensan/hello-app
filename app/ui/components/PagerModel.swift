@@ -24,7 +24,7 @@ public class PagerViewModel: ObservableObject {
     commitViewStackUpdate()
     if animated {
       Task {
-        try await Task.sleep(nanoseconds: 25_000_000)
+        try await Task.sleepForOneFrame()
         self.viewDepth = self.realViewStack.count
       }
     } else {

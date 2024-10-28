@@ -90,7 +90,7 @@ public class Downloader {
     defer { downloadingURLs.remove(url) }
   
     let urlString = url.absoluteString.removingPercentEncoding ?? url.absoluteString
-    Log.verbose("Starting download for \(urlString)", context: "Downloader")
+    Log.verbose(context: "Downloader", "Starting download for \(urlString)")
     
     let requestStartTime = epochTime
     
@@ -115,43 +115,43 @@ public class Downloader {
       case NSURLErrorDomain:
         switch nsError.code {
         case NSURLErrorNotConnectedToInternet:
-          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) No Network Connection - \(urlString)", context: "Downloader")
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) No Network Connection - \(urlString)")
           throw .noInternet
         case NSURLErrorNetworkConnectionLost:
-          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) Network Connection Lost - \(urlString)", context: "Downloader")
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Network Connection Lost - \(urlString)")
           throw .noInternet
         default:
-          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with url error \(nsError.code): \(error.localizedDescription)", context: "Downloader")
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with url error \(nsError.code): \(error.localizedDescription)")
           throw .nsURLError(code: nsError.code)
         }
       case String(kCFErrorDomainCFNetwork):
         switch nsError.code {
         case -1100: // kCFURLErrorFileDoesNotExist:
-          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) TMP Download File Not Found - \(urlString)", context: "Downloader")
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) TMP Download File Not Found - \(urlString)")
           throw .noFile
         default:
-          Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with cf error \(nsError.code): \(error.localizedDescription)", context: "Downloader")
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with cf error \(nsError.code): \(error.localizedDescription)")
           throw .cfNetworkError(code: nsError.code)
         }
       default:
-        Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(nsError.domain) \(nsError.code) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
+        Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(nsError.domain) \(nsError.code) \(urlString) failed with error: \(error.localizedDescription)")
         throw .other(error)
       }
-      Log.error("\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)", context: "Downloader")
+      Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)")
       throw .other(error)
     }
     let duration = String(format: "(%.2fs)", epochTime - requestStartTime)
     guard let httpResponse = urlResponse as? HTTPURLResponse else {
-      Log.error("\(duration) \(urlString) failed, no HTTP response", context: "Downloader")
+      Log.error(context: "Downloader", "\(duration) \(urlString) failed, no HTTP response")
       throw .noHTTPResponse
     }
     let responseStatus = HTTPResponseStatus.from(code: httpResponse.statusCode)
     guard responseStatus.isSuccess else {
-      Log.error("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")
+      Log.error(context: "Downloader", "\(duration) \(httpResponse.statusCode) \(urlString)")
       throw .httpError(code: responseStatus)
     }
     
-    Log.info("\(duration) \(httpResponse.statusCode) \(urlString)", context: "Downloader")
+    Log.info(context: "Downloader", "\(duration) \(httpResponse.statusCode) \(urlString)")
     return data
   }
 }

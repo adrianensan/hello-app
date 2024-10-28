@@ -69,6 +69,7 @@ public struct OptionSlider<T: OptionSliderElement>: View {
           option.view
             .font(.system(size: 13, weight: .medium))
             .frame(minWidth: 40)
+            .frame(height: 40)
             .foregroundStyle(selectedValue == option ? theme.accent.readableOverlayColor : theme.surfaceSection.foreground.primary.color)
             .scaleEffect(selectedValue == option ? 1.16 : 1)
             .readFrame(in: .named("slider")) {

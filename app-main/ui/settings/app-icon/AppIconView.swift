@@ -50,24 +50,6 @@ public struct AppIconView: View {
   
   @Environment(\.theme) private var theme
   
-  private var icon: any BaseAppIcon
-  
-  public init(icon: some BaseAppIcon) {
-    self.icon = icon
-  }
-  
-  public var body: some View {
-    HelloImageView(.resource(fileName: "hello-resources/app-icon-thumbnails/\(icon.imageName).heic"))
-//    icon.view.flattenedView
-      .clipShape(AppIconShape())
-      .overlay(AppIconShape().stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))
-  }
-}
-
-public struct NewAppIconView: View {
-  
-  @Environment(\.theme) private var theme
-  
   private var icon: any HelloAppIcon
   
   public init(icon: some HelloAppIcon) {
@@ -79,22 +61,5 @@ public struct NewAppIconView: View {
     //    icon.view.flattenedView
       .clipShape(AppIconShape())
       .overlay(AppIconShape().stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))
-  }
-}
-
-public struct IMessageAppIconView<AppIcon: BaseAppIcon>: View {
-  
-  @Environment(\.theme) var theme
-  
-  var icon: AppIcon
-  
-  var isSmall: Bool = false
-  
-  public var body: some View {
-    HelloImageView(.asset(named: icon.imageName))
-      .aspectRatio(0.75, contentMode: .fill)
-    //    icon.view.flattenedView
-      .clipShape(.capsule)
-      .overlay(Capsule().stroke(theme.foreground.primary.style.opacity(0.1), lineWidth: 1))
   }
 }

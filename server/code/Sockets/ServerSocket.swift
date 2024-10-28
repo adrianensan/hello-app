@@ -23,7 +23,7 @@ class ServerSocket: Socket {
     try bindForInbound(to: port)
     
     guard listen(socketFileDescriptor, ServerSocket.acceptBacklog) != -1 else {
-      Log.error("Failed to listen on port \(port).", context: "Socket")
+      Log.error(context: "Socket", "Failed to listen on port \(port).")
       throw SocketError.listenFail
     }
   }
@@ -37,7 +37,7 @@ class ServerSocket: Socket {
     var clientAddressLength = socklen_t(MemoryLayout<sockaddr>.size)
     var newConnectionFD: Int32 = -1
     while true {
-      Log.verbose("accept attempt", context: "Router")
+      Log.verbose(context: "Router", "accept attempt")
       clientAddrressStruct = sockaddr()
       clientAddressLength = socklen_t(MemoryLayout<sockaddr>.size)
       newConnectionFD = accept(socketFileDescriptor, &clientAddrressStruct, &clientAddressLength)
@@ -45,7 +45,7 @@ class ServerSocket: Socket {
         switch errno {
         case EAGAIN, EWOULDBLOCK:
           try await SocketPool.main.waitUntilReadable(socketFileDescriptor)
-          Log.verbose("Ready to accept", context: "Router")
+          Log.verbose(context: "Router", "Ready to accept")
           continue
         default:
           throw SocketError.closed

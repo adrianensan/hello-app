@@ -5,12 +5,12 @@ import HelloApp
 
 struct DisableViewMaskingSettingsItem: View {
   
-  @Persistent(.disableMasking) private var disableMasking
+  @Persistent(.maskToDeviceShape) private var maskToDeviceShape
   
   var body: some View {
-    HelloNavigationRow(icon: "squareshape", name: "Disable Masking") {
-      HelloToggle(isSelected: disableMasking) {
-        disableMasking.toggle()
+    HelloNavigationRow(icon: "squareshape", name: "Mask To Device Shape") {
+      HelloToggle(isSelected: maskToDeviceShape) {
+        maskToDeviceShape.toggle()
       }
     }
   }

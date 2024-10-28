@@ -32,7 +32,7 @@ public extension Connection {
     var saddr = sockaddr()
     memcpy(&saddr, &addrLocal, MemoryLayout<sockaddr_in>.size)
     guard bind(socketFD, &saddr, socklen_t(MemoryLayout<sockaddr_in>.size)) != -1 else {
-      Log.error("Failed to bind socket on port \(address.port). errno: \(errno)", context: "Socket")
+      Log.error(context: "Socket", "Failed to bind socket on port \(address.port). errno: \(errno)")
       throw SocketError.bindFail
     }
     

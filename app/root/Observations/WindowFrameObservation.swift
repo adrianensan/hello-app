@@ -14,21 +14,20 @@ fileprivate struct WindowFrameObservationViewModifier: ViewModifier {
     let isFullscreen = uiProperties.size == windowModel.pointSize
     let isFullscreenWidth = uiProperties.size.width == windowModel.pointSize.width
     let screenCornerRaidusPoints = Device.current.screenCornerRadiusPixels / windowModel.physicalPixelsPerPoint
-    let shape: AnyInsettableShape = debugModel.disableMasking ? .rect : .rect(
+    let shape: AnyInsettableShape = .rect(
       cornerRadii: RectangleCornerRadii(
         topLeading: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius,
         bottomLeading: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,
         bottomTrailing: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,
         topTrailing: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius))
     content
+//      .frame(uiProperties.size, alignment: .top)
       .environment(\.windowFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.viewFrame, CGRect(origin: .zero, size: uiProperties.size))
       .environment(\.physicalScale, windowModel.physicalPixelScale)
       .environment(\.pixelsPerPoint, windowModel.physicalPixelsPerPoint)
-      .clipShape(shape)
-      .background(Color.black)
       .environment(\.viewShape, shape)
-      .environment(\.pageShape, debugModel.disableMasking ? .rect : .rect(
+      .environment(\.pageShape, .rect(
         cornerRadii: RectangleCornerRadii(
           topLeading: isFullscreen ? screenCornerRaidusPoints : windowCornerRadius,
           bottomLeading: isFullscreenWidth ? screenCornerRaidusPoints : windowCornerRadius,

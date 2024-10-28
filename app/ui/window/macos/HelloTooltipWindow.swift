@@ -83,19 +83,19 @@ public enum TooltipTrigger: Equatable, Sendable {
   case onClick
 }
 
-@MainActor
 fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   
   @Environment(HelloWindowModel.self) private var windowModel
   
   @NonObservedState private var globalPosition: CGPoint = .zero
+  @NonObservedState private var isHovered: Bool = false
   @State private var id: String = .uuid
   
   var trigger: TooltipTrigger
-  var content: () -> TooltipContent
+  var content: @MainActor () -> TooltipContent
   
   func showTooltip() {
-    guard let windowFrame = windowModel.window?.frame else { return }
+    guard let windowFrame = windowModel.window?.frame, globalPosition != .zero else { return }
     var position = windowFrame.origin
     position.x += globalPosition.x
     position.y += windowFrame.height - globalPosition.y
@@ -111,13 +111,20 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .readFrame { globalPosition = $0.top }
+      .readFrame {
+        guard globalPosition != $0.top else { return }
+        globalPosition = $0.top
+        if isHovered {
+          showTooltip()
+        }
+      }
       .onTapGesture {
         if trigger == .onClick {
           showTooltip()
         }
       }
       .onHover {
+        isHovered = $0
         if $0 {
           if trigger == .onHover {
             showTooltip()
@@ -136,7 +143,7 @@ fileprivate struct TooptipViewModifier<TooltipContent: View>: ViewModifier {
 @MainActor
 public extension View {
   func helloTooltip(trigger: TooltipTrigger = .onHover,
-                    @ViewBuilder view: @escaping () -> some View) -> some View {
+                    @ViewBuilder view: @escaping @MainActor () -> some View) -> some View {
     self.modifier(TooptipViewModifier(trigger: trigger, content: view))
   }
 }

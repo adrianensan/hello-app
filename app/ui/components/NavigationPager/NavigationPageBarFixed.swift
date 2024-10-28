@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -9,7 +8,9 @@ public struct NavigationPageBarFixed<TitleContent: View, NavBarContent: View>: V
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.helloPagerConfig) private var config
   @Environment(HelloScrollModel.self) private var scrollModel
+  #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
+  #endif
   
   @GestureState private var drag: CGSize?
   
@@ -42,8 +43,9 @@ public struct NavigationPageBarFixed<TitleContent: View, NavBarContent: View>: V
       .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
       .onChange(of: drag == nil) {
+        #if os(iOS)
         sheetModel?.isDraggingNavBar = drag != nil
+        #endif
       }
   }
 }
-#endif

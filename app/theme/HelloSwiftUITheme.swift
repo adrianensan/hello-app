@@ -35,11 +35,11 @@ public struct HelloSwiftUITheme: Sendable {
   }
   
   public var backgroundOutlineWidth: CGFloat {
-    theme.baseLayer.background.borderWidth ?? 0
+    base.backgroundOutlineWidth
   }
   
   public var backgroundOutline: Color {
-    theme.baseLayer.background.borderColor?.flattenAlpha(background: theme.baseLayer.background.mainColor).swiftuiColor ?? .clear
+    base.backgroundOutline
   }
   
   public var textPrimaryColor: Color { foreground.primary.color }
@@ -47,11 +47,7 @@ public struct HelloSwiftUITheme: Sendable {
   public var textTertiaryColor: Color { foreground.tertiary.color }
   
   public var divider: HelloBorder {
-    if case .color(_, let border) = base.layer.background, let border {
-      border
-    } else {
-      HelloBorder(color: base.layer.foregroundPrimary.mainColor.opacity(0.12), width: 1)
-    }
+    base.divider
   }
   
   public var accent: HelloSwiftUIThemeForeground { base.accent }

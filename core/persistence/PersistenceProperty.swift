@@ -39,21 +39,21 @@ public enum DefaultsPersistenceSuite: Hashable, Sendable, CaseIterable {
       if let appGroupDefaults = UserDefaults(suiteName: AppInfo.appGroup) {
         return appGroupDefaults
       } else {
-        Log.fatal("Failed to create UserDefaults for app group, please ensure \(AppInfo.appGroup) is added as an App Group", context: "Persistence")
+        Log.fatal(context: "Persistence", "Failed to create UserDefaults for app group, please ensure \(AppInfo.appGroup) is added as an App Group")
         return nil
       }
     case .helloShared:
       if let helloDefaults = UserDefaults(suiteName: AppInfo.sharedHelloGroup) {
         return helloDefaults
       } else {
-        Log.fatal("Failed to create UserDefaults for share Hello, please ensure com.adrianensan.hello is added as an App Group", context: "Persistence")
+        Log.fatal(context: "Persistence", "Failed to create UserDefaults for share Hello, please ensure com.adrianensan.hello is added as an App Group")
         return nil
       }
     case .custom(let suiteName):
       if let helloDefaults = UserDefaults(suiteName: suiteName) {
         return  helloDefaults
       } else {
-        Log.fatal("Failed to create UserDefaults for \(suiteName)", context: "Persistence")
+        Log.fatal(context: "Persistence", "Failed to create UserDefaults for \(suiteName)")
         return nil
       }
     }
@@ -181,7 +181,6 @@ public enum PersistenceType: Sendable {
   }
 }
 
-
 extension Never: PersistenceProperty {
   
   public var defaultValue: Never { fatalError("") }
@@ -192,10 +191,7 @@ extension Never: PersistenceProperty {
 public protocol PersistenceProperty<Value>: Sendable {
   
   associatedtype Value: Codable & Sendable
-//  associatedtype Key: PersistenceKey
   associatedtype OldProperty: PersistenceProperty = Never
-  
-  static var persistence: HelloPersistence { get }
   
   var defaultValue: Value { get }
   func defaultValue(for mode: PersistenceMode) -> Value
@@ -205,8 +201,6 @@ public protocol PersistenceProperty<Value>: Sendable {
   var allowedInDemoMode: Bool { get }
   
   var location: PersistenceType { get }
-  
-//  var key: Key { get }
   
   var isDeprecated: Bool { get }
   
@@ -222,8 +216,6 @@ public protocol PersistenceProperty<Value>: Sendable {
 }
 
 extension PersistenceProperty {
-  
-  public static var persistence: HelloPersistence { Persistence.defaultPersistence }
   
   public func cleanup(value: Value) -> Value { value }
   
@@ -249,6 +241,16 @@ extension PersistenceProperty {
   
   public var oldProperty: OldProperty? { nil }
   public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
+  
+  public var forcedNewFileURL: URL? {
+    switch location {
+    case .defaults: nil
+    case .file(let location, let path):
+      location.newURL?.appending(component: path)
+    case .keychain: nil
+    case .memory: nil
+    }
+  }
   
   public var fileURL: URL? {
     switch location {
@@ -276,214 +278,4 @@ extension PersistenceProperty {
     }
   }
 //  public func migrate(from oldValue: OldProperty.Value) -> Value? { nil }
-}
-
-//@Observable
-//class PersistentObservable<Property: PersistenceProperty> {
-//
-//  private let property: Property
-//  var value: Property.Value
-//  
-//  @MainActor
-//  func updateValue(to newValue: Property.Value) async {
-//    value = newValue
-//    await Property.persistence.save(value, for: property, skipModelUpdate: true)
-//  }
-//  
-//  init(_ property: Property) {
-//    self.property = property
-//    value = Property.persistence.storedValue(for: property)
-//  }
-//}
-//
-//@propertyWrapper
-//@Observable
-//public class Persistent<Property: PersistenceProperty> {
-//  
-//  private let persistenObservable: PersistentObservable<Property>
-//  
-//  private var value: Property.Value
-//  
-//  public var onUpdate: (() -> Void)?
-//  
-//  private func trackNextChange() {
-//    withObservationTracking {
-//      let _ = persistenObservable.value
-//    } onChange: { [weak self] in
-//      guard let self else { return }
-//      valueChanged()
-//    }
-//  }
-//  
-//  private func valueChanged() {
-//    Task {
-//      try? await Task.sleep(seconds: 0.02)
-//      value = persistenObservable.value
-//      trackNextChange()
-//      onUpdate?()
-//    }
-//  }
-//  
-//  public init(_ property: Property) {
-//    persistenObservable = Persistence.model(for: property)
-//    value = persistenObservable.value
-//    trackNextChange()
-//  }
-//  
-//  public var wrappedValue: Property.Value {
-//    get { value }
-//    set {
-//      value = newValue
-//      Task { await persistenObservable.updateValue(to: value) }
-//    }
-//  }
-//}
-
-@MainActor
-@Observable
-public class PersistentObservable<Property: PersistenceProperty> {
-
-  private let property: Property
-  public internal(set) var _value: Property.Value
-  public var value: Property.Value {
-    get { _value }
-    set {
-      _value = newValue
-      Task { await Property.persistence.save(value, for: property, skipModelUpdate: true) }
-    }
-  }
-//  {
-//    didSet { notifyListeners() }
-//  }
-
-//  @ObservationIgnored private var listeners: [Weak<PersistentAsync<Property>>] = []
-//  @ObservationIgnored private var listenerToSkip: PersistentAsync<Property>?
-
-  init(_ property: Property) {
-    self.property = property
-    _value = Property.persistence.storedValue(for: property)
-  }
-  
-//  func updateValue(to newValue: Property.Value, from listener: PersistentAsync<Property>? = nil) {
-  func updateValue(to newValue: Property.Value) {
-//    listenerToSkip = listener
-    _value = newValue
-//    listenerToSkip = nil
-    Task { await Property.persistence.save(value, for: property, skipModelUpdate: true) }
-  }
-
-//  @MainActor
-//  func listen(_ listener: PersistentAsync<Property>) {
-//    listeners.append(Weak(value: listener))
-//  }
-
-//  private func notifyListeners() {
-//    for (i, weakListener) in listeners.enumerated().reversed() {
-//      if let listener = weakListener.value {
-//        if listener !== listenerToSkip {
-//          listener.valueUpdated()
-//        }
-//      } else {
-//        listeners.remove(at: i)
-//      }
-//    }
-//  }
-}
-
-//@propertyWrapper
-//public struct PersistentNew<Property: PersistenceProperty> {
-//  
-//  private let persistenObservable: PersistentObservable<Property>
-//  
-//  private var value: Property.Value
-//  
-//  public init(_ property: Property) {
-//    persistenObservable = Persistence.model(for: property)
-//    value = persistenObservable.value
-////    Task { await persistenObservable.listen(self) }
-//  }
-//  
-//  fileprivate mutating func valueUpdated() {
-//    value = persistenObservable.value
-//  }
-//  
-//  public var wrappedValue: Property.Value {
-//    get { value }
-//    mutating set {
-//      value = newValue
-//      valueUpdated()
-////      Task { await persistenObservable.updateValue(to: value, from: self) }
-//    }
-//  }
-//}
-
-//@propertyWrapper
-//@Observable
-//public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
-//
-//  private let persistenObservable: PersistentObservable<Property>
-//
-//  private var value: Property.Value
-//
-//  public var onUpdate: (() -> Void)?
-//
-//  public init(_ property: Property) {
-//    persistenObservable = Persistence.model(for: property)
-//    value = persistenObservable.value
-//    Task { await persistenObservable.listen(self) }
-//  }
-//  
-//  fileprivate func valueUpdated() {
-//    value = persistenObservable.value
-//    onUpdate?()
-//  }
-//
-//  public var wrappedValue: Property.Value {
-//    get { value }
-//    set {
-//      value = newValue
-//      Task { await persistenObservable.updateValue(to: value, from: self) }
-//    }
-//  }
-//}
-
-//public final class PersistentAsync<Property: PersistenceProperty>: Sendable {
-//  
-//  private let property: Property
-//  
-//  public init(_ property: Property) {
-//    self.property = property
-//  }
-//  
-//  public var value: Property.Value { get async { await Persistence.model(for: property).value } }
-//  
-//  public func update(to newValue: Property.Value) async {
-//    await Persistence.model(for: property).updateValue(to: newValue)
-//  }
-//  
-//  public func onChange(_: @escaping (Property.Value) -> Void) async {
-//    await Persistence.model(for: property).listen(self)
-//  }
-//  
-//  fileprivate func valueUpdated() {
-//    //    value = persistenObservable.value
-//    //    onUpdate?()
-//    //  }
-//  }
-//}
-
-@MainActor
-@propertyWrapper
-public struct Persistent<Property: PersistenceProperty> {
-  
-  private let persistenObservable: PersistentObservable<Property>
-  
-  public init(_ property: Property) {
-    persistenObservable = Persistence.model(for: property)
-  }
-  
-  public var wrappedValue: Property.Value {
-    get { persistenObservable.value }
-    nonmutating set { persistenObservable.updateValue(to: newValue) }
-  }
 }

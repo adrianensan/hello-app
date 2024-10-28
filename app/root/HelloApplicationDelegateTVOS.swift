@@ -36,7 +36,7 @@ class SceneDelegate: NSObject, UISceneDelegate {
   
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     guard let windowScene = scene as? UIWindowScene else {
-      Log.error("Expected UIWindowScene in willConnectTo", context: "App Delegate")
+      Log.error(context: "App Delegate", "Expected UIWindowScene in willConnectTo")
       return
     }
     let window = UIWindow(windowScene: windowScene)

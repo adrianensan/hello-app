@@ -49,7 +49,6 @@ public extension View {
 @MainActor
 public class HelloRootViewController: UIHostingController<AnyView> {
   
-  var statusBarStyle: UIStatusBarStyle = .default
   var lockRotation: Bool = false
   var hideHomeIndicator: Bool = false
   public var onBrightnessChange: (() -> Void)?
@@ -57,18 +56,12 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   var uiProperties: UIProperties
   var windowModel: HelloWindowModel
   
-  public init<T: View>(window: UIWindow? = nil, wrappedView: T) {
+  public init<T: View>(window: UIWindow? = nil, windowCornerRadius: CGFloat = 0, wrappedView: T) {
 //    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
     windowModel.window = window
     let id = HelloUUID().string
-//      .onPreferenceChange(StatusBarStyleKey.self) { style in
-//        guard let viewController = Self.instances[id],
-//              viewController.statusBarStyle != style else { return }
-//        viewController.statusBarStyle = style
-//        viewController.setNeedsStatusBarAppearanceUpdate()
-//      }
 //      .onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
 //        guard let viewController = Self.instances[id],
 //              viewController.hideHomeIndicator != hideHomeIndicator else { return }
@@ -91,9 +84,10 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     super.init(rootView: AnyView(HelloAppRootView { wrappedView }
       .environment(uiProperties)
       .environment(windowModel)
+      .environment(\.windowCornerRadius, windowCornerRadius)
       .ignoresSafeArea()))
 //    view.backgroundColor = .black
-    disableKeyboardOffset()
+    disableKeyboardAvoidance()
     
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(brightnessDidChange),
@@ -106,7 +100,14 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     fatalError("Unavailable")
   }
   
-  func disableKeyboardOffset() {
+  // There is built in keyboard avoidance starting from iOS 14, it's horrifying.
+  // Any UIHostingController will be shifted up automatically, with no way to disable it.
+  // Even small views in a list might get individually shifted up for no reason.
+  // This behvaiour almost always results in buggy behvaiour when using UIHostingController,
+  // and only works alright when using the SwfitUI App lifecycle, with no safe area management.
+  //
+  // The following disables this keyboard offset behaviour, we can manage safe area and offsets ourselves.
+  private func disableKeyboardAvoidance() {
     guard let viewClass = object_getClass(view) else { return }
     
     let viewSubclassName = String("HelloRootUIHostingView")
@@ -121,11 +122,12 @@ public class HelloRootViewController: UIHostingController<AnyView> {
                       method_getTypeEncoding(method))
     }
     
-    if let method = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
-      let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
+    let keyboardWillShowSelector = NSSelectorFromString("keyboardWillShowWithNotification:")
+    if let method = class_getInstanceMethod(viewClass, keyboardWillShowSelector) {
+      let keyboardWillShowBlock: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
       class_addMethod(viewSubclass,
-                      NSSelectorFromString("keyboardWillShowWithNotification:"),
-                      imp_implementationWithBlock(keyboardWillShow),
+                      keyboardWillShowSelector,
+                      imp_implementationWithBlock(keyboardWillShowBlock),
                       method_getTypeEncoding(method))
     }
     
@@ -140,10 +142,6 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     if let safeArea = view.window?.safeAreaInsets {
       uiProperties.updateSafeAreaInsets(to: safeArea)
     }
-  }
-  
-  override public var preferredStatusBarStyle: UIStatusBarStyle {
-    statusBarStyle
   }
   
   //  override var prefersHomeIndicatorAutoHidden: Bool {
@@ -175,8 +173,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     updateSize()
   }
   
-  override public func viewWillTransition(to size: CGSize,
-                                          with coordinator: any UIViewControllerTransitionCoordinator) {
+  override public func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
     updateSize()
   }

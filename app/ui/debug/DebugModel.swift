@@ -14,11 +14,5 @@ public class DebugModel {
     set { showBordersProperty.value = newValue }
   }
   
-  private var disableMaskingProperty = Persistence.model(for: .disableMasking)
-  public var disableMasking: Bool {
-    get { disableMaskingProperty.value }
-    set { disableMaskingProperty.value = newValue }
-  }
-  
   private init() {}
 }

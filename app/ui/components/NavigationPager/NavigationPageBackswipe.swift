@@ -1,12 +1,18 @@
 import SwiftUI
 
+import HelloCore
+
 struct NavigationPageBackswipe: ViewModifier {
   
   @Environment(\.theme) private var theme
   @Environment(\.pageShape) private var pageShape
+  @Environment(\.viewFrame) private var viewFrame
   @Environment(\.helloPagerConfig) private var pagerConfig
   @Environment(PagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
+  
+  @NonObservedState private var lastTimeMoved: TimeInterval = epochTime
+  @State private var maskShape: Bool = true
   
   @GestureState private var backDragWidth: CGFloat?
 //  @State private var touchesModel: TouchesModel = .main
@@ -34,28 +40,49 @@ struct NavigationPageBackswipe: ViewModifier {
     min(1, max(0, (-size.width + (backProgressModel.drag ?? 0)) / (-size.width)))
   }
   
+  var needsEffects: Bool {
+    pagerModel.activePageID == pageID && offset != 0
+  }
+  
+  var effectiveShowEffects: Bool { needsEffects || maskShape }
+  
   func body(content: Content) -> some View {
     content
-      .clipShape(pageShape)
-      .background(theme.backgroundView(for: pageShape, isBaseLayer: true)
-        .shadow(color: .black.opacity(pagerModel.activePageID == pageID.id ? 0.2 : 0), radius: 16)
+      .clipShape(effectiveShowEffects ? pageShape : .rect)
+      .background(theme.backgroundView(for: effectiveShowEffects ? pageShape : .rect, isBaseLayer: true)
+        .shadow(color: .black.opacity(effectiveShowEffects && pagerModel.activePageID == pageID.id ? 0.2 : 0), radius: 16)
         .onTapGesture { globalDismissKeyboard() })
+      .padding(theme.backgroundOutlineWidth)
+      .overlay((effectiveShowEffects ? pageShape : .rect).strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
+      .padding(-theme.backgroundOutlineWidth)
       .overlay(
         HelloBackgroundDimmingView()
           .opacity(isActive ? 0 : 0.8 * backProgress)
           .animation(.pageAnimation, value: isActive)
 //          .animation(.interactive, value: backProgress)
           .allowsTightening(false)
-      ).overlay(pageShape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth)
-        .opacity(backProgressModel.drag == nil ? 0 : 1))
+      )
       .allowsHitTesting(pagerModel.activePageID == pageID && pagerModel.allowInteraction && backProgressModel.backProgress == 0)
       .disabled(pagerModel.activePageID != pageID || backProgressModel.backProgress != 0)
       .compositingGroup()
       .offset(x: offset)
 //      .animation(.pageAnimation, value: pagerModel.viewDepth)
-      .animation(backProgressModel.drag == nil ? .pageAnimation : nil, value: offset)
+      .animation(backProgressModel.drag == nil ? .pageAnimation : .interactive, value: offset)
+      .onChange(of: needsEffects, initial: true) {
+        if needsEffects {
+          lastTimeMoved = epochTime
+          if !maskShape {
+            maskShape = true
+          }
+        } else {
+          Task {
+            try await Task.sleep(seconds: 0.5)
+            guard !needsEffects && epochTime - lastTimeMoved >= 0.5 else { return }
+            maskShape = false
+          }
+        }
+      }
       .nest {
-#if os(iOS)
         $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
           .updating($backDragWidth) { drag, state, transaction in
             if backProgressModel.backSwipeAllowance == nil {
@@ -64,7 +91,9 @@ struct NavigationPageBackswipe: ViewModifier {
             
             var dragWidth: CGFloat? = nil
             if backProgressModel.backSwipeAllowance == true {
-              if drag.translation.width > 0 {
+              if drag.translation.width > viewFrame.width {
+                dragWidth = viewFrame.width + sqrt(abs(drag.translation.width - viewFrame.width))
+              } else if drag.translation.width > 0 {
                 dragWidth = drag.translation.width
               } else {
                 dragWidth = -sqrt(abs(drag.translation.width))
@@ -94,9 +123,6 @@ struct NavigationPageBackswipe: ViewModifier {
             backProgressModel.backSwipeAllowance = nil
             backProgressModel.reset()
           })
-#else
-        $0
-#endif
       }.onChange(of: backDragWidth) {
         if backDragWidth == nil {
           Task {

@@ -63,41 +63,15 @@ public extension HelloRectConformable {
   var maxX: NumberType { x + width }
   var maxY: NumberType { y + height }
   
-  var center: PointType {
-    PointType(x: midX, y: midY)
-  }
-  
-  var leading: PointType {
-    PointType(x: minX, y: midY)
-  }
-  
-  var topLeading: PointType {
-    PointType(x: minX, y: maxY)
-  }
-  
-  var topTrailing: PointType {
-    PointType(x: maxX, y: maxY)
-  }
-  
-  var trailing: PointType {
-    PointType(x: maxX, y: midY)
-  }
-  
-  var bottom: PointType {
-    PointType(x: midX, y: maxY)
-  }
-  
-  var bottomLeading: PointType {
-    PointType(x: minX, y: minY)
-  }
-  
-  var bottomTrailing: PointType {
-    PointType(x: maxX, y: minY)
-  }
-  
-  var top: PointType {
-    PointType(x: midX, y: minY)
-  }
+  var center: PointType { PointType(x: midX, y: midY) }
+  var leading: PointType { PointType(x: minX, y: midY) }
+  var topLeading: PointType { PointType(x: minX, y: maxY) }
+  var topTrailing: PointType { PointType(x: maxX, y: maxY) }
+  var trailing: PointType { PointType(x: maxX, y: midY) }
+  var bottom: PointType { PointType(x: midX, y: maxY) }
+  var bottomLeading: PointType { PointType(x: minX, y: minY) }
+  var bottomTrailing: PointType { PointType(x: maxX, y: minY) }
+  var top: PointType { PointType(x: midX, y: minY) }
   
   func clipped(in outerSize: SizeType) -> Self {
     var clippedRect = self

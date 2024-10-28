@@ -4,37 +4,27 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct AppIconSettingsRow<AppIcon: BaseAppIcon>: View {
+public struct AppIconSettingsRow: View {
   
   @Environment(\.theme) private var theme
   @Environment(PagerModel.self) private var pagerModel
   
-  @State private var appIconModel: AppIconModel<AppIcon> = AppIconModel()
+  @State private var appIconModel: AppIconModel
   
-  public init() {}
+  public init(_ appIconConfig: some HelloAppIconConfig) {
+    _appIconModel = State(initialValue: AppIconModel(appIconConfig: appIconConfig))
+  }
   
   public var body: some View {
     HelloButton(clickStyle: .highlight, haptics: .click, action: {
-      pagerModel.push(name: "App Icon") { AppIconSettingsPage<AppIcon>().environment(appIconModel) }
+      pagerModel.push(name: "App Icon") { AppIconSettingsPage().environment(appIconModel) }
     }) {
-      HelloSectionItem {
-        HStack(spacing: 4) {
-          Image(systemName: "app")
-            .font(.system(size: 20, weight: .regular))
-            .frame(width: 32, height: 32)
-          
-          Text("App Icon")
-            .font(.system(size: 16, weight: .regular))
-          Spacer(minLength: 0)
-          AppIconView(icon: appIconModel.currentIcon)
-            .frame(width: 36, height: 36)
-            .frame(height: 20)
-          Image(systemName: "chevron.right")
-            .font(.system(size: 16, weight: .regular))
-            .foregroundStyle(theme.surface.foreground.tertiary.style)
-        }
+      HelloNavigationRow(icon: "app", name: "App Icon", actionIcon: .arrow) {
+        AppIconView(icon: appIconModel.currentIcon)
+          .frame(width: 36, height: 36)
+          .frame(height: 20)
       }
-    }
+    }.onAppear { appIconModel.setup() }
   }
 }
 #endif

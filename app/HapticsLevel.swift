@@ -1,9 +1,11 @@
 import Foundation
 
-public enum HapticsLevel: String, CaseIterable {
+public enum HapticsLevel: String, Identifiable, CaseIterable {
   case off
   case minimal
   case normal
+  
+  public var id: String { rawValue }
   
   public var name: String {
     switch self {

@@ -56,7 +56,7 @@ public class Socket {
   let socketFileDescriptor: Int32
   
   nonisolated init(socketFD: Int32) throws {
-    Log.verbose("Opened on \(socketFD)", context: "Socket")
+    Log.verbose(context: "Socket", "Opened on \(socketFD)")
     socketFileDescriptor = socketFD
     guard fcntl(socketFileDescriptor, F_SETFL, fcntl(socketFileDescriptor, F_GETFL, 0) | O_NONBLOCK) == 0 else {
       throw SocketError.failedToMakeNonBlocking
@@ -93,7 +93,7 @@ public class Socket {
     var saddr = sockaddr()
     memcpy(&saddr, &addr, MemoryLayout<sockaddr_in>.size)
     guard bind(socketFileDescriptor, &saddr, socklen_t(MemoryLayout<sockaddr_in>.size)) != -1 else {
-      Log.error("Failed to bind socket on port \(port).", context: "Socket")
+      Log.error(context: "Socket", "Failed to bind socket on port \(port).")
       throw SocketError.bindFail
     }
   }

@@ -115,7 +115,7 @@ public actor ICloudSyncManager {
     defer { isSyncing = false }
     
     guard await Persistence.value(.persistenceMode) == .normal else {
-      Log.verbose("Skipping sync due to persistence mode", context: "Cloud")
+      Log.verbose(context: "Cloud", "Skipping sync due to persistence mode")
       return
     }
     
@@ -142,7 +142,7 @@ public actor ICloudSyncManager {
       } catch {
         switch error {
         case CKError.unknownItem:
-          Log.info("No item found for \(property.recordID)", context: "Cloud")
+          Log.info(context: "Cloud", "No item found for \(property.recordID)")
           record = CKRecord(recordType: property.recordType, recordID: recordID)
           hasCloudItem = false
         case CKError.badDatabase, CKError.badContainer:
@@ -175,28 +175,28 @@ public actor ICloudSyncManager {
       
       var value = await Persistence.value(persistenceProperty)
       
-      var needsToUpdateCloud: Bool
-      var needsToUpdateLocal: Bool
+      let needsToUpdateCloud: Bool
+      let needsToUpdateLocal: Bool
       if hasCloudItem {
         let cloudObject = try parseValue(from: record, for: property)
         if cloudMetadata.changeID == propertyMetadata.changeID {
           if try await hasLocalUpdates(value, cloudObject) {
-            Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
+            Log.verbose(context: "Cloud", "Replacing remote with local for \(property.recordID)")
             needsToUpdateCloud = true
             needsToUpdateLocal = false
           } else {
-            Log.verbose("No change for \(property.recordID)", context: "Cloud")
+            Log.verbose(context: "Cloud", "No change for \(property.recordID)")
             needsToUpdateCloud = false
             needsToUpdateLocal = false
           }
         } else {
-          Log.verbose("Merging value for \(property.recordID)", context: "Cloud")
+          Log.verbose(context: "Cloud", "Merging value for \(property.recordID)")
           value = try await mergeHandler(value, cloudObject)
           needsToUpdateCloud = true
           needsToUpdateLocal = true
         }
       } else {
-        Log.verbose("Replacing remote with local for \(property.recordID)", context: "Cloud")
+        Log.verbose(context: "Cloud", "Replacing remote with local for \(property.recordID)")
         needsToUpdateCloud = true
         needsToUpdateLocal = false
       }
@@ -206,7 +206,7 @@ public actor ICloudSyncManager {
       }
       
       if needsToUpdateCloud {
-        Log.verbose("Pushing for \(property.recordID)", context: "Cloud")
+        Log.verbose(context: "Cloud", "Pushing for \(property.recordID)")
         let valueData = try value.jsonData
         switch property.valueType {
         case .data:
@@ -223,7 +223,7 @@ public actor ICloudSyncManager {
         }
         propertyMetadata = updatedMetadata
       } else {
-        Log.verbose("Skipping push for \(property.recordID)", context: "Cloud")
+        Log.verbose(context: "Cloud", "Skipping push for \(property.recordID)")
       }
       let updatedMetadata = propertyMetadata
       await Persistence.atomicUpdate(for: .cloudSyncState) {
@@ -231,9 +231,9 @@ public actor ICloudSyncManager {
         state[property.recordID] = updatedMetadata
         return state
       }
-      Log.info("Sync complete for \(property.recordID)\nchanged: {local: \(needsToUpdateLocal), remote: \(needsToUpdateCloud)}", context: "Cloud")
+      Log.info(context: "Cloud", "Sync complete for \(property.recordID)\nchanged: {local: \(needsToUpdateLocal), remote: \(needsToUpdateCloud)}")
     } catch {
-      Log.error(error.localizedDescription, context: "Cloud")
+      Log.error(context: "Cloud", error.localizedDescription)
       throw error
     }
   }

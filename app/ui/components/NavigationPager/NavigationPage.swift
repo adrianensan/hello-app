@@ -78,11 +78,9 @@ public struct NavigationPage<Content: View, TitleContent: View, NavBarContent: V
           Color.clear.frame(height: navBarStyle != .scrollsWithContent ? navBarHeight : 0)
         }
       
-      #if os(iOS)
       NavigationPageBarFixed(titleContent: titleContent, navBarContent: {
         HelloPageNavBarContent(navBarContent: navBarContent)
       })
-      #endif
     }.onChange(of: config.overrideNavBarTitleScrollsDown == false || isSmallSize || !(TitleContent.self == NavigationPageTitle.self), initial: true) {
       #if os(iOS)
       scrollModel.defaultScrollThreshold = config.overrideNavBarTitleScrollsDown == false || isSmallSize || !(TitleContent.self == NavigationPageTitle.self) ? 0 : -82

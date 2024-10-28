@@ -10,7 +10,6 @@ public enum DNSLabel {
     var domain: String = ""
     var newLabelPointers: [Int: String] = [:]
     while let firstByte = dataReader.byte() {
-      Log.debug("Loop 9", context: "Loop")
       // 0 signals the end of a domain
       if firstByte == 0 {
         dataReader.advanceCursor(by: 1)

@@ -84,7 +84,6 @@ public enum DNSPacketParser {
     
     // Flatten domain aliases into their final resolved ip address
     while let alias = aliases.first(where: { ipAddresses[$0.value] != nil }) {
-      Log.debug("Loop 10", context: "Loop")
       guard var mappings = ipAddresses[alias.value] else { break }
       mappings.domains.insert(alias.key)
       ipAddresses[alias.value] = mappings

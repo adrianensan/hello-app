@@ -141,61 +141,61 @@ public enum MacAppIconView: Sendable {
   }
 }
 
-@MainActor
-public protocol AnyAppIconView: BaseAppIcon {
-  var view: HelloAppIconViewLayers { get }
-  
-  var delayBeforeCapture: TimeInterval { get }
-}
-
-public extension AnyAppIconView {
-  var delayBeforeCapture: TimeInterval { 0 }
-}
-
-public protocol IOSAppIcon: AnyAppIconView {
-  var iOSView: HelloIOSAppIconView { get }
-}
-
-public extension IOSAppIcon {
-  var iOSView: HelloIOSAppIconView { .classic(view) }
-}
-
-public protocol MacOSAppIcon: AnyAppIconView {
-  var macOSView: MacAppIconView { get }
-}
-
-public extension MacOSAppIcon {
-  var macOSView: MacAppIconView { .unmasked(view) }
-}
-
-public protocol IMessageAppIcon: AnyAppIconView {
-  var iMessageView: HelloAppIconViewLayers { get }
-}
-
-public extension IMessageAppIcon {
-  var iMessageView: HelloAppIconViewLayers { view }
-}
-
-public protocol WatchAppIcon: AnyAppIconView {
-  var watchOSView: HelloAppIconViewLayers { get }
-}
-
-public extension WatchAppIcon {
-  var watchOSView: HelloAppIconViewLayers { view }
-}
-
-public protocol VisionOSAppIcon: AnyAppIconView {
-  var visionOSView: HelloAppIconViewLayers { get }
-}
-
-public extension VisionOSAppIcon {
-  var visionOSView: HelloAppIconViewLayers { view }
-}
-
-public protocol TVOSAppIcon: AnyAppIconView {
-  var tvOSView: HelloAppIconViewLayers { get }
-}
-
-public extension TVOSAppIcon {
-  var tvOSView: HelloAppIconViewLayers { view }
-}
+//@MainActor
+//public protocol AnyAppIconView: BaseAppIcon {
+//  var view: HelloAppIconViewLayers { get }
+//  
+//  var delayBeforeCapture: TimeInterval { get }
+//}
+//
+//public extension AnyAppIconView {
+//  var delayBeforeCapture: TimeInterval { 0 }
+//}
+//
+//public protocol IOSAppIcon: AnyAppIconView {
+//  var iOSView: HelloIOSAppIconView { get }
+//}
+//
+//public extension IOSAppIcon {
+//  var iOSView: HelloIOSAppIconView { .classic(view) }
+//}
+//
+//public protocol MacOSAppIcon: AnyAppIconView {
+//  var macOSView: MacAppIconView { get }
+//}
+//
+//public extension MacOSAppIcon {
+//  var macOSView: MacAppIconView { .unmasked(view) }
+//}
+//
+//public protocol IMessageAppIcon: AnyAppIconView {
+//  var iMessageView: HelloAppIconViewLayers { get }
+//}
+//
+//public extension IMessageAppIcon {
+//  var iMessageView: HelloAppIconViewLayers { view }
+//}
+//
+//public protocol WatchAppIcon: AnyAppIconView {
+//  var watchOSView: HelloAppIconViewLayers { get }
+//}
+//
+//public extension WatchAppIcon {
+//  var watchOSView: HelloAppIconViewLayers { view }
+//}
+//
+//public protocol VisionOSAppIcon: AnyAppIconView {
+//  var visionOSView: HelloAppIconViewLayers { get }
+//}
+//
+//public extension VisionOSAppIcon {
+//  var visionOSView: HelloAppIconViewLayers { view }
+//}
+//
+//public protocol TVOSAppIcon: AnyAppIconView {
+//  var tvOSView: HelloAppIconViewLayers { get }
+//}
+//
+//public extension TVOSAppIcon {
+//  var tvOSView: HelloAppIconViewLayers { view }
+//}

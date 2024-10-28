@@ -30,7 +30,7 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
   
   public static func resource(bundle: Bundle = .main, fileName: String) -> HelloImageSource {
     guard let url = bundle.path(forResource: fileName, ofType: nil) else {
-      Log.error("Failed to find bundle image \(fileName)", context: "ImageModel")
+      Log.error(context: "ImageModel", "Failed to find bundle image \(fileName)")
       return .data(Data())
     }
     return .url(url)

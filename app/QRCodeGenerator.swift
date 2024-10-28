@@ -6,7 +6,7 @@ import HelloCore
 public enum QRCodeGenerator {
   public static func generate(from string: String) throws -> NativeImage {
     guard let data = string.data(using: String.Encoding.ascii) else {
-      Log.error("String could not be encoded to ASCII", context: "QR Code Generator")
+      Log.error(context: "QR Code Generator", "String could not be encoded to ASCII")
       throw HelloError("String could not be encoded to ASCII")
     }
     
@@ -17,7 +17,7 @@ public enum QRCodeGenerator {
       let ciImage = filter.outputImage,
       let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent)
     else {
-      Log.error("Failed to generate", context: "QR Code Generator")
+      Log.error(context: "QR Code Generator", "Failed to generate")
       throw HelloError("Failed to generate")
     }
     

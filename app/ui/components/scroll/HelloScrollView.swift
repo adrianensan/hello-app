@@ -38,6 +38,7 @@ public class HelloScrollModel {
   @ObservationIgnored internal private(set) var readyForDismiss: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
+  @ObservationIgnored private var isScreenTouched: Bool = false
   @ObservationIgnored private var isActive: Bool = true
 //  @ObservationIgnored private var lastUpdate: TimeInterval = epochTime
   
@@ -48,12 +49,6 @@ public class HelloScrollModel {
   
   public var scrollEnabled: Bool = true
   public var scrollBottomOffset: CGFloat = 0
-  
-  #if os(iOS)
-  public var isScreenTouched: Bool { !TouchesModel.main.activeTouches.isEmpty }
-  #else
-  public var isScreenTouched: Bool { false }
-  #endif
   
   public var overscroll: CGFloat = 0
   
@@ -81,6 +76,10 @@ public class HelloScrollModel {
   
   public func setActive(_ isActive: Bool) {
     self.isActive = isActive
+  }
+  
+  public func setIsTouching(_ isTouching: Bool) {
+    self.isScreenTouched = isTouching
   }
   
   public func resetDismissState() {
@@ -119,9 +118,7 @@ public class HelloScrollModel {
     
     guard scrollOffset != offset else { return }
     scrollOffset = offset
-//    #if os(iOS)
-//    TouchesModel.main.hasScrolledDuringTouch = isScreenTouched
-//    #endif
+
     let hasScrolled = scrollOffset < effectiveScrollThreshold
     if self.hasScrolled != hasScrolled {
       self.hasScrolled = hasScrolled
@@ -185,6 +182,7 @@ public struct HelloScrollView<Content: View>: View {
       }
     }.scrollDisabled(!model.scrollEnabled)
       .modifier(HelloScrollPositionViewModifier())
+      .modifier(HelloScrollTouchViewModifier())
     //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
     //        -geometry.contentOffset.y - geometry.contentInsets.top
     //      }, action: { _, newScrollOffset in

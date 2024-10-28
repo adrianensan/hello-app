@@ -97,11 +97,11 @@ public extension HTTPServer {
   func handleConnection(connection: ClientConnection) async throws {
     guard accessControl.shouldAllowAccessTo(address: connection.clientAddress) else { return }
     for try await request in await connection.httpRequests {
-      Log.verbose("Request from \(connection.clientAddress), \(request.url)", context: "HTTP")
+      Log.verbose(context: "HTTP", "Request from \(connection.clientAddress), \(request.url)")
       do {
         try await connection.send(response: try await handle(request: request))
       } catch {
-        Log.error("Server error: \(error)", context: "Server")
+        Log.error(context: "Server", "Server error: \(error)")
         try await connection.send(response: .serverError)
       }
     }

@@ -24,7 +24,6 @@ public class SSLClientConnection: ClientConnection {
     
     var errorLoopCounter = 0
     while true {
-      Log.debug("Loop 6", context: "Loop")
       let result = SSL_accept(socket.sslSocket)
       switch result {
       case 1: return

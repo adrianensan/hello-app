@@ -1,21 +1,8 @@
 import Foundation
 
-public class Weak<T: AnyObject> {
-  public weak var value : T?
-  public init (value: T) {
-    self.value = value
-  }
-}
-
 public enum HelloPersistenceError: Error {
   case updatesCancelled
 }
-
-@globalActor final public actor HelloPersistenceActor: GlobalActor {
-  public static let shared: HelloPersistenceActor = HelloPersistenceActor()
-}
-
-//extension UserDefaults: @unchecked @retroactive Sendable {}
 
 public extension UserDefaults {
   func value<Property: PersistenceProperty>(for property: Property) throws -> Property.Value {
@@ -46,7 +33,7 @@ public extension UserDefaults {
 }
 
 @HelloPersistenceActor
-public class HelloPersistence {
+public class HelloPersistence: HelloPersistenceConformable {
   
   public struct Listener<Property: PersistenceProperty> {
     weak var object: AnyObject?
@@ -58,7 +45,7 @@ public class HelloPersistence {
     }
   }
   
-  nonisolated public let keychain: KeychainHelper
+  nonisolated public let keychain = KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup)
   private var allowSaving: Bool = true
   
   nonisolated public let mode: PersistenceMode = (try? UserDefaults.standard.value(for: .persistenceMode)) ?? .normal
@@ -72,13 +59,11 @@ public class HelloPersistence {
   private var userDefaultsCache: [DefaultsPersistenceSuite: UserDefaults] = [:]
   private var baseURLs: [FilePersistenceLocation: URL] = [:]
   
-  nonisolated fileprivate init(keychain: KeychainHelper) {
-    self.keychain = keychain
-  }
+  nonisolated init() {}
   
   nonisolated private func userDefaults(for suite: DefaultsPersistenceSuite) -> UserDefaults {
     guard let defaults = suite.userDefaults else {
-      Log.fatal("Failed to get defaults suite for \(suite.id)", context: "Persistence")
+      Log.fatal(context: "Persistence", "Failed to get defaults suite for \(suite.id)")
       return .standard
     }
     return defaults
@@ -93,7 +78,7 @@ public class HelloPersistence {
   
   nonisolated private func baseURL(for location: FilePersistenceLocation, isNew: Bool) -> URL {
     guard let url = (isNew ? location.newURL : location.url) else {
-      Log.fatal("Failed to get URL for \(location.id)", context: "Persistence")
+      Log.fatal(context: "Persistence", "Failed to get URL for \(location.id)")
       return .temporaryDirectory
     }
     return url
@@ -111,7 +96,7 @@ public class HelloPersistence {
 //    }
   }
   
-  func listen<Property: PersistenceProperty>(for property: Property,
+  public func listen<Property: PersistenceProperty>(for property: Property,
                                              object: AnyObject,
                                              action: @escaping @Sendable (Property.Value) async -> Void,
                                              initial: Bool = true) async {
@@ -128,7 +113,7 @@ public class HelloPersistence {
       Task { @MainActor in
         guard let object = Persistence.models[property.location.id]?.value else { return }
         guard let observable = object as? PersistentObservable<Property> else {
-          Log.error("Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!", context: "Persistence")
+          Log.error(context: "Persistence", "Invalid type for property \(property.self), make sure 2 properties aren't sharing the same location!!!")
           return
         }
         observable._value = value
@@ -151,11 +136,11 @@ public class HelloPersistence {
     }
   }
   
-  nonisolated func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
+  nonisolated public func saveInternal<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) throws {
     guard mode == .normal || property.allowedInDemoMode else { return }
     
     if property.isDeprecated {
-      Log.warning("Using depreacted property \(property.self)", context: "Persistence")
+      Log.warning(context: "Persistence", "Using depreacted property \(property.self)")
     }
     let value = property.cleanup(value: value)
     
@@ -208,7 +193,7 @@ public class HelloPersistence {
       }
       updated(value: value, for: property, skipModelUpdate: skipModelUpdate)
     } catch {
-      Log.error("Failed to save value for \(property.self). Error: \(error.localizedDescription)", context: "Persistence")
+      Log.error(context: "Persistence", "Failed to save value for \(property.self). Error: \(error.localizedDescription)")
     }
   }
   
@@ -311,9 +296,9 @@ public class HelloPersistence {
     updated(value: property.defaultValue, for: property, skipModelUpdate: false)
   }
   
-  public func nuke(stopSaving: Bool = true) {
+  public func nuke() {
     guard mode == .normal else { return }
-    allowSaving = !stopSaving
+    allowSaving = false
     cache = [:]
     for suite in DefaultsPersistenceSuite.allCases {
       let userDefaults = userDefaults(for: suite)
@@ -388,7 +373,7 @@ public class HelloPersistence {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
       }
     } catch {
-      Log.error("Failed to create directory at \(url.relativePath). \(error.localizedDescription)", context: "Persistence")
+      Log.error(context: "Persistence", "Failed to create directory at \(url.relativePath). \(error.localizedDescription)")
     }
     
     if let string = value as? String {
@@ -423,259 +408,6 @@ public class HelloPersistence {
   }
   
   nonisolated private func size(of url: URL) -> Int {
-    guard let resourceValues = try? url.resourceValues(forKeys: [
-      .isRegularFileKey,
-      .totalFileSizeKey,
-      .fileAllocatedSizeKey,
-      .totalFileAllocatedSizeKey,
-    ]), resourceValues.isRegularFile == true else { return 0 }
-    
-    return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
-  }
-}
-
-public enum PersistenceMode: String, Codable, Identifiable, CaseIterable, Sendable {
-  case normal
-  case demo
-  case freshInstall
-  
-  public var id: String { rawValue }
-  
-  public var name: String {
-    switch self {
-    case .normal: "Normal"
-    case .demo: "Demo"
-    case .freshInstall: "New"
-    }
-  }
-}
-
-@HelloPersistenceActor
-public enum Persistence {
-  
-  @MainActor
-  fileprivate static var models: [String: Weak<AnyObject>] = [:]
-  
-  @MainActor
-  public static func model<Property: PersistenceProperty>(for property: Property) -> PersistentObservable<Property> {
-    if let weakModel = models[property.id],
-       let model = weakModel.value as? PersistentObservable<Property> {
-      return model
-    } else {
-      let model = PersistentObservable(property)
-      models[property.id] = Weak(value: model)
-      return model
-    }
-  }
-  
-  nonisolated public static let defaultPersistence = HelloPersistence(keychain: KeychainHelper(service: AppInfo.bundleID, group: AppInfo.appGroup))
-  
-  public static func save<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
-    Property.persistence.save(value, for: property)
-  }
-  
-  nonisolated public static func unsafeSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
-    try? Property.persistence.saveInternal(value, for: property)
-  }
-  
-  public static func value<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    Property.persistence.value(for: property)
-  }
-  
-  nonisolated public static func unsafeValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    Property.persistence.storedValue(for: property)
-  }
-  
-  @MainActor
-  public static func mainActorValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-    model(for: property).value
-  }
-  
-  @MainActor
-  public static func mainActorSave<Property: PersistenceProperty>(_ value: Property.Value, for property: Property) {
-    model(for: property).value = value
-  }
-  
-//  public static func initValue<Property: PersistenceProperty>(_ property: Property) -> Property.Value {
-//    await Property.Key.persistence.value(for: property)
-//  }
-  
-  public static func delete<Property: PersistenceProperty>(_ property: Property) {
-    Property.persistence.delete(property: property)
-  }
-  
-  public static func listen<Property: PersistenceProperty>(for property: Property,
-                                                           object: AnyObject,
-                                                           initial: Bool = true,
-                                                           action: @escaping @Sendable (Property.Value) async -> Void) async {
-    await Property.persistence.listen(for: property, object: object, action: action, initial: initial)
-  }
-  
-  public static func atomicUpdate<Property: PersistenceProperty>(for property: Property, update: @Sendable (consuming Property.Value) -> Property.Value) {
-    Property.persistence.atomicUpdate(property, update: update)
-  }
-  
-  nonisolated public static func size<Property: PersistenceProperty>(of property: Property) -> Int {
-    Property.persistence.size(of: property)
-  }
-  
-  public static func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    Property.persistence.isSet(property: property)
-  }
-  
-  nonisolated public static func unsafeIsSet<Property: PersistenceProperty>(property: Property) -> Bool {
-    Property.persistence.unsafeIsSet(property: property)
-  }
-  
-  nonisolated public static func fileURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    Property.persistence.fileURL(for: property)
-  }
-  
-  nonisolated public static func rootURL<Property: PersistenceProperty>(for property: Property) -> URL? {
-    Property.persistence.rootURL(for: property)
-  }
-  
-  nonisolated public static func wipeFiles(in location: FilePersistenceLocation) throws {
-    guard let url = location.newURL else { return }
-    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
-      try FileManager.default.removeItem(at: fileURL)
-    }
-  }
-  
-  nonisolated public static func wipeFiles(in location: FilePersistenceLocation, notAccessedWithin timeInterval: TimeInterval) throws {
-    guard let url = location.newURL else { return }
-    try wipeFiles(in: url, notAccessedWithin: timeInterval)
-  }
-  
-  nonisolated public static func wipeFiles(in url: URL, notAccessedWithin timeInterval: TimeInterval) throws {
-    for fileURL in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
-      if fileURL.isDirectory {
-        try? wipeFiles(in: fileURL, notAccessedWithin: timeInterval)
-      } else if fileURL.dateAccessed ?? .distantPast < .now.addingTimeInterval(-timeInterval) {
-        try? FileManager.default.removeItem(at: fileURL)
-      }
-    }
-  }
-  
-  nonisolated public static func delete(location: FilePersistenceLocation) throws {
-    guard let url = location.newURL else { return }
-    try FileManager.default.removeItem(at: url)
-  }
-  
-  static package func nuke() {
-    for filePersistenceLocation in FilePersistenceLocation.allCases {
-      if let url = filePersistenceLocation.newURL {
-        try? FileManager.default.removeItem(at: url)
-      }
-    }
-    for defaultsSuite in DefaultsPersistenceSuite.allCases {
-      if let userDefaults = defaultsSuite.userDefaults {
-        for key in userDefaults.dictionaryRepresentation().keys {
-          userDefaults.removeObject(forKey: key)
-        }
-      }
-    }
-  }
-  
-  public static func snapshot(of fileURL: URL, overrideName: String? = nil) throws -> PersistenceFileSnapshotType {
-    let name = fileURL.lastPathComponent
-    guard FileManager.default.fileExists(atPath: fileURL.path) else { throw HelloError("No file") }
-    if fileURL.isDirectory {
-      var children: [PersistenceFileSnapshotType] = []
-      for fileURL in try FileManager.default.contentsOfDirectory(at: fileURL, includingPropertiesForKeys: nil) {
-        children.append(try snapshot(of: fileURL))
-      }
-      return .folder(PersistenceFolderSnapshot(
-        name: overrideName ?? name,
-        size: children.reduce(DataSize(bytes: 0)) { $0 + $1.size },
-        sizeOnDisk: children.reduce(DataSize(bytes: 0)) { $0 + $1.sizeOnDisk },
-        url: fileURL,
-        files: children))
-    } else {
-      return .file(PersistenceFileSnapshot(
-        name: name,
-        size: DataSize(bytes: fileURL.fileSize()),
-        sizeOnDisk: DataSize(bytes: fileURL.regularFileAllocatedSize()),
-        dateCreated: fileURL.dateCreated,
-        dateModified: fileURL.dateModified,
-        url: fileURL))
-    }
-  }
-  
-  package static func snapshot() throws -> PersistenceSnapshot {
-    var userDefaultsSnapshot: [UserDefaultsSnapshot] = []
-    for defaults in DefaultsPersistenceSuite.allCases {
-      if let userDefaults = defaults.userDefaults {
-        userDefaultsSnapshot.append(
-          UserDefaultsSnapshot(
-            suite: defaults,
-            objects: userDefaults.dictionaryRepresentation().map { (key, value) in
-              UserDefaultsEntry(
-                suite: defaults,
-                key: key,
-                object: UserDefaultsObjectSnapshot.infer(from: value),
-                isSystem:
-                  PersistenceSnapshotGenerator.systemUserDefaultKeyPrefixes.contains(where: key.starts) ||
-                  PersistenceSnapshotGenerator.systemUserDefaultKeys.contains(key))
-            }
-          ))
-      }
-    }
-    
-    var fileSnapshots: [PersistenceFileSnapshotType] = []
-    for fileLocation in FilePersistenceLocation.allCases.sorted(by: { $0.name < $1.name }) {
-      if let url = fileLocation.newURL,
-         let folderSnapshot = try? snapshot(of: url, overrideName: fileLocation.name) {
-        fileSnapshots.append(folderSnapshot)
-      }
-    }
-    
-    return PersistenceSnapshot(userDefaults: userDefaultsSnapshot, files: PersistenceFolderSnapshot(
-      name: "Root",
-      size: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.size },
-      sizeOnDisk: fileSnapshots.reduce(DataSize(bytes: 0)) { $0 + $1.sizeOnDisk },
-      url: URL(filePath: "/"),
-      files: fileSnapshots))
-  }
-}
-
-public extension URL {
-  var isDirectory: Bool {
-    (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
-  }
-  
-  var dateCreated: Date? {
-    (try? resourceValues(forKeys: [.creationDateKey]))?.creationDate
-  }
-  
-  var dateModified: Date? {
-    (try? resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
-  }
-  
-  var dateAccessed: Date? {
-    (try? resourceValues(forKeys: [.contentAccessDateKey]))?.contentAccessDate
-  }
-  
-  func regularFileAllocatedSize() -> Int {
-    guard let resourceValues = try? self.resourceValues(forKeys: [
-      .isRegularFileKey,
-      .totalFileSizeKey,
-      .fileAllocatedSizeKey,
-      .totalFileAllocatedSizeKey,
-    ]),
-          resourceValues.isRegularFile == true else { return 0 }
-    
-    return resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0
-  }
-  
-  func fileSize() -> Int {
-    guard let resourceValues = try? self.resourceValues(forKeys: [
-      .isRegularFileKey,
-      .totalFileSizeKey,
-      .fileSizeKey,
-    ]),
-          resourceValues.isRegularFile == true else { return 0 }
-    
-    return resourceValues.totalFileSize ?? resourceValues.fileSize ?? 0
+    url.regularFileAllocatedSize()
   }
 }

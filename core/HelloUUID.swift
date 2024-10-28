@@ -1,10 +1,20 @@
 import Foundation
 
+/// A lossless condensed and more useful representation of the system UUID
+/// 
+/// UUID:      36 characters, 1-9 & A-F  XXXXXXXX-XXXX-4XXX-XXXX-XXXXXXXXXXXX
+/// HelloUUID: 24 characters, 1-9 & a-z, xxxxxxxxxxxxxxxxxxxxxxxx
+///
+/// The system UUID contains 122 bits of actual entropy. The remaining 6 bits appear
+/// These bits are rearranged into a 128bit int, with the remaining 6 bits being fixed.
+/// 0000x1x1xxxxxxxx...
+/// These fixed bits ensure the string representation is exactly 24 characters long, with a leading letter
 public struct HelloUUID: Identifiable, Hashable, Sendable {
   
   public var bits: UInt128
   
   public init(bits: UInt128) {
+    // Set some unused leading bits to force a leading letter
     self.bits = (bits & 0x0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) | 0x05000000000000000000000000000000
   }
   
@@ -16,6 +26,8 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
   
   public init(uuid: UUID) {
     let uuid = uuid.uuid
+    // The system UUID contains fixed bits (like the version "4", the 4 leading bits of byte 6),
+    // which are stripped out here as they don't provide any entropy.
     let modifiedByte0 = ((uuid.8 & 0b00010000) >> 1) | ((uuid.8 & 0b00100000) >> 4)
     let modifiedByte1 = ((uuid.8 & 0x0F) << 4) | (uuid.6 & 0x0F)
     let bytes = [
@@ -36,35 +48,8 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
     self.init(bits: bits)
   }
   
-  public static func read(uuidString: String) throws -> HelloUUID {
-    guard let uuid = UUID(uuidString: uuidString) else {
-      throw HelloError("Invalid hexadecimal value")
-    }
-    return HelloUUID(uuid: uuid)
-  }
-  
   public var string: String {
     String(bits, radix: 36, uppercase: false)
-//    var raw = String(bits, radix: 36, uppercase: false)
-//    let diff = 24 - raw.count
-//    if diff > 0 {
-//      raw = String(repeatElement("0", count: diff)) + raw
-//    }
-//    guard let firstCharacter = raw.first else {
-//      Log.wtf("Empty HelloUUID string")
-//      return raw
-//    }
-//    guard let index = characters.firstIndex(of: firstCharacter) else {
-//      Log.wtf("Unexpected character \(firstCharacter) in HelloUUID")
-//      return raw
-//    }
-//    let modifiedIndex = index + 27
-//    guard modifiedIndex < characters.count else {
-//      Log.wtf("First character in HelloUUID is too large (\(firstCharacter))")
-//      return raw
-//    }
-//    raw = String(characters[modifiedIndex]) + raw.dropFirst()
-//    return raw
   }
   
   public var shortHashString: String {
@@ -81,44 +66,4 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
     var sumCharacter = String(sum % 36, radix: 36, uppercase: false)
     return "\(sumCharacter)\(String(subset, radix: 36, uppercase: false))"
   }
-  
-  public var systemUUIDString: String {
-    var uuid = String(bits, radix: 16, uppercase: true)
-    uuid.insert("-", at: uuid.index(for: 20))
-    uuid.insert("-", at: uuid.index(for: 16))
-    uuid.insert("-", at: uuid.index(for: 12))
-    uuid.insert("-", at: uuid.index(for: 8))
-    return uuid
-  }
-  
-  public var systemUUID: UUID? {
-    UUID(uuidString: systemUUIDString)
-  }
-  
-//  func nowTime() -> String {
-//    let epochTime = Date.now.timeIntervalSince1970
-//    var int = UInt64(epochTime)
-//    print(int)
-//    
-//    var bits: [Bool] = []
-//    for _ in 0..<35 {
-//      let currentBit = int & 0x01
-//      bits.append(currentBit != 0)
-//      int >>= 1
-//    }
-//    
-//    bits.reverse()
-//    
-//    var string = ""
-//    while !bits.isEmpty {
-//      var value = 0
-//      for i in 0..<5 {
-//        if bits.popLast() == true {
-//          value += Int(pow(2, Double(i)))
-//        }
-//      }
-//      string.append(Self.lowercasedCharacters[value])
-//    }
-//    return String(string.reversed())
-//  }
 }

@@ -21,7 +21,7 @@ class TLSSocket: TCPSocket {
     }
     var data = data
     let bytesSent = SSL_write(sslSocket, &data, min(8192, Int32(data.count)))
-    Log.verbose("Sending \(bytesSent) bytes to \(socketFileDescriptor)", context: "TLS Socket")
+    Log.verbose(context: "TLS Socket", "Sending \(bytesSent) bytes to \(socketFileDescriptor)")
     guard bytesSent > 0 else {
       let error = SSL_get_error(sslSocket, bytesSent)
       switch error {
@@ -46,7 +46,7 @@ class TLSSocket: TCPSocket {
       default: throw SSLError.initFail
       }
     }
-    Log.verbose("Read \(bytesRead) bytes from \(socketFileDescriptor)", context: "SSL Socket")
+    Log.verbose(context: "SSL Socket", "Read \(bytesRead) bytes from \(socketFileDescriptor)")
     return [UInt8](recieveBuffer[..<Int(bytesRead)])
   }
 }

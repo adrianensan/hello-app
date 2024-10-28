@@ -52,7 +52,7 @@ public extension HTTPSServer {
   nonisolated var port: UInt16 { 443 }
   
   func setupSSL() throws {
-    Log.info("Setting up SSL", context: "SSL")
+    Log.info(context: "SSL", "Setting up SSL")
     sslContext = SSL_CTX_new(TLS_server_method())
 
 //    SSL_CTX_set_options(sslContext, UInt(SSL_OP_NO_SSLv2))

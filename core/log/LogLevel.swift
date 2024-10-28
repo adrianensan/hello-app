@@ -1,6 +1,6 @@
 import Foundation
 
-public enum LogLevel: Codable, Comparable, Equatable, Sendable {
+public enum LogLevel: Codable, Comparable, Equatable, Sendable, CaseIterable {
   case debug
   case verbose
   case info
@@ -9,6 +9,19 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable {
   case error
   case fatal
   case wtf
+  
+  public var name: String {
+    switch self {
+    case .debug: "Debug"
+    case .verbose: "Verbose"
+    case .info: "Info"
+    case .meta: "Meta"
+    case .warning: "Warning"
+    case .error: "Error"
+    case .fatal: "Fatal"
+    case .wtf: "WTF"
+    }
+  }
   
   public var icon: String {
     switch self {

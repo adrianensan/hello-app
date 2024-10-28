@@ -56,7 +56,7 @@ public struct HelloPagerConfig: Sendable {
   public var backGestureType: GestureType
   
   public init(navBarHeight: CGFloat = Self.defaultNavBarHeight,
-              horizontalPagePadding: CGFloat = 16,
+              horizontalPagePadding: CGFloat = 20,
               belowNavBarPadding: CGFloat = 0,
               navBarStyle: NavigationPageNavigationBarStyle = .fixed,
               navBarFadeTransitionMultiplier: CGFloat = 1,
@@ -164,7 +164,7 @@ public class PagerModel {
                                animated: Bool = true,
                                withOptions options: PagerPageOptions = PagerPageOptions(),
                                view: @escaping @MainActor () -> Page) {
-    Log.verbose("Attempting to push page \(id)", context: "Pager")
+    Log.verbose(context: "Pager", "Attempting to push page \(id)")
     guard allowInteraction else { return }
 //    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
@@ -180,16 +180,12 @@ public class PagerModel {
     viewStack.append(newPage)
     if animated {
       Task {
-        try await Task.sleepForABit()
-//        try await Task.sleepForOneFrame()
+        try await Task.sleepForOneFrame()
+        try await Task.sleepForOneFrame()
         withAnimation(.pageAnimation) {
           self.viewDepth = self.viewStack.count
           self.allowInteraction = true
         }
-//        Task {
-//          try await Task.sleep(seconds: 0.24)
-//          self.allowInteraction = true
-//        }
       }
     } else {
       self.viewDepth = self.viewStack.count
@@ -209,9 +205,9 @@ public class PagerModel {
   }
   
   public func popView(animated: Bool = true) {
-    Log.verbose("Attempting to pop page", context: "Pager")
+    Log.verbose(context: "Pager", "Attempting to pop page")
     guard let activePage else {
-      Log.error("Trying to pop view with no active page", context: "Pager")
+      Log.error(context: "Pager", "Trying to pop view with no active page")
       return
     }
     let pageIDToRemove = activePage.instanceID

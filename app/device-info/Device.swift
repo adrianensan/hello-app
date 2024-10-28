@@ -2,13 +2,13 @@ import Foundation
 
 import HelloCore
 
-public indirect enum Device: CustomStringConvertible, Equatable, Sendable {
+public enum Device: CustomStringConvertible, Equatable, Sendable {
   case iPhone(IPhoneModel)
   case iPad(IPadModel)
   case appleWatch(AppleWatchModel)
   case appleTV(AppleTVModel)
   case mac
-  case simulator(device: Device)
+  indirect case simulator(device: Device)
   case unknown(identifier: String)
   
   public static let current = Device.infer(from: deviceModelIdentifier)

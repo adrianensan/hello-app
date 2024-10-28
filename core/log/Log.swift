@@ -4,37 +4,38 @@ import Foundation
   public static let shared: HelloLogActor = HelloLogActor()
 }
 
+@MainActor
 public enum Log {
   
   #if DEBUG
-  nonisolated(unsafe) private static var shouldPrintStatements: Bool = true
+  private static var shouldPrintStatements: Bool = true
   #else
-  nonisolated(unsafe) private static var shouldPrintStatements: Bool = false
+  private static var shouldPrintStatements: Bool = false
   #endif
   
-  nonisolated(unsafe) private static var ephemeral: Bool = false
+  private static var ephemeral: Bool = false
   #if DEBUG
-  nonisolated(unsafe) private static var logLevel: LogLevel = .debug
+  private static var logLevel: LogLevel = .debug
   #else
-  nonisolated(unsafe) private static var logLevel: LogLevel = .verbose
+  private static var logLevel: LogLevel = .verbose
   #endif
   
-  nonisolated package static let logger: Logger = Logger(ephemeral: ephemeral)
-  
-  package static func log(level: LogLevel, message: String, context: String?) {
+  package static func log(level: LogLevel, context: @escaping @Sendable () -> String?,
+                          message: @escaping @Sendable () -> String) async throws {
     guard shouldPrintStatements || level >= logLevel else { return }
-    let logStatement = LogStatement(level: level, message: message, context: context)
+
+    let logStatement = LogStatement(level: level, context: context(), message: message())
     if shouldPrintStatements {
       print(logStatement.formattedLine)
     }
-
+    
     if level >= logLevel {
-      Task { try await logger.log(logStatement) }
+      try await HelloEnvironment.object(for: .logger).log(logStatement)
     }
   }
   
-  @MainActor
   public static func configure(
+    fileURL: URL? = nil,
     logLevel: LogLevel? = nil,
     shouldPrintStatements: Bool?,
     ephemeral: Bool = false
@@ -45,88 +46,61 @@ public enum Log {
     if let shouldPrintStatements {
       Self.shouldPrintStatements = shouldPrintStatements
     }
-    Self.ephemeral = ephemeral
-    let now: Date = .now
-    if logger.dateStarted > now {
-      Log.error("Attempted to configure after logger was initialized", context: "Log")
+  }
+  
+  nonisolated public static func log(level: LogLevel, context: @escaping @Sendable () -> String?, message: @escaping @Sendable () -> String) {
+    Task { @MainActor in
+      try await log(level: level, context: context, message: message)
     }
   }
   
-  @MainActor
   public static func terminate() {
-    logger.terminate()
+    HelloEnvironment.object(for: .logger).unsafeSyncLog(LogStatement(level: .meta, context: "App", message: "Terminate ---------------"))
   }
   
-  public static func verbose(context: String? = nil, _ message: String) {
-    log(level: .verbose, message: message, context: context)
+  nonisolated public static func verbose(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                         _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .verbose, context: context, message: message)
   }
   
-  public static func debug(context: String? = nil, _ message: String) {
-    log(level: .debug, message: message, context: context)
+  nonisolated public static func debug(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                       _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .debug, context: context, message: message)
   }
   
-  public static func info(context: String? = nil, _ message: String) {
-    log(level: .info, message: message, context: context)
+  nonisolated public static func info(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                      _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .info, context: context, message: message)
   }
   
-  public static func warning(context: String? = nil, _ message: String) {
-    log(level: .warning, message: message, context: context)
+  nonisolated public static func warning(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                         _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .warning, context: context, message: message)
   }
   
-  public static func error(context: String? = nil, _ message: String) {
-    log(level: .error, message: message, context: context)
+  nonisolated public static func error(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                       _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .error, context: context, message: message)
   }
   
-  public static func fatal(context: String? = nil, _ message: String) {
-    log(level: .fatal, message: message, context: context)
+  nonisolated public static func fatal(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                       _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .fatal, context: context, message: message)
   }
   
-  public static func wtf(context: String? = nil, _ message: String) {
-    log(level: .wtf, message: message, context: context)
+  nonisolated public static func wtf(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                     _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .wtf, context: context, message: message)
   }
   
-  public static func meta(context: String? = nil, _ message: String) {
-    log(level: .meta, message: message, context: context)
+  nonisolated public static func meta(context: @escaping @autoclosure @Sendable () -> String? = nil,
+                                      _ message: @escaping @autoclosure @Sendable () -> String) {
+    log(level: .meta, context: context, message: message)
   }
   
-  
-  
-  
-  public static func verbose(_ message: String, context: String) {
-    log(level: .verbose, message: message, context: context)
-  }
-  
-  public static func debug(_ message: String, context: String) {
-    log(level: .debug, message: message, context: context)
-  }
-  
-  public static func info(_ message: String, context: String) {
-    log(level: .info, message: message, context: context)
-  }
-  
-  public static func warning(_ message: String, context: String) {
-    log(level: .warning, message: message, context: context)
-  }
-  
-  public static func error(_ message: String, context: String) {
-    log(level: .error, message: message, context: context)
-  }
-  
-  public static func fatal(_ message: String, context: String) {
-    log(level: .fatal, message: message, context: context)
-  }
-  
-  public static func wtf(_ message: String, context: String) {
-    log(level: .wtf, message: message, context: context)
-  }
-  
-  public static func meta(_ message: String, context: String) {
-    log(level: .meta, message: message, context: context)
-  }
-  
-  public static func crash(_ message: String) {
-    try? logger.nonMainUnsafeSyncLog(LogStatement(level: .fatal, message: message, context: "Crash"))
-    log(level: .fatal, message: message, context: "Crash")
+  nonisolated public static func crash(_ message: @escaping @autoclosure @Sendable () -> String) {
+    //    try? logger.nonMainUnsafeSyncLog(LogStatement(level: .fatal, message: message, context: "Crash"))
+    log(level: .fatal, context: { "Crash" }, message: message)
   }
 }
 

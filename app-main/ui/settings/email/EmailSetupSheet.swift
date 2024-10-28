@@ -74,7 +74,7 @@ struct EmailSetupSheet: View {
           to: emailRecipient,
           subject: emailSubject,
           body: emailBody,
-          attachments: includeLogs ? [.logs(data: Log.logger.generateRawString().data)] : [])
+          attachments: includeLogs ? [.logs(data: HelloEnvironment.object(for: .logger).generateRawString().data)] : [])
       }.onChange(of: isShowingMailSheet) {
         if !isShowingMailSheet {
           dismiss()

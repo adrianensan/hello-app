@@ -122,7 +122,7 @@ public class ImageProcessor {
   
   public static func resize(imageData: Data, maxSize: Int, format: HelloImageFormat = .heic) throws -> Data {
     guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else {
-      Log.error("Failed to create source", context: "Image Resize")
+      Log.error(context: "Image Resize", "Failed to create source")
       throw HelloImageError.failedToCreateDestination
     }
     
@@ -133,7 +133,7 @@ public class ImageProcessor {
       1,
       [:] as CFDictionary)
     else {
-      Log.error("Failed to create destination", context: "Image Resize")
+      Log.error(context: "Image Resize", "Failed to create destination")
       throw HelloImageError.failedToCreateDestination
     }
 
@@ -144,7 +144,7 @@ public class ImageProcessor {
       kCGImageDestinationLossyCompressionQuality: 0.8,
     ] as CFDictionary)
     guard CGImageDestinationFinalize(destination), !mutableData.isEmpty else {
-      Log.error("Failed to finalize destination", context: "Image Resize")
+      Log.error(context: "Image Resize", "Failed to finalize destination")
       throw HelloImageError.failedToResize
     }
     return mutableData as Data

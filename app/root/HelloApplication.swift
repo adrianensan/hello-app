@@ -187,7 +187,8 @@ extension HelloApplication {
           return unlockedAppIcons
         }
       }
-      Log.verbose("Device ID: \(await Persistence.value(.deviceID))")
+      let deviceID = await Persistence.value(.deviceID)
+      Log.verbose("Device ID: \(deviceID)")
       _ = await Persistence.value(.firstDateLaunched)
       await Persistence.atomicUpdate(for: .installedApps) {
         var installedApps = $0
@@ -212,7 +213,6 @@ extension HelloApplication {
     }
     
     onLaunch()
-    _ = Log.logger
   }
   
   func onTerminateInternal() {

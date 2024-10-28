@@ -1,5 +1,8 @@
 import SwiftUI
 
+
+/// SwiftUI property wrapper that behvaes the same as State, without triggering view updates.
+/// Useful for storing state that doesn't directly impact the UI
 @MainActor
 @propertyWrapper
 public struct NonObservedState<Value>: DynamicProperty {

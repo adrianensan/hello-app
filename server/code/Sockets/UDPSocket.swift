@@ -31,7 +31,7 @@ public class UDPSocket: Socket {
   }
   
   func sendDataPass(data: [UInt8], to address: NetworkAddress) throws -> Int {
-    Log.verbose("Sending \(data.count) bytes to \(address.string) on \(socketFileDescriptor)", context: "UDP Socket")
+    Log.verbose(context: "UDP Socket", "Sending \(data.count) bytes to \(address.string) on \(socketFileDescriptor)")
     var toAddr = address.systemAddr
     return Int(sendto(socketFileDescriptor, data, data.count, Socket.socketSendFlags, &toAddr, socklen_t(MemoryLayout<sockaddr_in>.size)))
   }
@@ -42,7 +42,7 @@ public class UDPSocket: Socket {
     var remoteAddrLength = socklen_t(MemoryLayout<sockaddr>.size)
     let bytesRead = recvfrom(socketFileDescriptor, &recieveBuffer, Socket.bufferSize, 0, &remoteAddr, &remoteAddrLength)
     guard bytesRead > 0 else { throw SocketError.cantReadYet }
-    Log.verbose("Read \(bytesRead) bytes from \(socketFileDescriptor)", context: "UDP Socket")
+    Log.verbose(context: "UDP Socket", "Read \(bytesRead) bytes from \(socketFileDescriptor)")
     return UDPPacket(originAddress: try NetworkAddress(from: remoteAddr),
                      bytes: [UInt8](recieveBuffer[..<Int(bytesRead)]))
   }

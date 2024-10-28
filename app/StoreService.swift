@@ -85,14 +85,16 @@ public class StoreModel {
   
   private func refreshProducts() async throws {
     guard availableProducts.count != knownProductIDs.count else {
-      Log.verbose("Skipped loading products, all known products loaded", context: "StoreKit")
+      Log.verbose(context: "StoreKit", "Skipped loading products, all known products loaded")
       return
     }
     availableProducts = try await Product.products(for: knownProductIDs).idsMappedToValues
-    if availableProducts.count == knownProductIDs.count {
-      Log.info("Loaded all \(knownProductIDs.count) known products", context: "StoreKit")
+    let availableProductsCount = availableProducts.count
+    let knownProductsCount = knownProductIDs.count
+    if availableProductsCount == knownProductsCount {
+      Log.info(context: "StoreKit", "Loaded all \(knownProductsCount) known products")
     } else {
-      Log.error("Loaded \(availableProducts.count) of \(knownProductIDs.count) known products", context: "StoreKit")
+      Log.error(context: "StoreKit", "Loaded \(availableProductsCount) of \(knownProductsCount) known products")
     }
   }
   
@@ -112,7 +114,7 @@ public class StoreModel {
       }
       await refreshEntitlements()
     } catch {
-      Log.error("Failed to refresh products: \(error.localizedDescription)", context: "StoreKit")
+      Log.error(context: "StoreKit", "Failed to refresh products: \(error.localizedDescription)")
     }
     
     //    Transaction.currentEntitlements
@@ -122,12 +124,12 @@ public class StoreModel {
     var activeSubscriptions: [HelloNativeSubscriptionInfo] = []
     for await entitlement in Transaction.currentEntitlements {
       guard case .verified(let transaction) = entitlement else {
-        Log.warning("Found unverified entitlement", context: "StoreKit")
+        Log.warning(context: "StoreKit", "Found unverified entitlement")
         continue
       }
       
       guard let subscriptionInfo = await transaction.subscriptionStatus else {
-        Log.warning("Found transaction without subscription information", context: "StoreKit")
+        Log.warning(context: "StoreKit", "Found transaction without subscription information")
         continue
       }
       
@@ -140,7 +142,9 @@ public class StoreModel {
     validSubscriptions = activeSubscriptions.filter { $0.state.isValid }
     invalidSubscriptions = activeSubscriptions.filter { !$0.state.isValid }
     
-    Log.info("Refreshed entitlements: \(validSubscriptions.count) valid, \(invalidSubscriptions.count) invalid", context: "StoreKit")
+    let validSubscriptionCount = validSubscriptions.count
+    let invalidSubscriptionsCount = invalidSubscriptions.count
+    Log.info(context: "StoreKit", "Refreshed entitlements: \(validSubscriptionCount) valid, \(invalidSubscriptionsCount) invalid")
 
     HelloSubscriptionModel.main.refresh()
   }
@@ -148,11 +152,11 @@ public class StoreModel {
   private func listenForUpdates() {
     Task {
       for await result in Transaction.updates {
-        Log.info("Transaction update", context: "StoreKit")
+        Log.info(context: "StoreKit", "Transaction update")
         await result.unsafePayloadValue.finish()
         Task { try await refreshEntitlements() }
       }
-      Log.wtf("Update loop ended", context: "StoreKit")
+      Log.wtf(context: "StoreKit", "Update loop ended")
     }
     //    try await refreshProducts(knownProductIDs: knownProductIDs)
   }

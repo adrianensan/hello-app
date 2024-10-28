@@ -41,7 +41,6 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
       .onChange(of: configuration.isPressed) { handleIsPressed(isPressed: configuration.isPressed) }
   }
 
-  @MainActor
   private func handleIsPressed(isPressed: Bool) {
     isPressedAction(isPressed)
     if isPressed {
@@ -53,11 +52,8 @@ fileprivate struct DelaysTouchesButtonStyle: ButtonStyle {
         try await Task.sleep(seconds: max(duration, 0))
         if date == touchDownDate {
           disabled = true
-          
-          Task {
-            try await Task.sleepForOneFrame()
-            disabled = false
-          }
+          try await Task.sleepForOneFrame()
+          disabled = false
         }
       }
     } else {

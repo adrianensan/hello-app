@@ -23,17 +23,16 @@ class Router {
   private static func listenForTCPConnection(on port: UInt16, usingTLS: Bool) throws {
     guard listeningTCPPorts[port] == nil else { return }
     listeningTCPPorts[port] = try ServerSocket(port: port, usingTLS: usingTLS)
-    Log.info("Listening on port \(port)", context: "Init")
+    Log.info(context: "Connection", "Listening on port \(port)")
     Task {
       do {
         while let newClient = try await listeningTCPPorts[port]?.acceptConnection() {
-          Log.debug("Loop 18", context: "Loop")
-          Log.verbose("Waiting for accept on \(port)", context: "Router")
+          Log.verbose(context: "Router", "Waiting for accept on \(port)")
           guard Security.shouldAllowConnection(from: newClient.clientAddress) else {
-            Log.verbose("Rejected inbound from \(newClient.clientAddress)", context: "Connection")
+            Log.verbose(context: "Connection", "Rejected inbound from \(newClient.clientAddress)")
             continue
           }
-          Log.verbose("Accepted inbound from \(newClient.clientAddress)", context: "Connection")
+          Log.verbose(context: "Connection", "Accepted inbound from \(newClient.clientAddress)")
           Task {
             let requestedHost: String
             do {
@@ -43,15 +42,15 @@ class Router {
               if let lastHost = lastAccess[newClient.clientAddress] {
                 requestedHost = lastHost
               } else {
-                Log.warning("Failed to determine host from \(newClient.clientAddress)", context: "Connection")
+                Log.warning(context: "Connection", "Failed to determine host from \(newClient.clientAddress)")
                 return
               }
             }
             guard let server = tcpRoutingTable["\(requestedHost):\(port)"] ?? tcpRoutingTable[":\(port)"] else {
-              Log.warning("No server found for \(requestedHost):\(port)", context: "Connection")
+              Log.warning(context: "Connection", "No server found for \(requestedHost):\(port)")
               return
             }
-            Log.verbose("from \(newClient.clientAddress) handled by \(requestedHost):\(port)", context: "Connection")
+            Log.verbose(context: "Connection", "from \(newClient.clientAddress) handled by \(requestedHost):\(port)")
             if let sslServer = server as? SSLServer,
                let newClient = newClient as? SSLClientConnection {
               try await sslServer.handleConnection(sslConnection: newClient)
@@ -61,7 +60,7 @@ class Router {
           }
         }
       } catch {
-        Log.error("No longer accepting on port \(port)", context: "Router")
+        Log.error(context: "Router", "No longer accepting on port \(port)")
       }
     }
   }
@@ -69,16 +68,15 @@ class Router {
   private static func listenForUDPPackets(on port: UInt16) throws {
     guard listeningUDPPorts[port] == nil else { return }
     listeningUDPPorts[port] = try UDPServerSocket(port: port)
-    Log.info("Listening on port \(port)", context: "Init")
+    Log.info(context: "Router", "Listening on port \(port)")
     Task {
       do {
         while let packet = try await listeningUDPPorts[port]?.recievePacket() {
-          Log.debug("Loop 19", context: "Loop")
           guard Security.shouldAllowConnection(from: packet.originAddress) else {
-            Log.verbose("Accepted UDP from \(packet.originAddress.string)", context: "Connection")
+            Log.verbose(context: "Connection", "Accepted UDP from \(packet.originAddress.string)")
             continue
           }
-          Log.verbose("Accepted UDP packet from \(packet.originAddress.string)", context: "Connection")
+          Log.verbose(context: "Connection", "Accepted UDP packet from \(packet.originAddress.string)")
           guard let servers = udpServers[port] else { continue }
           Task {
             for server in servers {
@@ -87,7 +85,7 @@ class Router {
           }
         }
       } catch {
-        Log.error("No longer accepting on port \(port). \(error)", context: "Router")
+        Log.error(context: "Router", "No longer accepting on port \(port). \(error)")
         fatalError("No longer accepting")
       }
     }
@@ -127,10 +125,10 @@ class Router {
       }
       try listenForTCPConnection(on: port, usingTLS: usingTLS)
       if tcpRoutingTable["\(host):\(port):"] == nil {
-        Log.info("\(host):\(port) TCP - \(server.name)", context: "Init")
+        Log.info(context: "Router", "\(host):\(port) TCP - \(server.name)")
         tcpRoutingTable["\(host):\(port)"] = tcpServer
       } else {
-        Log.warning("Duplicate server for \(host):\(port), skipping", context: "Init")
+        Log.warning(context: "Router", "Duplicate server for \(host):\(port), skipping")
       }
     case .udp:
       guard let udpServer = server as? UDPServer else {
@@ -141,10 +139,10 @@ class Router {
         await udpServer.socketUpdated(to: socket)
       }
       if udpServers[port] == nil {
-        Log.info("\(host):\(port):UDP - \(server.name)", context: "Init")
+        Log.info(context: "Router", "\(host):\(port):UDP - \(server.name)")
         udpServers[port] = (udpServers[port] ?? []) + [udpServer]
       } else {
-        Log.warning("Duplicate server for \(host):\(port), skipping", context: "Init")
+        Log.warning(context: "Router", "Duplicate server for \(host):\(port), skipping")
       }
     }
         

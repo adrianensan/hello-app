@@ -83,6 +83,7 @@ public struct BackButton: View {
         .offset(x: 16 * rotationIntervalProgress)
         .padding(.trailing, 12)
         .frame(maxWidth: 100, alignment: .leading)
+        .fixedSize()
     }.foregroundStyle(theme.header.foreground.primary.style)
 //      .foregroundStyle(theme.accent.style)
       .animation(backProgress == 0 ? .pageAnimation : nil, value: backProgress)

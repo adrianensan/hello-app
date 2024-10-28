@@ -75,18 +75,26 @@ public struct HelloSheet<Content: View>: View {
     windowFrame.size.minSide > 700
   }
   
+  var fillShape: AnyInsettableShape {
+    .rect(cornerRadii: RectangleCornerRadii(
+      topLeading: 30,
+      bottomLeading: isfloating ? 30 : 0,
+      bottomTrailing: isfloating ? 30 : 0,
+      topTrailing: 30))
+  }
+  
   var shape: AnyInsettableShape {
     .rect(cornerRadii: RectangleCornerRadii(
       topLeading: 30,
-      bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
-      bottomTrailing: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      bottomLeading: isfloating ? 30 : !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      bottomTrailing: isfloating ? 30 : !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
       topTrailing: 30))
   }
   
   var pageShape: AnyInsettableShape {
     .rect(cornerRadii: RectangleCornerRadii(
       topLeading: 30,
-      bottomLeading: isfloating ? 30 : debugModel.disableMasking || !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
+      bottomLeading: isfloating ? 30 : !windowModel.isFullscreenWidth ? 0 : Device.current.screenCornerRadiusPixels / pixelsPerPoint,
       bottomTrailing: 0,
       topTrailing: 0))
   }
@@ -99,10 +107,11 @@ public struct HelloSheet<Content: View>: View {
           HelloCloseButton { model.dismiss() }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
         }
-      }
-      .clipShape(shape)
-      .background(theme.backgroundView(for: shape, isBaseLayer: true)
+      }.clipShape(shape)
+      .padding(.bottom, isfloating ? 0 : 36)
+      .background(theme.backgroundView(for: fillShape, isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
+      .padding(.bottom, isfloating ? 0 : -36)
       .overlay(shape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
       .padding(.top, isfloating ? 0 : safeArea.top + 16)
       .handleSheetDismissDrag()

@@ -158,6 +158,7 @@ public struct HelloShareLink<Content: View>: View {
   }
 }
 
+/// SwiftUI Button with an async throws action, haptics, and fully customizable label
 public struct HelloButton<Content: View>: View {
   
   #if os(macOS)

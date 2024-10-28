@@ -7,7 +7,7 @@ import OpenSSL
 @SocketActor
 public class TCPSocket: Socket {
   func sendDataPass(data: [UInt8]) throws -> Int {
-    Log.verbose("Sending \(data.count) bytes to \(socketFileDescriptor)", context: "Socket")
+    Log.verbose(context: "Socket", "Sending \(data.count) bytes to \(socketFileDescriptor)")
     let bytesSent = send(socketFileDescriptor, data, data.count, Socket.socketSendFlags)
     guard bytesSent > 0 else {
       switch errno {
@@ -49,7 +49,7 @@ public class TCPSocket: Socket {
       default: throw SocketError.closed
       }
     }
-    Log.verbose("Read \(bytesRead) bytes from \(socketFileDescriptor)", context: "Socket")
+    Log.verbose(context: "Socket", "Read \(bytesRead) bytes from \(socketFileDescriptor)")
     return [UInt8](recieveBuffer[..<Int(bytesRead)])
   }
   

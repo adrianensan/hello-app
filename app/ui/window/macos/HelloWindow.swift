@@ -603,6 +603,10 @@ open class HelloWindow: HelloDefaultWindow {
     nsWindow.close()
   }
   
+  public func isShowing(windowID: String) -> Bool {
+    self.temporaryWindow?.id == windowID
+  }
+  
   public func show(temporaryWindow: HelloWindow) {
     closeTemporaryWindow()
     self.temporaryWindow = temporaryWindow

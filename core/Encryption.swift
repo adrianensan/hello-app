@@ -68,7 +68,7 @@ public enum SyncEncryption {
     get throws {
       var buffer: [UInt8] = .init(repeating: 0, count: SHA512.byteCount)
       guard SecRandomCopyBytes(kSecRandomDefault, SHA512.byteCount, &buffer) == 0 else {
-        Log.wtf("Failed to generate random bytes", context: "Encryption")
+        Log.wtf(context: "Encryption", "Failed to generate random bytes")
         throw HelloError("Failed to generate random bytes")
       }
       return buffer
@@ -95,7 +95,7 @@ public enum SyncEncryption {
   
   private static func generatePBKDF(password: String, salt: Data) throws -> [UInt8] {
     guard let passwordCharacters = password.cString(using: .utf8) else {
-      Log.wtf("Failed to generate C string from password", context: "Encryption")
+      Log.wtf(context: "Encryption", "Failed to generate C string from password")
       throw HelloError("Failed to get c string from password")
     }
     var derivedKeyData: [UInt8] = .init(repeating: 0, count: SHA256.byteCount)

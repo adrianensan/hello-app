@@ -42,7 +42,6 @@ public enum Security {
     hasStarted = true
     Task {
       while true {
-        Log.debug("Loop 20", context: "Loop")
         try? await Task.sleep(seconds: 1)
         for (client, reputation) in clientReputation {
           clientReputation[client] = max(0.1, min(1, reputation + 0.5 * reputation))

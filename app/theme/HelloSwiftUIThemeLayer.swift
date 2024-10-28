@@ -26,7 +26,13 @@ public struct HelloSwiftUIThemeLayer: Sendable {
   }
   
   public var backgroundOutline: Color {
-    layer.background.borderColor?.flattenAlpha(background: layer.background.mainColor).swiftuiColor ?? .clear
+    if case .blur = layer.background {
+      layer.background.borderColor?.swiftuiColor ?? .clear
+    } else if layer.background.mainColor.alpha < 0.4 {
+      layer.background.borderColor?.swiftuiColor ?? .clear
+    } else {
+      layer.background.borderColor?.flattenAlpha(background: layer.background.mainColor).swiftuiColor ?? .clear
+    }
   }
   
   public var backgroundColor: Color

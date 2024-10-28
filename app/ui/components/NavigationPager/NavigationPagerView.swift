@@ -26,7 +26,9 @@ public extension View {
 
 public extension Animation {
   static var pageAnimation: Animation {
-    .spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0)
+//    .dampSpring
+    .interpolatingSpring(duration: 0.26, bounce: 0, initialVelocity: 0)
+//    .spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0)
   }
 }
 
@@ -102,7 +104,7 @@ public struct NavigationPagerView: View {
 //        #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
         .compositingGroup()
-//        .background(theme.backgroundView)
+        .background(theme.backgroundView)
 //        .background(theme.foreground.primary.color
 //          .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness))
 //        .clipShape(Rectangle())

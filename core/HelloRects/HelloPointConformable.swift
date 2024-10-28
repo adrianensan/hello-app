@@ -16,6 +16,8 @@ public extension HelloPointConformable {
   
   static var one: Self { Self(x: 1, y: 1) }
   
+  static var negativeOne: Self { Self(x: -1, y: -1) }
+  
   var minCoordinate: NumberType { min(x, y) }
   
   var maxCoordinate: NumberType { max(x, y) }
@@ -132,9 +134,6 @@ public extension HelloPointConformable where NumberType: BinaryFloatingPoint {
   func distance(to otherPoint: Self) -> NumberType {
     (self - otherPoint).magnitude
   }
-}
-
-public extension HelloPointConformable where NumberType: BinaryFloatingPoint {
   
   static prefix func -(point: Self) -> Self {
     point * NumberType(-1)

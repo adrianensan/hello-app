@@ -4,7 +4,7 @@ import HelloCore
 
 extension NSException: @unchecked @retroactive Sendable {}
 
-public enum UNIXSignal: CaseIterable {
+public enum UNIXSignal: Sendable, CaseIterable {
   case hangup
   case interrupt
   case quit
@@ -94,7 +94,7 @@ public enum CrashHandler {
     Log.crash("Crash with \(exception.name.rawValue): \(exception.description)")
     restore()
     Task {
-      try await Log.logger.flush(force: true)
+      try await HelloEnvironment.object(for: .logger).flush()
       exception.raise()
     }
   }
@@ -120,7 +120,7 @@ public enum CrashHandler {
     }
     restore()
     Task {
-      try await Log.logger.flush(force: true)
+      try await HelloEnvironment.object(for: .logger).flush()
       kill(getpid(), signal)
     }
   }

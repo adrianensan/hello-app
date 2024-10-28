@@ -74,8 +74,7 @@ struct PersistenceExplorerFileRow: View {
               .foregroundStyle(theme.surface.foreground.tertiary.style)
           }
         }
-      }.frame(height: 56)
-        .readFrame(to: $globalFrame)
+      }.readFrame(to: $globalFrame)
         .simultaneousGesture(LongPressGesture(minimumDuration: 0.4, maximumDistance: 4)
           .onEnded { success in
             guard success else { return }

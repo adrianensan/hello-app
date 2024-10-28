@@ -6,6 +6,8 @@ import HelloApp
 
 public struct HelloSettingsRootPageContent<Content: View, AdditionalDeveloperContent: View>: View {
   
+  @Environment(\.hasAppeared) private var hasAppeared
+  
   @Persistent(.isDeveloper) private var isDeveloper
   @Persistent(.isFakeDeveloper) private var isFakeDeveloper
   
@@ -29,7 +31,7 @@ public struct HelloSettingsRootPageContent<Content: View, AdditionalDeveloperCon
         }
       }
       
-//      OtherHelloAppsView()
+      //      OtherHelloAppsView()
       
       HelloSettingsCopyrightSection()
     }

@@ -2,6 +2,10 @@ import Foundation
 
 public extension Array {
   
+  init(repeating: [Element], count: Int) {
+    self.init([[Element]](repeating: repeating, count: count).flatMap{$0})
+  }
+  
   mutating func popFirst() -> Element? {
     guard !isEmpty else { return nil }
     return removeFirst()
@@ -19,12 +23,6 @@ public extension Array {
       grouped[key] = keyElements + [element]
     }
     return keyOrder.compactMap { grouped[$0] }
-  }
-}
-
-public extension Array {
-  init(repeating: [Element], count: Int) {
-    self.init([[Element]](repeating: repeating, count: count).flatMap{$0})
   }
   
   func repeated(count: Int) -> [Element] {
@@ -48,8 +46,6 @@ public extension Array where Element: Identifiable {
   var idsMappedToValues: [Element.ID: Element] {
     Dictionary(map { ($0.id, $0) }, uniquingKeysWith: { (first, _) in first })
   }
-  
-  
 }
 
 public extension Array {

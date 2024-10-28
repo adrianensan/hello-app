@@ -48,8 +48,6 @@ public struct HelloRect3D<NumberType: HelloNumeric>: HelloRect3DConformable, Has
     self.size = HelloSize3D(width: width, height: height, depth: depth)
   }
   
-  
-  
   public mutating func move(to newOrigin: some HelloPoint3DConformable<NumberType>) {
     self.origin = HelloPoint3D(x: newOrigin.x, y: newOrigin.y, z: newOrigin.z)
   }

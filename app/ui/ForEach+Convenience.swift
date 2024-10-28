@@ -48,10 +48,5 @@ public struct HelloForEach<Element, Content: View>: View where Element: Sendable
     ForEach(reversed ? data.enumeratedIdentifiable().reversed() : data.enumeratedIdentifiable()) { element in
       content(element.index, element.element, element.isLast)
     }
-    
-//    ForEach(reversed ? data.reversed() : data) { element in
-//      let index = data.firstIndex(where: { element.id == $0.id }) ?? 0
-//      content(index, element, data.last?.id == element.id)
-//    }
   }
 }

@@ -1,4 +1,3 @@
-#if os(iOS)
 import SwiftUI
 
 public struct HelloPageNavBarContent<NavBarContent: View>: View {
@@ -7,7 +6,9 @@ public struct HelloPageNavBarContent<NavBarContent: View>: View {
   @Environment(\.helloPagerConfig) private var config
   @Environment(\.pageID) private var pageID
   @OptionalEnvironment(PagerModel.self) private var pagerModel
+  #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
+  #endif
   
   @ViewBuilder private var navBarContent: @MainActor () -> NavBarContent
   
@@ -26,6 +27,7 @@ public struct HelloPageNavBarContent<NavBarContent: View>: View {
       Spacer(minLength: 0)
       navBarContent()
       Spacer(minLength: 0)
+      #if os(iOS)
       if let sheetModel {
         HelloCloseButton(onDismiss: { sheetModel.dismiss() })
           .foregroundStyle(theme.header.foreground.primary.style)
@@ -34,7 +36,7 @@ public struct HelloPageNavBarContent<NavBarContent: View>: View {
         Color.clear
           .frame(width: config.horizontalPagePadding)
       }
+      #endif
     }
   }
 }
-#endif

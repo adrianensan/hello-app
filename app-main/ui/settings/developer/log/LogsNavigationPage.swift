@@ -6,12 +6,12 @@ import HelloApp
 
 public struct LogsNavigationPage: View {
   
-  @Environment(\.theme) var theme
-  @Environment(\.safeArea) var safeArea
-  @Environment(\.helloPagerConfig) var helloPagerConfig
-  @Environment(HelloWindowModel.self) var windowModel
+  @Environment(\.theme) private var theme
+  @Environment(\.safeArea) private var safeArea
+  @Environment(\.helloPagerConfig) private var helloPagerConfig
+  @Environment(HelloWindowModel.self) private var windowModel
   
-  @State private var loggerModel = LoggerModel(logger: Log.logger)
+  @State private var loggerModel = LoggerModel()
   @State private var scrollModel = HelloScrollModel(showScrollIndicator: true)
   
   @NonObservedState private var isFollowingNew: Bool = true
@@ -28,12 +28,14 @@ public struct LogsNavigationPage: View {
                      navBarContent: {
         ZStack {
           HelloButton(action: {
-            windowModel.show(alert: .init(title: "Clear Logs",
-                                          message: "Are you sure you want to clear all logs?",
-                                          firstButton: .init(name: "Clear",
-                                                             action: { Task { try await Log.logger.clear() } },
-                                                             isDestructive: true),
-                                          secondButton: .cancel()))
+            windowModel.show(
+              alert: .init(
+                title: "Clear Logs",
+                message: "Are you sure you want to clear all logs?",
+                firstButton: .init(name: "Clear",
+                                   action: { Task { try await HelloEnvironment.object(for: .logger).clear() } },
+                                   isDestructive: true),
+                secondButton: .cancel()))
           }) {
             Image(systemName: "trash")
               .font(.system(size: 20, weight: .regular))

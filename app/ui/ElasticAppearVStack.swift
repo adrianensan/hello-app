@@ -20,9 +20,9 @@ public struct ElasticAppearContent<Content: View>: View {
       i += 1
       return subview
         .compositingGroup()
-        .offset(y: isVisible ? 0 : 160)
-        .opacity(isVisible ? 1 : 0)
-        .animation(.dampSpring.delay(i * 0.04), value: isVisible)
+        .offset(y: isVisible ? 0 : 160 + (40 * i))
+        .opacity(isVisible ? 1 : 1)
+        .animation(.dampSpring.delay(i * 0.02), value: isVisible)
     }.onChange(of: hasAppeared, initial: true) {
       if hasAppeared {
         Task {

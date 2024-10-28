@@ -138,7 +138,7 @@ class SocketPoller {
             socketStates[pollSocket.fd] = .readyToWrite
             writeObservedSockets.remove(pollSocket.fd)
           } else {
-            Log.error("Unhandled events \(pollSocket.revents)", context: "Poll")
+            Log.error(context: "Poll", "Unhandled events \(pollSocket.revents)")
           }
         }
       }

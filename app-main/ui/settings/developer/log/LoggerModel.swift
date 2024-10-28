@@ -7,7 +7,8 @@ import HelloCore
 @Observable
 public class LoggerModel: LoggerSubscriber, Sendable {
   
-  let logger: Logger
+  @ObservationIgnored @HelloEnvironmentObject(.logger) private var logger
+  
   public var logStatements: [LogStatement] = []
   
   public private(set) var showVerbose: Bool = false
@@ -15,9 +16,7 @@ public class LoggerModel: LoggerSubscriber, Sendable {
   
   public private(set) var filters: [String] = []
   
-  public init(logger: Logger) {
-    self.logger = logger
-  }
+  public init() {}
   
   public func setup() {
     logger.subscribe(self)

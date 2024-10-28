@@ -66,7 +66,7 @@ public actor HelloImageDownloadManager {
     currentlyDownloading.insert(nextDownload.url)
     defer { currentlyDownloading.remove(nextDownload.url) }
     if pendingDownloadsTasks[nextDownload.url] == nil {
-      Log.wtf("Pending download has no associated task!", context: "ImageDownloader")
+      Log.wtf(context: "ImageDownloader", "Pending download has no associated task!")
     }
     nextDownload.startContinuation.resume()
   }

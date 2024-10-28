@@ -40,7 +40,6 @@ public class ClientConnection: Sendable {
     var recievedData: [UInt8] = []
     var errorLoopCounter = 0
     while true {
-      Log.debug("Loop 2", context: "Loop")
       recievedData += try await socket.recieveDataBlock()
       do {
         return try HTTPRequest<Data?>.parse(data: recievedData.filter{$0 != 13}, from: clientAddress)
@@ -65,7 +64,6 @@ public class ClientConnection: Sendable {
     AsyncThrowingStream { continuation in
       Task {
         while true {
-          Log.debug("Loop 3", context: "Loop")
           do {
             continuation.yield(try await socket.recieveDataBlock())
           } catch {
@@ -80,7 +78,6 @@ public class ClientConnection: Sendable {
     AsyncThrowingStream { continuation in
       Task {
         while true {
-          Log.debug("Loop 4", context: "Loop")
           do {
             continuation.yield(try await getRequest())
           } catch {

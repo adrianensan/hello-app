@@ -9,7 +9,6 @@ public extension Connection {
     
     var addrInfo = result?.pointee
     while addrInfo != nil {
-      Log.debug("Loop 5", context: "Loop")
       if addrInfo?.ai_socktype == SocketType.tcp.systemValue {
         break
       }
