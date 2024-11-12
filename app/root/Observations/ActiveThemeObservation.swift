@@ -75,15 +75,6 @@ fileprivate extension EnvironmentValues {
   }
 }
 
-//@frozen @propertyWrapper public struct OptionalEnvironment<Value> : DynamicProperty {
-//  
-//  @inlinable public init(_ keyPath: KeyPath<EnvironmentValues, Value>) {
-//
-//  }
-//  
-//  @inlinable public var wrappedValue: Value { get }
-//}
-
 struct ActiveThemeObservationViewModifier: ViewModifier {
   
   @Environment(\.colorScheme) private var colorScheme
@@ -104,7 +95,6 @@ struct ActiveThemeObservationViewModifier: ViewModifier {
     content
       .applyTheme()
       .environment(\.theme, activeSwiftUITheme)
-//      .preferredColorScheme(activeTheme.isDark ? .dark : .light)
       .animation(.easeInOut(duration: 0.2), value: activeTheme.id)
   }
 }

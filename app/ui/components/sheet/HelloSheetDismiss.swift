@@ -5,6 +5,7 @@ import HelloCore
 
 struct HelloSheetDismissDragViewModifier: ViewModifier {
   
+  @Environment(\.isActive) private var isActive
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.keyboardFrame) private var keyboardFrame
   @Environment(\.popupID) private var viewID
@@ -104,19 +105,14 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
           if model.dragCanDismiss == true &&
               (gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200) {
             model.dismiss()
-          } else {
-            if model.dismissDrag != 0 {
-              model.dismissDrag = 0
-            }
           }
-          model.dragCanDismiss = nil
+          model.reset()
         })
-      .onChange(of: drag) {
-        if drag == nil {
-          model.isDraggingNavBar = false
-          if model.dismissDrag != 0 {
-            model.dismissDrag = 0
-          }
+      .onChange(of: drag == nil || !isActive) {
+        guard drag == nil || !isActive else { return }
+        Task {
+          try? await Task.sleepForOneFrame()
+          model.reset()
         }
       }
       .allowsHitTesting(model.isVisible && model.dismissDrag == 0)

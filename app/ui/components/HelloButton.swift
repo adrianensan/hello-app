@@ -43,13 +43,10 @@ public struct HelloButtonStyle: ButtonStyle {
           model.hasPressed = false
         }
       }
-    }.onChange(of: model.forceVisualPress) {
-      guard isPressed != model.forceVisualPress else { return }
+    }.when(isPressed != model.forceVisualPress) {
       isPressed = model.forceVisualPress
-    }.onChange(of: isEnabled) {
-      if !isEnabled && isPressed {
-        isPressed = false
-      }
+    }.when(!isEnabled && isPressed) {
+      isPressed = false
     }
   }
 }

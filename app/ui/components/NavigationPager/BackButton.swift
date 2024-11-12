@@ -21,6 +21,7 @@ public class BackProgressModel {
     if drag != nil {
       drag = nil
     }
+    backSwipeAllowance = nil
   }
 }
 

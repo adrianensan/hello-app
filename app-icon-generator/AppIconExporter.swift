@@ -284,11 +284,11 @@ public enum AppIconExporter {
     }
   }
   
-  static private func generateContentsFile(at url: URL, for icon: some BaseAppIcon, variants: [AppIconImageVariant]) throws {
-    try AppIconAssetsContents(appIconName: icon.imageName, variants: variants)
-      .prettyJSONData
-      .write(to: url.appendingPathComponent("Contents.json"))
-  }
+//  static private func generateContentsFile(at url: URL, for icon: some BaseAppIcon, variants: [AppIconImageVariant]) throws {
+//    try AppIconAssetsContents(appIconName: icon.imageName, variants: variants)
+//      .prettyJSONData
+//      .write(to: url.appendingPathComponent("Contents.json"))
+//  }
   
   static private func generateContentsFile(at url: URL, for icon: any HelloAppIcon, variants: [AppIconImageVariant]) throws {
     try AppIconAssetsContents(appIconName: icon.systemName, variants: variants)
@@ -300,16 +300,16 @@ public enum AppIconExporter {
     try await ImageProcessor.resize(imageData: imageData, maxSize: Int(variant.size.maxSide * CGFloat(variant.scale ?? 1)), format: .png)
   }
   
-  static private func save(imageData: Data, icon: some BaseAppIcon, for variant: AppIconImageVariant, at url: URL) async throws {
-    let resizedImageData = try await resize(imageData: imageData, for: variant)
-    if shouldTinify,
-       let compressedImageURL = try? await DefaultHelloAPIClient.main.request(endpoint: .compressImage(imageData: resizedImageData)).headers["location"],
-       let compressedImageData = try? await Downloader.main.download(from: compressedImageURL) {
-      try compressedImageData.write(to: url.appendingPathComponent(variant.imageName(for: icon)))
-    } else {
-      try resizedImageData.write(to: url.appendingPathComponent(variant.imageName(for: icon)))
-    }
-  }
+//  static private func save(imageData: Data, icon: some BaseAppIcon, for variant: AppIconImageVariant, at url: URL) async throws {
+//    let resizedImageData = try await resize(imageData: imageData, for: variant)
+//    if shouldTinify,
+//       let compressedImageURL = try? await DefaultHelloAPIClient.main.request(endpoint: .compressImage(imageData: resizedImageData)).headers["location"],
+//       let compressedImageData = try? await Downloader.main.download(from: compressedImageURL) {
+//      try compressedImageData.write(to: url.appendingPathComponent(variant.imageName(for: icon)))
+//    } else {
+//      try resizedImageData.write(to: url.appendingPathComponent(variant.imageName(for: icon)))
+//    }
+//  }
   
   static private func save(imageData: Data, icon: any HelloSwiftUIAppIcon, for variant: AppIconImageVariant, at url: URL) async throws {
     let resizedImageData = try await resize(imageData: imageData, for: variant)
@@ -322,11 +322,11 @@ public enum AppIconExporter {
     }
   }
   
-  static private func save(imageData: Data, icon: some BaseAppIcon, for variants: [AppIconImageVariant], at url: URL) async throws {
-    for variant in variants {
-      try await save(imageData: imageData, icon: icon, for: variant, at: url)
-    }
-  }
+//  static private func save(imageData: Data, icon: some BaseAppIcon, for variants: [AppIconImageVariant], at url: URL) async throws {
+//    for variant in variants {
+//      try await save(imageData: imageData, icon: icon, for: variant, at: url)
+//    }
+//  }
   
   static private func save(imageData: Data, icon: any HelloSwiftUIAppIcon, for variants: [AppIconImageVariant], at url: URL) async throws {
     for variant in variants {

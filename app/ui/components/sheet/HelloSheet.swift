@@ -48,6 +48,14 @@ public class HelloSheetModel {
     isVisible = false
     ButtonHaptics.buttonFeedback()
   }
+  
+  public func reset() {
+    isDraggingNavBar = false
+    dragCanDismiss = nil
+    if dismissDrag != 0 {
+      dismissDrag = 0
+    }
+  }
 }
 
 public struct HelloSheet<Content: View>: View {

@@ -34,6 +34,10 @@ extension String: @retroactive Identifiable {
   public var id: String { self }
 }
 
+extension Character: @retroactive Identifiable {
+  public var id: Character { self }
+}
+
 public extension StringProtocol {
   
   var data: Data { data(using: .utf8) ?? Data(utf8) }

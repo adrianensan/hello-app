@@ -61,9 +61,9 @@ public struct AppIconImageVariant: Sendable {
     }
   }
   
-  func imageName(for icon: some BaseAppIcon, suffix: String = "", format: HelloImageFormat = .png) -> String {
-    imageName(for: icon.imageName, suffix: suffix, format: format)
-  }
+//  func imageName(for icon: some BaseAppIcon, suffix: String = "", format: HelloImageFormat = .png) -> String {
+//    imageName(for: icon.imageName, suffix: suffix, format: format)
+//  }
   
   func imageName(for icon: any HelloAppIcon, suffix: String = "", format: HelloImageFormat = .png) -> String {
     imageName(for: icon.systemName, suffix: suffix, format: format)

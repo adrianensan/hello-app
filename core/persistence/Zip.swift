@@ -33,14 +33,14 @@ public enum Zip {
     return archiveUrl
   }
   
-  func unzip() {
-    #if os(macOS) || os(Linux)
-    let unzipProcess = Process()
-    unzipProcess.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-    unzipProcess.arguments = [zipURL.path, "-d", Self.emojiURL.path]
-    try unzipProcess.run()
-    unzipProcess.waitUntilExit()
-    #endif
-  }
+//  func unzip() {
+//    #if os(macOS) || os(Linux)
+//    let unzipProcess = Process()
+//    unzipProcess.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
+//    unzipProcess.arguments = [zipURL.path, "-d", Self.emojiURL.path]
+//    try unzipProcess.run()
+//    unzipProcess.waitUntilExit()
+//    #endif
+//  }
 }
 

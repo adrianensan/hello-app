@@ -111,6 +111,7 @@ public class PagerModel {
   @ObservationIgnored var dismissed: [String] = []
   
   private var pageScrollModels: [String: HelloScrollModel] = [:]
+  private var timePagePushed: TimeInterval = epochTime
   
   public init(id: String = .uuid, config: HelloPagerConfig = HelloPagerConfig(), initialViewStack: [PagerPage]) {
     self.id = id
@@ -178,18 +179,24 @@ public class PagerModel {
     allowInteraction = false
     let newPage = PagerPage(id: id, name: name, view: view, options: options)
     viewStack.append(newPage)
-    if animated {
-      Task {
-        try await Task.sleepForOneFrame()
-        try await Task.sleepForOneFrame()
-        withAnimation(.pageAnimation) {
-          self.viewDepth = self.viewStack.count
-          self.allowInteraction = true
-        }
-      }
-    } else {
+    if !animated {
       self.viewDepth = self.viewStack.count
       self.allowInteraction = true
+    } else {
+      timePagePushed = epochTime
+    }
+  }
+  
+  public func pageReady(_ pageID: String) {
+    let time = epochTime - timePagePushed
+    Log.verbose(context: "Pager", "Page \(pageID) took \(time.string)s to prepare")
+    guard viewDepth != viewStack.count else { return }
+    Task {
+      try? await Task.sleepForOneFrame()
+      withAnimation(.pageAnimation) {
+        viewDepth = viewStack.count
+        allowInteraction = true
+      }
     }
   }
   

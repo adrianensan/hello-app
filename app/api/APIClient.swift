@@ -226,7 +226,7 @@ public extension HelloAPIClient {
     let response: HTTPResponse<Data?> = HTTPResponse<Data?>(httpURLResponse: httpResponse, data: data)
     
     guard response.status.isSuccess else {
-      if let bodyString = response.body as? String {
+      if let bodyString = (response.body as? String) ?? (try? String.decodeJSON(from: data)) {
         Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))\n\(bodyString)")
       } else {
         Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")

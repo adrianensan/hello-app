@@ -5,6 +5,7 @@ import HelloCore
 struct NavigationPageBackswipe: ViewModifier {
   
   @Environment(\.theme) private var theme
+  @Environment(\.isActive) private var isActive
   @Environment(\.pageShape) private var pageShape
   @Environment(\.viewFrame) private var viewFrame
   @Environment(\.helloPagerConfig) private var pagerConfig
@@ -19,7 +20,7 @@ struct NavigationPageBackswipe: ViewModifier {
   let pageID: String
   let size: CGSize
   
-  var isActive: Bool {
+  var isActivePage: Bool {
     pagerModel.viewStack.firstIndex { $0.id == pageID } ?? .max >= pagerModel.viewDepth - 1
   }
   
@@ -57,8 +58,8 @@ struct NavigationPageBackswipe: ViewModifier {
       .padding(-theme.backgroundOutlineWidth)
       .overlay(
         HelloBackgroundDimmingView()
-          .opacity(isActive ? 0 : 0.8 * backProgress)
-          .animation(.pageAnimation, value: isActive)
+          .opacity(isActivePage ? 0 : 0.8 * backProgress)
+          .animation(.pageAnimation, value: isActivePage)
 //          .animation(.interactive, value: backProgress)
           .allowsTightening(false)
       )
@@ -120,20 +121,16 @@ struct NavigationPageBackswipe: ViewModifier {
             if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
               pagerModel.popView()
             }
-            backProgressModel.backSwipeAllowance = nil
             backProgressModel.reset()
           })
-      }.onChange(of: backDragWidth) {
-        if backDragWidth == nil {
-          Task {
-            try await Task.sleepForOneFrame()
-            backProgressModel.reset()
-          }
+      }.onChange(of: backDragWidth == nil || !isActive) {
+        guard backDragWidth == nil || !isActive else { return }
+        Task {
+          try? await Task.sleepForOneFrame()
+          backProgressModel.reset()
         }
-//        let progress = min(1, max(0, backDragGestureState.width / 200))
-//        if backProgressModel.backProgress != progress {
-//          backProgressModel.backProgress = progress
-//        }
+      }.onAppear {
+        pagerModel.pageReady(pageID)
       }
 //      .onChange(of: touchesModel.activeTouches.isEmpty) {
 //        if touchesModel.activeTouches.isEmpty {

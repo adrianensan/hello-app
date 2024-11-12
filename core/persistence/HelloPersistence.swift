@@ -56,8 +56,6 @@ public class HelloPersistence: HelloPersistenceConformable {
   
   private var cache: [String: Any] = [:]
   private var listeners: [String: [Any]] = [:]
-  private var userDefaultsCache: [DefaultsPersistenceSuite: UserDefaults] = [:]
-  private var baseURLs: [FilePersistenceLocation: URL] = [:]
   
   nonisolated init() {}
   
@@ -67,13 +65,6 @@ public class HelloPersistence: HelloPersistenceConformable {
       return .standard
     }
     return defaults
-//    if let userDefaults = userDefaultsCache[suite] {
-//      return userDefaults
-//    } else {
-//      let userDefaults = suite.userDefaults ?? .standard
-//      userDefaultsCache[suite] = userDefaults
-//      return userDefaults
-//    }
   }
   
   nonisolated private func baseURL(for location: FilePersistenceLocation, isNew: Bool) -> URL {
@@ -82,18 +73,6 @@ public class HelloPersistence: HelloPersistenceConformable {
       return .temporaryDirectory
     }
     return url
-//    if let url = baseURLs[location] {
-//      return url
-//    } else {
-//      guard let url = location.url else {
-//        return .temporaryDirectory
-//      }
-//      baseURLs[location] = url
-//      if !FileManager.default.fileExists(atPath: url.path) {
-//        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-//      }
-//      return url
-//    }
   }
   
   public func listen<Property: PersistenceProperty>(for property: Property,
