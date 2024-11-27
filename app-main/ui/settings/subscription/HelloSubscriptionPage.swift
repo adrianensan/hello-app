@@ -10,7 +10,7 @@ public struct HelloSubscriptionPage: View {
   public init() {}
   
   public var body: some View {
-    NavigationPage(allowScroll: false) {
+    HelloPage(allowScroll: false) {
       HelloSubscriptionPageContent()
     }
   }

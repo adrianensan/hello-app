@@ -56,7 +56,7 @@ public struct HelloKeyboard: View {
   }
   
   func updateSize() {
-    var keyWidth = min(72, (windowFrame.size.width - 8) / 10)
+    let keyWidth = min(72, (windowFrame.size.width - 8) / 10)
     let keyHeight = min(72, max(44, windowFrame.size.width / 9))
     let keySize = CGSize(width: keyWidth, height: keyHeight)
     if self.keySize != keySize {

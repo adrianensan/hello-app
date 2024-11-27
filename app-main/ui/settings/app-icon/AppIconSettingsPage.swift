@@ -74,7 +74,7 @@ struct AppIconSettingsPage: View {
   @Environment(AppIconModel.self) private var appIconModel
   
   var body: some View {
-    NavigationPage(title: "App Icon") {
+    HelloPage(title: "App Icon") {
       VStack(alignment: .leading, spacing: 16) {
         HelloSection {
           LazyVGrid(columns: [.init(.adaptive(minimum: 60, maximum: 120), spacing: 16)], spacing: 16) {

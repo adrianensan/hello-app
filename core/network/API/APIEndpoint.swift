@@ -10,7 +10,6 @@ public enum RequestType: Codable, Sendable {
   case normal
   case upload
   case longPoll
-  case websocket
 }
 
 public protocol APIEndpoint: Sendable {
@@ -60,7 +59,6 @@ extension APIEndpoint {
     case .normal: return 30
     case .upload: return 100
     case .longPoll: return 120
-    case .websocket: return 30
     }
   }
   

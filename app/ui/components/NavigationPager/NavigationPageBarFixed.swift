@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-public struct NavigationPageBarFixed<TitleContent: View, NavBarContent: View>: View {
+public struct HelloPageBarFixed<TitleContent: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeAreaInsets
@@ -18,7 +18,7 @@ public struct NavigationPageBarFixed<TitleContent: View, NavBarContent: View>: V
   @ViewBuilder let navBarContent: @MainActor () -> NavBarContent
   
   public var body: some View {
-    NavigationPageBar(titleContent: titleContent, navBarContent: navBarContent)
+    HelloPageBar(titleContent: titleContent, navBarContent: navBarContent)
       .frame(maxWidth: .infinity)
       .padding(.top, safeAreaInsets.top)
       .padding(.bottom, config.navBarFadeTransitionMultiplier * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)

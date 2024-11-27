@@ -15,7 +15,7 @@ extension Device {
       case ._16Pro, ._16ProMax: 190
       case ._17, ._17Plus: 166
       case ._17Pro, ._17ProMax: 190
-      case .unknown(let modelNumber): 0
+      case .unknown: 0
       }
     case .iPad(let iPadModel):
       switch iPadModel {
@@ -52,7 +52,7 @@ extension Device {
       case ._16Pro, ._16ProMax: 63 + 1/3
       case ._17, ._17Plus: 55 + 1/3
       case ._17Pro, ._17ProMax: 63 + 1/3
-      case .unknown(let modelNumber): 0
+      case .unknown: 0
       }
     case .iPad(let iPadModel):
       switch iPadModel {

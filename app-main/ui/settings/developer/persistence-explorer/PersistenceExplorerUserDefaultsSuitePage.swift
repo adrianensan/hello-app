@@ -21,7 +21,7 @@ struct PersistenceExplorerUserDefaultsSuitePage: View {
   }
   
   public var body: some View {
-    NavigationPage(showScrollIndicators: true) {
+    HelloPage(showScrollIndicators: true) {
       VStack(spacing: 32) {
         VStack(spacing: 8) {
           Text(snapshot.suite.name)

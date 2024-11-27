@@ -13,7 +13,7 @@ public struct HelloSettingsRootPage<Content: View>: View {
   }
   
   public var body: some View {
-    NavigationPage(title: "Settings") {
+    HelloPage(title: "Settings") {
       HelloSettingsRootPageContent(content: content)
     }
   }

@@ -21,10 +21,18 @@ public extension View {
   }
   
   @ViewBuilder
-  func when(_ condition: Bool, action: @MainActor @escaping () -> Void) -> some View {
-    onChange(of: condition) {
+  func when(_ condition: Bool, initial: Bool = false, action: @MainActor @escaping () -> Void) -> some View {
+    onChange(of: condition, initial: initial) {
       guard condition else { return }
       action()
+    }
+  }
+  
+  @ViewBuilder
+  func when(_ condition: Bool, initial: Bool = false, action: @MainActor @escaping () async throws -> Void) -> some View {
+    onChange(of: condition, initial: initial) {
+      guard condition else { return }
+      Task { try await action() }
     }
   }
   

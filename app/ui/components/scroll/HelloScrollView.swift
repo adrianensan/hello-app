@@ -17,6 +17,36 @@ public enum HelloScrollTarget: Sendable, Identifiable, Hashable {
   }
 }
 
+public enum HelloScrollAxes: Hashable, Sendable {
+  case vertical
+  case horizontal
+  case both
+  case none
+  
+  public var isVertical: Bool {
+    switch self {
+    case .vertical, .both: true
+    case .horizontal, .none: false
+    }
+  }
+  
+  public var isHorizontal: Bool {
+    switch self {
+    case .horizontal, .both: true
+    case .vertical, .none: false
+    }
+  }
+  
+  public var swiftui: Axis.Set {
+    switch self {
+    case .vertical: [.vertical]
+    case .horizontal: [.horizontal]
+    case .both: [.vertical, .horizontal]
+    case .none: []
+    }
+  }
+}
+
 @MainActor
 @Observable
 public class HelloScrollModel {
@@ -28,12 +58,15 @@ public class HelloScrollModel {
   public fileprivate(set) var dismissProgress: CGFloat = 0
   public fileprivate(set) var isDismissed: Bool = false
   public fileprivate(set) var showScrollIndicator: Bool
+  public let invertScroll: Bool
   
   public var scrollThreshold: CGFloat?
   var defaultScrollThreshold: CGFloat = 0
   
   public var effectiveScrollThreshold: CGFloat { scrollThreshold ?? defaultScrollThreshold }
   
+  public let id: String = .uuid
+  public var axes: HelloScrollAxes
   fileprivate let coordinateSpaceName: String = .uuid
   @ObservationIgnored internal private(set) var readyForDismiss: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
@@ -42,9 +75,14 @@ public class HelloScrollModel {
   @ObservationIgnored private var isActive: Bool = true
 //  @ObservationIgnored private var lastUpdate: TimeInterval = epochTime
   
-  public init(scrollThreshold: CGFloat? = nil, showScrollIndicator: Bool = false) {
+  public init(axes: HelloScrollAxes = .vertical,
+              scrollThreshold: CGFloat? = nil,
+              showScrollIndicator: Bool = false,
+              invertScroll: Bool = false) {
+    self.axes = axes
     self.scrollThreshold = scrollThreshold
     self.showScrollIndicator = showScrollIndicator
+    self.invertScroll = invertScroll
   }
   
   public var scrollEnabled: Bool = true
@@ -52,8 +90,7 @@ public class HelloScrollModel {
   
   public var overscroll: CGFloat = 0
   
-  public var hasScrolled: Bool = false// { scrollOffset < scrollThreshold }
-//  public var hasScrolledDuringTouch: Bool = false
+  public var hasScrolled: Bool = false
   
   public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
   
@@ -97,24 +134,27 @@ public class HelloScrollModel {
       isDismissing = true
     }
     
-    if !readyForDismiss
-        && offset >= 0
-        && epochTime - timeReachedTop > 0.3 {
-      readyForDismiss = true
-    } else if readyForDismiss && offset < 0 {
-      readyForDismiss = false
-      isDismissing = false
-    }
-    
     if offset > scrollOffset {
       timeReachedTop = epochTime
     }
     
-//    #if os(iOS)
-//    if !isScreenTouched {
-//      TouchesModel.main.hasScrolledDuringTouch = false
-//    }
-//    #endif
+    if !readyForDismiss
+        && offset >= 0
+        && epochTime - timeReachedTop >= 0 {
+      let diff = 0.3 - (epochTime - timeReachedTop)
+      if diff > 0 {
+        Task {
+          try await Task.sleep(seconds: diff)
+          guard !readyForDismiss && offset >= 0 && epochTime - timeReachedTop >= 0.3 else { return }
+          readyForDismiss = true
+        }
+      } else {
+        readyForDismiss = true
+      }
+    } else if readyForDismiss && offset < 0 {
+      readyForDismiss = false
+      isDismissing = false
+    }
     
     guard scrollOffset != offset else { return }
     scrollOffset = offset
@@ -140,12 +180,6 @@ public class HelloScrollModel {
       let newDismissProgress = min(1, max(0, offset / 100))
       guard dismissProgress != newDismissProgress else { return }
       dismissProgress = newDismissProgress
-      
-      #if !os(iOS)
-      if !isDismissed && dismissProgress == 1 {
-        isDismissed = true
-      }
-      #endif
     } else if dismissProgress != 0 {
       dismissProgress = 0
     }
@@ -156,23 +190,28 @@ public struct HelloScrollView<Content: View>: View {
   
   @Environment(\.pageID) private var pageID
   @Environment(\.theme) private var theme
+  @Environment(\.safeArea) private var safeAreaInsets
   @OptionalEnvironment(PagerModel.self) private var pagerModel
   
   @State private var model: HelloScrollModel
   
-  private let allowScroll: Bool
   private var content: @MainActor () -> Content
   
-  public init(allowScroll: Bool = true,
-              model: HelloScrollModel? = nil,
+  public init(axes: HelloScrollAxes = .vertical,
+              invertScroll: Bool = false,
               @ViewBuilder content: @escaping @MainActor () -> Content) {
-    self.allowScroll = allowScroll
     self.content = content
-    _model = State(initialValue: model ?? HelloScrollModel())
+    _model = State(initialValue: HelloScrollModel(axes: axes, invertScroll: invertScroll))
+  }
+  
+  public init(model: HelloScrollModel,
+              @ViewBuilder content: @escaping @MainActor () -> Content) {
+    self.content = content
+    _model = State(initialValue: model)
   }
   
   public var body: some View {
-    ScrollView(allowScroll ? .vertical : [], showsIndicators: model.showScrollIndicator) {
+    ScrollView(model.axes.swiftui, showsIndicators: model.showScrollIndicator) {
       VStack(spacing: 0) {
         GeometryReader { geometry in
           let _ = model.update(offset: geometry.frame(in: .named(model.coordinateSpaceName)).origin.y)
@@ -180,7 +219,20 @@ public struct HelloScrollView<Content: View>: View {
         }.frame(height: 0)
         content()
       }
-    }.scrollDisabled(!model.scrollEnabled)
+    }.coordinateSpace(name: model.coordinateSpaceName)
+      .safeAreaInset(edge: .top, spacing: 0) {
+      Color.clear.frame(height: safeAreaInsets.top)
+    }.safeAreaInset(edge: .bottom, spacing: 0) {
+      Color.clear.frame(height: safeAreaInsets.bottom)
+    }.safeAreaInset(edge: .leading, spacing: 0) {
+      Color.clear.frame(width: safeAreaInsets.leading)
+    }.safeAreaInset(edge: .trailing, spacing: 0) {
+      Color.clear.frame(width: safeAreaInsets.trailing)
+    }.if(model.invertScroll) {
+      $0.defaultScrollAnchor(.bottomLeading, for: .sizeChanges)
+        .defaultScrollAnchor(.bottomLeading, for: .initialOffset)
+    }.scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+      .scrollDisabled(!model.scrollEnabled)
       .modifier(HelloScrollPositionViewModifier())
       .modifier(HelloScrollTouchViewModifier())
     //      .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
@@ -188,8 +240,6 @@ public struct HelloScrollView<Content: View>: View {
     //      }, action: { _, newScrollOffset in
     //        model.update(offset: newScrollOffset)
     //      })
-      .coordinateSpace(name: model.coordinateSpaceName)
-      .insetBySafeArea()
       .environment(model)
       .onChange(of: pageID, initial: true) {
         if let pageID {

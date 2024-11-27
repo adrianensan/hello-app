@@ -18,7 +18,7 @@ public extension HelloAppIcon where Self == DefaultStandardTintHelloAppIcon {
 
 public struct StandardTintHelloAppIcon: HelloTintableAppIcon {
   public static func icon(for tint: HelloAppIconTint) -> StandardTintHelloAppIcon {
-    .icon(for: .black)
+    StandardTintHelloAppIcon(tint: .black)
   }
   
   public var tint: HelloAppIconTint

@@ -14,7 +14,7 @@ public extension UserDefaults {
         is Int.Type, is Int?.Type,
         is Double.Type, is Double?.Type,
         is Data.Type, is Data?.Type:
-        if let value = object(forKey: key) as? Property.Value {
+        if let value = suite.userDefaults?.object(forKey: key) as? Property.Value {
           return value
         } else {
           return property.defaultValue
@@ -23,7 +23,6 @@ public extension UserDefaults {
         guard let data = object(forKey: key) as? Data,
               let value = try? Property.Value.decodeJSON(from: data) else {
           return property.defaultValue
-          break
         }
         return value
       }

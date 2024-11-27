@@ -9,7 +9,7 @@ struct DeveloperSettingsPage<AdditionalContent: View>: View {
   @ViewBuilder var additionalContent: @MainActor () -> AdditionalContent
   
   public var body: some View {
-    NavigationPage(title: "Developer") {
+    HelloPage(title: "Developer") {
       DeveloperSettingsPageContent(additionalContent: additionalContent)
     }
   }

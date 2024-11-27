@@ -20,7 +20,7 @@ struct PersistenceExplorerFilesPage: View {
   }
   
   public var body: some View {
-    NavigationPage(showScrollIndicators: true, navBarContent: {
+    HelloPage(showScrollIndicators: true, navBarContent: {
       HelloButton(action: {
         windowModel.showPopup {
           HelloMenu(

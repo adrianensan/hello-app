@@ -4,7 +4,7 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct LogsNavigationPage: View {
+public struct LogsHelloPage: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea
@@ -23,7 +23,7 @@ public struct LogsNavigationPage: View {
   
   public var body: some View {
     ZStack {
-      NavigationPage(title: "Logs",
+      HelloPage(title: "Logs",
                      model: scrollModel,
                      navBarContent: {
         ZStack {

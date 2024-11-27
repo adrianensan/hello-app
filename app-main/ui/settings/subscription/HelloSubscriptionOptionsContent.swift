@@ -30,7 +30,7 @@ struct HelloSubscriptionOptionsContent: View {
        let tier3YearlyProduct = subcriptionModel.tier3YearlyProduct {
       VStack(spacing: 0) {
         HStack(spacing: 8) {
-          HelloImageView(.resource(bundle: .helloAppMain, fileName: "red-heart.png"))
+          HelloImageView(.resource(bundle: .helloAppMain, fileName: "red-heart.png"), load: .sync)
             .frame(width: 40, height: 40)
           //          .frame(height: 20)
           Text("Basic")
@@ -48,7 +48,7 @@ struct HelloSubscriptionOptionsContent: View {
           .frame(height: theme.surface.divider.width)
         
         HStack(spacing: 8) {
-          HelloImageView(.resource(bundle: .helloAppMain, fileName: "smiling-face-with-heart-eyes.png"))
+          HelloImageView(.resource(bundle: .helloAppMain, fileName: "smiling-face-with-heart-eyes.png"), load: .sync)
             .frame(width: 40, height: 40)
           //          .frame(height: 20)
           VStack(alignment: .leading, spacing: 0) {
@@ -74,7 +74,7 @@ struct HelloSubscriptionOptionsContent: View {
           .frame(height: theme.surface.divider.width)
         
         HStack(spacing: 8) {
-          HelloImageView(.resource(bundle: .helloAppMain, fileName: "star-struck.png"))
+          HelloImageView(.resource(bundle: .helloAppMain, fileName: "star-struck.png"), load: .sync)
             .frame(width: 40, height: 40)
           //          .frame(height: 20)
           

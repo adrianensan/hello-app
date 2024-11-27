@@ -7,7 +7,7 @@ import HelloApp
 struct AboutSettingsPage: View {
   
   var body: some View {
-    NavigationPage(title: "About") {
+    HelloPage(title: "About") {
       AboutSettingsPageContent()
     }
   }

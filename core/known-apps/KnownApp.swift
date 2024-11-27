@@ -33,7 +33,7 @@ public struct KnownApp: Identifiable, Hashable, Codable, Sendable {
 }
 
 public extension KnownApp {
-  public static var all: [KnownApp] {
+  static var all: [KnownApp] {
     var apps: [KnownApp] = [.helloPodcasts, .helloPasswords, .helloSolitaire, .helloEmoji]
     if let currentApp = apps.first(where: { $0.bundleID == AppInfo.rootBundleID }) {
       apps.removeAll { $0.bundleID == currentApp.bundleID }
@@ -42,7 +42,7 @@ public extension KnownApp {
     return apps
   }
   
-  public static func app(for bundleID: String) -> KnownApp? {
+  static func app(for bundleID: String) -> KnownApp? {
     all.first { $0.bundleID == bundleID }
   }
 }

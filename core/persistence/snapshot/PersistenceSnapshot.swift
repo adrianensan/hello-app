@@ -87,11 +87,11 @@ public enum UserDefaultsObjectSnapshot: Hashable, Sendable {
   public var string: String {
     switch self {
     case .string(let string): string
-    case .boolean(let bool): previewString
-    case .int(let int): previewString
-    case .double(let double): previewString
-    case .data(let data): previewString
-    case .stringArray(let stringArray): previewString
+    case .boolean: previewString
+    case .int: previewString
+    case .double: previewString
+    case .data: previewString
+    case .stringArray: previewString
     case .unknown: previewString
     }
   }

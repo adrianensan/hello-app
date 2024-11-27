@@ -2,7 +2,7 @@ import SwiftUI
 
 extension Animation {
   public static var interactive: Animation {
-    .interpolatingSpring(duration: 0.02)
+    .interpolatingSpring(duration: 0.04)
 //    .spring(response: 0.15, dampingFraction: 0.85, blendDuration: 0)
   }
 }

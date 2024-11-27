@@ -127,7 +127,7 @@ public extension HelloAPIClient {
     return URLRequest(url: url) +& {
       $0.httpBody = bodyData
       switch endpoint.type {
-      case .normal, .longPoll, .websocket: ()
+      case .normal, .longPoll: ()
       case .upload:
         $0.allowsExpensiveNetworkAccess = true
         $0.allowsConstrainedNetworkAccess = true
@@ -199,15 +199,6 @@ public extension HelloAPIClient {
       do {
         request.httpBody = nil
         (data, urlResponse) = try await session.upload(for: request, from: bodyData, delegate: delegate)
-      } catch {
-        let requestDuration = epochTime - requestStartTime
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")
-        throw error
-      }
-    case .websocket:
-      do {
-        let wsSession = session.webSocketTask(with: request)
-        throw APIError.invalidRequest
       } catch {
         let requestDuration = epochTime - requestStartTime
         Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")

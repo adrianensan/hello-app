@@ -1,7 +1,7 @@
 #if os(iOS)
 import SwiftUI
 
-public struct NavigationPageBarScrolling<TitleContent: View, NavBarContent: View>: View {
+public struct HelloPageBarScrolling<TitleContent: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(HelloScrollModel.self) private var scrollModel
@@ -10,7 +10,7 @@ public struct NavigationPageBarScrolling<TitleContent: View, NavBarContent: View
   @ViewBuilder let navBarContent: @MainActor () -> NavBarContent
   
   public var body: some View {
-    NavigationPageBar(titleContent: titleContent, navBarContent: navBarContent)
+    HelloPageBar(titleContent: titleContent, navBarContent: navBarContent)
       .opacity(scrollModel.hasScrolled ? 1 : 0)
   }
 }

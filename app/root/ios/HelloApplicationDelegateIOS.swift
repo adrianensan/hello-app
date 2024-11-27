@@ -106,7 +106,7 @@ public class SceneDelegate: NSObject, UISceneDelegate {
   
   public func scene(_ scene: UIScene, openURLContexts urlContexts: Set<UIOpenURLContext>) {
     for urlContext in urlContexts {
-      helloApplication.open(url: HelloURL(string: urlContext.url.absoluteString))
+      _ = helloApplication.open(url: HelloURL(string: urlContext.url.absoluteString))
     }
   }
   

@@ -8,40 +8,35 @@ public struct HelloSheetCoordinateSpace: CoordinateSpaceProtocol {
 }
 
 public extension CoordinateSpaceProtocol where Self == HelloSheetCoordinateSpace {
-  public static var sheet: HelloSheetCoordinateSpace { HelloSheetCoordinateSpace() }
+  static var sheet: HelloSheetCoordinateSpace { HelloSheetCoordinateSpace() }
 }
 
 public extension NamedCoordinateSpace {
-  public static var sheet: NamedCoordinateSpace { .named("hello-sheet") }
+  static var sheet: NamedCoordinateSpace { .named("hello-sheet") }
 }
 
 @MainActor
 @Observable
 public class HelloSheetModel {
+  
   var pagerModel: PagerModel?
+  
   var dismissDrag: CGFloat = 0
   var isVisible: Bool = false
   public var isFloating: Bool = false
   var sheetSize: CGSize = .zero
   public var waitingForSizing: Bool = false
+  public var scrollPreventingDismiss: String?
   
-  public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
   
-  public private(set) var dragToDismissType: GestureType
   @ObservationIgnored var dragCanDismiss: Bool?
-  
   @ObservationIgnored var isDraggingNavBar: Bool = false
-  var shouldScrollInsteadOfDismiss: Bool { !(pagerModel?.activePageIsReadyForDismiss ?? true) }
+  
+  public init() {}
+  
+  var shouldScrollInsteadOfDismiss: Bool { !(pagerModel?.activePageIsReadyForDismiss ?? true) || scrollPreventingDismiss != nil }
+  public var dismissProgress: CGFloat { max(0, min(1, dismissDrag / 200)) }
   var backProgress: CGFloat { pagerModel?.backProgressModel.backProgress ?? 0 }
-  
-  public init(dragToDismissType: GestureType = .highPriority) {
-    self.dragToDismissType = dragToDismissType
-  }
-  
-  public func update(dragToDismissType: GestureType) {
-    guard self.dragToDismissType != dragToDismissType else { return }
-    self.dragToDismissType = dragToDismissType
-  }
   
   public func dismiss() {
     guard isVisible else { return }
@@ -73,8 +68,8 @@ public struct HelloSheet<Content: View>: View {
   
   private var content: @MainActor () -> Content
   
-  public init(dragToDismissType: GestureType = .highPriority, content: @escaping @MainActor () -> Content) {
-    let sheetModel = HelloSheetModel(dragToDismissType: dragToDismissType)
+  public init(content: @escaping @MainActor () -> Content) {
+    let sheetModel = HelloSheetModel()
     self._model = State(initialValue: sheetModel)
     self.content = content
   }

@@ -120,7 +120,7 @@ public class HelloWindowModel {
     }
   
   public func present(sheet: HelloSheetConfig<some View>) {
-    present(id: sheet.id) { HelloSheet(dragToDismissType: sheet.dragToDismissType, content: sheet.view) }
+    present(id: sheet.id) { HelloSheet(content: sheet.view) }
   }
   #endif
   
@@ -140,7 +140,7 @@ public class HelloWindowModel {
   public func dismissPopup() {
     guard !popupViews.isEmpty else { return }
     popupViews.last?.onDismiss?()
-    popupViews.popLast()
+    _ = popupViews.popLast()
   }
   
   public func dismiss(id: String?) {
@@ -158,7 +158,7 @@ public class HelloWindowModel {
   public func dismiss(above targetID: String) {
     guard !popupViews.isEmpty else { return }
     while popupViews.last?.id != nil && popupViews.last?.id != targetID {
-      popupViews.popLast()
+      _ = popupViews.popLast()
     }
   }
   

@@ -196,14 +196,11 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       } else {
         fallback()
       }
-    }.nest {
-      if let cornerRadius {
-        $0.clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-          .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 0.5))
-      } else {
-        $0
-      }
+    }.ifLet(cornerRadius) { view, cornerRadius in
+      view
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+          .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 0.5))
     }.if(viewable) {
       $0.modifier(ViewableImageModifier(imageOptions: imageOptions, cornerRadius: cornerRadius))
     }.onChange(of: imageOptions, initial: true) {

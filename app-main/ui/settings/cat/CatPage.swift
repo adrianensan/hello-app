@@ -7,7 +7,7 @@ import HelloApp
 struct CatPage: View {
   
   var body: some View {
-    NavigationPage(title: "Monkey") {
+    HelloPage(title: "Monkey") {
       CatPageContent()
     }
   }

@@ -154,7 +154,7 @@ public class StoreModel {
       for await result in Transaction.updates {
         Log.info(context: "StoreKit", "Transaction update")
         await result.unsafePayloadValue.finish()
-        Task { try await refreshEntitlements() }
+        Task { await refreshEntitlements() }
       }
       Log.wtf(context: "StoreKit", "Update loop ended")
     }
@@ -171,7 +171,7 @@ public class StoreModel {
       switch verification {
       case .verified(let transaction):
         await transaction.finish()
-        try await refreshEntitlements()
+        await refreshEntitlements()
       case .unverified(let transaction, _):
         await transaction.finish()
         throw StoreServiceError.unverified

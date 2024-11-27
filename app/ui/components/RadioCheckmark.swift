@@ -1,7 +1,5 @@
 import SwiftUI
 
-import HelloApp
-
 public struct RadioCheckmark: View {
   
   @Environment(\.theme) private var theme

@@ -34,7 +34,7 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
       modifiedByte0, modifiedByte1, uuid.0, uuid.1, uuid.2, uuid.3, uuid.4, uuid.5, uuid.7,
       uuid.9, uuid.10, uuid.11, uuid.12, uuid.13, uuid.14, uuid.15]
     let bigEndianUInt = bytes.withUnsafeBytes { $0.load(as: UInt128.self) }
-    var value = CFByteOrderGetCurrent() == CFByteOrder(CFByteOrderLittleEndian.rawValue)
+    let value = CFByteOrderGetCurrent() == CFByteOrder(CFByteOrderLittleEndian.rawValue)
     ? UInt128(bigEndian: bigEndianUInt)
     : bigEndianUInt
     
@@ -63,7 +63,7 @@ public struct HelloUUID: Identifiable, Hashable, Sendable {
         subset += 0b1 << (i - 1)
       }
     }
-    var sumCharacter = String(sum % 36, radix: 36, uppercase: false)
+    let sumCharacter = String(sum % 36, radix: 36, uppercase: false)
     return "\(sumCharacter)\(String(subset, radix: 36, uppercase: false))"
   }
 }

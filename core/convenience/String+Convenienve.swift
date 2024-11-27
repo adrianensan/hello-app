@@ -51,8 +51,7 @@ public extension StringProtocol {
   }
   
   var fileSafeString: String {
-    var filtered = String(filter { !#"/\:%"'"#.contains($0) })
-    filtered = filtered.components(separatedBy: "?")[0]
+    var filtered = String(filter { !#"/\:%"'=?"#.contains($0) })
     if filtered.count > 250 {
       filtered = String(filtered.dropFirst(filtered.count - 251))
     }

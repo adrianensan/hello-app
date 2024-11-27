@@ -18,7 +18,7 @@ extension Device {
       case ._17Pro, ._17ProMax: .a19Pro
       case .se2: .a13
       case .se3: .a15
-      case .unknown(let modelNumber): .a15
+      case .unknown: .a15
       }
     case .iPad(let iPadModel):
       switch iPadModel {
@@ -37,7 +37,7 @@ extension Device {
       case .pro11Inch3, .pro12Inch5: .m1
       case .pro11Inch4, .pro12Inch6: .m2
       case .pro11Inch5, .pro13Inch7: .m4
-      case .unknown(let modelNumber): .m4
+      case .unknown: .m4
       }
     case .appleWatch(let appleWatchModel):
       switch appleWatchModel {
@@ -48,7 +48,7 @@ extension Device {
       case .series9_41mm, .series9_45mm: .s9
       case .ultra1: .s8
       case .ultra2: .s9
-      case .unknown(let modelNumber): .s9
+      case .unknown: .s9
       }
     case .appleTV(let appleTVModel):
       switch appleTVModel {
@@ -56,11 +56,11 @@ extension Device {
       case .tv4K: .a10X
       case .tv4K2: .a12
       case .tv4K3: .a15
-      case .unknown(let modelNumber): .a10
+      case .unknown: .a10
       }
     case .mac: .m4
     case .simulator(let device): device.processor
-    case .unknown(let identifier): .a10
+    case .unknown: .a10
     }
   }
 }

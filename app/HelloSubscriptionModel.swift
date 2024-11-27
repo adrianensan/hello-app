@@ -242,8 +242,8 @@ public class HelloSubscriptionModel {
         }
       }
     }
-    var premiumIcons = ["gold"]
-    var unlockedIcons = Persistence.mainActorValue(.unlockedAppIcons)
+    let premiumIcons = ["gold"]
+    let unlockedIcons = Persistence.mainActorValue(.unlockedAppIcons)
     if allowSuperPremiumFeatures {
       if !unlockedIcons.isSuperset(of: premiumIcons) {
         Persistence.mainActorSave(unlockedIcons.union(premiumIcons), for: .unlockedAppIcons)

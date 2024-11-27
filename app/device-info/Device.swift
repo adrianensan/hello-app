@@ -117,7 +117,7 @@ public enum Device: CustomStringConvertible, Equatable, Sendable {
       case ._17, ._17Plus, ._17Pro, ._17ProMax: 152
       case .se2: 0
       case .se3: 0
-      case .unknown(modelNumber: let modelNumber): 0
+      case .unknown: 0
       }
     case .iPad(let iPadModel):
       switch iPadModel {

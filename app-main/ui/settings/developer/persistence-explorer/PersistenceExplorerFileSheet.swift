@@ -8,16 +8,19 @@ struct PersistenceExplorerFileSheet: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.helloDismiss) private var helloDismiss
+  @Environment(\.share) private var share
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(PersistenceExplorerFileModel.self) private var fileModel
   
   var file: PersistenceFileSnapshot
   
   public var body: some View {
-    NavigationPagerView {
-      NavigationPage(navBarContent: {
+    HelloPager {
+      HelloPage(navBarContent: {
         HStack(spacing: 4) {
-          HelloShareLink(url: file.url) {
+          HelloButton(action: {
+            share(file.url)
+          }) {
             Image(systemName: "square.and.arrow.up")
               .font(.system(size: 20, weight: .regular))
               .foregroundStyle(theme.foreground.primary.style)

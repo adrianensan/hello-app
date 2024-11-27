@@ -137,8 +137,6 @@ public class Downloader {
         Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(nsError.domain) \(nsError.code) \(urlString) failed with error: \(error.localizedDescription)")
         throw .other(error)
       }
-      Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with error: \(error.localizedDescription)")
-      throw .other(error)
     }
     let duration = String(format: "(%.2fs)", epochTime - requestStartTime)
     guard let httpResponse = urlResponse as? HTTPURLResponse else {

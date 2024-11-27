@@ -5,77 +5,7 @@ import CoreGraphics
 //}
 
 public extension CGRect {
-  
-//  static var unit: CGRect { CGRect(origin: .init(), size: .unit) }
-//  
-//  var center: CGPoint {
-//    CGPoint(x: origin.x + 0.5 * size.width,
-//            y: origin.y + 0.5 * size.height)
-//  }
-//  
-//  var leading: CGPoint {
-//    CGPoint(x: origin.x,
-//            y: origin.y + 0.5 * size.height)
-//  }
-//  
-//  var topLeading: CGPoint {
-//    CGPoint(x: origin.x,
-//            y: origin.y + size.height)
-//  }
-//  
-//  var topTrailing: CGPoint {
-//    CGPoint(x: origin.x + size.width,
-//            y: origin.y + size.height)
-//  }
-//  
-//  var trailing: CGPoint {
-//    CGPoint(x: origin.x + size.width,
-//            y: origin.y + 0.5 * size.height)
-//  }
-//  
-//  var bottom: CGPoint {
-//    CGPoint(x: origin.x + 0.5 * size.width,
-//            y: origin.y + size.height)
-//  }
-//  
-//  var bottomLeading: CGPoint {
-//    CGPoint(x: origin.x, y: origin.y)
-//  }
-//  
-//  var bottomTrailing: CGPoint {
-//    CGPoint(x: origin.x + size.width,
-//            y: origin.y)
-//  }
-//  
-//  var top: CGPoint {
-//    CGPoint(x: origin.x + 0.5 * size.width,
-//            y: origin.y)
-//  }
-//  
-//  static func +(left: CGRect, right: CGRect) -> CGRect {
-//    CGRect(origin: left.origin + right.origin, size: left.size + right.size)
-//  }
-//  
-//  static func -(left: CGRect, right: CGRect) -> CGRect {
-//    CGRect(origin: left.origin - right.origin, size: left.size - right.size)
-//  }
-//  
-//  static func *(left: CGRect, right: CGSize) -> CGRect {
-//    CGRect(origin: left.origin * right, size: left.size * right)
-//  }
-//  
-//  static func +(left: CGRect, right: CGPoint) -> CGRect {
-//    CGRect(origin: left.origin + right, size: left.size)
-//  }
-//  
-//  static func -(left: CGRect, right: CGPoint) -> CGRect {
-//    CGRect(origin: left.origin - right, size: left.size)
-//  }
-//  
-//  static func /(left: CGRect, right: CGFloat.NativeType) -> CGRect {
-//    CGRect(origin: left.origin / right, size: left.size / right)
-//  }
-//  
+    
 ////  func contains(_ innerRect: CGRect) -> Bool {
 ////    innerRect.origin.x >= origin.x &&
 ////    innerRect.origin.y >= origin.y &&

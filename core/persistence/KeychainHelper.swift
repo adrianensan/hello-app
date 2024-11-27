@@ -91,7 +91,7 @@ public class KeychainHelper {
                                          [kSecValueData: data,
                                           kSecUseDataProtectionKeychain: true
                                          ] as [CFString : Any] as CFDictionary)
-        guard status == errSecSuccess else {
+        guard updateStatus == errSecSuccess else {
           switch status {
           default: throw KeychainError.other(error: status)
           }

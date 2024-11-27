@@ -32,7 +32,7 @@ public extension Animation {
   }
 }
 
-public struct NavigationPagerView: View {
+public struct HelloPager: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeAreaInsets

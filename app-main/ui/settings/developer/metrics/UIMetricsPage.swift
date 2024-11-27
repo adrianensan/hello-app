@@ -15,7 +15,7 @@ public struct UIMetricsPage: View {
   public init() {}
   
   public var body: some View {
-    NavigationPage(title: "UI Metrics") {
+    HelloPage(title: "UI Metrics") {
       VStack(spacing: 36) {
         HelloSection(title: "Screen") {
           HelloSectionItem(leadingPadding: false) {

@@ -32,7 +32,7 @@ public struct PagerPage: Sendable, Identifiable {
   }
 }
 
-public enum NavigationPageNavigationBarStyle: Sendable {
+public enum HelloPageNavigationBarStyle: Sendable {
   case fixed
   case scrollsWithContent
   case none
@@ -49,7 +49,7 @@ public struct HelloPagerConfig: Sendable {
   public var navBarHeight: CGFloat
   public var horizontalPagePadding: CGFloat
   public var belowNavBarPadding: CGFloat
-  public var navBarStyle: NavigationPageNavigationBarStyle
+  public var navBarStyle: HelloPageNavigationBarStyle
   public var navBarFadeTransitionMultiplier: CGFloat
   public var overrideNavBarTitleScrollsDown: Bool?
   public var allowsBack: Bool
@@ -58,7 +58,7 @@ public struct HelloPagerConfig: Sendable {
   public init(navBarHeight: CGFloat = Self.defaultNavBarHeight,
               horizontalPagePadding: CGFloat = 20,
               belowNavBarPadding: CGFloat = 0,
-              navBarStyle: NavigationPageNavigationBarStyle = .fixed,
+              navBarStyle: HelloPageNavigationBarStyle = .fixed,
               navBarFadeTransitionMultiplier: CGFloat = 1,
               overrideNavBarTitleScrollsDown: Bool? = nil,
               allowsBack: Bool = true,
@@ -107,6 +107,7 @@ public class PagerModel {
   public private(set) var viewStack: [PagerPage] = []
   public private(set) var viewDepth: Int = 0
   public var allowInteraction: Bool = true
+  public var backGestureOverride: String?
   var config: HelloPagerConfig
   @ObservationIgnored var dismissed: [String] = []
   

@@ -114,6 +114,7 @@ public struct HelloMenuRow: View {
 public struct HelloMenu: View {
   
   @Environment(\.theme) private var theme
+  @Environment(\.share) private var share
   
   private var position: CGPoint
   private var anchor: Alignment = .topTrailing
@@ -133,22 +134,18 @@ public struct HelloMenu: View {
                      anchor: anchor) { isVisible in
       VStack(spacing: 0) {
         ForEach(items) { item in
-          if let url = item.shareURL {
-            HelloShareLink(url: url, clickStyle: .highlight) {
-              HelloMenuRow(item: item)
-            }
-          } else if let string = item.shareString {
-            ShareLink(item: string) {
-              HelloMenuRow(item: item)
-            }
-          } else {
-            HelloButton(clickStyle: .highlight, action: {
-              isVisible.wrappedValue = false
+          HelloButton(clickStyle: .highlight, action: {
+            isVisible.wrappedValue = false
+            if let url = item.shareURL {
+              share(item)
+            } else if let string = item.shareString {
+              share(string)
+            } else {
               try await item.action()
-            }) {
-              HelloMenuRow(item: item)
-            }.environment(\.contentShape, .rect)
-          }
+            }
+          }) {
+            HelloMenuRow(item: item)
+          }.environment(\.contentShape, .rect)
         }
       }.clipShape(.rect(cornerRadius: 12))
         .background(theme.floating.backgroundView(for: .rect(cornerRadius: 12)))

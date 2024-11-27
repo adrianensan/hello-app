@@ -1,9 +1,14 @@
 import SwiftUI
 
 import HelloCore
-import HelloApp
 
 public struct HelloNavigationRow: View {
+  
+  public enum `Type`: Sendable {
+    case normal
+    case destructive
+    case deprioritized
+  }
   
   public enum ActionIcon: Sendable {
     case arrow
@@ -25,15 +30,18 @@ public struct HelloNavigationRow: View {
   private var iconYOffset: CGFloat
   private var name: String
   private var description: String?
+  private var type: `Type`
   private var previewContent: (@MainActor () -> AnyView)?
   private var actionIcon: ActionIcon?
   
-  public init(icon: String?,
+  public init(type: `Type` = .normal,
+              icon: String?,
               iconYOffset: CGFloat = 0,
               name: String,
               description: String? = nil,
               actionIcon: ActionIcon? = nil,
               @ViewBuilder trailingContent: @MainActor @escaping () -> some View) {
+    self.type = type
     self.icon = icon
     self.iconYOffset = iconYOffset
     self.name = name
@@ -42,17 +50,30 @@ public struct HelloNavigationRow: View {
     self.previewContent = { @MainActor in AnyView(trailingContent()) }
   }
   
-  public init(icon: String?,
+  public init(type: `Type` = .normal,
+              icon: String?,
               iconYOffset: CGFloat = 0,
               name: String,
               description: String? = nil,
               actionIcon: ActionIcon? = nil) {
+    self.type = type
     self.icon = icon
     self.iconYOffset = iconYOffset
     self.name = name
     self.description = description
     self.actionIcon = actionIcon
     self.previewContent = nil
+  }
+  
+  private var foregroundStyle: Color {
+    switch type {
+    case .normal:
+      theme.surface.foreground.primary.color
+    case .destructive:
+      theme.surface.error.color
+    case .deprioritized:
+      theme.surface.foreground.tertiary.color
+    }
   }
   
   public var body: some View {
@@ -68,17 +89,22 @@ public struct HelloNavigationRow: View {
           }
           Text(name)
             .font(.system(size: 16, weight: .regular))
-            .fixedSize()
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
           Spacer(minLength: 8)
           if let previewContent {
             previewContent()
+              .font(theme.font(size: 14, weight: .regular))
+              .foregroundStyle(theme.surface.foreground.tertiary.style)
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
           }
           if let actionIcon {
             Image(systemName: actionIcon.iconName)
               .font(.system(size: 16, weight: .regular))
               .foregroundStyle(theme.surface.foreground.tertiary.style)
           }
-        }
+        }.foregroundStyle(foregroundStyle)
         if let description {
           Text(description)
             .font(.system(size: 13, weight: .regular))

@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct NavigationPageBar<TitleContent: View, NavBarContent: View>: View {
+public struct HelloPageBar<TitleContent: View, NavBarContent: View>: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config

@@ -61,7 +61,6 @@ public class HelloRootViewController: UIHostingController<AnyView> {
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
     windowModel.window = window
-    let id = HelloUUID().string
 //      .onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
 //        guard let viewController = Self.instances[id],
 //              viewController.hideHomeIndicator != hideHomeIndicator else { return }
@@ -80,7 +79,6 @@ public class HelloRootViewController: UIHostingController<AnyView> {
 //        UIViewController.attemptRotationToDeviceOrientation()
 //      }
       
-    
     super.init(rootView: AnyView(HelloAppRootView { wrappedView }
       .environment(uiProperties)
       .environment(windowModel)
@@ -109,7 +107,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   // The following disables this keyboard offset behaviour, we can manage safe area and offsets ourselves.
   private func disableKeyboardAvoidance() {
     guard let viewClass = object_getClass(view) else { return }
-    
+
     let viewSubclassName = String("HelloRootUIHostingView")
     guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
     guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
@@ -165,11 +163,6 @@ public class HelloRootViewController: UIHostingController<AnyView> {
   
   override public func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    updateSize()
-  }
-  
-  override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-    super.traitCollectionDidChange(previousTraitCollection)
     updateSize()
   }
   

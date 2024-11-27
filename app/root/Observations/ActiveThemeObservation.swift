@@ -26,6 +26,14 @@ public extension EnvironmentValues {
   @Entry var pixelsPerPoint: CGFloat = 1
   @Entry var helloPagerConfig: HelloPagerConfig = HelloPagerConfig()
   @Entry var helloDismiss: @MainActor () -> Void = {}
+  @Entry var share: @MainActor (_ items: Any) -> Void = { items in
+    #if os(iOS)
+    (UIApplication.shared.connectedScenes.first as? UIWindowScene)?
+      .keyWindow?
+      .rootViewController?
+      .present(UIActivityViewController(activityItems: (items as? [Any]) ?? [items], applicationActivities: nil), animated: true, completion: nil)
+    #endif
+  }
 }
 
 //struct OptionalEnvironmentKey<ObservableType: Observable>: EnvironmentKey {

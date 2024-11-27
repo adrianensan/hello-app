@@ -7,7 +7,7 @@ import HelloApp
 struct MoreAppsSettingsPage: View {
   
   var body: some View {
-    NavigationPage(title: "More Apps") {
+    HelloPage(title: "More Apps") {
       MoreAppsSettingsPageContent()
     }
   }

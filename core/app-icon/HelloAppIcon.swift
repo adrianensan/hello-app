@@ -59,7 +59,7 @@ public enum HelloAppIconTintFill: Codable, Hashable, Sendable {
     switch self {
     case .color(let color): color
     case .gradient(_, let color): color
-    case .colorBlock(let colors, let vertical): colors.first ?? .black
+    case .colorBlock(let colors, _): colors.first ?? .black
     }
   }
 }

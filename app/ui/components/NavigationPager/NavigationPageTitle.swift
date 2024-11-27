@@ -47,12 +47,12 @@ public struct NavigationTitleOffsetModifier: ViewModifier {
 }
 
 public extension View {
-  public func navBarTitleContent() -> some View {
+  func navBarTitleContent() -> some View {
     modifier(NavigationTitleOffsetModifier())
   }
 }
 
-public struct NavigationPageTitle: View {
+public struct HelloPageTitle: View {
   
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.helloPagerConfig) private var config

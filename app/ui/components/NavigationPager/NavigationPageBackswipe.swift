@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-struct NavigationPageBackswipe: ViewModifier {
+struct HelloPageBackswipe: ViewModifier {
   
   @Environment(\.theme) private var theme
   @Environment(\.isActive) private var isActive
@@ -68,7 +68,7 @@ struct NavigationPageBackswipe: ViewModifier {
       .compositingGroup()
       .offset(x: offset)
 //      .animation(.pageAnimation, value: pagerModel.viewDepth)
-      .animation(backProgressModel.drag == nil ? .pageAnimation : .interactive, value: offset)
+      .animation(backProgressModel.drag == nil ? .dampSpring : .interactive, value: offset)
       .onChange(of: needsEffects, initial: true) {
         if needsEffects {
           lastTimeMoved = epochTime
@@ -82,32 +82,30 @@ struct NavigationPageBackswipe: ViewModifier {
             maskShape = false
           }
         }
-      }
-      .nest {
-        $0.gesture(type: pagerConfig.backGestureType, DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
-          .updating($backDragWidth) { drag, state, transaction in
-            if backProgressModel.backSwipeAllowance == nil {
-              backProgressModel.backSwipeAllowance = 0.5 * drag.translation.width > abs(drag.translation.height)
+      }.simultaneousGesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
+        .updating($backDragWidth) { drag, state, transaction in
+          if backProgressModel.backSwipeAllowance == nil {
+            backProgressModel.backSwipeAllowance = pagerModel.backGestureOverride == nil && 0.5 * drag.translation.width > abs(drag.translation.height)
+          }
+          
+          var dragWidth: CGFloat? = nil
+          if backProgressModel.backSwipeAllowance == true {
+            if drag.translation.width > viewFrame.width {
+              dragWidth = viewFrame.width + sqrt(abs(drag.translation.width - viewFrame.width))
+            } else if drag.translation.width > 0 {
+              dragWidth = drag.translation.width
+            } else {
+              dragWidth = -sqrt(abs(drag.translation.width))
             }
-            
-            var dragWidth: CGFloat? = nil
-            if backProgressModel.backSwipeAllowance == true {
-              if drag.translation.width > viewFrame.width {
-                dragWidth = viewFrame.width + sqrt(abs(drag.translation.width - viewFrame.width))
-              } else if drag.translation.width > 0 {
-                dragWidth = drag.translation.width
-              } else {
-                dragWidth = -sqrt(abs(drag.translation.width))
-              }
-            }
-            
-            state = dragWidth
-            backProgressModel.drag = dragWidth
-            
-            let progress = min(1, max(0, (dragWidth ?? 0) / 200))
-            if backProgressModel.backProgress != progress {
-              backProgressModel.backProgress = progress
-            }
+          }
+          
+          state = dragWidth
+          backProgressModel.drag = dragWidth
+          
+          let progress = min(1, max(0, (dragWidth ?? 0) / 200))
+          if backProgressModel.backProgress != progress {
+            backProgressModel.backProgress = progress
+          }
 //            if TouchesModel.main.hasScrolledDuringTouch || drag.translation.width <= 0 {
 //              state = CGSize(width: 0, height: 0)
 //              if backProgressModel.backSwipeAllowance == nil {
@@ -117,19 +115,19 @@ struct NavigationPageBackswipe: ViewModifier {
 //              state = CGSize(width: drag.translation.width, height: 0)
 //              backProgressModel.backSwipeAllowance = true
 //            }
-          }.onEnded { drag in
-            if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
-              pagerModel.popView()
-            }
-            backProgressModel.reset()
-          })
-      }.onChange(of: backDragWidth == nil || !isActive) {
-        guard backDragWidth == nil || !isActive else { return }
+        }.onEnded { drag in
+          if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
+            pagerModel.popView()
+          }
+          backProgressModel.reset()
+        }).when(backDragWidth == nil || !isActive) {
         Task {
           try? await Task.sleepForOneFrame()
           backProgressModel.reset()
         }
-      }.onAppear {
+      }.task {
+        try? await Task.sleepForOneFrame()
+        try? await Task.sleepForOneFrame()
         pagerModel.pageReady(pageID)
       }
 //      .onChange(of: touchesModel.activeTouches.isEmpty) {
@@ -148,6 +146,6 @@ struct NavigationPageBackswipe: ViewModifier {
 
 extension View {
   func handlePageBackSwipe(pageID: String, pageSize: CGSize) -> some View {
-    self.modifier(NavigationPageBackswipe(pageID: pageID, size: pageSize))
+    self.modifier(HelloPageBackswipe(pageID: pageID, size: pageSize))
   }
 }

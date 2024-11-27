@@ -55,7 +55,7 @@ public struct HelloSubscription: Codable, Equatable, Sendable {
   public var isGlobal: Bool {
     switch type {
     case .test: false
-    case .paid(let tier): true
+    case .paid: true
     case .developer: true
     case .promo(let global): global
     }
@@ -65,7 +65,7 @@ public struct HelloSubscription: Codable, Equatable, Sendable {
     guard isValid else { return false }
     return switch type {
     case .test: true
-    case .paid(let tier): true
+    case .paid: true
     case .developer: false
     case .promo: false
     }

@@ -9,7 +9,7 @@ public struct TechnicalDetailsSettingsPage: View {
   @Environment(\.theme) var theme
   
   public var body: some View {
-    NavigationPage(title: "Technical Details") {
+    HelloPage(title: "Technical Details") {
       Text("""
         \(AppInfo.displayName) is written entirely in Swift 6, with SwiftUI for all the UI.
         

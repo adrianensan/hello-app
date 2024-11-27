@@ -9,7 +9,7 @@ public struct PrivacyPolicySettingsPage: View {
   @Environment(\.theme) var theme
   
   public var body: some View {
-    NavigationPage(title: "Privacy Policy") {
+    HelloPage(title: "Privacy Policy") {
       Text("\(AppInfo.displayName) does not collect any information.\n\nThat's it!")
         .font(.system(size: 14, weight: .medium))
         .fontDesign(.monospaced)

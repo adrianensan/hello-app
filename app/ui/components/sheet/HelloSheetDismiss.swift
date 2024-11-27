@@ -57,16 +57,6 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
         .opacity(model.isVisible ? 1 : 0)
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
           .updating($drag) { value, state, transaction in
-//            if dragID == nil {
-//              dragID = value.startLocation
-//              state = value.startLocation
-//            }
-//            guard dragID == value.startLocation else {
-//              if state != dragID {
-//                state = dragID
-//              }
-//              return
-//            }
             if state == nil {
               state = value.startLocation
             }
@@ -79,25 +69,14 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
             }
           })
           .animation(.easeInOut(duration: 0.2), value: model.isVisible))
-      .gesture(type: model.dragToDismissType, DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
+      .simultaneousGesture(DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
         .updating($drag) { drag, state, transaction in
-//          if dragID == nil {
-//            dragID = drag.startLocation
-//            state = drag.startLocation
-//          }
-//          guard dragID == drag.startLocation else {
-//            if state != dragID {
-//              state = dragID
-//            }
-//            return
-//          }
           if state == nil {
             state = drag.startLocation
           }
           if model.dragCanDismiss == nil {
             model.dragCanDismiss = (model.isDraggingNavBar || !model.shouldScrollInsteadOfDismiss) && 0.8 * drag.translation.height > abs(drag.translation.width)
           }
-          
           if model.dragCanDismiss == true {
             model.dismissDrag = drag.translation.height
           }
@@ -117,12 +96,10 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       }
       .allowsHitTesting(model.isVisible && model.dismissDrag == 0)
       .environment(\.hasAppeared, model.isVisible)
-      .onChange(of: model.isVisible) {
-        if !model.isVisible {
-          Task {
-            try? await Task.sleep(seconds: 0.2)
-            windowModel.dismiss(id: viewID)
-          }
+      .when(!model.isVisible) {
+        Task {
+          try? await Task.sleep(seconds: 0.2)
+          windowModel.dismiss(id: viewID)
         }
       }
       .onChange(of: model.sheetSize) { oldSize, newSize in

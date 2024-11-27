@@ -38,7 +38,7 @@ public enum HelloImageSource: Hashable, Sendable, Identifiable {
   
   public var id: String {
     switch self {
-    case .asset(let named):
+    case .asset(_, let named):
       "asset-\(named)"
     case .url(let url):
       "file-url-\(url)"
@@ -125,7 +125,7 @@ public class HelloImageModel {
     guard !isLoading else { return }
     Task {
       defer { isLoading = false }
-      await loadTask?.result
+      _ = await loadTask?.result
     }
     switch imageSource {
     case .asset(let bundle, let named):
@@ -138,7 +138,7 @@ public class HelloImageModel {
     case .url(let urlString):
       let url: URL
       if urlString.hasPrefix("file://") {
-        guard let fileURL = try? URL(string: urlString) else {
+        guard let fileURL = URL(string: urlString) else {
           return
         }
         url = fileURL
@@ -148,8 +148,8 @@ public class HelloImageModel {
       guard let data = try? Data(contentsOf: url),
             let nativeImage = NativeImage(data: data)
       else { return }
+      image = nativeImage
       Task { @MainActor [weak self] in
-        self?.image = nativeImage
         await self?.loadFrames(from: data)
       }
     case .remoteURL(let url):
@@ -218,7 +218,7 @@ public class HelloImageModel {
       loadTask = Task.detached {
         let url: URL
         if urlString.hasPrefix("file://") {
-          guard let fileURL = try? URL(string: urlString) else {
+          guard let fileURL = URL(string: urlString) else {
             return
           }
           url = fileURL

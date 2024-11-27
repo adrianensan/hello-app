@@ -68,6 +68,7 @@ struct PersistenceExplorerFileRow: View {
           Text(file.size.string())
             .font(.system(size: 16, weight: .regular))
             .lineLimit(1)
+            .foregroundStyle(theme.surface.foreground.tertiary.style)
           if case .folder = file {
             Image(systemName: "chevron.right")
               .font(.system(size: 16, weight: .regular))
