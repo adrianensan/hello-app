@@ -69,13 +69,13 @@ public struct HelloPage<Content: View, TitleContent: View, NavBarContent: View>:
           model: scrollModel,
           content: {
             VStack(spacing: 0) {
-#if os(iOS)
+              #if os(iOS)
               if navBarStyle == .scrollsWithContent {
                 HelloPageBarScrolling(titleContent: titleContent, navBarContent: {
                   HelloPageNavBarContent(navBarContent: navBarContent)
                 })
               }
-#endif
+              #endif
               content()
                 .padding(.top, max(-scrollModel.effectiveScrollThreshold, 0) + (scrollModel.scrollThreshold == nil && scrollModel.effectiveScrollThreshold < 0 ? 8 : 0))
                 .padding(.horizontal, config.horizontalPagePadding)

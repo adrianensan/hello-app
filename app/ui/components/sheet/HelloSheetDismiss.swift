@@ -74,7 +74,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
           if state == nil {
             state = drag.startLocation
           }
-          if model.dragCanDismiss == nil {
+          if model.dragCanDismiss == nil && isActive {
             model.dragCanDismiss = (model.isDraggingNavBar || !model.shouldScrollInsteadOfDismiss) && 0.8 * drag.translation.height > abs(drag.translation.width)
           }
           if model.dragCanDismiss == true {

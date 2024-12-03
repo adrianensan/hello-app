@@ -35,4 +35,17 @@ public enum LogLevel: Codable, Comparable, Equatable, Sendable, CaseIterable {
     case .wtf: "exclamationmark.octagon.fill"
     }
   }
+  
+  public var printIcon: String {
+    switch self {
+    case .debug: ""
+    case .verbose: ""
+    case .info: ""
+    case .meta: ""
+    case .warning: ""
+    case .error: "❌"
+    case .fatal: "❌"
+    case .wtf: "❌"
+    }
+  }
 }

@@ -17,11 +17,11 @@ public struct LogStatement: Codable, Hashable, Identifiable, Sendable {
   
   public var timeStampString: String {
     let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "h:mm:ss"
+    dateFormatter.dateFormat = "h:mm:ss.SSS"
     return dateFormatter.string(from: Date(timeIntervalSince1970: timeStamp))
   }
   
   public var formattedLine: String {
-    "[\(level)] \(timeStampString) \(context.flatMap { "[\($0)] " } ?? "")\(message)"
+    "\(timeStampString) \(level.printIcon)[\(level)] \(context.flatMap { "[\($0)] " } ?? "")\(message)"
   }
 }

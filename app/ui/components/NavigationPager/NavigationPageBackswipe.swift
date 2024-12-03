@@ -16,7 +16,7 @@ struct HelloPageBackswipe: ViewModifier {
   @State private var maskShape: Bool = true
   
   @GestureState private var backDragWidth: CGFloat?
-//  @State private var touchesModel: TouchesModel = .main
+  //  @State private var touchesModel: TouchesModel = .main
   let pageID: String
   let size: CGSize
   
@@ -60,14 +60,14 @@ struct HelloPageBackswipe: ViewModifier {
         HelloBackgroundDimmingView()
           .opacity(isActivePage ? 0 : 0.8 * backProgress)
           .animation(.pageAnimation, value: isActivePage)
-//          .animation(.interactive, value: backProgress)
+        //          .animation(.interactive, value: backProgress)
           .allowsTightening(false)
       )
       .allowsHitTesting(pagerModel.activePageID == pageID && pagerModel.allowInteraction && backProgressModel.backProgress == 0)
       .disabled(pagerModel.activePageID != pageID || backProgressModel.backProgress != 0)
       .compositingGroup()
       .offset(x: offset)
-//      .animation(.pageAnimation, value: pagerModel.viewDepth)
+    //      .animation(.pageAnimation, value: pagerModel.viewDepth)
       .animation(backProgressModel.drag == nil ? .dampSpring : .interactive, value: offset)
       .onChange(of: needsEffects, initial: true) {
         if needsEffects {
@@ -84,7 +84,7 @@ struct HelloPageBackswipe: ViewModifier {
         }
       }.simultaneousGesture(DragGesture(minimumDistance: pagerModel.config.allowsBack && pagerModel.viewDepth > 1 && pagerModel.activePage?.options.allowBackOverride != false ? 10 : .infinity, coordinateSpace: .global)
         .updating($backDragWidth) { drag, state, transaction in
-          if backProgressModel.backSwipeAllowance == nil {
+          if backProgressModel.backSwipeAllowance == nil && isActive {
             backProgressModel.backSwipeAllowance = pagerModel.backGestureOverride == nil && 0.5 * drag.translation.width > abs(drag.translation.height)
           }
           
@@ -106,41 +106,41 @@ struct HelloPageBackswipe: ViewModifier {
           if backProgressModel.backProgress != progress {
             backProgressModel.backProgress = progress
           }
-//            if TouchesModel.main.hasScrolledDuringTouch || drag.translation.width <= 0 {
-//              state = CGSize(width: 0, height: 0)
-//              if backProgressModel.backSwipeAllowance == nil {
-//                backProgressModel.backSwipeAllowance = false
-//              }
-//            } else if backProgressModel.backSwipeAllowance != false {
-//              state = CGSize(width: drag.translation.width, height: 0)
-//              backProgressModel.backSwipeAllowance = true
-//            }
+          //            if TouchesModel.main.hasScrolledDuringTouch || drag.translation.width <= 0 {
+          //              state = CGSize(width: 0, height: 0)
+          //              if backProgressModel.backSwipeAllowance == nil {
+          //                backProgressModel.backSwipeAllowance = false
+          //              }
+          //            } else if backProgressModel.backSwipeAllowance != false {
+          //              state = CGSize(width: drag.translation.width, height: 0)
+          //              backProgressModel.backSwipeAllowance = true
+          //            }
         }.onEnded { drag in
           if backProgressModel.backSwipeAllowance == true && drag.predictedEndTranslation.width > 200 {
             pagerModel.popView()
           }
           backProgressModel.reset()
         }).when(backDragWidth == nil || !isActive) {
-        Task {
+          Task {
+            try? await Task.sleepForOneFrame()
+            backProgressModel.reset()
+          }
+        }.task {
           try? await Task.sleepForOneFrame()
-          backProgressModel.reset()
+          try? await Task.sleepForOneFrame()
+          pagerModel.pageReady(pageID)
         }
-      }.task {
-        try? await Task.sleepForOneFrame()
-        try? await Task.sleepForOneFrame()
-        pagerModel.pageReady(pageID)
-      }
-//      .onChange(of: touchesModel.activeTouches.isEmpty) {
-//        if touchesModel.activeTouches.isEmpty {
-//          Task {
-//            try await Task.sleep(seconds: 0.2)
-//            if touchesModel.activeTouches.isEmpty && backProgressModel.backSwipeAllowance != nil {
-//              backProgressModel.backProgress = 0
-//              backProgressModel.backSwipeAllowance = nil
-//            }
-//          }
-//        }
-//      }
+    //      .onChange(of: touchesModel.activeTouches.isEmpty) {
+    //        if touchesModel.activeTouches.isEmpty {
+    //          Task {
+    //            try await Task.sleep(seconds: 0.2)
+    //            if touchesModel.activeTouches.isEmpty && backProgressModel.backSwipeAllowance != nil {
+    //              backProgressModel.backProgress = 0
+    //              backProgressModel.backSwipeAllowance = nil
+    //            }
+    //          }
+    //        }
+    //      }
   }
 }
 

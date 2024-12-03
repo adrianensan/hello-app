@@ -88,7 +88,7 @@ public struct ImageViewer: View {
           }
         }) {
           HelloImageView(options: imageOptions)
-            .clipShape(RoundedRectangle(cornerRadius: originalFrame == nil ? 0 : cornerRadius, style: .continuous))
+            .clipShape(.rect(cornerRadius: originalFrame == nil ? 0 : cornerRadius))
             .frame(width: originalFrame?.width, height: originalFrame?.height)
             .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
             .frame(width: windowFrame.size.width, height: windowFrame.size.height,
