@@ -99,7 +99,7 @@ public enum SyncEncryption {
       throw HelloError("Failed to get c string from password")
     }
     var derivedKeyData: [UInt8] = .init(repeating: 0, count: SHA256.byteCount)
-    KeyDerivationPBKDF(
+    let result =  KeyDerivationPBKDF(
       algorithm: CCPBKDFAlgorithm(kCCPBKDF2),
       password: passwordCharacters,
       passwordLen: passwordCharacters.count,
@@ -109,6 +109,9 @@ public enum SyncEncryption {
       rounds: 806_911,
       derivedKey: &derivedKeyData,
       derivedKeyLen: derivedKeyData.count)
+    guard result == 0 else {
+      throw HelloError("Key derivation failed \(result)")
+    }
     return derivedKeyData
   }
   

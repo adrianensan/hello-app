@@ -25,9 +25,9 @@ public struct HelloKeyboard: View {
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeAreaInsets
   
-  @Binding var string: String
+  @Binding private var string: String
   
-  var rows: [String] = [
+  private var rows: [String] = [
     "1234567890",
     "qwertyuiop",
     "asdfghjkl"
@@ -39,7 +39,7 @@ public struct HelloKeyboard: View {
   
   @State private var keySize: CGSize = .zero
   
-  var keyPadding: CGFloat {
+  private var keyPadding: CGFloat {
     keySize.width / 12
   }
   

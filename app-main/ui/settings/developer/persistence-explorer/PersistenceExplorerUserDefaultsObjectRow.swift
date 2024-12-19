@@ -8,7 +8,7 @@ struct PersistenceExplorerUserDefaultsObjectRow: View {
   
   @Environment(\.theme) private var theme
   @Environment(HelloWindowModel.self) private var windowModel
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(PersistenceExplorerFileModel.self) private var fileModel
   
   @NonObservedState private var globalFrame: CGRect = .zero

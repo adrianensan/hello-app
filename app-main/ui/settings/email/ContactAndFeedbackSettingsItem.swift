@@ -12,7 +12,7 @@ public struct ContactAndFeedbackSettingsItem: View {
   public init() {}  
   
   public var body: some View {
-    HelloButton(clickStyle: .highlight, haptics: .click, action: {
+    HelloButton(clickStyle: .highlight, action: {
       windowModel.presentSheet { EmailSetupSheet() }
     }) {
       HelloNavigationRow(icon: "envelope", name: "Contact/Feedback", actionIcon: .arrow)

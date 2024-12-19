@@ -164,13 +164,15 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
     return (hue, saturation, brightness)
   }
   
-  public func modify(saturation: Double, brightness: Double) -> HelloColor {
+  public func brightness(_ brightness: Double) -> HelloColor {
     var (h, s, b) = hsb
-    if s > 0 {
-      s += saturation
-    }
-    
     b += brightness
+    return HelloColor(h: h, s: s, b: b, a: a, colorSpace: colorSpace)
+  }
+  
+  public func saturation(_ saturation: Double) -> HelloColor {
+    var (h, s, b) = hsb
+    s += saturation
     return HelloColor(h: h, s: s, b: b, a: a, colorSpace: colorSpace)
   }
   
@@ -188,14 +190,6 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
     return modifiedColor
   }
   
-  public func darken(by darkenAmount: Double) -> HelloColor {
-    HelloColor(r: r * darkenAmount,
-               g: g * darkenAmount,
-               b: b * darkenAmount,
-               a: a,
-               colorSpace: colorSpace)
-  }
-  
   public func isEssentiallySame(as otherColor: HelloColor) -> Bool {
     abs(r - otherColor.r) < 0.001 && abs(g - otherColor.g) < 0.001
     && abs(b - otherColor.b) < 0.001 && abs(a - otherColor.a) < 0.001
@@ -207,14 +201,6 @@ public struct HelloColor: Codable, Equatable, Hashable, Identifiable, Sendable, 
     let bDiff: Double = abs(b - otherColor.b)
     let diff: Double = rDiff + gDiff + bDiff
     return diff / 3 < 0.1
-  }
-  
-  public func lighten() -> HelloColor {
-    modify(saturation: 0, brightness: 0.4)
-  }
-  
-  public func darken() -> HelloColor {
-    modify(saturation: 0, brightness: -0.3)
   }
 }
 

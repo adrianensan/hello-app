@@ -5,21 +5,25 @@ import HelloCore
 public struct HelloButtonStyle: ButtonStyle {
   
   @Environment(\.theme) private var theme
-  @Environment(\.contentShape) private var contentShape
+  @Environment(\.viewShape) private var viewShape
   @Environment(\.isEnabled) private var isEnabled
   @Environment(HelloButtonModel.self) private var model
   
   @State private var isPressed: Bool = false
+  @State private var isHovered: Bool = false
   
   var clickStyle: HelloButtonClickStyle
   var longPressAction: (@MainActor () async throws -> Void)?
   
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
+      .background(isHovered ? viewShape.fill((theme.theme.isDark ? Color.white : Color.black).opacity(0.08)) : nil)
+      .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.08 : 0)
       .brightness(isPressed ? (theme.theme.isDark ? 1 : -1) * 0.12 : 0)
       .animation(.easeInOut(duration: 0.1), value: isPressed)
       .scaleEffect(isPressed ? clickStyle.scaleAmount : 1)
       .animation(.spring(dampingFraction: 0.6).speed(1.6), value: isPressed)
+      .onHover { isHovered = $0 }
       .onChange(of: configuration.isPressed) {
         isPressed = isEnabled && configuration.isPressed
         if isPressed {
@@ -27,11 +31,12 @@ public struct HelloButtonStyle: ButtonStyle {
             model.longPressTask?.cancel()
             model.longPressTask = Task {
               try await Task.sleep(seconds: 0.4)
+              ButtonHaptics.buttonFeedback()
               Task { try await longPressAction?() }
               model.longPressTask = nil
             }
           }
-          if !model.hasPressed && model.hapticsType.hapticsOnClick {
+          if !model.hasPressed {
             ButtonHaptics.buttonFeedback()
           }
           model.hasPressed = true
@@ -64,13 +69,12 @@ public enum HelloButtonClickStyle {
   case scale
   case highlight
   
-  var highlightAmount: CGFloat {
-    switch self {
-    case .scale:
-      -0.05
-    case .highlight:
-      0.12
-    }
+  public static var `default`: HelloButtonClickStyle {
+#if os(iOS)
+    .scale
+#elseif os(macOS)
+    .highlight
+#endif
   }
   
   var scaleAmount: CGFloat {
@@ -86,14 +90,12 @@ public enum HelloButtonClickStyle {
 @MainActor
 @Observable
 fileprivate class HelloButtonModel {
-  var hapticsType: HapticsType
   var forceVisualPress: Bool = false
   @ObservationIgnored var longPressTask: Task<Void, any Error>?
   @ObservationIgnored var hasPressed: Bool = false
   @ObservationIgnored var hasClicked: Bool = false
   
-  init(hapticsType: HapticsType) {
-    self.hapticsType = hapticsType
+  init() {
   }
 }
 
@@ -130,35 +132,6 @@ public enum HapticsType {
   }
 }
 
-//public struct HelloShareLink<Content: View>: View {
-//  
-//  @State private var model: HelloButtonModel
-//  
-//  private var url: URL
-//  private var clickStyle: HelloButtonClickStyle
-//  private var content: @MainActor () -> Content
-//  
-//  public init(url: URL,
-//              clickStyle: HelloButtonClickStyle = .scale,
-//              haptics: HapticsType = .click,
-//              @ViewBuilder content: @MainActor @escaping () -> Content) {
-//    self.url = url
-//    self.clickStyle = clickStyle
-//    self.content = content
-//    _model = State(initialValue: HelloButtonModel(hapticsType: haptics))
-//  }
-//  
-//  public var body: some View {
-//    ShareLink(item: url) {
-//      content()
-//        .clickable()
-//    }.buttonStyle(.hello(clickStyle: clickStyle))
-//      .accessibilityElement()
-//      .accessibilityAddTraits(.isButton)
-//      .environment(model)
-//  }
-//}
-
 /// SwiftUI Button with an async throws action, haptics, and fully customizable label
 public struct HelloButton<Content: View>: View {
   
@@ -169,23 +142,94 @@ public struct HelloButton<Content: View>: View {
   @State private var isHovered: Bool = false
 #endif
   
+  @Environment(\.all) private var all
+  
   @State private var model: HelloButtonModel
   
+  @NonObservedState private var globalFrame: CGRect = .zero
+  
   private var clickStyle: HelloButtonClickStyle
-  private var action: (@MainActor () async throws -> Void)?
-  private var longPressAction: (@MainActor () async throws -> Void)?
+  private var action: (any HelloButtonAction)?
+  private var longPressAction: (any HelloButtonAction)?
   private var content: @MainActor () -> Content
   
-  public init(clickStyle: HelloButtonClickStyle = .scale,
-              haptics: HapticsType = .click,
-              action: (@MainActor () async throws -> Void)?,
-              longPressAction: (@MainActor () async throws -> Void)? = nil,
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              action: some HelloButtonAction,
+              longPressAction: some HelloButtonAction,
               @ViewBuilder content: @MainActor @escaping () -> Content) {
     self.clickStyle = clickStyle
+    self.content = content
     self.action = action
     self.longPressAction = longPressAction
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              tapAndLongPressAction: some HelloButtonAction,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
     self.content = content
-    _model = State(initialValue: HelloButtonModel(hapticsType: haptics))
+    self.action = tapAndLongPressAction
+    self.longPressAction = tapAndLongPressAction
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              action: some HelloButtonAction,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
+    self.content = content
+    self.action = action
+    self.longPressAction = nil
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              action: @MainActor @escaping () async throws -> Void,
+              longPressAction: some HelloButtonAction,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
+    self.content = content
+    self.action = .closure(action)
+    self.longPressAction = longPressAction
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              action: @MainActor @escaping () async throws -> Void,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
+    self.content = content
+    self.action = .closure(action)
+    self.longPressAction = nil
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              action: @MainActor @escaping () async throws -> Void,
+              longPressAction: @MainActor @escaping () async throws -> Void,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
+    self.content = content
+    self.action = .closure(action)
+    self.longPressAction = .closure(action)
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  public init(clickStyle: HelloButtonClickStyle = .default,
+              tapAndlongPressAction: @MainActor @escaping () async throws -> Void,
+              @ViewBuilder content: @MainActor @escaping () -> Content) {
+    self.clickStyle = clickStyle
+    self.content = content
+    self.action = .closure(tapAndlongPressAction)
+    self.longPressAction = .closure(tapAndlongPressAction)
+    _model = State(initialValue: HelloButtonModel())
+  }
+  
+  private var context: HelloButtonActionContext {
+    HelloButtonActionContext(
+      environment: all,
+      buttonFrame: globalFrame)
   }
   
   public var body: some View {
@@ -219,22 +263,23 @@ public struct HelloButton<Content: View>: View {
           model.hasPressed = false
           model.forceVisualPress = false
         }
-        try await action?()
+        try await action?.action(context: context)
       }
       model.forceVisualPress = true
-      if model.hapticsType.hapticsOnAction {
-        Haptics.buttonFeedback()
-      } else if !model.hasPressed && model.hapticsType == .click {
+      if !model.hasPressed {
         model.hasPressed = true
         Haptics.buttonFeedback()
       }
     }) {
       content()
         .clickable()
-    }.buttonStyle(HelloButtonStyle(clickStyle: clickStyle, longPressAction: longPressAction))
-      .accessibilityElement()
-      .accessibilityAddTraits(.isButton)
-      .environment(model)
+    }.buttonStyle(HelloButtonStyle(
+      clickStyle: clickStyle,
+      longPressAction: longPressAction.flatMap { action in { try await action.action(context: context) } }))
+    .accessibilityElement()
+    .accessibilityAddTraits(.isButton)
+    .environment(model)
+    .readFrame(to: $globalFrame)
 #endif
   }
 }

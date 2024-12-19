@@ -35,7 +35,7 @@ public struct HelloNavigationRow: View {
   private var actionIcon: ActionIcon?
   
   public init(type: `Type` = .normal,
-              icon: String?,
+              icon: String? = nil,
               iconYOffset: CGFloat = 0,
               name: String,
               description: String? = nil,
@@ -51,7 +51,7 @@ public struct HelloNavigationRow: View {
   }
   
   public init(type: `Type` = .normal,
-              icon: String?,
+              icon: String? = nil,
               iconYOffset: CGFloat = 0,
               name: String,
               description: String? = nil,

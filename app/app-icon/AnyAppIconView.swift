@@ -35,15 +35,15 @@ public struct HelloIOSAppIconView: Sendable {
           }
         ,
         back: LinearGradient(
-          colors: [accent.modify(saturation: 0.1, brightness: -0.2).swiftuiColor,
+          colors: [accent.saturation(0.1).brightness(-0.2).swiftuiColor,
                    accent.swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)),
       dark: HelloAppIconViewLayers(
         view: icon.foregroundStyle(LinearGradient(
-          colors: [accent.modify(saturation: -0.05, brightness: 0.1).swiftuiColor,
+          colors: [accent.saturation(-0.05).brightness(0.1).swiftuiColor,
                    accent.swiftuiColor,
-                   accent.modify(saturation: 0.1, brightness: -0.2).swiftuiColor],
+                   accent.saturation(0.1).brightness(-0.2).swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)
         )),
@@ -66,15 +66,15 @@ public struct HelloIOSAppIconView: Sendable {
           }
         ,
         back: LinearGradient(
-          colors: [tint.background.color.modify(saturation: 0.1, brightness: -0.2).swiftuiColor,
+          colors: [tint.background.color.saturation(0.1).brightness(-0.2).swiftuiColor,
                    tint.background.color.swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)),
       dark: HelloAppIconViewLayers(
         view: icon.foregroundStyle(LinearGradient(
-          colors: [tint.background.color.modify(saturation: -0.05, brightness: 0.1).swiftuiColor,
+          colors: [tint.background.color.saturation(-0.05).brightness(0.1).swiftuiColor,
                    tint.background.color.swiftuiColor,
-                   tint.background.color.modify(saturation: 0.1, brightness: -0.2).swiftuiColor],
+                   tint.background.color.saturation(0.1).brightness(-0.2).swiftuiColor],
           startPoint: .top,
           endPoint: .bottom)
         )),

@@ -167,7 +167,7 @@ public class HelloPersistence: HelloPersistenceConformable {
     do {
       try saveInternal(value, for: property)
       if mode != .normal && !property.allowedInDemoMode || property.allowCache {
-        cache[property.location.id] = property.cleanup(value: value)
+        cache[property.id] = property.cleanup(value: value)
       }
       updated(value: value, for: property, skipModelUpdate: skipModelUpdate)
     } catch {
@@ -237,18 +237,22 @@ public class HelloPersistence: HelloPersistenceConformable {
     case .memory: returnValue = property.defaultValue
     }
     
+    if let deprecatedProperty = property.oldProperty {
+      
+    }
+    
     return property.cleanup(value: returnValue)
   }
   
   public func value<Property: PersistenceProperty>(for property: Property) -> Property.Value {
-    if let rawValue = cache[property.location.id],
+    if let rawValue = cache[property.id],
        let value = rawValue as? Property.Value {
       return value
     }
     
     let value = storedValue(for: property)
     if mode != .normal && !property.allowedInDemoMode || property.allowCache {
-      cache[property.location.id] = value
+      cache[property.id] = value
     }
     
     return value
@@ -259,7 +263,7 @@ public class HelloPersistence: HelloPersistenceConformable {
   }
   
   public func delete<Property: PersistenceProperty>(property: Property) {
-    cache[property.location.id] = nil
+    cache[property.id] = nil
     
     if mode == .normal || property.allowedInDemoMode {
       switch property.location {
@@ -304,7 +308,7 @@ public class HelloPersistence: HelloPersistenceConformable {
   
   public func isSet<Property: PersistenceProperty>(property: Property) -> Bool {
     guard mode == .normal && property.location.type != .memory else {
-      return cache[property.location.id] != nil
+      return cache[property.id] != nil
     }
     return unsafeIsSet(property: property)
   }

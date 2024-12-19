@@ -1,11 +1,12 @@
 import Foundation
 
 @globalActor final public actor HelloPersistenceActor: GlobalActor {
-  public static let shared: HelloPersistenceActor = HelloPersistenceActor()
+  public static let shared = HelloPersistenceActor()
 }
 
 public struct PersistenceHelloEnvironmentKey: HelloEnvironmentObjectKey {
-  public static let defaultValue: any HelloPersistenceConformable = HelloPersistence()
+  public static let defaultValue: any HelloPersistenceConformable =
+    (try? UserDefaults.standard.value(for: .persistenceMode)) != .normal ? EphemeralPersistence() : HelloPersistence()
 }
 
 public extension HelloEnvironmentObjectKey where Self == PersistenceHelloEnvironmentKey {

@@ -5,7 +5,7 @@ public struct HelloPageNavBarContent<NavBarContent: View>: View {
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config
   @Environment(\.pageID) private var pageID
-  @OptionalEnvironment(PagerModel.self) private var pagerModel
+  @OptionalEnvironment(HelloPagerModel.self) private var pagerModel
   #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   #endif

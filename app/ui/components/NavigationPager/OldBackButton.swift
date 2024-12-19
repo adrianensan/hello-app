@@ -4,7 +4,7 @@ import Observation
 public struct OldBackButton: View {
   
   @Environment(\.theme) private var theme
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
   var rotationInterval: CGFloat = 0.6

@@ -15,7 +15,7 @@ public class HelloEnterCodeModel {
   
   var id: String = .uuid
   weak var windowModel: HelloWindowModel?
-  weak var pagerModel: PagerModel?
+  weak var pagerModel: HelloPagerModel?
   
   var unlockDevModeClickCount: Int = 0
   @ObservationIgnored private var unlockDevModeLastClick: TimeInterval = 0
@@ -105,7 +105,7 @@ public class HelloEnterCodeModel {
         alertMessage = "Not sure what you expected"
       }
     default:
-      if let unixSignal = UNIXSignal(input) {
+      if let _ = UNIXSignal(input) {
         exit(0)
       } else if let promoCode: HelloPromoCode = try? .parse(from: input) {
         guard helloApplication.appConfig.hasPremiumFeatures else {

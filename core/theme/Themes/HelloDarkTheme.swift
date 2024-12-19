@@ -21,7 +21,7 @@ public extension HelloTheme {
       scheme: .dark,
       baseLayer: .init(
         background: .color(color: HelloColor(r: 0, g: 0, b: 0),
-                           border: .init(color: .white.opacity(0.08))),
+                           border: .init(color: .white.opacity(0.14))),
         accent: accent,
         error: .color(color: .retroApple.red)),
       headerLayer: .init(

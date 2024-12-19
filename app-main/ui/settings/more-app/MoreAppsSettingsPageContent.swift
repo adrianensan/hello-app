@@ -9,7 +9,7 @@ struct MoreAppsSettingsPageContent: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.pageID) private var pageID
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   @NonObservedState private var targetPresentedApp: KnownApp?
   @State private var presentedApp: KnownApp?

@@ -8,7 +8,7 @@ import HelloApp
 public struct DeveloperSettingsRow<AdditionalContent: View>: View {
   
   @Environment(\.theme) private var theme
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   @ViewBuilder private var additionalContent: @MainActor () -> AdditionalContent
   
@@ -17,7 +17,7 @@ public struct DeveloperSettingsRow<AdditionalContent: View>: View {
   }
   
   public var body: some View {
-    HelloButton(clickStyle: .highlight, haptics: .click, action: {
+    HelloButton(clickStyle: .highlight, action: {
       pagerModel.push(name: "Developer") { DeveloperSettingsPage(additionalContent: additionalContent) }
     }) {
       HelloNavigationRow(icon: "hammer", name: "Developer", actionIcon: .arrow)
@@ -26,7 +26,7 @@ public struct DeveloperSettingsRow<AdditionalContent: View>: View {
 }
 
 public extension DeveloperSettingsRow where AdditionalContent == EmptyView {
-  public init() {
+  init() {
     self.additionalContent = { EmptyView() }
   }
 }

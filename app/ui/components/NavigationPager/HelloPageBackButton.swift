@@ -6,14 +6,14 @@ public struct HelloBackButton: View {
   @Environment(\.pageID) private var pageID
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.helloPagerConfig) private var config
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
   public init() {
   }
   
   public var body: some View {
-    HelloButton(haptics: .none, action: { pagerModel.popView() }) {
+    HelloButton(action: { pagerModel.popView() }) {
       BackButton()
         .foregroundStyle(theme.text.primary.color)
         .padding(.leading, 8)

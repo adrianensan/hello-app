@@ -21,7 +21,7 @@ public struct HelloCloseButton: View {
   private var dismissProgress: CGFloat { manualDismissProgress ?? sheetModel?.dismissProgress ?? 0 }
   
   public var body: some View {
-    HelloButton(clickStyle: .highlight, haptics: .none, action: { onDismiss() }) {
+    HelloButton(clickStyle: .highlight, action: { onDismiss() }) {
       ZStack {
         if needsContrast {
           ZStack {
@@ -109,7 +109,7 @@ public struct HelloCloseButton: View {
 //  private var dismissProgress: CGFloat { sheetModel?.dismissProgress ?? 0 }
 //  
 //  public var body: some View {
-//    HelloButton(clickStyle: .highlight, haptics: .click, action: { onDismiss() }) {
+//    HelloButton(clickStyle: .highlight, action: { onDismiss() }) {
 //      ZStack {
 //        ZStack {
 //          Circle()

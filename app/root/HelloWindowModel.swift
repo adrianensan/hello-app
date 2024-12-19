@@ -16,20 +16,6 @@ public func globalDismissKeyboard() {
 
 #if !os(macOS)
 
-public struct HelloSheetConfig<Content: View> {
-  var id: String
-  var dragToDismissType: GestureType = .highPriority
-  var view: @MainActor () -> Content
-  
-  public init(id: String,
-              dragToDismissType: GestureType = .highPriority,
-              view: @escaping @MainActor () -> Content) {
-    self.id = id
-    self.dragToDismissType = dragToDismissType
-    self.view = view
-  }
-}
-
 @MainActor
 @Observable
 public class HelloWindowModel {
@@ -62,6 +48,7 @@ public class HelloWindowModel {
   public var freeze: Bool = false
   var confettiID: String = .uuid
   var popupViews: [PopupWindow] = []
+  var dismissedPopups: [String] = []
   
   public var physicalScreenPixelSize: IntSize {
     IntSize(width: (window?.screen ?? UIScreen.main).nativeBounds.width,
@@ -102,27 +89,31 @@ public class HelloWindowModel {
   public func showPopup<Content: View>(blurBackground: Bool = false,
                                        onDismiss: (@MainActor () -> Void)? = nil,
                                        _ view: @escaping @MainActor () -> Content) {
-    blurAmountForPopup = blurBackground ? 16 : 0
+    blurAmountForPopup = blurBackground ? 16 : 1
     popupViews.append(PopupWindow(viewID: String(describing: Content.self), view: view, onDismiss: onDismiss))
   }
   
   public func show(alert alertConfig: HelloAlertConfig) {
-    blurAmountForPopup = 0
+    blurAmountForPopup = 1
     globalDismissKeyboard()
     popupViews.append(PopupWindow(viewID: alertConfig.id) { HelloAlert(config: alertConfig) })
   }
   
   #if os(iOS)
   public func presentSheet<Content: View>(
-    dragToDismissType: GestureType = .highPriority,
     sheet: @MainActor @escaping () -> Content) {
-      present(sheet: HelloSheetConfig(id: String(describing: Content.self), dragToDismissType: dragToDismissType, view: sheet))
+      present(sheet: HelloSheetConfig(id: String(describing: Content.self), view: sheet))
     }
   
-  public func present(sheet: HelloSheetConfig<some View>) {
+  public func present(sheet: HelloSheetConfig) {
     present(id: sheet.id) { HelloSheet(content: sheet.view) }
   }
   #endif
+  
+  public func areAnyPopupsPresented(above id: String?) -> Bool {
+    let index = popupViews.firstIndex(where: { $0.uniqueInstanceID == id }).map { $0 + 1 } ?? 0
+    return !popupViews[index...].filter { !dismissedPopups.contains($0.uniqueInstanceID) }.isEmpty
+  }
   
   public func present<Content: View>(
     id: String = String(describing: Content.self),
@@ -133,7 +124,7 @@ public class HelloWindowModel {
         return
       }
       globalDismissKeyboard()
-      blurAmountForPopup = 0
+      blurAmountForPopup = 1
       popupViews.append(PopupWindow(viewID: id, hasExclusiveInteraction: hasExclusiveInteraction, view: view))
   }
   
@@ -141,6 +132,7 @@ public class HelloWindowModel {
     guard !popupViews.isEmpty else { return }
     popupViews.last?.onDismiss?()
     _ = popupViews.popLast()
+    cleanup()
   }
   
   public func dismiss(id: String?) {
@@ -153,6 +145,7 @@ public class HelloWindowModel {
       .filter { $0.id == id }
       .forEach { $0.onDismiss?() }
     popupViews.removeAll { $0.id == id }
+    cleanup()
   }
   
   public func dismiss(above targetID: String) {
@@ -160,16 +153,28 @@ public class HelloWindowModel {
     while popupViews.last?.id != nil && popupViews.last?.id != targetID {
       _ = popupViews.popLast()
     }
+    cleanup()
+  }
+  
+  private func cleanup() {
+    let activeIDs = popupViews.map { $0.uniqueInstanceID }
+    dismissedPopups = dismissedPopups.filter { activeIDs.contains($0) }
   }
   
   public func isPresenting(_ id: String) -> Bool {
     popupViews.contains { $0.id == id }
   }
   
+  public func markDismiss(id: String?) {
+    guard let id else { return }
+    dismissedPopups.append(id)
+  }
+  
   public func dismissAllPopups() {
     guard !popupViews.isEmpty else { return }
     popupViews.forEach { $0.onDismiss?() }
     popupViews = []
+    dismissedPopups = []
   }
   
   public func showConfetti() {

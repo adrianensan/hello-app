@@ -10,7 +10,7 @@ public struct UIMetricsPage: View {
   @Environment(\.theme) private var theme
   @Environment(\.windowFrame) private var windowFrame
   @Environment(HelloWindowModel.self) private var windowModel
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   public init() {}
   

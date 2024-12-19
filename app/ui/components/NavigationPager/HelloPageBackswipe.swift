@@ -9,7 +9,7 @@ struct HelloPageBackswipe: ViewModifier {
   @Environment(\.pageShape) private var pageShape
   @Environment(\.viewFrame) private var viewFrame
   @Environment(\.helloPagerConfig) private var pagerConfig
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(BackProgressModel.self) private var backProgressModel
   
   @NonObservedState private var lastTimeMoved: TimeInterval = epochTime

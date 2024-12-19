@@ -41,14 +41,14 @@ public struct HelloPager: View {
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
   #endif
   
-  @State private var model: PagerModel
+  @State private var model: HelloPagerModel
   
-  public init(model: PagerModel) {
+  public init(model: HelloPagerModel) {
     _model = State(initialValue: model)
   }
   
   public init(name: String? = nil, rootView: @escaping @MainActor () -> some View) {
-    _model = State(initialValue: PagerModel(rootPage: PagerPage(name: name, view: rootView)))
+    _model = State(initialValue: HelloPagerModel(rootPage: PagerPage(name: name, view: rootView)))
   }
   
   private var config: HelloPagerConfig {

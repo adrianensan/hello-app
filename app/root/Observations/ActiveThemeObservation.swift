@@ -57,7 +57,7 @@ struct AllKey: EnvironmentKey {
   static let defaultValue: EnvironmentValues = .init()
 }
 
-fileprivate extension EnvironmentValues {
+extension EnvironmentValues {
   var all: EnvironmentValues {
     get { self }
     set { self = newValue }

@@ -191,7 +191,7 @@ public struct HelloScrollView<Content: View>: View {
   @Environment(\.pageID) private var pageID
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeAreaInsets
-  @OptionalEnvironment(PagerModel.self) private var pagerModel
+  @OptionalEnvironment(HelloPagerModel.self) private var pagerModel
   
   @State private var model: HelloScrollModel
   

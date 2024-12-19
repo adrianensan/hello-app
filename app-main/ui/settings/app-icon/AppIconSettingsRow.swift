@@ -7,7 +7,7 @@ import HelloApp
 public struct AppIconSettingsRow: View {
   
   @Environment(\.theme) private var theme
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   @State private var appIconModel: AppIconModel
   
@@ -16,7 +16,7 @@ public struct AppIconSettingsRow: View {
   }
   
   public var body: some View {
-    HelloButton(clickStyle: .highlight, haptics: .click, action: {
+    HelloButton(clickStyle: .highlight, action: {
       pagerModel.push(name: "App Icon") { AppIconSettingsPage().environment(appIconModel) }
     }) {
       HelloNavigationRow(icon: "app", name: "App Icon", actionIcon: .arrow) {

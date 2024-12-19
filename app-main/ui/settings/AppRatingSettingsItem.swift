@@ -14,7 +14,7 @@ public struct AppRatingSettingsItem: View {
   
   public var body: some View {
     if !AppInfo.isTestBuild && lastDateRatingClicked.addingTimeInterval(4 * 30 * .secondsInDay) < .now {
-      HelloButton(clickStyle: .highlight, haptics: .click, action: {
+      HelloButton(clickStyle: .highlight, action: {
         requestReview()
         withAnimation(.easeInOut(duration: 0.2)) {
           lastDateRatingClicked = .now

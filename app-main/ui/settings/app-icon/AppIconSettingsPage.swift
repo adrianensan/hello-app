@@ -7,7 +7,7 @@ import HelloApp
 struct AppIconSettingsPageOption: View {
   
   @Environment(\.theme) private var theme
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(AppIconModel.self) private var appIconModel
   
   var icon: AppIconOption
@@ -15,7 +15,7 @@ struct AppIconSettingsPageOption: View {
   var isSelected: Bool { icon.id == appIconModel.currentIcon.id }
   
   var body: some View {
-    HelloButton(haptics: .action, action: {
+    HelloButton(action: {
       guard icon.isAvailable else {
         pagerModel.push { HelloSubscriptionPage() }
         return
@@ -48,8 +48,7 @@ struct AppIconSettingsPageOption: View {
 //        }
       }.frame(width: 76)
         .animation(.easeInOut(duration: 0.2), value: isSelected)
-    }.buttonStyle(.scale(haptics: .onAction))
-      .overlay {
+    }.overlay {
         if !icon.isAvailable {
           Image(systemName: "lock.fill")
             .font(.system(size: 12, weight: .medium))
@@ -70,7 +69,7 @@ struct AppIconSettingsPage: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(AppIconModel.self) private var appIconModel
   
   var body: some View {

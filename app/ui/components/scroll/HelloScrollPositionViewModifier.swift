@@ -15,7 +15,7 @@ struct HelloScrollTouchViewModifier: ViewModifier {
   @Environment(HelloScrollModel.self) private var scrollModel
   #if os(iOS)
   @OptionalEnvironment(HelloSheetModel.self) private var sheetModel
-  @OptionalEnvironment(PagerModel.self) private var pagerModel
+  @OptionalEnvironment(HelloPagerModel.self) private var pagerModel
   #endif
   
   @GestureState private var isTouching: Bool = false

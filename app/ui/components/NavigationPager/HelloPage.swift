@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct HelloPage<Content: View, TitleContent: View, NavBarContent: View>: View {
   
-  @OptionalEnvironment(PagerModel.self) private var pagerModel
+  @OptionalEnvironment(HelloPagerModel.self) private var pagerModel
   @Environment(\.theme) private var theme
   @Environment(\.helloPagerConfig) private var config
   @Environment(\.safeArea) private var safeAreaInsets

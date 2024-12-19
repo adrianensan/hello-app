@@ -7,7 +7,7 @@ import HelloApp
 
 struct LogsSettingsItem: View {
   
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   var body: some View {
     HelloButton(clickStyle: .highlight, action: {

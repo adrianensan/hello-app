@@ -10,24 +10,28 @@ public struct QuestionBlockView: View {
     self.color = color
   }
   
+  var darkColor: Color {
+    color.brightness(-0.12).swiftuiColor
+  }
+  
   public var body: some View {
     GeometryReader { geometry in
       ZStack {
         ZStack {
           Circle()
-            .fill(color.darken().swiftuiColor)
+            .fill(darkColor)
             .frame(width: 0.15 * geometry.size.width, height: 0.15 * geometry.size.width)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
           Circle()
-            .fill(color.darken().swiftuiColor)
+            .fill(darkColor)
             .frame(width: 0.15 * geometry.size.width, height: 0.15 * geometry.size.width)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
           Circle()
-            .fill(color.darken().swiftuiColor)
+            .fill(darkColor)
             .frame(width: 0.15 * geometry.size.width, height: 0.15 * geometry.size.width)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
           Circle()
-            .fill(color.darken().swiftuiColor)
+            .fill(darkColor)
             .frame(width: 0.15 * geometry.size.width, height: 0.15 * geometry.size.width)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
         }.padding(0.075 * geometry.size.width)

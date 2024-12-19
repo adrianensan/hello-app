@@ -52,7 +52,7 @@ public enum HelloAppIconTintFill: Codable, Hashable, Sendable {
   case colorBlock([HelloColor], Orientation = .vertical)
   
   static func standardGradient(for color: HelloColor) -> HelloAppIconTintFill {
-    .gradient(color.modify(saturation: 0.1, brightness: -0.25), color)
+    .gradient(color.brightness(-0.25).saturation(0.1), color)
   }
   
   public var color: HelloColor {

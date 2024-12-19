@@ -2,7 +2,7 @@ import SwiftUI
 
 import HelloCore
 
-public struct HelloMenuItem: Identifiable {
+public struct HelloMenuItem: Identifiable, Sendable {
   public var id: String
   var name: String
   var icon: String

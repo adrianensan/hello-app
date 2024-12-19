@@ -25,7 +25,7 @@ public struct HelloToggle: View {
   }
   
   public var body: some View {
-    HelloButton(haptics: .action, action: { action() }) {
+    HelloButton(action: { action() }) {
       Capsule(style: .continuous)
         .fill(.white.opacity(theme.theme.isDim ? 0.5 : 1))
         .frame(width: 28, height: 28)

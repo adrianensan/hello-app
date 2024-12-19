@@ -8,7 +8,7 @@ struct AboutSettingsPageContent: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   @Persistent(.deviceID) private var deviceID
   @Persistent(.firstDateLaunched) private var firstDateLaunched
@@ -16,147 +16,57 @@ struct AboutSettingsPageContent: View {
   var body: some View {
     VStack(spacing: 24) {
       HelloSection(title: "APP") {
-        HelloMenuButton(items: { [.copy(string: AppInfo.displayName)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("App Name")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(AppInfo.displayName)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        let action: MenuHelloButtonAction = .showMenu { [.copy(string: AppInfo.displayName)] }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: action) {
+          HelloNavigationRow(name: "App Name") { Text(AppInfo.displayName) }
         }
         
-        HelloMenuButton(items: { [.copy(string: AppInfo.fullVersionString)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("App Version")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(AppInfo.fullVersionString)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: AppInfo.fullVersionString)] }) {
+          HelloNavigationRow(name: "App Version") { Text(AppInfo.fullVersionString) }
         }
         
-        HelloMenuButton(items: { [.copy(string: AppInfo.rootBundleID)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Bundle ID")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(AppInfo.rootBundleID)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: AppInfo.rootBundleID)] }) {
+          HelloNavigationRow(name: "Bundle ID") { Text(AppInfo.rootBundleID) }
         }
         
         let firstDateLaunchedString = firstDateLaunched.absoluteDateAndTimeString
-        HelloMenuButton(items: { [.copy(string: firstDateLaunchedString)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Install Date")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(firstDateLaunchedString)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: firstDateLaunchedString)] }) {
+          HelloNavigationRow(name: "Install Date") { Text(firstDateLaunchedString) }
         }
       }
       
       HelloSection(title: "DEVICE") {
         let deviceString = Device.current.description
-        HelloMenuButton(items: { [.copy(string: deviceString)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Device Name")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(deviceString)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: deviceString)] }) {
+          HelloNavigationRow(name: "Device Name") { Text(deviceString) }
         }
         
         let deviceModel = Device.deviceModelIdentifier
-        HelloMenuButton(items: { [.copy(string: deviceModel)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Device Model")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(deviceModel)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: deviceModel)] }) {
+          HelloNavigationRow(name: "Device Model") { Text(deviceModel) }
         }
         
         let processor = Device.current.processor.name
-        HelloMenuButton(items: { [.copy(string: processor)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Chip")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(processor)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: processor)] }) {
+          HelloNavigationRow(name: "Chip") { Text(processor) }
         }
         
         let osString = OSInfo.description
-        HelloMenuButton(items: { [.copy(string: osString)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("OS")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(osString)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: osString)] }) {
+          HelloNavigationRow(name: "OS") { Text(osString) }
         }
         
-        HelloMenuButton(items: { [.copy(string: deviceID)] }) {
-          HelloSectionItem(leadingPadding: false) {
-            HStack(spacing: 0) {
-              Text("Device ID")
-                .font(.system(size: 16, weight: .regular))
-              
-              Spacer(minLength: 0)
-              
-              Text(deviceID)
-                .font(.system(size: 16, weight: .regular))
-            }
-          }
+        HelloButton(clickStyle: .highlight, tapAndLongPressAction: .showMenu { @MainActor in [.copy(string: deviceID)] }) {
+          HelloNavigationRow(name: "Device ID") { Text(deviceID) }
         }
       }
       
-      
       HelloSection {
         HelloButton(clickStyle: .highlight, action: { pagerModel.push { TechnicalDetailsSettingsPage() } }) {
-          HelloNavigationRow(icon: nil, name: "Technical Details", actionIcon: .arrow)
+          HelloNavigationRow(name: "Technical Details", actionIcon: .arrow)
         }
         HelloButton(clickStyle: .highlight, action: { pagerModel.push { PrivacyPolicySettingsPage() } }) {
-          HelloNavigationRow(icon: nil, name: "Privacy Policy", actionIcon: .arrow)
+          HelloNavigationRow(name: "Privacy Policy", actionIcon: .arrow)
         }
       }
       

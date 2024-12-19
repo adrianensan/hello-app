@@ -89,7 +89,7 @@ public struct LogsHelloPage: View {
     }
     .transformEnvironment(\.helloPagerConfig) {
       $0.horizontalPagePadding = 8
-    }.onChange(of: loggerModel.logStatements.count) { _ in
+    }.onChange(of: loggerModel.logStatements.count) {
       if isFollowingNew {
         Task {
           try await Task.sleepForOneFrame()

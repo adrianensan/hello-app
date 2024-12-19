@@ -7,9 +7,10 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
   
   @Environment(\.isActive) private var isActive
   @Environment(\.windowFrame) private var windowFrame
+  @Environment(\.safeArea) private var safeArea
   @Environment(\.keyboardFrame) private var keyboardFrame
   @Environment(\.popupID) private var viewID
-  @Environment(\.viewID) private var viiiewID
+  @Environment(\.viewID) private var uniqueViewID
   @Environment(HelloWindowModel.self) private var windowModel
   @Environment(HelloSheetModel.self) private var model
   
@@ -44,6 +45,14 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .readSizeSync {
         guard model.sheetSize != $0 else { return }
         model.sheetSize = $0
+      }
+      .padding(.top, isfloating ? 0 : safeArea.top + 16)
+      .padding([.horizontal, .bottom], HelloSheet<EmptyView>.usePaddingOnIOS ? 10 : 0)
+      .transformEnvironment(\.safeArea) {
+        $0.top = 0
+        if isfloating {
+          $0.bottom = 0
+        }
       }
       .compositingGroup()
       .disabled(yDrag != 0)
@@ -97,6 +106,7 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .allowsHitTesting(model.isVisible && model.dismissDrag == 0)
       .environment(\.hasAppeared, model.isVisible)
       .when(!model.isVisible) {
+        windowModel.markDismiss(id: uniqueViewID)
         Task {
           try? await Task.sleep(seconds: 0.2)
           windowModel.dismiss(id: viewID)

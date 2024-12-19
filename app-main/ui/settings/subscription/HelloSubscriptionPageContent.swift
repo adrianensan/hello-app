@@ -8,7 +8,7 @@ import HelloApp
 struct HelloSubscriptionOpionsSectionContent: View {
   
   @Environment(HelloWindowModel.self) private var windowModel
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   @Environment(\.theme) private var theme
   
   let subcriptionModel: HelloSubscriptionModel = .main
@@ -84,7 +84,7 @@ struct HelloSubscriptionPageContent: View {
   @Environment(\.theme) private var theme
   @Environment(\.openURL) private var openURL
   @Environment(HelloWindowModel.self) private var windowModel
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   let subcriptionModel: HelloSubscriptionModel = .main
   

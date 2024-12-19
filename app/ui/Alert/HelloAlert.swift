@@ -96,7 +96,7 @@ public struct HelloAlert: View {
         .frame(height: 1)
       
       HStack(spacing: 0) {
-        HelloButton(clickStyle: .highlight, haptics: .click, action: {
+        HelloButton(clickStyle: .highlight, action: {
           config.firstButton.action?()
           dismiss()
         }) {
@@ -112,7 +112,7 @@ public struct HelloAlert: View {
         if let secondButton = config.secondButton {
           theme.foreground.primary.color.opacity(0.1)
             .frame(width: 1, height: 44)
-          HelloButton(clickStyle: .highlight, haptics: .click, action: {
+          HelloButton(clickStyle: .highlight, action: {
             secondButton.action?()
             dismiss()
           }) {

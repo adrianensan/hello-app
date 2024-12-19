@@ -21,8 +21,8 @@ public struct HelloAppRootView<Content: View>: View {
       content()
         .compositingGroup()
 //        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
-        .blur(radius: !windowModel.popupViews.isEmpty ? windowModel.blurAmountForPopup : 0)
-        .animation(.easeInOut(duration: 0.24), value: !windowModel.popupViews.isEmpty)
+        .blur(radius: windowModel.areAnyPopupsPresented(above: nil) ? windowModel.blurAmountForPopup : 0)
+        .animation(.easeInOut(duration: 0.2), value: windowModel.areAnyPopupsPresented(above: nil))
         .disabled(!windowModel.popupViews.isEmpty)
         .allowsHitTesting(windowModel.popupViews.isEmpty)
       
@@ -34,9 +34,10 @@ public struct HelloAppRootView<Content: View>: View {
             .environment(\.viewID, popupView.uniqueInstanceID)
             .zIndex(3 + 0.1 * Double(i))
             .compositingGroup()
-            .blur(radius: topView.id != popupView.id ? windowModel.blurAmountForPopup : 0)
+            .blur(radius: windowModel.areAnyPopupsPresented(above: popupView.uniqueInstanceID) ? windowModel.blurAmountForPopup : 0)
             .disabled(topView.hasExclusiveInteraction && topView.id != popupView.id)
             .allowsHitTesting(!topView.hasExclusiveInteraction || topView.id == popupView.id)
+            .animation(.easeInOut(duration: 0.2), value: windowModel.areAnyPopupsPresented(above: popupView.uniqueInstanceID))
         }
       }
       

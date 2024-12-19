@@ -8,7 +8,7 @@ struct CatPageContent: View {
   
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea
-  @Environment(PagerModel.self) private var pagerModel
+  @Environment(HelloPagerModel.self) private var pagerModel
   
   @Persistent(.deviceID) private var deviceID
   @Persistent(.firstDateLaunched) private var firstDateLaunched

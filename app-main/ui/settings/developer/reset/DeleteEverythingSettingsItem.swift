@@ -25,7 +25,7 @@ struct DeleteEverythingSettingsItem: View {
               secondButton: .init(
                 name: "Delete",
                 action: {
-                  try await Persistence.nuke()
+                  await Persistence.nuke()
                   exitGracefully()
                 },
                 isDestructive: true)))

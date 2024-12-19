@@ -18,7 +18,7 @@ public struct AppStoreReviewSettingsItem: View {
   
   public var body: some View {
     if let appStoreReviewURL = URL(string: "\(AppStoreURLGenerator.url(for: appID))?action=write-review&mt=8") {
-      HelloButton(clickStyle: .highlight, haptics: .click, action: {
+      HelloButton(clickStyle: .highlight, action: {
         openURL(appStoreReviewURL)
       }) {
         HelloNavigationRow(icon: "heart", name: "Write Review in App Store", actionIcon: .openExternal)

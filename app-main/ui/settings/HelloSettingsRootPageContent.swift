@@ -39,7 +39,7 @@ public struct HelloSettingsRootPageContent<Content: View, AdditionalDeveloperCon
 }
 
 public extension HelloSettingsRootPageContent where AdditionalDeveloperContent == EmptyView {
-  public init(@ViewBuilder content: @escaping @MainActor () -> Content) {
+  init(@ViewBuilder content: @escaping @MainActor () -> Content) {
     self.content = content
     self.additionalDeveloperContent = { EmptyView() }
   }

@@ -9,10 +9,9 @@ public struct PagerPage: Sendable, Identifiable {
   public var options: PagerPageOptions
   var instanceID: String = .uuid
   
-  @MainActor
   public init(id: String = .uuid,
               name: String? = nil,
-              view: @escaping @MainActor () -> some View,
+              view: @MainActor @escaping () -> some View,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
     self.name = name
@@ -20,10 +19,9 @@ public struct PagerPage: Sendable, Identifiable {
     self.options = options
   }
   
-  @MainActor
   public init(id: String = .uuid,
               name: String? = nil,
-              view: @escaping @MainActor () -> AnyView,
+              view: @MainActor @escaping () -> AnyView,
               options: PagerPageOptions = PagerPageOptions()) {
     self.id = id
     self.name = name
@@ -101,7 +99,7 @@ public struct HelloPageConfig<Content: View>: Sendable {
 
 @MainActor
 @Observable
-public class PagerModel {
+public class HelloPagerModel {
   public let id: String
   public private(set) var backProgressModel = BackProgressModel()
   public private(set) var viewStack: [PagerPage] = []
@@ -161,14 +159,9 @@ public class PagerModel {
     dismissed.contains(instanceID)
   }
   
-  public func push<Page: View>(id: String = String(describing: Page.self),
-                               name: String? = nil,
-                               animated: Bool = true,
-                               withOptions options: PagerPageOptions = PagerPageOptions(),
-                               view: @escaping @MainActor () -> Page) {
-    Log.verbose(context: "Pager", "Attempting to push page \(id)")
+  public func push(page: PagerPage, animated: Bool = true) {
+    Log.verbose(context: "Pager", "Attempting to push page \(page.id)")
     guard allowInteraction else { return }
-//    dismissKeyboard()
     let pagesToRemove = viewStack.count - viewDepth
     if pagesToRemove > 0 {
       for _ in 0..<pagesToRemove {
@@ -176,16 +169,23 @@ public class PagerModel {
         dismissed.removeAll { $0 == removedPage?.instanceID }
       }
     }
-    guard !viewStack.contains(where: { $0.id == id }) else { return }
+    guard !viewStack.contains(where: { $0.id == page.id }) else { return }
     allowInteraction = false
-    let newPage = PagerPage(id: id, name: name, view: view, options: options)
-    viewStack.append(newPage)
-    if !animated {
+    viewStack.append(page)
+    if animated {
+      timePagePushed = epochTime
+    } else {
       self.viewDepth = self.viewStack.count
       self.allowInteraction = true
-    } else {
-      timePagePushed = epochTime
     }
+  }
+  
+  public func push<Page: View>(id: String = String(describing: Page.self),
+                               name: String? = nil,
+                               animated: Bool = true,
+                               withOptions options: PagerPageOptions = PagerPageOptions(),
+                               view: @escaping @MainActor () -> Page) {
+    push(page: PagerPage(id: id, name: name, view: view, options: options), animated: animated)
   }
   
   public func pageReady(_ pageID: String) {
