@@ -54,7 +54,7 @@ public class HelloScrollModel {
   fileprivate var scrollTarget: HelloScrollTarget?
   var swiftuiScrollPosition = ScrollPosition()
   
-  public fileprivate(set) var scrollOffset: CGFloat = 0
+  public fileprivate(set) var scrollOffset: CGPoint = .zero
   public fileprivate(set) var dismissProgress: CGFloat = 0
   public fileprivate(set) var isDismissed: Bool = false
   public fileprivate(set) var showScrollIndicator: Bool
@@ -69,8 +69,10 @@ public class HelloScrollModel {
   public var axes: HelloScrollAxes
   fileprivate let coordinateSpaceName: String = .uuid
   @ObservationIgnored internal private(set) var readyForDismiss: Bool = true
+  @ObservationIgnored internal private(set) var isScrolledToLeading: Bool = true
   @ObservationIgnored fileprivate var isDismissing: Bool = true
   @ObservationIgnored fileprivate var timeReachedTop: TimeInterval = 0
+  @ObservationIgnored fileprivate var timeReachedLeading: TimeInterval = 0
   @ObservationIgnored private var isScreenTouched: Bool = false
   @ObservationIgnored private var isActive: Bool = true
 //  @ObservationIgnored private var lastUpdate: TimeInterval = epochTime
@@ -92,7 +94,7 @@ public class HelloScrollModel {
   
   public var hasScrolled: Bool = false
   
-  public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset / min(-0.01, effectiveScrollThreshold))) }
+  public var scrollThresholdProgress: Double { min(1, max(0, scrollOffset.y / min(-0.01, effectiveScrollThreshold))) }
   
   public func scroll(to scrollTarget: HelloScrollTarget, animated: Bool = false) {
     scroll(to: scrollTarget, animation: animated ? .easeOut(duration: 0.5) : nil)
@@ -123,49 +125,70 @@ public class HelloScrollModel {
     isDismissed = false
   }
   
-  fileprivate func update(offset: CGFloat) {
+  fileprivate func update(offset: CGPoint) {
 //    let time: TimeInterval = epochTime
 //    lastUpdate = time
     guard isActive else { return }
     
     if readyForDismiss
         && !isDismissing
-        && offset > scrollOffset {
+        && offset.y > scrollOffset.y {
       isDismissing = true
     }
     
-    if offset > scrollOffset {
+    if offset.y > scrollOffset.y {
       timeReachedTop = epochTime
     }
     
+    if offset.x > scrollOffset.x {
+      timeReachedLeading = epochTime
+    }
+    
     if !readyForDismiss
-        && offset >= 0
+        && offset.y >= 0
         && epochTime - timeReachedTop >= 0 {
       let diff = 0.3 - (epochTime - timeReachedTop)
       if diff > 0 {
         Task {
           try await Task.sleep(seconds: diff)
-          guard !readyForDismiss && offset >= 0 && epochTime - timeReachedTop >= 0.3 else { return }
+          guard !readyForDismiss && offset.y >= 0 && epochTime - timeReachedTop >= 0.3 else { return }
           readyForDismiss = true
         }
       } else {
         readyForDismiss = true
       }
-    } else if readyForDismiss && offset < 0 {
+    } else if readyForDismiss && offset.y < 0 {
       readyForDismiss = false
       isDismissing = false
+    }
+    
+    if !isScrolledToLeading
+        && offset.x >= 0
+        && epochTime - timeReachedLeading >= 0 {
+      let diff = 0.3 - (epochTime - timeReachedLeading)
+      if diff > 0 {
+        Task {
+          try await Task.sleep(seconds: diff)
+          guard !isScrolledToLeading && offset.x >= 0 && epochTime - timeReachedLeading >= 0.3 else { return }
+          isScrolledToLeading = true
+        }
+      } else {
+        isScrolledToLeading = true
+      }
+    } else if isScrolledToLeading && offset.x < 0 {
+      isScrolledToLeading = false
     }
     
     guard scrollOffset != offset else { return }
     scrollOffset = offset
 
-    let hasScrolled = scrollOffset < effectiveScrollThreshold
+    let hasScrolled = scrollOffset.y < effectiveScrollThreshold
     if self.hasScrolled != hasScrolled {
       self.hasScrolled = hasScrolled
     }
     
-    if scrollOffset > 0 {
-      overscroll = scrollOffset
+    if scrollOffset.y > 0 {
+      overscroll = scrollOffset.y
     } else if overscroll != 0 {
       overscroll = 0
     }
@@ -177,7 +200,7 @@ public class HelloScrollModel {
     #endif
     
     if isDismissing {
-      let newDismissProgress = min(1, max(0, offset / 100))
+      let newDismissProgress = min(1, max(0, offset.y / 100))
       guard dismissProgress != newDismissProgress else { return }
       dismissProgress = newDismissProgress
     } else if dismissProgress != 0 {
@@ -214,13 +237,16 @@ public struct HelloScrollView<Content: View>: View {
     ScrollView(model.axes.swiftui, showsIndicators: model.showScrollIndicator) {
       VStack(spacing: 0) {
         GeometryReader { geometry in
-          let _ = model.update(offset: geometry.frame(in: .named(model.coordinateSpaceName)).origin.y)
-          Color.clear
+          var offset = geometry.frame(in: .named(model.coordinateSpaceName)).topLeading - CGPoint(x: safeAreaInsets.leading, y: safeAreaInsets.top)
+          if offset.magnitude < 0.1 {
+            offset = .zero
+          }
+          model.update(offset: offset)
+          return Color.clear
         }.frame(height: 0)
         content()
       }
-    }.coordinateSpace(name: model.coordinateSpaceName)
-      .safeAreaInset(edge: .top, spacing: 0) {
+    }.safeAreaInset(edge: .top, spacing: 0) {
       Color.clear.frame(height: safeAreaInsets.top)
     }.safeAreaInset(edge: .bottom, spacing: 0) {
       Color.clear.frame(height: safeAreaInsets.bottom)
@@ -228,10 +254,11 @@ public struct HelloScrollView<Content: View>: View {
       Color.clear.frame(width: safeAreaInsets.leading)
     }.safeAreaInset(edge: .trailing, spacing: 0) {
       Color.clear.frame(width: safeAreaInsets.trailing)
-    }.if(model.invertScroll) {
-      $0.defaultScrollAnchor(.bottomLeading, for: .sizeChanges)
-        .defaultScrollAnchor(.bottomLeading, for: .initialOffset)
-    }.scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+    }.coordinateSpace(name: model.coordinateSpaceName)
+      .if(model.invertScroll) {
+        $0.defaultScrollAnchor(.bottomLeading, for: .sizeChanges)
+          .defaultScrollAnchor(.bottomLeading, for: .initialOffset)
+      }.scrollBounceBehavior(.basedOnSize, axes: .horizontal)
       .scrollDisabled(!model.scrollEnabled)
       .modifier(HelloScrollPositionViewModifier())
       .modifier(HelloScrollTouchViewModifier())

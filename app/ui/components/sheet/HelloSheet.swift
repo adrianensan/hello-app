@@ -38,7 +38,6 @@ public class HelloSheetModel {
   public var waitingForSizing: Bool = false
   public var scrollPreventingDismiss: String?
   
-  
   @ObservationIgnored var dragCanDismiss: Bool?
   @ObservationIgnored var isDraggingNavBar: Bool = false
   

@@ -17,7 +17,7 @@ public struct NavigationTitleOffsetModifier: ViewModifier {
   }
   
   private var progress: CGFloat {
-    titleOffset > 0 ? (titleOffset + scrollModel.scrollOffset) / titleOffset : 0
+    titleOffset > 0 ? (titleOffset + scrollModel.scrollOffset.y) / titleOffset : 0
   }
   
   private var scaleProgress: CGFloat {
@@ -29,8 +29,8 @@ public struct NavigationTitleOffsetModifier: ViewModifier {
   }
   
   private var offset: CGFloat {
-    if scrollModel.scrollOffset > 0 {
-      return 0.8 * titleOffset + 0.6 * scrollModel.scrollOffset
+    if scrollModel.scrollOffset.y > 0 {
+      return 0.8 * titleOffset + 0.6 * scrollModel.scrollOffset.y
     } else {
       var adjustedProgress = max(0, progress)
       if adjustedProgress > 1 {
@@ -72,7 +72,7 @@ public struct HelloPageTitle: View {
     config.overrideNavBarTitleScrollsDown == false || isSmallSize ? 0 : -scrollModel.effectiveScrollThreshold
   }
   
-  private var progress: CGFloat { titleOffset > 0 ? (titleOffset + scrollModel.scrollOffset) / titleOffset : 0 }
+  private var progress: CGFloat { titleOffset > 0 ? (titleOffset + scrollModel.scrollOffset.y) / titleOffset : 0 }
   
   private var scaleProgress: CGFloat {
     var adjustedProgress = max(0, progress)

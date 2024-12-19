@@ -32,7 +32,7 @@ struct HelloScrollTouchViewModifier: ViewModifier {
               if !scrollModel.readyForDismiss {
                 sheetModel?.scrollPreventingDismiss = scrollModel.id
               }
-              if scrollModel.axes.isHorizontal {
+              if !scrollModel.isScrolledToLeading && scrollModel.axes.isHorizontal {
                 pagerModel?.backGestureOverride = scrollModel.id
               }
               #endif
