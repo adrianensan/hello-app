@@ -83,7 +83,7 @@ public protocol HelloApplication: AnyObject {
   func onResignActive() async
   func onBackgrounded() async
   
-  func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) async
+  func versionUpdated(from previousVersion: HelloVersion, to newVersion: HelloVersion) async
   func onFirstLaunch() async
   
   func open(url: HelloURL) -> Bool
@@ -156,7 +156,7 @@ public extension HelloApplication {
   
   var supportsNotifications: Bool { false }
   
-  func versionUpdated(from previousVersion: AppVersion, to newVersion: AppVersion) {}
+  func versionUpdated(from previousVersion: HelloVersion, to newVersion: HelloVersion) {}
   func onFirstLaunch() {}
   
   func open(url: HelloURL) -> Bool { false }
@@ -175,7 +175,7 @@ extension HelloApplication {
 #if DEBUG
       await Persistence.save(true, for: .isDeveloper)
 #endif
-      if AppInfo.isTestBuild {
+      if AppInfo.distributionMethod != .appStore {
         await Persistence.save(true, for: .isTester)
         await Persistence.atomicUpdate(for: .unlockedAppIcons) {
           var unlockedAppIcons = $0
@@ -195,22 +195,26 @@ extension HelloApplication {
         installedApps.insert(AppInfo.rootBundleID)
         return installedApps
       }
-      if let currentAppVersion = AppVersion.current {
-        let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
-        if currentAppVersion != previousAppVersion {
-          await Persistence.save(currentAppVersion, for: .lastestVersionLaunched)
-          if let previousAppVersion {
-            await helloApplication.versionUpdated(from: previousAppVersion, to: currentAppVersion)
-          } else {
-            await helloApplication.onFirstLaunch()
-          }
+      let currentAppVersion = AppInfo.version
+      let previousAppVersion = await Persistence.value(.lastestVersionLaunched)
+      if currentAppVersion != previousAppVersion {
+        await Persistence.save(currentAppVersion, for: .lastestVersionLaunched)
+        if let previousAppVersion {
+          await helloApplication.versionUpdated(from: previousAppVersion, to: currentAppVersion)
+        } else {
+          await helloApplication.onFirstLaunch()
         }
-      }      
+      }
     }
     
     if appConfig.hasPremiumFeatures {
       _ = HelloSubscriptionModel.main
     }
+    
+    #if os(iOS)
+    ActiveThemeManager.main.set(colorScheme: UIScreen.main.traitCollection.userInterfaceStyle == .dark ? .dark : .light)
+    #elseif os(macOS)
+    #endif
     
     onLaunch()
   }

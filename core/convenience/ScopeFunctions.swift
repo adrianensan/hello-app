@@ -1,7 +1,7 @@
 import Foundation
 
-public func logAndThrow(level: LogLevel = .error, context: @escaping @Sendable @autoclosure () -> String? = nil, _ message: String) throws -> Never {
-  Log.log(level: level, context: context, message: { message })
+public func logAndThrow(level: LogLevel = .error, context: @escaping @Sendable @autoclosure () -> LogContext? = nil, _ message: String) throws -> Never {
+  Log.log(level: level, context: context, preview: { nil }, message: { message })
   throw HelloError(message)
 }
 

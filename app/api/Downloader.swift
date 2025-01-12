@@ -70,7 +70,7 @@ public class Downloader {
         $0.tlsMaximumSupportedProtocolVersion = .TLSv13
         $0.allowsExpensiveNetworkAccess = true
         $0.allowsConstrainedNetworkAccess = true
-        $0.httpAdditionalHeaders = ["User-Agent": "\(AppInfo.displayName) v\(AppVersion.current?.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
+      $0.httpAdditionalHeaders = ["User-Agent": "\(AppInfo.displayName) v\(AppInfo.version.display ?? "?"); \(Device.current.description); \(OSInfo.description)"]
       },
       delegate: nil,
       delegateQueue: nil)

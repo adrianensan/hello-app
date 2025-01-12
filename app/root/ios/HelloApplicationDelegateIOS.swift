@@ -9,8 +9,6 @@ class HelloAppDelegate: NSObject, UIApplicationDelegate {
   
 //  public static var shared: HelloAppDelegate?
   
-  public var window: UIWindow?
-  
 //  override public init() {
 //    super.init()
 ////    Hello.persistence = persistence

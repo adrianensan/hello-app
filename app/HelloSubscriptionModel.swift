@@ -143,10 +143,10 @@ public class HelloSubscriptionModel {
     storeModel.validSubscriptions
       .compactMap { HelloSubscriptionOption.infer(from: $0.productID) }
       .map {
-        if AppInfo.isTestBuild {
-          HelloSubscription.test
-        } else {
+        if AppInfo.distributionMethod == .appStore {
           HelloSubscription.new(for: $0.tier)
+        } else {
+          HelloSubscription.test
         }
       }
       .first
@@ -219,7 +219,7 @@ public class HelloSubscriptionModel {
       if let existingSubscription = appSubscription, existingSubscription.isValid {
         switch existingSubscription.type {
         case .paid:
-          if !AppInfo.isTestBuild {
+          if AppInfo.distributionMethod == .appStore {
             if existingSubscription.isValid {
               appSubscription?.isValid = false
               hasChanged = true
@@ -229,7 +229,7 @@ public class HelloSubscriptionModel {
             hasChanged = true
           }
         case .test:
-          if AppInfo.isTestBuild {
+          if AppInfo.distributionMethod != .appStore {
             if existingSubscription.isValid {
               appSubscription?.isValid = false
               hasChanged = true

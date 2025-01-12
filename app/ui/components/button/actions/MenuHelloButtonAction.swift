@@ -13,12 +13,14 @@ public struct MenuHelloButtonAction: HelloButtonAction {
   public func action(context: HelloButtonActionContext) async throws {
     guard let windowModel = context.environment[HelloWindowModel.self] else { return }
     let menuItems = try await menuItems()
+    #if os(iOS)
     windowModel.present {
       HelloMenu(
         position: context.buttonFrame.bottom + CGPoint(x: 0, y: 10),
         anchor: .top,
         items: menuItems)
     }
+    #endif
   }
 }
 

@@ -12,16 +12,16 @@ public class LoggerModel: LoggerSubscriber, Sendable {
   public var logStatements: [LogStatement] = []
   
   public private(set) var showVerbose: Bool = false
-  public private(set) var filter: String?
+  public private(set) var filter: LogContext?
   
-  public private(set) var filters: [String] = []
+  public private(set) var filters: [LogContext] = []
   
   public init() {}
   
   public func setup() {
     logger.subscribe(self)
     refresh()
-    filters = logger.logStatements.compactMap { $0.context }.removingDuplicates().sorted()
+    filters = Set(logger.logStatements.compactMap { $0.context }).sorted { $0.string < $1.string }
   }
   
   public func statementLogged(_ statement: LogStatement) {
@@ -29,7 +29,7 @@ public class LoggerModel: LoggerSubscriber, Sendable {
       logStatements.append(statement)
     }
     if let context = statement.context, !filters.contains(context) {
-      filters = (filters + [context]).sorted()
+      filters = (filters + [context]).sorted { $0.string < $1.string }
     }
   }
   
@@ -43,7 +43,7 @@ public class LoggerModel: LoggerSubscriber, Sendable {
     refresh()
   }
   
-  public func set(filter: String?) {
+  public func set(filter: LogContext?) {
     guard self.filter != filter else { return }
     self.filter = filter
     refresh()

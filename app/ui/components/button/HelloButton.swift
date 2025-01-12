@@ -11,6 +11,7 @@ public struct HelloButtonStyle: ButtonStyle {
   
   @State private var isPressed: Bool = false
   @State private var isHovered: Bool = false
+  @NonObservedState private var longPressTask: Task<Void, any Error>?
   
   var clickStyle: HelloButtonClickStyle
   var longPressAction: (@MainActor () async throws -> Void)?
@@ -20,7 +21,7 @@ public struct HelloButtonStyle: ButtonStyle {
       .background(isHovered ? viewShape.fill((theme.theme.isDark ? Color.white : Color.black).opacity(0.08)) : nil)
       .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.08 : 0)
       .brightness(isPressed ? (theme.theme.isDark ? 1 : -1) * 0.12 : 0)
-      .animation(.easeInOut(duration: 0.1), value: isPressed)
+      .animation(isPressed ? nil : .easeInOut(duration: 0.25), value: isPressed)
       .scaleEffect(isPressed ? clickStyle.scaleAmount : 1)
       .animation(.spring(dampingFraction: 0.6).speed(1.6), value: isPressed)
       .onHover { isHovered = $0 }
@@ -28,12 +29,12 @@ public struct HelloButtonStyle: ButtonStyle {
         isPressed = isEnabled && configuration.isPressed
         if isPressed {
           if longPressAction != nil {
-            model.longPressTask?.cancel()
-            model.longPressTask = Task {
+            longPressTask?.cancel()
+            longPressTask = Task {
               try await Task.sleep(seconds: 0.4)
               ButtonHaptics.buttonFeedback()
               Task { try await longPressAction?() }
-              model.longPressTask = nil
+              longPressTask = nil
             }
           }
           if !model.hasPressed {
@@ -41,8 +42,8 @@ public struct HelloButtonStyle: ButtonStyle {
           }
           model.hasPressed = true
         } else {
-          model.longPressTask?.cancel()
-          model.longPressTask = nil
+          longPressTask?.cancel()
+          longPressTask = nil
           Task {
             try await Task.sleepForABit()
             model.hasPressed = false
@@ -53,8 +54,8 @@ public struct HelloButtonStyle: ButtonStyle {
         isPressed = model.forceVisualPress
       }.when(!isEnabled && isPressed) {
         isPressed = false
-        model.longPressTask?.cancel()
-        model.longPressTask = nil
+        longPressTask?.cancel()
+        longPressTask = nil
       }
   }
 }
@@ -91,7 +92,6 @@ public enum HelloButtonClickStyle {
 @Observable
 fileprivate class HelloButtonModel {
   var forceVisualPress: Bool = false
-  @ObservationIgnored var longPressTask: Task<Void, any Error>?
   @ObservationIgnored var hasPressed: Bool = false
   @ObservationIgnored var hasClicked: Bool = false
   
@@ -233,26 +233,6 @@ public struct HelloButton<Content: View>: View {
   }
   
   public var body: some View {
-#if os(macOS)
-    Button(action: {
-      guard !model.hasClicked else { return }
-      model.hasClicked = true
-      Task {
-        try? await Task.sleepForOneFrame()
-        try await action?()
-        model.hasClicked = false
-      }
-    }) {
-      content()
-        .background(contentShape?.fill(theme.foreground.primary.style.opacity(isHovered ? 0.08 : 0)))
-        .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.1 : 0)
-        .clickable()
-    }.buttonStyle(.hello(clickStyle: clickStyle))
-      .onHover { isHovered = $0 }
-      .accessibilityElement()
-      .accessibilityAddTraits(.isButton)
-      .environment(model)
-#else
     Button(action: {
       guard !model.hasClicked else { return }
       model.hasClicked = true
@@ -280,6 +260,5 @@ public struct HelloButton<Content: View>: View {
     .accessibilityAddTraits(.isButton)
     .environment(model)
     .readFrame(to: $globalFrame)
-#endif
   }
 }

@@ -15,7 +15,19 @@ public struct ViewableImageView: View {
   private let imageModels: [HelloImageModel]
   private let resizeMode: ContentMode
   private let allowViewing: Bool
-  private let cornerRadius: CGFloat
+  private let cornerRadii: RectangleCornerRadii
+  
+  public init(_ source: HelloImageSource,
+              variant: HelloImageVariant = .original,
+              resizeMode: ContentMode = .fit,
+              allowViewing: Bool = true,
+              cornerRadii: RectangleCornerRadii = .init(0)) {
+    imageOptions = [HelloImageOption(imageSource: source, variant: variant)]
+    imageModels = [.model(for: source, variant: variant)]
+    self.resizeMode = resizeMode
+    self.allowViewing = allowViewing
+    self.cornerRadii = cornerRadii
+  }
   
   public init(_ source: HelloImageSource,
               variant: HelloImageVariant = .original,
@@ -26,7 +38,7 @@ public struct ViewableImageView: View {
     imageModels = [.model(for: source, variant: variant)]
     self.resizeMode = resizeMode
     self.allowViewing = allowViewing
-    self.cornerRadius = cornerRadius
+    self.cornerRadii = .init(cornerRadius)
   }
   
   public init(options: [HelloImageOption],
@@ -37,7 +49,7 @@ public struct ViewableImageView: View {
     imageModels = options.map { .model(for: $0.imageSource, variant: $0.variant) }
     self.resizeMode = resizeMode
     self.allowViewing = allowViewing
-    self.cornerRadius = cornerRadius
+    self.cornerRadii = .init(cornerRadius)
   }
   
   private var model: HelloImageModel? {
@@ -65,7 +77,7 @@ public struct ViewableImageView: View {
               isOpened = false
             }
           }) {
-            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadius: cornerRadius)
+            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadii: cornerRadii)
           }
           isOpened = true
           ButtonHaptics.buttonFeedback()

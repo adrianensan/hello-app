@@ -104,7 +104,7 @@ public struct HelloPager: View {
 //        #endif
       }.frame(width: geometry.size.width, height: geometry.size.height)
         .compositingGroup()
-        .background(theme.backgroundView)
+//        .background(theme.backgroundView)
 //        .background(theme.foreground.primary.color
 //          .opacity(0.05 + 0.05 * theme.theme.baseLayer.foregroundPrimary.mainColor.brightness))
 //        .clipShape(Rectangle())

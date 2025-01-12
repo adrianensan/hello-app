@@ -21,10 +21,12 @@ public class ActiveThemeManager {
   public private(set) var lightTheme: HelloTheme = .helloLight
   public private(set) var darkTheme: HelloTheme = .helloDark
   
-  public private(set) var colorScehem: HelloThemeScheme = .light
+  public private(set) var colorScheme: HelloThemeScheme = .light
   public private(set) var isLowBrightness: Bool = isLowBrightness
   
-  private var themeMode = Persistence.model(for: .themeMode)
+  private var _themeMode = Persistence.model(for: .themeMode)
+  private var themeMode: ThemeMode { _themeMode.value }
+  
   private var accentColor = Persistence.model(for: .accentColor)
   private var useBarelyVisibleThemeWhenDark = Persistence.model(for: .useBarelyVisibleThemeWhenDark)
   
@@ -42,6 +44,20 @@ public class ActiveThemeManager {
     #endif
   }
   
+  public var effectiveColorScheme: HelloThemeScheme { themeMode.effectiveScheme(for: colorScheme) }
+  
+  public var activeTheme: HelloTheme {
+    switch effectiveColorScheme {
+    case .light: lightTheme
+    case .dark:
+      if useBarelyVisibleThemeWhenDark.value && isLowBrightness {
+        .superBlack(accent: accentColor.value)
+      } else {
+        darkTheme
+      }
+    }
+  }
+  
   public func set(theme: some HelloThemeSet) {
     lightTheme = theme.lightTheme
     darkTheme = theme.darkTheme
@@ -52,27 +68,13 @@ public class ActiveThemeManager {
     self.darkTheme = darkTheme
   }
   
+  public func set(colorScheme: HelloThemeScheme) {
+    guard self.colorScheme != colorScheme else { return }
+    self.colorScheme = colorScheme
+  }
+  
   public func activeTheme(for colorScheme: HelloThemeScheme) -> HelloTheme {
-    var colorScheme = colorScheme
-    switch themeMode.value {
-    case .auto: ()
-    case .alwaysLight:
-      colorScheme = .light
-    case .alwaysDark:
-      colorScheme = .dark
-    }
-    if self.colorScehem != colorScheme {
-      self.colorScehem = colorScheme
-    }
-    switch colorScheme {
-    case .light:
-      return lightTheme
-    case .dark:
-      if useBarelyVisibleThemeWhenDark.value && isLowBrightness {
-        return .superBlack(accent: accentColor.value)
-      } else {
-        return darkTheme
-      }
-    }
+    set(colorScheme: colorScheme)
+    return activeTheme
   }
 }

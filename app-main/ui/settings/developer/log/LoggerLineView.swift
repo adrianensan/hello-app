@@ -1,6 +1,7 @@
 import SwiftUI
 
 import HelloCore
+import HelloApp
 
 struct LoggerLineView: View {
   
@@ -60,43 +61,40 @@ struct LoggerLineView: View {
   var logFontSize: CGFloat {
     #if os(macOS)
     10
-    #else
+#else
     12
-    #endif
+#endif
   }
   
   var body: some View {
-    HStack(alignment: .top, spacing: 2) {
-      Image(systemName: logStatement.level.icon)
-        .font(.system(size: iconSize, weight: .bold, design: .monospaced))
-        .foregroundStyle(symbolColor)
-        .frame(width: iconSize, height: iconSize + 2)
-      
-      Text(logStatement.timeStampString)
-        .font(.system(size: timeStampFontSize, weight: .semibold, design: .monospaced))
-        .foregroundStyle(timeColor)
-        .frame(height: iconSize + 2)
-        .padding(.horizontal, 2)
-        .background(RoundedRectangle(cornerRadius: 4, style: .continuous)
-          .fill(backgroundColor))
-      
-      #if os(iOS) || os(macOS)
-      (Text(logStatement.context.map { $0 + " "} ?? "").bold() + Text(logStatement.message))
-        .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
-        .foregroundStyle(logColor)
-//        .textSelection(.enabled)
-        .lineLimit(isExpanded ? nil : 1)
-        .fixedSize(horizontal: false, vertical: isExpanded)
-      #else
-      ((logStatement.context.map { Text($0 + " ").bold() } ?? Text("")) + Text(logStatement.message))
-        .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
-        .foregroundStyle(.primary)
-        .fixedSize(horizontal: false, vertical: true)
-      #endif
-    }.frame(height: isExpanded ? nil : 16)
-      .fontDesign(.monospaced)
-      .frame(minHeight: 16)
-      .clickable()
-      .onTapGesture { isExpanded.toggle() }
+    HelloButton(clickStyle: .highlight,
+                action: { isExpanded.toggle() },
+                longPressAction: .showMenu { @MainActor in [.copy(string: logStatement.formattedLine)] }) {
+      HStack(alignment: isExpanded ? .top : .center, spacing: 6) {
+        Image(systemName: logStatement.level.icon)
+          .font(.system(size: iconSize, weight: .bold, design: .monospaced))
+          .foregroundStyle(symbolColor)
+          .frame(width: iconSize, height: iconSize)
+        Text(isExpanded ? logStatement.fullTimeStampString : logStatement.shortimeStampString)
+          .font(.system(size: timeStampFontSize, weight: .semibold, design: .monospaced))
+          .foregroundStyle(timeColor)
+          .fixedSize()
+          .background(RoundedRectangle(cornerRadius: 4, style: .continuous)
+            .fill(backgroundColor))
+        
+        (Text(logStatement.context.map { $0.string + " "} ?? "").bold() +
+         Text(isExpanded ? logStatement.message : logStatement.preview ?? logStatement.message))
+          .font(.system(size: logFontSize, weight: .regular, design: .monospaced))
+          .foregroundStyle(logColor)
+          .lineLimit(isExpanded ? nil : 1)
+          .fixedSize(horizontal: false, vertical: isExpanded)
+      }.frame(height: isExpanded ? nil : 16)
+        .fontDesign(.monospaced)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(minHeight: 16)
+        .padding(.vertical, 2)
+        .padding(.horizontal, 8)
+        .background(theme.backgroundColor)
+    }
   }
 }

@@ -52,24 +52,42 @@ public struct HelloMenuItem: Identifiable, Sendable {
     self.shareString = string
   }
   
-#if os(iOS)
+
   public static func copy(string: String) -> HelloMenuItem {
-    HelloMenuItem(name: "Copy", icon: "doc.on.doc", action: { UIPasteboard.general.string = string })
+    HelloMenuItem(name: "Copy", icon: "doc.on.doc", action: {
+#if os(iOS)
+      UIPasteboard.general.string = string
+#elseif os(macOS)
+      NSPasteboard.general.declareTypes([.string], owner: nil)
+      NSPasteboard.general.setString(string, forType: .string)
+#endif
+    })
   }
   
   public static func copy(url: URL) -> HelloMenuItem {
     HelloMenuItem(name: "Copy", icon: "doc.on.doc", action: {
+#if os(iOS)
       UIPasteboard.general.string = url.absoluteString
       UIPasteboard.general.url = url
+#elseif os(macOS)
+      NSPasteboard.general.declareTypes([.string, .URL], owner: nil)
+      NSPasteboard.general.setString(url.absoluteString, forType: .string)
+      NSPasteboard.general.setString(url.absoluteString, forType: .URL)
+#endif
     })
   }
   
   public static func open(url: URL) -> HelloMenuItem {
     HelloMenuItem(name: "Open", icon: "arrow.up.right.square", action: {
+#if os(iOS)
       UIApplication.shared.open(url)
+#elseif os(macOS)
+      NSWorkspace.shared.open(url)
+#endif
     })
   }
-  
+
+#if os(iOS)
   public static func share(string: String) -> HelloMenuItem {
     HelloMenuItem(id: "share-\(String.uuid)", name: "Share", icon: "square.and.arrow.up", string: string)
   }

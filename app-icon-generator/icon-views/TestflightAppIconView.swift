@@ -16,7 +16,9 @@ public struct TestflightAppIconView: View {
           .padding(0.06 * geometry.size.minSide)
         
         iconFillView
-          .foregroundStyle(.white.opacity(0.36))
+          .foregroundStyle(.white)
+          .compositingGroup()
+          .opacity(0.36)
         
         iconStrokeView(0.012)
           .foregroundStyle(.white)

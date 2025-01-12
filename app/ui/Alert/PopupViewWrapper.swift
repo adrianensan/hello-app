@@ -90,21 +90,23 @@ public struct PopupViewWrapper<Content: View>: View {
       .background(HelloBackgroundDimmingView()
         .opacity(isVisible ? 0.5 : 0)
         .nest {
-          #if os(tvOS)
+#if os(tvOS)
           $0
-          #else
+#else
           $0.onLongPressGesture(minimumDuration: 0, maximumDistance: 0) {
             guard isVisible else { return }
             isVisible = false
           }
-          #endif
+#endif
         }.animation(.easeInOut(duration: 0.2), value: isVisible))
       .allowsHitTesting(isVisible)
       .onAppear {
         guard !isVisible else { return }
         isVisible = true
       }.when(!isVisible) {
+#if os(iOS)
         windowModel.markDismiss(id: uniqueViewID)
+#endif
         Task {
           try? await Task.sleep(seconds: 0.2)
           if let viewID {

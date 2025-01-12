@@ -30,6 +30,7 @@ public struct ImageViewer: View {
   @Environment(\.safeArea) private var safeAreaInsets
   @Environment(\.contentShape) private var contentShape
   @Environment(\.popupID) private var viewID
+  @Environment(\.viewID) private var uniqueID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var model = ImageViewModel()
@@ -39,16 +40,16 @@ public struct ImageViewer: View {
   
   private let imageOptions: [HelloImageOption]
   private var originalFrameSaved: CGRect?
-  private var cornerRadius: CGFloat
+  private var cornerRadii: RectangleCornerRadii
   
   public init(options: [HelloImageOption],
               resizeMode: ContentMode = .fit,
               originalFrame: CGRect?,
-              cornerRadius: CGFloat) {
+              cornerRadii: RectangleCornerRadii) {
     imageOptions = options
     self.originalFrameSaved = originalFrame
     self._originalFrame = State(initialValue: originalFrame)
-    self.cornerRadius = cornerRadius
+    self.cornerRadii = cornerRadii
   }
   
   var isDissmising: Bool {
@@ -61,6 +62,7 @@ public struct ImageViewer: View {
         size: windowFrame.size,
         onDismiss: { velocity in
           guard !isDissmising else { return }
+          windowModel.markDismiss(id: uniqueID)
           Task {
             if originalFrameSaved == nil {
               dismissVelocity = velocity
@@ -88,7 +90,7 @@ public struct ImageViewer: View {
           }
         }) {
           HelloImageView(options: imageOptions)
-            .clipShape(.rect(cornerRadius: originalFrame == nil ? 0 : cornerRadius))
+            .clipShape(.rect(cornerRadii: originalFrame == nil ? .init(0) : cornerRadii))
             .frame(width: originalFrame?.width, height: originalFrame?.height)
             .offset(x: originalFrame?.minX ?? 0, y: originalFrame?.minY ?? 0)
             .frame(width: windowFrame.size.width, height: windowFrame.size.height,

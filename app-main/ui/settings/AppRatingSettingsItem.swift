@@ -13,7 +13,7 @@ public struct AppRatingSettingsItem: View {
   public init() {}
   
   public var body: some View {
-    if !AppInfo.isTestBuild && lastDateRatingClicked.addingTimeInterval(4 * 30 * .secondsInDay) < .now {
+    if AppInfo.distributionMethod == .appStore && lastDateRatingClicked.addingTimeInterval(4 * 30 * .secondsInDay) < .now {
       HelloButton(clickStyle: .highlight, action: {
         requestReview()
         withAnimation(.easeInOut(duration: 0.2)) {

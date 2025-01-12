@@ -54,6 +54,7 @@ public struct HelloAlertConfig {
 public struct HelloAlert: View {
   
   @Environment(\.theme) private var theme
+  @Environment(\.viewID) private var viewID
   @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var animateIn: Bool = false
@@ -69,6 +70,9 @@ public struct HelloAlert: View {
   private func dismiss() {
     isDismissed = true
     animateIn = false
+    #if os(iOS)
+    windowModel.markDismiss(id: viewID)
+    #endif
     Task {
       try? await Task.sleep(seconds: 0.2)
       windowModel.dismiss(id: config.id)

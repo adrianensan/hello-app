@@ -20,6 +20,18 @@ struct HelloScrollTouchViewModifier: ViewModifier {
   
   @GestureState private var isTouching: Bool = false
   
+  private func reset() {
+    scrollModel.setIsTouching(false)
+    #if os(iOS)
+    if sheetModel?.scrollPreventingDismiss == scrollModel.id {
+      sheetModel?.scrollPreventingDismiss = nil
+    }
+    if scrollModel.axes.isHorizontal {
+      pagerModel?.backGestureOverride = nil
+    }
+    #endif
+  }
+  
   func body(content: Content) -> some View {
     content
       .simultaneousGesture(
@@ -37,17 +49,7 @@ struct HelloScrollTouchViewModifier: ViewModifier {
               }
               #endif
             }
-          })
-      .when(!isTouching) {
-        scrollModel.setIsTouching(false)
-        #if os(iOS)
-        if sheetModel?.scrollPreventingDismiss == scrollModel.id {
-          sheetModel?.scrollPreventingDismiss = nil
-        }
-        if scrollModel.axes.isHorizontal {
-          pagerModel?.backGestureOverride = nil
-        }
-        #endif
-      }
+          }.onEnded { _ in reset() })
+      .when(!isTouching) { reset() }
   }
 }

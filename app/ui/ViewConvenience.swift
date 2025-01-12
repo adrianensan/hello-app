@@ -21,6 +21,14 @@ public extension View {
   }
   
   @ViewBuilder
+  func ifLet<T: Equatable>(_ optional: T?, viewModifier: @MainActor @escaping (T) -> Void) -> some View {
+    onChange(of: optional, initial: true) {
+      guard let optional else { return }
+      viewModifier(optional)
+    }
+  }
+  
+  @ViewBuilder
   func when(_ condition: Bool, initial: Bool = false, action: @MainActor @escaping () -> Void) -> some View {
     onChange(of: condition, initial: initial) {
       guard condition else { return }
@@ -32,6 +40,13 @@ public extension View {
   func when(_ condition: Bool, initial: Bool = false, action: @MainActor @escaping () async throws -> Void) -> some View {
     onChange(of: condition, initial: initial) {
       guard condition else { return }
+      Task { try await action() }
+    }
+  }
+  
+  @ViewBuilder
+  func onChange(of value: some Equatable, initial: Bool = false, action: @MainActor @escaping () async throws -> Void) -> some View {
+    onChange(of: value, initial: initial) {
       Task { try await action() }
     }
   }

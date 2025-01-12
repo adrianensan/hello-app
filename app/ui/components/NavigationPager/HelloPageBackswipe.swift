@@ -49,13 +49,15 @@ struct HelloPageBackswipe: ViewModifier {
   
   func body(content: Content) -> some View {
     content
+      .padding(.top, effectiveShowEffects ? 0 : 8)
       .clipShape(effectiveShowEffects ? pageShape : .rect)
       .background(theme.backgroundView(for: effectiveShowEffects ? pageShape : .rect, isBaseLayer: true)
         .shadow(color: .black.opacity(effectiveShowEffects && pagerModel.activePageID == pageID.id ? 0.2 : 0), radius: 16)
         .onTapGesture { globalDismissKeyboard() })
       .padding(theme.backgroundOutlineWidth)
-      .overlay((effectiveShowEffects ? pageShape : .rect).strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
+      .overlay(pageShape.strokeBorder(theme.backgroundOutline.opacity(effectiveShowEffects ? 1 : 0), lineWidth: theme.backgroundOutlineWidth))
       .padding(-theme.backgroundOutlineWidth)
+      .padding(.top, effectiveShowEffects ? 0 : -8)
       .overlay(
         HelloBackgroundDimmingView()
           .opacity(isActivePage ? 0 : 0.8 * backProgress)
@@ -120,11 +122,12 @@ struct HelloPageBackswipe: ViewModifier {
             pagerModel.popView()
           }
           backProgressModel.reset()
-        }).when(backDragWidth == nil || !isActive) {
-          Task {
-            try? await Task.sleepForOneFrame()
-            backProgressModel.reset()
-          }
+        }).when(backDragWidth == nil) {
+          try? await Task.sleepForOneFrame()
+          backProgressModel.reset()
+        }.onChange(of: isActive) {
+          try? await Task.sleepForOneFrame()
+          backProgressModel.reset()
         }.task {
           try? await Task.sleepForOneFrame()
           try? await Task.sleepForOneFrame()

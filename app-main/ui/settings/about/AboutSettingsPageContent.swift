@@ -70,7 +70,7 @@ struct AboutSettingsPageContent: View {
         }
       }
       
-      Text("© 2024 Adrian Ensan")
+      Text("© \(AppInfo.copyright)")
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.foreground.tertiary.style)
     }

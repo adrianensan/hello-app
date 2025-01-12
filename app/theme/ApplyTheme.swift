@@ -11,6 +11,7 @@ struct ApplyThemeViewModifier: ViewModifier {
       .font(theme.font(size: 16, weight: .regular))
       .foregroundStyle(theme.foreground.primary.style)
       .backgroundStyle(theme.backgroundColor)
+      .background(theme.backgroundColor)
       .environment(\.hasAppliedTheme, ["crt-light", "crt-dark"].contains(theme.theme.id))
       .environment(\.colorScheme, theme.theme.scheme == .dark ? .dark : .light)
       .overlay {

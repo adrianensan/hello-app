@@ -3,6 +3,29 @@ import SwiftUI
 
 import HelloCore
 
+struct HelloPopupViewModifier: ViewModifier {
+  
+  @Environment(HelloWindowModel.self) private var windowModel
+  @Environment(\.viewFrame) private var viewFrame
+  
+  var popup: HelloWindowModel.PopupWindow?
+  
+  var frontmostPopup: HelloWindowModel.PopupWindow? { windowModel.popupViews.last }
+  
+  var backgroundScale: CGFloat { max(0.9, (viewFrame.height - 8) / viewFrame.height) }
+  
+  func body(content: Content) -> some View {
+    content
+      .compositingGroup()
+//      .offset(y: windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID) ? 8 : 0)
+      .scaleEffect(windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID) ? backgroundScale : 1, anchor: .bottom)
+//      .blur(radius: windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID) ? windowModel.blurAmountForPopup : 0)
+      .disabled(frontmostPopup?.hasExclusiveInteraction == true && windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID))
+      .allowsHitTesting(frontmostPopup?.hasExclusiveInteraction == false || !windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID))
+      .animation(.dampSpring, value: windowModel.areAnyPopupsPresented(above: popup?.uniqueInstanceID))
+  }
+}
+
 public struct HelloAppRootView<Content: View>: View {
   
   @Environment(HelloWindowModel.self) private var windowModel
@@ -21,24 +44,18 @@ public struct HelloAppRootView<Content: View>: View {
       content()
         .compositingGroup()
 //        .grayscale(windowModel.popupViews.isEmpty ? 0 : 0.8)
-        .blur(radius: windowModel.areAnyPopupsPresented(above: nil) ? windowModel.blurAmountForPopup : 0)
-        .animation(.easeInOut(duration: 0.2), value: windowModel.areAnyPopupsPresented(above: nil))
-        .disabled(!windowModel.popupViews.isEmpty)
-        .allowsHitTesting(windowModel.popupViews.isEmpty)
+//        .blur(radius: windowModel.areAnyPopupsPresented(above: nil) ? windowModel.blurAmountForPopup : 0)
+//        .animation(.easeInOut(duration: 0.2), value: windowModel.areAnyPopupsPresented(above: nil))
+        .modifier(HelloPopupViewModifier(popup: nil))
       
-      if let topView = windowModel.popupViews.last {
-        HelloForEach(windowModel.popupViews) { i, popupView in
-          popupView.view()
-            .id(popupView.uniqueInstanceID)
-            .environment(\.popupID, popupView.id)
-            .environment(\.viewID, popupView.uniqueInstanceID)
-            .zIndex(3 + 0.1 * Double(i))
-            .compositingGroup()
-            .blur(radius: windowModel.areAnyPopupsPresented(above: popupView.uniqueInstanceID) ? windowModel.blurAmountForPopup : 0)
-            .disabled(topView.hasExclusiveInteraction && topView.id != popupView.id)
-            .allowsHitTesting(!topView.hasExclusiveInteraction || topView.id == popupView.id)
-            .animation(.easeInOut(duration: 0.2), value: windowModel.areAnyPopupsPresented(above: popupView.uniqueInstanceID))
-        }
+      HelloForEach(windowModel.popupViews) { i, popupView in
+        popupView.view()
+          .id(popupView.uniqueInstanceID)
+//            .offset(y: windowModel.areAnyPopupsPresented(above: popupView.uniqueInstanceID) ? 8 : 0)
+          .environment(\.popupID, popupView.id)
+          .environment(\.viewID, popupView.uniqueInstanceID)
+          .zIndex(3 + 0.1 * Double(i))
+          .modifier(HelloPopupViewModifier(popup: popupView))
       }
       
       #if os(iOS)

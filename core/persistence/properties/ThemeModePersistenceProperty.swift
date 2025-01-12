@@ -14,6 +14,14 @@ public enum ThemeMode: String, Identifiable, Codable, CaseIterable, Sendable {
     case .alwaysDark: "Always Dark"
     }
   }
+  
+  public func effectiveScheme(for colorScheme: HelloThemeScheme) -> HelloThemeScheme {
+    switch self {
+    case .auto: colorScheme
+    case .alwaysLight: .light
+    case .alwaysDark: .dark
+    }
+  }
 }
 
 public struct ThemeModePersistenceProperty: PersistenceProperty {

@@ -27,6 +27,10 @@ public struct HelloAPIResponse<Content: Decodable & Sendable>: Sendable {
   public var content: Content
 }
 
+public extension LogContext {
+  static var api: LogContext { LogContext(stringLiteral: "API") }
+}
+
 //public class WebSocketsSession: NSObject {
 //
 //  private var session: URLSessionWebSocketTask
@@ -88,7 +92,7 @@ public protocol HelloAPIClient {
 
 public extension HelloAPIClient {
   
-  var userAgentString: String { "\(AppInfo.displayName); \(AppVersion.current?.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
+  var userAgentString: String { "\(AppInfo.displayName); \(AppInfo.version.description ?? "?"); \(OSInfo.description); \(Device.current.description)" }
   
   func additionalHeaders(endpoint: some APIEndpoint) -> [String: String] { [:] }
   
@@ -162,7 +166,7 @@ public extension HelloAPIClient {
     do {
       request = try self.request(for: endpoint)
     } catch {
-      Log.error(context: "API", error.localizedDescription)
+      Log.error(context: .api, error.localizedDescription)
       throw error
     }
     
@@ -184,12 +188,12 @@ public extension HelloAPIClient {
         (data, urlResponse) = try await session.data(for: request)
       } catch {
         let requestDuration = epochTime - requestStartTime
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")
         throw error
       }
     case .upload:
       guard let bodyData = request.httpBody else {
-        Log.error(context: "API", "\(logStatement(for: endpoint)) Request body empty for expected upload")
+        Log.error(context: .api, "\(logStatement(for: endpoint)) Request body empty for expected upload")
         throw APIError.invalidRequest
       }
       var delegate: HelloAPIUploadTaskDelegate?
@@ -201,14 +205,14 @@ public extension HelloAPIClient {
         (data, urlResponse) = try await session.upload(for: request, from: bodyData, delegate: delegate)
       } catch {
         let requestDuration = epochTime - requestStartTime
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration)) failed with error: \(error.localizedDescription)")
         throw error
       }
     }
     let requestDuration = epochTime - requestStartTime
     
     guard let httpResponse = urlResponse as? HTTPURLResponse else {
-      Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration)) failed")
+      Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration)) failed")
       throw APIError.fail
     }
     
@@ -218,14 +222,14 @@ public extension HelloAPIClient {
     
     guard response.status.isSuccess else {
       if let bodyString = (response.body as? String) ?? (try? String.decodeJSON(from: data)) {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))\n\(bodyString)")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))\n\(bodyString)")
       } else {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
       }
       try await handle(errorResponse: response)
       let error = APIError.httpError(statusCode: httpResponse.statusCode)
       if !isRetry, try await retryHandler?(error) == true {
-        Log.info(context: "API", "\(endpoint.path) retrying")
+        Log.info(context: .api, "\(endpoint.path) retrying")
         return try await self.request(endpoint: endpoint, isRetry: true, retryHandler: retryHandler)
       } else {
         throw error
@@ -245,34 +249,34 @@ public extension HelloAPIClient {
     switch Endpoint.ResponseType.self {
     case is EmptyResponse.Type:
       guard let decodedResponse = EmptyResponse() as? Endpoint.ResponseType else {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
         throw APIError.invalidResponse
       }
-      Log.info(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
+      Log.info(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
       return HelloAPIResponse(headers: headers, content: decodedResponse)
     case is Data.Type:
       guard let decodedResponse = data as? Endpoint.ResponseType else {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
         throw APIError.invalidResponse
       }
-      Log.info(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
+      Log.info(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
       return HelloAPIResponse(headers: headers, content: decodedResponse)
     case is String.Type:
       guard let decodedResponse = String(data: data, encoding: .utf8) as? Endpoint.ResponseType else {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
         throw APIError.invalidResponse
       }
-      Log.info(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
+      Log.info(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
       return HelloAPIResponse(headers: headers, content: decodedResponse)
     default:
       guard let decodedResponse = try? Endpoint.ResponseType.decodeJSON(from: data) else {
-        Log.error(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
+        Log.error(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode)) failed to decode response")
         if let stringResponse = String(data: data, encoding: .utf8) {
           Log.debug(stringResponse)
         }
         throw APIError.invalidResponse
       }
-      Log.info(context: "API", "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
+      Log.info(context: .api, "\(logStatement(for: endpoint, duration: requestDuration, statusCode: statusCode))")
       return HelloAPIResponse(headers: headers, content: decodedResponse)
     }
   }
@@ -282,7 +286,7 @@ public extension HelloAPIClient {
     do {
       request = try self.request(for: endpoint)
     } catch {
-      Log.error(context: "API", error.localizedDescription)
+      Log.error(context: .api, error.localizedDescription)
       throw error
     }
     let (stream, urlResponse) = try await session.bytes(for: request)
@@ -328,7 +332,7 @@ public extension HelloAPIClient {
     session.maximumMessageSize = 3145728
     
     let requestDuration = epochTime - requestStartTime
-    Log.info(context: "API", "\(endpoint.path + String(format: " (%.2fs)", requestDuration))")
+    Log.info(context: .api, "\(endpoint.path + String(format: " (%.2fs)", requestDuration))")
     
     return session
   }

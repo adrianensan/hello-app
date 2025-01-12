@@ -8,7 +8,7 @@ public extension HTTPHeaderKey {
 
 public struct HelloUserAgent {
   public var appName: String
-  public var appVersion: AppVersion
+  public var appVersion: HelloVersion
   public var deviceOS: String
   public var deviceName: String
 }
@@ -33,12 +33,10 @@ public struct HTTPRequest<Body: Codable & Sendable>: HTTPRequestConformable {
   public var helloUserAgent: HelloUserAgent? {
     guard let userAgent else { return nil }
     let userAgentComponenets = userAgent.components(separatedBy: ";")
-    guard userAgentComponenets.count == 4,
-          let appVersion = AppVersion(userAgentComponenets[1].trimmingCharacters(in: .whitespaces))
-    else { return nil }
+    guard userAgentComponenets.count == 4 else { return nil }
     
     return HelloUserAgent(appName: userAgentComponenets[0].trimmingCharacters(in: .whitespaces),
-                          appVersion: appVersion,
+                          appVersion: HelloVersion(userAgentComponenets[1].trimmingCharacters(in: .whitespaces)),
                           deviceOS: userAgentComponenets[2].trimmingCharacters(in: .whitespaces),
                           deviceName: userAgentComponenets[3].trimmingCharacters(in: .whitespaces))
   }

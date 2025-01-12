@@ -2,7 +2,7 @@ import Foundation
 
 public extension HelloTheme {
   static var warmDark: HelloTheme {
-    helloDark(accent: .color(color: .retroApple.blue))
+    warmDark(accent: .color(color: .retroApple.blue))
   }
   
   static func warmDark(accent: HelloFill) -> HelloTheme {

@@ -8,7 +8,6 @@ public extension EnvironmentValues {
   @Entry var viewShape: AnyInsettableShape = .rect
   @Entry var pageShape: AnyInsettableShape = .rect
   @Entry var windowCornerRadius: CGFloat = 0
-  @Entry var isActive: Bool = true
   @Entry var hasAppeared: Bool = true
   @Entry var hasAppliedTheme: Bool = false
   @Entry var dismissProgress: CGFloat?
@@ -85,12 +84,19 @@ fileprivate extension EnvironmentValues {
 
 struct ActiveThemeObservationViewModifier: ViewModifier {
   
+  @Environment(HelloWindowModel.self) private var windowModel
+#if os(macOS)
   @Environment(\.colorScheme) private var colorScheme
+#endif
   
   private var themeManager: ActiveThemeManager = .main
   
   private var activeTheme: HelloTheme {
+#if os(iOS)
+    themeManager.activeTheme(for: windowModel.colorScheme)
+#else
     themeManager.activeTheme(for: colorScheme == .dark ? .dark : .light)
+#endif
   }
   
   private var activeSwiftUITheme: HelloSwiftUITheme {

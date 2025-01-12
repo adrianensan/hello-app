@@ -60,6 +60,7 @@ public class HelloRootViewController: UIHostingController<AnyView> {
 //    let uiProperties = UIProperties(initialSize: .zero, initialSafeArea: .zero)
     uiProperties = UIProperties(initialSize: window?.frame.size ?? .zero, initialSafeArea: window?.safeAreaInsets ?? .zero)
     windowModel = HelloWindowModel()
+    windowModel.update(colorScheme: UIScreen.main.traitCollection.userInterfaceStyle == .dark ? .dark : .light)
     windowModel.window = window
 //      .onPreferenceChange(HomeIndicatorHiddenKey.self) { hideHomeIndicator in
 //        guard let viewController = Self.instances[id],
@@ -86,6 +87,10 @@ public class HelloRootViewController: UIHostingController<AnyView> {
       .ignoresSafeArea()))
 //    view.backgroundColor = .black
     disableKeyboardAvoidance()
+    
+    registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection) in
+      self.windowModel.update(colorScheme: UIScreen.main.traitCollection.userInterfaceStyle == .dark ? .dark : .light)
+    }
     
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(brightnessDidChange),

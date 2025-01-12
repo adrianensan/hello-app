@@ -133,18 +133,29 @@ public extension NativeImage {
   var needsTint: Bool {
     var color: HelloColor?
     guard let pixelReader = ImagePixelReader.reader(for: self) else { return false }
-    return stride(from: 0.0, to: 1.0, by: 0.1).allSatisfy { x in
-      stride(from: 0.0, to: 1.0, by: 0.1).allSatisfy { y in
-        guard let pixelColor = pixelReader.pixelColor(percentage: CGPoint(x: x, y: y)) else { return false }
-        guard pixelColor.alpha > 0.1 else { return true }
-        if let color {
-          return color.isEffectivelyBlack && pixelColor.isEffectivelyBlack || color.isEffectivelyWhite && pixelColor.isEffectivelyWhite
+    var effectiveWhiteCount: Float = 0
+    var effectiveBlackCount: Float = 0
+    var effectiveTransparentCount: Float = 0
+    var colorCount: Float = 0
+    for x in stride(from: 0.0, to: 1.0, by: 0.1) {
+      for y in stride(from: 0.0, to: 1.0, by: 0.1) {
+        guard let pixelColor = pixelReader.pixelColor(percentage: CGPoint(x: x, y: y)) else {
+          Log.verbose(context: "Favicon", "Failed to get pixel color at (\(x), \(y))")
+          return false
+        }
+        if pixelColor.alpha < 0.1 {
+          effectiveTransparentCount += 1
+        } else if pixelColor.isEffectivelyBlack {
+          effectiveBlackCount += 1
+        } else if pixelColor.isEffectivelyWhite {
+          effectiveWhiteCount += 1
         } else {
-          guard pixelColor.isEffectivelyBlack || pixelColor.isEffectivelyWhite else { return false }
-          color = pixelColor
-          return true
+          colorCount += 1
         }
       }
     }
+    let greyscaleCount = effectiveWhiteCount + effectiveBlackCount
+    guard colorCount / max(1, greyscaleCount) < 0.05 else { return false }
+    return greyscaleCount - max(effectiveWhiteCount, effectiveBlackCount) < 0.05
   }
 }

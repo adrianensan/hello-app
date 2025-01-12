@@ -4,12 +4,11 @@ import SwiftUI
 import HelloCore
 import HelloApp
 
-public struct LogsHelloPage: View {
+public struct LogsPage: View {
   
+  @Environment(HelloWindowModel.self) private var windowModel
   @Environment(\.theme) private var theme
   @Environment(\.safeArea) private var safeArea
-  @Environment(\.helloPagerConfig) private var helloPagerConfig
-  @Environment(HelloWindowModel.self) private var windowModel
   
   @State private var loggerModel = LoggerModel()
   @State private var scrollModel = HelloScrollModel(showScrollIndicator: true)
@@ -55,7 +54,7 @@ public struct LogsHelloPage: View {
               }
               lastTopY = minY
             }
-          LazyVStack(alignment: .leading, spacing: 4) {
+          LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(loggerModel.logStatements) { logStatement in
               LoggerLineView(logStatement: logStatement)
             }
@@ -88,7 +87,7 @@ public struct LogsHelloPage: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
     }
     .transformEnvironment(\.helloPagerConfig) {
-      $0.horizontalPagePadding = 8
+      $0.horizontalPagePadding = 0
     }.onChange(of: loggerModel.logStatements.count) {
       if isFollowingNew {
         Task {

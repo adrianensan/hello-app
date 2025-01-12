@@ -17,5 +17,6 @@ public struct HelloBackgroundDimmingView: View {
   
   public var body: some View {
     Color(red: 0.1, green: 0.1, blue: 0.1, opacity: fadeAmount)
+      .padding(-8)
   }
 }

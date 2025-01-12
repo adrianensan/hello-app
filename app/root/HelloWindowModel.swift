@@ -47,6 +47,7 @@ public class HelloWindowModel {
   var isShowingConfetti: Bool = false
   public var freeze: Bool = false
   var confettiID: String = .uuid
+  public private(set) var colorScheme: HelloThemeScheme = .light
   var popupViews: [PopupWindow] = []
   var dismissedPopups: [String] = []
   
@@ -184,6 +185,11 @@ public class HelloWindowModel {
   
   public func stopConfetti() {
     isShowingConfetti = false
+  }
+  
+  public func update(colorScheme: HelloThemeScheme) {
+    guard self.colorScheme != colorScheme else { return }
+    self.colorScheme = colorScheme
   }
 }
 #endif

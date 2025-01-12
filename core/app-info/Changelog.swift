@@ -2,12 +2,12 @@ import Foundation
 
 public struct Changelog: Codable, Sendable {
   
-  public var version: AppVersion
+  public var version: HelloVersion
   public var notes: [ChangelogNote]
   
   public var isEmpty: Bool { notes.isEmpty }
   
-  public init(from oldVersion: AppVersion, to newVersion: AppVersion, releases: [AppRelease]) {
+  public init(from oldVersion: HelloVersion, to newVersion: HelloVersion, releases: [AppRelease]) {
     var notes: [ChangelogNote] = []
     for release in releases {
       guard release.version <= newVersion else { continue }

@@ -15,21 +15,16 @@ public enum HelloBackground: Codable, Sendable, Hashable {
     }
   }
   
-  public var borderColor: HelloColor? {
+  public var border: HelloBorder? {
     switch self {
-    case .color(_, let borderColor): borderColor?.color
+    case .color(_, let border): border
     case .gradient: nil
-    case .blur(_, _, let borderColor): borderColor?.color
+    case .blur(_, _, let border): border
     case .image: nil
     }
   }
   
-  public var borderWidth: CGFloat? {
-    switch self {
-    case .color(_, let border): border?.width
-    case .gradient: nil
-    case .blur(_, _, let border): border?.width
-    case .image: nil
-    }
-  }
+  public var borderColor: HelloColor? { border?.color }
+  
+  public var borderWidth: CGFloat? { border?.width }
 }

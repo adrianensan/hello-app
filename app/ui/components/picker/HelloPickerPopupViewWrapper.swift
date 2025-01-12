@@ -82,7 +82,9 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
         guard !isVisible else { return }
         isVisible = true
       }.when(!isVisible) {
+#if os(iOS)
         windowModel.markDismiss(id: uniqueViewID)
+#endif
         Task {
           try? await Task.sleep(seconds: 0.24)
           if let viewID {

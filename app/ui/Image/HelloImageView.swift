@@ -2,6 +2,12 @@ import SwiftUI
 
 import HelloCore
 
+public extension RectangleCornerRadii {
+  init(_ cornerRadius: CGFloat) {
+    self.init(topLeading: cornerRadius, bottomLeading: cornerRadius, bottomTrailing: cornerRadius, topTrailing: cornerRadius)
+  }
+}
+
 @MainActor
 fileprivate struct ViewableImageModifier: ViewModifier {
   
@@ -11,11 +17,15 @@ fileprivate struct ViewableImageModifier: ViewModifier {
   @NonObservedState private var globalFrame: CGRect?
   
   private let imageOptions: [HelloImageOption]
-  private let cornerRadius: CGFloat
+  private let cornerRadii: RectangleCornerRadii
   
   init(imageOptions: [HelloImageOption], cornerRadius: CGFloat?) {
+    self.init(imageOptions: imageOptions, cornerRadii: cornerRadius.map { .init($0) })
+  }
+  
+  init(imageOptions: [HelloImageOption], cornerRadii: RectangleCornerRadii?) {
     self.imageOptions = imageOptions
-    self.cornerRadius = cornerRadius ?? 0
+    self.cornerRadii = cornerRadii ?? .init(0)
   }
   
   func body(content: Content) -> some View {
@@ -35,7 +45,7 @@ fileprivate struct ViewableImageModifier: ViewModifier {
           
           #if os(iOS)
           windowModel.showPopup(onDismiss: { isViewing = false }) {
-            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadius: cornerRadius)
+            ImageViewer(options: fullImageOptions, originalFrame: globalFrame, cornerRadii: cornerRadii)
           }
           #endif
           isViewing = true
@@ -103,7 +113,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   private var imageOptions: [HelloImageOption]
   private let load: HelloImageLoadType
   private let viewable: Bool
-  private let cornerRadius: CGFloat?
+  private let cornerRadii: RectangleCornerRadii?
   private let resizeMode: ContentMode
   private let cache: HelloImageCache?
   private let custom: (@MainActor (NativeImage) -> CustomView)?
@@ -112,7 +122,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
   public init(options: [HelloImageOption],
               load: HelloImageLoadType = .async,
               viewable: Bool = false,
-              cornerRadius: CGFloat? = nil,
+              cornerRadii: RectangleCornerRadii? = nil,
               resizeMode: ContentMode = .fit,
               cache: HelloImageCache? = nil,
               custom: (@MainActor (NativeImage) -> CustomView)?,
@@ -121,7 +131,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
     self.load = load
     //    imageModels = imageOptions.map { .model(for: $0.imageSource, variant: $0.variant) }
     self.viewable = viewable
-    self.cornerRadius = cornerRadius
+    self.cornerRadii = cornerRadii
     self.resizeMode = resizeMode
     self.cache = cache
     self.custom = custom
@@ -140,7 +150,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
               load: load,
               viewable: viewable,
-              cornerRadius: cornerRadius,
+              cornerRadii: cornerRadius.map { .init($0) },
               resizeMode: resizeMode,
               cache: cache,
               custom: custom,
@@ -159,7 +169,7 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
     self.init(options: [HelloImageOption(imageSource: source, variant: variant)],
               load: load,
               viewable: viewable,
-              cornerRadius: cornerRadius,
+              cornerRadii: cornerRadius.map { .init($0) },
               resizeMode: resizeMode,
               cache: cache,
               custom: custom,
@@ -196,13 +206,13 @@ public struct HelloImageView<CustomView: View, Fallback: View>: View {
       } else {
         fallback()
       }
-    }.ifLet(cornerRadius) { view, cornerRadius in
+    }.ifLet(cornerRadii) { view, cornerRadii in
       view
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-          .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 0.5))
+        .clipShape(.rect(cornerRadii: cornerRadii, style: .continuous))
+//        .overlay(RoundedRectangle(cornerRadii: cornerRadii, style: .continuous)
+//          .strokeBorder(theme.foreground.primary.style.opacity(0.2), lineWidth: 0.5))
     }.if(viewable) {
-      $0.modifier(ViewableImageModifier(imageOptions: imageOptions, cornerRadius: cornerRadius))
+      $0.modifier(ViewableImageModifier(imageOptions: imageOptions, cornerRadii: cornerRadii))
     }.onChange(of: imageOptions, initial: true) {
       var imageModels: [HelloImageModel] = []
       for imageOption in imageOptions {
@@ -275,7 +285,24 @@ public extension HelloImageView where CustomView == EmptyView {
     self.init(options: options,
               load: load,
               viewable: viewable,
-              cornerRadius: cornerRadius,
+              cornerRadii: cornerRadius.map { .init($0) },
+              resizeMode: resizeMode,
+              cache: cache,
+              custom: nil,
+              fallback: fallback)
+  }
+  
+  init(options: [HelloImageOption],
+       load: HelloImageLoadType = .async,
+       viewable: Bool = false,
+       cornerRadii: RectangleCornerRadii? = nil,
+       resizeMode: ContentMode = .fit,
+       cache: HelloImageCache? = nil,
+       fallback: @MainActor @escaping () -> Fallback) {
+    self.init(options: options,
+              load: load,
+              viewable: viewable,
+              cornerRadii: cornerRadii,
               resizeMode: resizeMode,
               cache: cache,
               custom: nil,
@@ -311,7 +338,7 @@ public extension HelloImageView where CustomView == EmptyView, Fallback == Color
     self.init(options: options,
               load: load,
               viewable: viewable,
-              cornerRadius: cornerRadius,
+              cornerRadii: cornerRadius.map { .init($0) },
               resizeMode: resizeMode,
               cache: cache,
               custom: nil,

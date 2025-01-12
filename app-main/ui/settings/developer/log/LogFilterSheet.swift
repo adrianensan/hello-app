@@ -6,14 +6,14 @@ import HelloApp
 
 public struct LogContextFilter: Identifiable, HelloPickerItem {
   
-  public var filter: String?
+  public var filter: LogContext?
   
-  public init(filter: String?) {
+  public init(filter: LogContext?) {
     self.filter = filter
   }
   
-  public var id: String { filter ?? "none" }
-  public var name: String { filter ?? "All" }
+  public var id: String { filter?.string ?? "none" }
+  public var name: String { filter?.string ?? "All" }
 }
 
 struct LogFilterSheet: View {

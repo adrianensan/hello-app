@@ -9,13 +9,13 @@ public enum ChangelogNoteType: Codable, Equatable, CaseIterable, Sendable {
 public struct ChangelogNote: Codable, Equatable, Sendable {
   public var note: String
   public var type: ChangelogNoteType
-  public var earliestVersionAffected: AppVersion?
+  public var earliestVersionAffected: HelloVersion?
   
   public static var generalBugFixes: ChangelogNote {
     ChangelogNote(note: "General Bug Fixes", type: .fix)
   }
   
-  public init(note: String, type: ChangelogNoteType = .change, earliestVersionAffected: AppVersion? = nil) {
+  public init(note: String, type: ChangelogNoteType = .change, earliestVersionAffected: HelloVersion? = nil) {
     self.note = note
     self.type = type
     self.earliestVersionAffected = earliestVersionAffected
@@ -23,13 +23,13 @@ public struct ChangelogNote: Codable, Equatable, Sendable {
 }
 
 public struct AppRelease: Codable, Equatable, Identifiable, Sendable {
-  public var version: AppVersion
+  public var version: HelloVersion
   public var date: Date
   public var notes: [ChangelogNote]
   
-  public var id: AppVersion { version }
+  public var id: HelloVersion { version }
   
-  public init(version: AppVersion, date: Date, notes: [ChangelogNote]) {
+  public init(version: HelloVersion, date: Date, notes: [ChangelogNote]) {
     self.version = version
     self.date = date
     self.notes = notes

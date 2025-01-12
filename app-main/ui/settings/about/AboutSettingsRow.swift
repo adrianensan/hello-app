@@ -16,7 +16,7 @@ public struct AboutSettingsRow: View {
       pagerModel.push(name: "About") { AboutSettingsPage() }
     }) {
       HelloNavigationRow(icon: "info.circle", name: "About", actionIcon: .arrow) {
-        Text("Version " + AppInfo.version)
+        Text("Version " + AppInfo.version.display)
           .font(.system(size: 16, weight: .regular))
       }
     }

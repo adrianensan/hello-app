@@ -52,6 +52,10 @@ public struct HelloURL: Codable, Sendable {
   public var fragment: String?
   public var parameters: [String: String]
   
+  public init(url: URL) {
+    self.init(string: url.absoluteString)
+  }
+  
   public init(string: String) {
     var string = string.removingPercentEncoding ?? string
     if string.hasPrefix(HelloURLScheme.https.schemeWithDelimeter) {

@@ -2,7 +2,7 @@ import Foundation
 
 public struct LastestVersionLaunchedPersistentProperty: PersistenceProperty {
   
-  public var defaultValue: AppVersion? { nil }
+  public var defaultValue: HelloVersion? { nil }
   
   public var location: PersistenceType { .defaults(key: "lastest-version-launched") }
 }

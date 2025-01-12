@@ -50,7 +50,6 @@ public class HelloSheetModel {
   public func dismiss() {
     guard isVisible else { return }
     isVisible = false
-    ButtonHaptics.buttonFeedback()
   }
   
   public func reset() {
@@ -64,7 +63,7 @@ public class HelloSheetModel {
 
 public struct HelloSheet<Content: View>: View {
   
-  static var usePaddingOnIOS: Bool { true }
+  static var usePaddingOnIOS: Bool { false }
   
   @Environment(\.windowFrame) private var windowFrame
   @Environment(\.safeArea) private var safeArea
@@ -131,7 +130,8 @@ public struct HelloSheet<Content: View>: View {
       .background(theme.backgroundView(for: fillShape, isBaseLayer: true)
         .onTapGesture { globalDismissKeyboard() })
       .padding(.bottom, isfloating || Self.usePaddingOnIOS ? 0 : -36)
-      .overlay(shape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth))
+      .overlay(shape.strokeBorder(theme.backgroundOutline, lineWidth: theme.backgroundOutlineWidth)
+        .allowsHitTesting(false))
       .handleSheetDismissDrag()
       .environment(model)
       .environment(\.viewShape, shape)

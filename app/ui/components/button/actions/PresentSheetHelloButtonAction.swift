@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -23,3 +24,4 @@ public extension HelloButtonAction where Self == PresentSheetHelloButtonAction {
     PresentSheetHelloButtonAction { HelloSheetConfig(id: id, view: content) }
   }
 }
+#endif

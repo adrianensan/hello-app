@@ -11,7 +11,7 @@ struct LogsSettingsItem: View {
   
   var body: some View {
     HelloButton(clickStyle: .highlight, action: {
-      pagerModel.push { LogsHelloPage() }
+      pagerModel.push { LogsPage() }
     }) {
       HelloNavigationRow(icon: "apple.terminal", name: "Logs", actionIcon: .arrow)
     }

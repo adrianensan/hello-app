@@ -11,7 +11,7 @@ public class HelloLogger: Logger {
   
   nonisolated public init() {
     self.logStatements = Persistence.unsafeValue(.logs)
-    logStatements.append(LogStatement(level: .meta, context: "App", message: "Launch ------------------"))
+    logStatements.append(LogStatement(level: .meta, context: "App", preview: nil, message: "Launch ------------------"))
     Task { try await softFlush() }
   }
   
@@ -45,7 +45,7 @@ public class HelloLogger: Logger {
   }
   
   public func terminate() {
-    unsafeSyncLog(LogStatement(level: .meta, context: "App", message: "Terminate ---------------"))
+    unsafeSyncLog(LogStatement(level: .meta, context: "App", preview: nil, message: "Terminate ---------------"))
   }
   
   public func clear() async throws {

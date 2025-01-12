@@ -61,23 +61,6 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
       .animation(yDrag == 0 ? .pageAnimation : .interactive, value: yDrag)
       .animation(.dampSpring, value: keyboardFrame)
       .frame(maxWidth: isfloating ? 560 : .infinity, maxHeight: height, alignment: isfloating ? .center : .bottom)
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-      .background(HelloBackgroundDimmingView()
-        .opacity(model.isVisible ? 1 : 0)
-        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
-          .updating($drag) { value, state, transaction in
-            if state == nil {
-              state = value.startLocation
-            }
-            model.dismissDrag = value.translation.height
-          }.onEnded { gesture in
-            if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
-              model.dismiss()
-            } else {
-              model.dismissDrag = 0
-            }
-          })
-          .animation(.easeInOut(duration: 0.2), value: model.isVisible))
       .simultaneousGesture(DragGesture(minimumDistance: 8, coordinateSpace: .sheet)
         .updating($drag) { drag, state, transaction in
           if state == nil {
@@ -90,18 +73,35 @@ struct HelloSheetDismissDragViewModifier: ViewModifier {
             model.dismissDrag = drag.translation.height
           }
         }.onEnded { gesture in
-          if model.dragCanDismiss == true &&
-              (gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200) {
+          if model.dragCanDismiss == true && gesture.predictedEndTranslation.height > 200 {
             model.dismiss()
+            Haptics.buttonFeedback()
           }
           model.reset()
         })
-      .onChange(of: drag == nil || !isActive) {
-        guard drag == nil || !isActive else { return }
-        Task {
-          try? await Task.sleepForOneFrame()
-          model.reset()
-        }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+      .background(HelloBackgroundDimmingView()
+        .opacity(model.isVisible ? 1 : 0)
+        .animation(.easeInOut(duration: 0.2), value: model.isVisible)
+        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .sheet)
+          .updating($drag) { value, state, transaction in
+            if state == nil {
+              state = value.startLocation
+            }
+            model.dismissDrag = value.translation.height
+          }.onEnded { gesture in
+            if gesture.predictedEndTranslation.maxSide == 0 || gesture.predictedEndTranslation.height > 200 {
+              model.dismiss()
+              Haptics.buttonFeedback()
+            }
+            model.reset()
+          }))
+      .when(drag == nil) {
+        try? await Task.sleepForOneFrame()
+        model.reset()
+      }.onChange(of: isActive) {
+        try? await Task.sleepForOneFrame()
+        model.reset()
       }
       .allowsHitTesting(model.isVisible && model.dismissDrag == 0)
       .environment(\.hasAppeared, model.isVisible)
