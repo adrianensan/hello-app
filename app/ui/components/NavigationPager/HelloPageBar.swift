@@ -20,7 +20,7 @@ public struct HelloPageBar<TitleContent: View, NavBarContent: View>: View {
         .padding(.top, config.belowNavBarPadding)
       navBarContent()
         .frame(height: config.navBarHeight)
-    }.font(.system(size: 20, weight: .semibold))
+    }.font(.system(size: 20, weight: .medium))
       .foregroundStyle(theme.header.foreground.primary.color)
 //      .padding(.top, config.belowNavBarPadding)
 //      .frame(height: title == nil

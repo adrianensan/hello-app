@@ -1,6 +1,7 @@
+#if os(iOS)
 import SwiftUI
 
-public struct HelloPickerPopup: View {
+public struct HelloPickerPopup<Item: HelloPickerItem, ItemContent: View>: View {
   
   public static var collapsedRowHeight: CGFloat { 40 }
   public static var expandedRowHeight: CGFloat { 44 }
@@ -9,20 +10,27 @@ public struct HelloPickerPopup: View {
   
   private var position: CGPoint
   private var anchor: Alignment = .topTrailing
-  private var items: [HelloPickerPopupItem]
+  private var items: [Item]
   @State private var selectedItemID: String
   private var width: CGFloat
-  
+  private var onChange: @MainActor (Item) -> Void
+  private var content: @MainActor (Item) -> ItemContent
+
   public init(position: CGPoint,
               anchor: Alignment = .topTrailing,
-              items: [HelloPickerPopupItem],
+              items: [Item],
               selectedItemID: String,
-              width: CGFloat) {
+              width: CGFloat,
+              onChange: @escaping @MainActor (Item) -> Void,
+              content: @escaping @MainActor (Item) -> ItemContent
+  ) {
     self.position = position
     self.anchor = anchor
     self.items = items
     _selectedItemID = State(initialValue: selectedItemID)
     self.width = width
+    self.onChange = onChange
+    self.content = content
   }
   
   public var body: some View {
@@ -36,14 +44,18 @@ public struct HelloPickerPopup: View {
         ForEach(items) { item in
           HelloButton(clickStyle: .highlight, action: {
             selectedItemID = item.id
-            //            try? await Task.sleepForOneFrame()
             isVisible.wrappedValue = false
-            try await item.action()
+            onChange(item)
           }) {
-            HelloPickerPopupRow(item: item, isSelected: item.id == selectedItemID, isExpanded: isVisible.wrappedValue)
-          }.environment(\.contentShape, .rect)
+            HelloPickerPopupRow(item: item,
+                                isSelected: item.id == selectedItemID,
+                                isExpanded: isVisible.wrappedValue,
+                                content: content)
+              .padding(.horizontal, isVisible.wrappedValue ? 2 : 0)
+          }.buttonShape(.rect)
         }
-      }.frame(width: width)
+      }.frame(width: width + (isVisible.wrappedValue ? 4 : 0))
     }
   }
 }
+#endif

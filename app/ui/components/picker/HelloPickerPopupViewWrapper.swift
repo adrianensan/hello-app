@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 
 import HelloCore
@@ -31,7 +32,7 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   private var adjustedPosition: CGPoint {
     var position = position
     position.x -= 2
-    position.y -= CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight
+    position.y -= CGFloat(startIndex) * HelloPickerSizing.expandedRowHeight
     let anchor = Alignment.topLeading
     let minWindowEdgeDistances = position - anchor.point * size - CGPoint(x: 8, y: safeArea.top + 8)
     if minWindowEdgeDistances.y < 0 {
@@ -46,20 +47,18 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
   }
   
   var diff: CGFloat {
-    0.5 * (HelloPickerPopup.expandedRowHeight - HelloPickerPopup.collapsedRowHeight)
+    0.5 * (HelloPickerSizing.expandedRowHeight - HelloPickerSizing.collapsedRowHeight)
   }
   
   public var body: some View {
     content($isVisible)
-      .padding(.horizontal, isVisible ? 2 : 0)
       .background(theme.surfaceSection.backgroundView(for: RoundedRectangle(cornerRadius: 12, style: .continuous), isBaseLayer: true))
-      .offset(y: isVisible ? 0 : -(CGFloat(startIndex) * HelloPickerPopup.expandedRowHeight + diff))
-      .frame(height: isVisible ? size.height : HelloPickerPopup.collapsedRowHeight, alignment: .topLeading)
+      .offset(y: isVisible ? 0 : -(CGFloat(startIndex) * HelloPickerSizing.expandedRowHeight + diff))
+      .frame(height: isVisible ? size.height : HelloPickerSizing.collapsedRowHeight, alignment: .topLeading)
       .clipShape(RoundedRectangle(cornerRadius: isVisible ? 16 : 10, style: .continuous))
       .overlay(RoundedRectangle(cornerRadius: isVisible ? 16 : 10, style: .continuous)
         .strokeBorder(theme.surfaceSection.backgroundOutline, lineWidth: theme.surfaceSection.backgroundOutlineWidth))
       .offset(y: isVisible ? 0 : diff)
-    //      .frame(width: 1, height: 1, alignment: anchor)
       .compositingGroup()
       .animation(.pageAnimation, value: isVisible)
       .offset(isVisible ? adjustedPosition : position)
@@ -96,3 +95,4 @@ public struct HelloPickerPopupViewWrapper<Content: View>: View {
       }
   }
 }
+#endif

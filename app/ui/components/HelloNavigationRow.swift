@@ -33,6 +33,7 @@ public struct HelloNavigationRow: View {
   private var type: `Type`
   private var previewContent: (@MainActor () -> AnyView)?
   private var actionIcon: ActionIcon?
+  private var dividerLeadingPadding: CGFloat
   
   public init(type: `Type` = .normal,
               icon: String? = nil,
@@ -40,6 +41,7 @@ public struct HelloNavigationRow: View {
               name: String,
               description: String? = nil,
               actionIcon: ActionIcon? = nil,
+              dividerLeadingPadding: CGFloat? = nil,
               @ViewBuilder trailingContent: @MainActor @escaping () -> some View) {
     self.type = type
     self.icon = icon
@@ -47,6 +49,7 @@ public struct HelloNavigationRow: View {
     self.name = name
     self.description = description
     self.actionIcon = actionIcon
+    self.dividerLeadingPadding = dividerLeadingPadding ?? (icon != nil ? 52 : 0)
     self.previewContent = { @MainActor in AnyView(trailingContent()) }
   }
   
@@ -55,13 +58,15 @@ public struct HelloNavigationRow: View {
               iconYOffset: CGFloat = 0,
               name: String,
               description: String? = nil,
-              actionIcon: ActionIcon? = nil) {
+              actionIcon: ActionIcon? = nil,
+              dividerLeadingPadding: CGFloat? = nil) {
     self.type = type
     self.icon = icon
     self.iconYOffset = iconYOffset
     self.name = name
     self.description = description
     self.actionIcon = actionIcon
+    self.dividerLeadingPadding = dividerLeadingPadding ?? (icon != nil ? 52 : 0)
     self.previewContent = nil
   }
   
@@ -77,7 +82,7 @@ public struct HelloNavigationRow: View {
   }
   
   public var body: some View {
-    HelloSectionItem(leadingPadding: icon != nil) {
+    HelloSectionItem(leadingDividerPadding: dividerLeadingPadding) {
       VStack(alignment: .leading, spacing: 0) {
         HStack(spacing: 4) {
           if let icon {

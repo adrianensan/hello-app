@@ -26,34 +26,28 @@ struct LogFilterSheet: View {
   init() {}
   
   var body: some View {
-    VStack(spacing: 0) {
-      Text("Log Filters")
-        .font(.system(size: 20, weight: .regular))
-        .foregroundStyle(theme.foreground.primary.style)
-        .fixedSize()
-        .frame(height: 60)
-        .frame(maxWidth: .infinity, alignment: .leading)
-      
-      HelloSection {
-        HelloNavigationRow(
-          icon: "line.3.horizontal.decrease",
-          name: "Filter",
-          trailingContent: {
-            HelloPicker(selected: LogContextFilter(filter: logModel.filter),
-                        options: [LogContextFilter(filter: nil)] + logModel.filters.map(LogContextFilter.init),
-                        onChange: { logModel.set(filter: $0.filter) })
-          })
-        
-        HelloNavigationRow(
-          icon: "apple.terminal",
-          name: "Show Verbose Logs",
-          description: "Including logs can be incredibly useful for diagnosing any issues you may be having.",
-          trailingContent: {
-            HelloToggle(isSelected: logModel.showVerbose, action: { logModel.set(showVerbose: !logModel.showVerbose) })
-          })
+    HelloPage(title: "Log Filters", allowScroll: false) {
+      VStack(spacing: 0) {
+        HelloSection {
+          HelloNavigationRow(
+            icon: "line.3.horizontal.decrease",
+            name: "Filter",
+            trailingContent: {
+              HelloPicker(selected: LogContextFilter(filter: logModel.filter),
+                          options: [LogContextFilter(filter: nil)] + logModel.filters.map(LogContextFilter.init),
+                          onChange: { logModel.set(filter: $0.filter) })
+            })
+          
+          HelloNavigationRow(
+            icon: "apple.terminal",
+            name: "Show Verbose Logs",
+            description: "Including logs can be incredibly useful for diagnosing any issues you may be having.",
+            trailingContent: {
+              HelloToggle(isSelected: logModel.showVerbose, action: { logModel.set(showVerbose: !logModel.showVerbose) })
+            })
+        }
       }
-    }.padding(.horizontal, 16)
-      .padding(.bottom, safeArea.bottom + 16)
+    }
   }
 }
 #endif

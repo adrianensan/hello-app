@@ -2,10 +2,20 @@ import SwiftUI
 
 import HelloCore
 
+public extension EnvironmentValues {
+  @Entry var buttonShape: AnyInsettableShape?
+}
+
+public extension View {
+  func buttonShape(_ shape: AnyInsettableShape?) -> some View {
+    environment(\.buttonShape, shape)
+  }
+}
+
 public struct HelloButtonStyle: ButtonStyle {
   
   @Environment(\.theme) private var theme
-  @Environment(\.viewShape) private var viewShape
+  @Environment(\.buttonShape) private var buttonShape
   @Environment(\.isEnabled) private var isEnabled
   @Environment(HelloButtonModel.self) private var model
   
@@ -18,7 +28,7 @@ public struct HelloButtonStyle: ButtonStyle {
   
   public func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .background(isHovered ? viewShape.fill((theme.theme.isDark ? Color.white : Color.black).opacity(0.08)) : nil)
+      .background(isHovered || isPressed ? buttonShape?.fill((theme.theme.isDark ? Color.white : Color.black).opacity(0.08)) : nil)
       .brightness(isHovered ? (theme.theme.isDark ? 1 : -1) * 0.08 : 0)
       .brightness(isPressed ? (theme.theme.isDark ? 1 : -1) * 0.12 : 0)
       .animation(isPressed ? nil : .easeInOut(duration: 0.25), value: isPressed)

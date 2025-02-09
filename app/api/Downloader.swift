@@ -7,7 +7,9 @@ public enum HelloDownloadError: Error {
   case duplicate
   case noInternet
   case noHTTPResponse
+  case timeout
   case noFile
+  case cannotUseData
   case httpError(code: HTTPResponseStatus)
   case nsURLError(code: Int)
   case cfNetworkError(code: Int)
@@ -120,15 +122,27 @@ public class Downloader {
         case NSURLErrorNetworkConnectionLost:
           Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Network Connection Lost - \(urlString)")
           throw .noInternet
+        case NSURLErrorTimedOut, NSURLErrorCancelled, NSURLErrorCancelledReasonUserForceQuitApplication:
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Network Connection Lost - \(urlString)")
+          throw .timeout
+        case NSURLErrorDataNotAllowed, NSURLErrorInternationalRoamingOff:
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Cannot Use Data - \(urlString)")
+          throw .cannotUseData
         default:
           Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with url error \(nsError.code): \(error.localizedDescription)")
           throw .nsURLError(code: nsError.code)
         }
       case String(kCFErrorDomainCFNetwork):
-        switch nsError.code {
-        case -1100: // kCFURLErrorFileDoesNotExist:
+        switch CFNetworkErrors(rawValue: Int32(nsError.code)) {
+        case .cfurlErrorFileDoesNotExist:
           Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) TMP Download File Not Found - \(urlString)")
           throw .noFile
+        case .cfurlErrorTimedOut, .cfNetServiceErrorTimeout, .cfurlErrorCancelled:
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Timeout - \(urlString)")
+          throw .timeout
+        case .cfurlErrorDataNotAllowed, .cfurlErrorInternationalRoamingOff:
+          Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) Cannot Use Data - \(urlString)")
+          throw .cannotUseData
         default:
           Log.error(context: "Downloader", "\(String(format: "(%.2fs)", epochTime - requestStartTime)) \(urlString) failed with cf error \(nsError.code): \(error.localizedDescription)")
           throw .cfNetworkError(code: nsError.code)

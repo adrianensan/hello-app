@@ -40,7 +40,6 @@ public struct HelloPageBarFixed<TitleContent: View, NavBarContent: View>: View {
       ).padding(.top, -16)
       .padding(.horizontal, -2)
     //.padding(.bottom, -0.64 * (1 - scrollModel.scrollThresholdProgress) * -scrollModel.effectiveScrollThreshold)
-      .frame(maxHeight: .infinity, alignment: .top)
       .opacity(config.navBarStyle == .scrollsWithContent && scrollModel.hasScrolled ? 0 : 1)
       .onChange(of: drag == nil) {
         #if os(iOS)

@@ -1,13 +1,14 @@
 import SwiftUI
 
-public struct HelloPickerPopupRow: View {
+public struct HelloPickerPopupRow<Item: HelloPickerItem, Content: View>: View {
   
   @Environment(\.theme) private var theme
   
-  var item: HelloPickerPopupItem
+  var item: Item
   var isSelected: Bool
   var isExpanded: Bool
-  
+  var content: @MainActor (Item) -> Content
+
   public var body: some View {
     HStack(spacing: 0) {
       ZStack {
@@ -17,7 +18,7 @@ public struct HelloPickerPopupRow: View {
           .opacity(isSelected && !isExpanded ? 1 : 0)
           .foregroundStyle(theme.surfaceSection.foreground.tertiary.color)
       }.frame(width: 32)
-      Text(item.name)
+      content(item)
         .lineLimit(1)
       Spacer(minLength: 0)
     }.font(.system(size: 16, weight: .regular))

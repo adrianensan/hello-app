@@ -119,7 +119,6 @@ public struct HelloMenuRow: View {
       .foregroundStyle(item.isDestructive ? theme.error.color : theme.foreground.primary.color)
       .padding(.horizontal, 4)
       .frame(width: 240, height: 44)
-      .clickable()
       .overlay {
         theme.text.primary.color.opacity(0.1)
           .frame(height: 1)
@@ -163,10 +162,12 @@ public struct HelloMenu: View {
             }
           }) {
             HelloMenuRow(item: item)
+              .background(theme.floating.backgroundView(isBaseLayer: true))
           }.environment(\.contentShape, .rect)
         }
       }.clipShape(.rect(cornerRadius: 12))
-        .background(theme.floating.backgroundView(for: .rect(cornerRadius: 12)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+          .strokeBorder(theme.floating.backgroundOutline, lineWidth: theme.floating.backgroundOutlineWidth))
     }
   }
 }

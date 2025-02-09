@@ -7,9 +7,9 @@ public struct HelloToggle: View {
   @Environment(\.theme) private var theme
   
   private var isSelected: Bool
-  private var action: @MainActor () -> Void
+  private var action: @MainActor () async throws -> Void
   
-  public init(isSelected: Bool, action: @escaping @MainActor () -> Void) {
+  public init(isSelected: Bool, action: @escaping @MainActor () async throws -> Void) {
     self.isSelected = isSelected
     self.action = action
   }
@@ -25,7 +25,7 @@ public struct HelloToggle: View {
   }
   
   public var body: some View {
-    HelloButton(action: { action() }) {
+    HelloButton(action: { try await action() }) {
       Capsule(style: .continuous)
         .fill(.white.opacity(theme.theme.isDim ? 0.5 : 1))
         .frame(width: 28, height: 28)

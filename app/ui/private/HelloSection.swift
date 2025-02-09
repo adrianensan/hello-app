@@ -23,7 +23,7 @@ public struct HelloSectionItem<Content: View>: View {
     content()
       .padding(.leading, 14)
       .padding(.trailing, 12)
-      .padding(.vertical, 12)
+      .padding(.vertical, 10)
       .foregroundStyle(theme.surface.foreground.primary.style)
       .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
       .background(theme.surface.backgroundColor)

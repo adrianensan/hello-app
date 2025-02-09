@@ -112,6 +112,9 @@ public struct HelloPage<Content: View, TitleContent: View, NavBarContent: View>:
       .observeSmallWindowSize(isSmallWindow: $isSmallSize)
       .transformEnvironment(\.helloPagerConfig) {
         $0.navBarStyle = navBarStyle
+        if !allowScroll {
+          $0.overrideNavBarTitleScrollsDown = false
+        }
       }
   }
 }

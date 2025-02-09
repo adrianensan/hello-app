@@ -70,7 +70,7 @@ struct AboutSettingsPageContent: View {
         }
       }
       
-      Text("© \(AppInfo.copyright)")
+      Text(AppInfo.copyright)
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.foreground.tertiary.style)
     }

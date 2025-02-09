@@ -31,55 +31,51 @@ struct EmailSetupSheet: View {
   private var mailLink: URL? { URL(string: "mailto:\(emailRecipient)?subject=\(emailSubject)&body=\(emailBody)") }
   
   var body: some View {
-    VStack(spacing: 0) {
-      Text("Feedback")
-        .font(.system(size: 20, weight: .medium))
-        .frame(maxWidth: .infinity)
-        .frame(height: 60)
-      HelloSection {
-        FeedbackTypeItem(type: $type)
-        FeedbackIncludeLogsRow(includeLogs: $includeLogs)
-      }
-      
-      HStack(spacing: 16) {
-        HelloButton(action: { dismiss() }) {
-          Text("Cancel")
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.accent.style)
-            .frame(height: 52)
-            .frame(maxWidth: 220)
-            .background(Capsule(style: .continuous).stroke(theme.accent.style, lineWidth: 1))
-            .clickable()
+    HelloPage(title: "Feedback", allowScroll: false) {
+      VStack(spacing: 0) {
+        HelloSection {
+          FeedbackTypeItem(type: $type)
+          FeedbackIncludeLogsRow(includeLogs: $includeLogs)
         }
-        HelloButton(action: {
-          if MFMailComposeViewController.canSendMail() {
-            isShowingMailSheet = true
-          } else if let mailLink {
-            openURL(mailLink)
-            dismiss()
+        
+        HStack(spacing: 16) {
+          HelloButton(action: { dismiss() }) {
+            Text("Cancel")
+              .font(.system(size: 17, weight: .semibold))
+              .foregroundStyle(theme.accent.style)
+              .frame(height: 52)
+              .frame(maxWidth: 220)
+              .background(Capsule(style: .continuous).stroke(theme.accent.style, lineWidth: 1))
+              .clickable()
           }
-        }) {
-          Text("Continue")
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.accent.readableOverlayColor)
-            .frame(height: 52)
-            .frame(maxWidth: 220)
-            .background(Capsule(style: .continuous).fill(theme.accent.style))
-        }
-      }.padding(.top, 24)
-    }.padding(.horizontal, 16)
-      .padding(.bottom, safeArea.bottom + 16)
-      .sheet(isPresented: $isShowingMailSheet) {
-        MailView(
-          to: emailRecipient,
-          subject: emailSubject,
-          body: emailBody,
-          attachments: includeLogs ? [.logs(data: HelloEnvironment.object(for: .logger).generateRawString().data)] : [])
-      }.onChange(of: isShowingMailSheet) {
-        if !isShowingMailSheet {
-          dismiss()
-        }
+          HelloButton(action: {
+            if MFMailComposeViewController.canSendMail() {
+              isShowingMailSheet = true
+            } else if let mailLink {
+              openURL(mailLink)
+              dismiss()
+            }
+          }) {
+            Text("Continue")
+              .font(.system(size: 17, weight: .semibold))
+              .foregroundStyle(theme.accent.readableOverlayColor)
+              .frame(height: 52)
+              .frame(maxWidth: 220)
+              .background(Capsule(style: .continuous).fill(theme.accent.style))
+          }
+        }.padding(.top, 24)
       }
+    }.sheet(isPresented: $isShowingMailSheet) {
+      MailView(
+        to: emailRecipient,
+        subject: emailSubject,
+        body: emailBody,
+        attachments: includeLogs ? [.logs(data: HelloEnvironment.object(for: .logger).generateRawString().data)] : [])
+    }.onChange(of: isShowingMailSheet) {
+      if !isShowingMailSheet {
+        dismiss()
+      }
+    }
   }
 }
 #endif
